@@ -1,5 +1,5 @@
 {
-  "name": "wapp-chat-analyzer-frontend",
+  "name": "appy-frontend",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -27,7 +27,6 @@
     "@fortawesome/free-brands-svg-icons": "^5.15.2",
     "@fortawesome/free-regular-svg-icons": "^5.15.2",
     "@fortawesome/free-solid-svg-icons": "^5.15.2",
-    "@joeattardi/emoji-button": "^4.6.0",
     "bootstrap": "^4.6.0",
     "dateformat": "^4.5.1",
     "grapheme-splitter": "^1.0.4",
