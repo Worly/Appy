@@ -12,14 +12,14 @@ import { CompanyService } from 'src/app/services/companies/company.service';
 })
 export class CompanyEditComponent implements OnInit {
 
-  @ViewChild(DialogComponent) dialog: DialogComponent;
+  @ViewChild(DialogComponent) dialog?: DialogComponent;
 
   @Input()
-  company: Company;
+  company?: Company;
 
   isNew: boolean = false;
 
-  name: string;
+  name: string = "";
 
   public validationErrors: {
     [key: string]: string
@@ -35,20 +35,20 @@ export class CompanyEditComponent implements OnInit {
   startEdit(): void {
     this.isNew = false;
     this.reset();
-    this.dialog.open();
+    this.dialog?.open();
   }
 
   startAddNew(): void {
     this.isNew = true;
     this.reset();
-    this.dialog.open();
+    this.dialog?.open();
   }
 
   reset(): void {
     if (this.isNew)
       this.name = "";
     else
-      this.name = this.company.name;
+      this.name = this.company?.name as string;
 
     this.validationErrors = {};
   }
@@ -72,7 +72,7 @@ export class CompanyEditComponent implements OnInit {
     if (this.isNew)
       request = this.companyService.addNew(this.name);
     else
-      request = this.companyService.edit(this.company.id, this.name);
+      request = this.companyService.edit(this.company?.id as number, this.name);
 
     request.subscribe({
       next: w => {
@@ -81,19 +81,19 @@ export class CompanyEditComponent implements OnInit {
           this.companyService.selectCompany(w).subscribe({
             next: () => {
               this.isLoading = false;
-              this.dialog.close();
+              this.dialog?.close();
 
               this.router.navigate(["home"])
             },
             error: () => {
               this.isLoading = false;
-              this.dialog.close();
+              this.dialog?.close();
             }
           });
         }
         else {
           this.isLoading = false;
-          this.dialog.close();
+          this.dialog?.close();
         }
       },
       error: e => {

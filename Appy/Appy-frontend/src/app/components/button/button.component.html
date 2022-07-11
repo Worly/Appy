@@ -5,7 +5,7 @@
     [ngClass]="['color-' + color, 'look-' + look, 'border-' + borderStyle, 'align-' + alignContent, 'icon-placement-' + iconPlacement]"
     [style]="'--border-width: ' + borderWidth + '; --width: ' + width" (click)="onClicked($event)" tabindex="0">
 
-    <fa-icon *ngIf="isLoading || icon != null" class="my-icon" [icon]="[iconPrefix, isLoading ? loadingIcon : icon]"
+    <fa-icon *ngIf="isLoading || icon != null" class="my-icon" [icon]="[iconPrefix, isLoading ? loadingIcon : $any(icon)]"
         [fixedWidth]="true" [style.font-size]="'0.8em'" [spin]="spinIcon || isLoading"></fa-icon>
     {{text}}
     <ng-content></ng-content>

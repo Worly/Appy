@@ -76,7 +76,7 @@ import { CompanyInterceptor } from './services/companies/company-interceptor.ser
     { provide: RouteReuseStrategy, useClass: CustomReuseStrategy },
     {
       provide: APP_INITIALIZER, useFactory:
-        function initAttachDetachHooks(router, reuseStrategy) {
+        function initAttachDetachHooks(router: Router, reuseStrategy: RouteReuseStrategy) {
           return () => new AttachDetachHooksService(router, reuseStrategy);
         },
       deps: [Router, RouteReuseStrategy], multi: true

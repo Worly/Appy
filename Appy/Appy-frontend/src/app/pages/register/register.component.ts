@@ -10,16 +10,16 @@ import { AuthService } from 'src/app/services/auth/auth.service';
 })
 export class RegisterComponent implements OnInit {
 
-  public height: number;
+  public height: number = 0;
 
   public validationErrors: {
     [key: string]: string
   } = {};
 
-  public email: string;
-  public username: string;
-  public password: string;
-  public repeatPassword: string;
+  public email: string = "";
+  public username: string = "";
+  public password: string = "";
+  public repeatPassword: string = "";
 
   public isLoading: boolean = false;
 

@@ -11,18 +11,18 @@ import { CompanyService } from "../companies/company.service";
 export class AuthService {
     private readonly TOKEN_KEY = "JWT_TOKEN";
 
-    private token: string;
+    private token: string | null = null;
 
     constructor(private router: Router, private httpClient: HttpClient, private companyService: CompanyService) {
     }
 
     public loadFromLocalStorage(): Observable<void> {
         return new Observable<void>(s => {
-            var obs = this.setToken(localStorage.getItem(this.TOKEN_KEY));
+            var obs = this.setToken(localStorage.getItem(this.TOKEN_KEY) as string);
             if (!obs)
                 s.next();
 
-            obs.subscribe({
+            obs?.subscribe({
                 next: () => s.next(),
                 error: () => s.error()
             });
@@ -36,7 +36,7 @@ export class AuthService {
                 password: password,
             }).subscribe({
                 next: o => {
-                    this.setToken(o.token).subscribe({
+                    this.setToken(o.token)?.subscribe({
                         next: () => s.next(),
                         error: o => {
                             this.logOut();
@@ -57,7 +57,7 @@ export class AuthService {
                 password: password
             }).subscribe({
                 next: o => {
-                    this.setToken(o.token).subscribe({
+                    this.setToken(o.token)?.subscribe({
                         next: () => s.next(),
                         error: o => {
                             this.logOut();
@@ -70,7 +70,7 @@ export class AuthService {
         });
     }
 
-    private setToken(token: string): Observable<void> {
+    private setToken(token: string): Observable<void> | null {
         if (token == null) {
             this.logOut();
             return null;
@@ -82,7 +82,7 @@ export class AuthService {
         return <any>this.companyService.loadMy();
     }
 
-    public getToken(): string {
+    public getToken(): string | null {
         return this.token;
     }
 
@@ -97,11 +97,11 @@ export class AuthService {
         this.router.navigate(["login"]);
     }
 
-    public getUsername(): string {
+    public getUsername(): string | null {
         if (!this.isLoggedIn())
             return null;
 
-        var decoded = <any>jwt_decode(this.token);
+        var decoded = <any>jwt_decode(this.token as string);
         return decoded.username;
     }
 }

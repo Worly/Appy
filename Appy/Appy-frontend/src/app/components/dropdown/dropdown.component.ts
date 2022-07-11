@@ -19,13 +19,13 @@ export class DropdownComponent implements OnInit {
   valueChange = new EventEmitter<any>();
 
   @Input()
-  items: any[];
+  items?: any[];
 
   @Input()
-  displayProperty: string;
+  displayProperty?: string;
 
   @Input()
-  displayFunction: (any) => string;
+  displayFunction?: (obj: any) => string;
 
   pickerVisible: boolean = false;
 
@@ -57,7 +57,7 @@ export class DropdownComponent implements OnInit {
   }
 
   @HostListener('document:mousedown', ['$event'])
-  onGlobalClick(event): void {
+  onGlobalClick(event: Event): void {
     if (!this.elementRef.nativeElement.contains(event.target)) {
       this.pickerVisible = false;
     }

@@ -8,12 +8,12 @@ import { GlobalPosition, InsidePlacement, Toppy, ToppyControl } from 'toppy';
 })
 export class DialogComponent implements OnInit, AfterViewInit {
 
-  @ViewChild("template") template: TemplateRef<any>;
+  @ViewChild("template") template?: TemplateRef<any>;
 
   @Input()
   showCloseButton: boolean = true;
 
-  toppyControl: ToppyControl;
+  toppyControl?: ToppyControl;
 
   constructor(private toppy: Toppy) { }
 
@@ -33,15 +33,15 @@ export class DialogComponent implements OnInit, AfterViewInit {
       closeOnDocClick: true,
       closeOnEsc: true
     })
-    .content(this.template)
+    .content(this.template as TemplateRef<any>)
     .create();
   }
 
   open() {
-    this.toppyControl.open();
+    this.toppyControl?.open();
   }
 
   close() {
-    this.toppyControl.close();
+    this.toppyControl?.close();
   }
 }

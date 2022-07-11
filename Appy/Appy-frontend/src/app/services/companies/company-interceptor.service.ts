@@ -13,7 +13,7 @@ export class CompanyInterceptor implements HttpInterceptor {
   intercept(httpRequest: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     if (this.companyService.getSelected()) {
       httpRequest = httpRequest.clone({
-        setHeaders: { "company-id": this.companyService.getSelected().id.toString() }
+        setHeaders: { "company-id": this.companyService.getSelected()?.id.toString() as string }
       });
     }
 

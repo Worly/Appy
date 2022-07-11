@@ -11,13 +11,13 @@ import { CompanyService } from 'src/app/services/companies/company.service';
 })
 export class SingleCompanyComponent implements OnInit {
 
-  @ViewChild("deleteDialog") deleteDialog: DialogComponent;
+  @ViewChild("deleteDialog") deleteDialog?: DialogComponent;
 
   @Input()
-  public company: Company;
+  public company?: Company;
 
-  public deleteName: string;
-  public isDeleting: boolean;
+  public deleteName: string = "";
+  public isDeleting: boolean = false;
   
   constructor(private companyService: CompanyService, private router: Router) { 
     
@@ -27,19 +27,19 @@ export class SingleCompanyComponent implements OnInit {
   }
 
   selectCompany() {
-    this.companyService.selectCompany(this.company).subscribe(o => this.router.navigate(["home"]));
+    this.companyService.selectCompany(this.company as Company).subscribe(o => this.router.navigate(["home"]));
   }
 
   openDeleteDialog() {
     this.deleteName = "";
-    this.deleteDialog.open();
+    this.deleteDialog?.open();
   }
 
   deleteCompany() {
     this.isDeleting = true;
-    this.companyService.deleteCompany(this.company).subscribe(() => {
+    this.companyService.deleteCompany(this.company as Company).subscribe(() => {
       this.isDeleting = false;
-      this.deleteDialog.close();
+      this.deleteDialog?.close();
     });
   }
 }

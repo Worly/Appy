@@ -23,13 +23,13 @@ interface DetachedRouteHandleExt extends DetachedRouteHandle {
 export class AttachDetachHooksService {
 
     private pseudoSuper: {
-        retrieve: (route: ActivatedRouteSnapshot) => DetachedRouteHandleExt,
+        retrieve: (route: ActivatedRouteSnapshot) => DetachedRouteHandle | null,
         shouldAttach: (route: ActivatedRouteSnapshot) => boolean,
         store: (route: ActivatedRouteSnapshot, handle: DetachedRouteHandle | null) => void
     };
 
-    private currentHandle: DetachedRouteHandleExt;
-    private pendingBeforeAttach: boolean;
+    private currentHandle?: DetachedRouteHandleExt;
+    private pendingBeforeAttach?: boolean;
 
     constructor(router: Router, reuseStrategy: RouteReuseStrategy) {
 
@@ -83,10 +83,10 @@ export class AttachDetachHooksService {
             const componentRef = detachedTree.componentRef;
             if (
                 componentRef.instance &&
-                typeof componentRef.instance[hookName] === 'function'
+                typeof (componentRef.instance as any)[hookName] === 'function'
             ) {
                 try {
-                    componentRef.instance[hookName]();
+                    (componentRef.instance as any)[hookName]();
                 } catch (error) {
                     console.error(error);
                 }

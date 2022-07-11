@@ -39,7 +39,7 @@ export class ErrorTranslateInterceptor implements HttpInterceptor {
     }
 }
 
-function camelize(text) {
+function camelize(text: string) {
     text = text.replace(/[-_\s.]+(.)?/g, (_, c) => c ? c.toUpperCase() : '');
     return text.substr(0, 1).toLowerCase() + text.substr(1);
 }
@@ -53,7 +53,9 @@ export class ErrorTranslateService {
             return this.errors["Unknown"];
     }
 
-    private errors = {
+    private errors: {
+        [key: string]: string
+    } = {
         "Unknown": "Unknown error",
         "WrongLogin": "Username or password is incorrect",
         "EmailTaken": "Account with this email already exists",

@@ -8,8 +8,8 @@ import { Company } from "../../dtos/company";
 @Injectable({ providedIn: "root" })
 export class CompanyService {
 
-    public myCompanies: Company[];
-    private selectedCompanyId: number;
+    public myCompanies: Company[] = [];
+    private selectedCompanyId: number | null = null;
 
     constructor(private http: HttpClient) { }
 
@@ -25,7 +25,7 @@ export class CompanyService {
             }));
     }
 
-    public getSelected(): Company {
+    public getSelected(): Company | null | undefined {
         if (this.selectedCompanyId == null || this.myCompanies == null)
             return null;
 
@@ -62,11 +62,12 @@ export class CompanyService {
             name: newName
         }).pipe(tap(w => {
             var oldCompany = this.myCompanies.find(o => o.id == w.id);
-            oldCompany.name = w.name;
+            if (oldCompany)
+                oldCompany.name = w.name;
         }));
     }
 
     public clear() {
-        this.myCompanies = null;
+        this.myCompanies = [];
     }
 }

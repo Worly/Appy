@@ -9,7 +9,7 @@ import { IconName, IconPrefix } from '@fortawesome/fontawesome-svg-core';
 export class ButtonComponent implements OnInit {
 
   @Input()
-  text: string;
+  text: string = "";
 
   @Input()
   curved: boolean = true;
@@ -46,7 +46,7 @@ export class ButtonComponent implements OnInit {
   iconPrefix: IconPrefix = "fas";
 
   @Input()
-  icon: IconName;
+  icon?: IconName;
 
   @Input()
   iconPlacement: "left" | "right" = "left";

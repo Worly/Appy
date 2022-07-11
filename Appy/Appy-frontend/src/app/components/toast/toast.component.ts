@@ -8,7 +8,7 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 export class ToastComponent implements OnInit {
 
   showing: boolean = false;
-  text: string;
+  text: string = "";
 
   constructor() { }
 
