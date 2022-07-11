@@ -1,0 +1,131 @@
+* {
+    --card-background-color: #fee9e1;
+
+    --input-background-color: white;
+    --input-border-color: rgb(179, 179, 179);
+
+    --focus-outline-color: rgb(104, 104, 104);
+
+    --text: black;
+    --anti-text: white;
+
+    --success: rgb(90, 172, 90);
+    --danger: #d05353;
+    --normal: black;
+    --disabled: rgb(177, 177, 177);
+}
+
+.w-card {
+    position: relative;
+    background-color: var(--card-background-color);
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.w-overlay,
+.w-overlay-dark {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    border-radius: 8px;
+
+    &:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    &-dark:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+}
+
+.w-clickable {
+    cursor: pointer;
+    & .w-overlay:active {
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+    & .w-overlay-dark:active {
+        background-color: rgba(0, 0, 0, 0.2);
+    }
+}
+
+.w-input {
+    font-size: 1.3rem;
+    background-color: var(--input-background-color);
+    padding: 6px 15px;
+    border-radius: 8px;
+    border: 1px solid var(--input-border-color);
+
+    &:focus {
+        outline: 1px solid var(--focus-outline-color);
+    }
+}
+
+.w-button {
+    font-size: 1.4rem;
+    display: inline-block;
+    position: relative;
+    background-color: transparent;
+    border: none;
+    border-radius: 8px;
+    padding: 3px 15px;
+    margin-right: 15px;
+    outline: none;
+    cursor: pointer;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+
+    color: black;
+    background-color: white;
+
+    &:focus {
+        outline: 2px solid var(--focus-outline-color);
+    }
+
+    &.w-danger {
+        color: white;
+        background-color: #d05353;
+    }
+
+    &.w-success {
+        color: white;
+        background-color: rgb(90, 172, 90);
+    }
+
+    &.disabled {
+        background-color: rgb(155, 161, 155);
+        cursor: default;
+    }
+    &:not(.disabled) {
+        &::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+        }
+        &:hover::before {
+            background-color: white;
+            opacity: 0.2;
+        }
+        &:active::before {
+            background-color: black;
+            opacity: 0.2;
+        }
+    }
+}
+
+.overflow-visible {
+    overflow: visible !important;
+}
+
+@media (min-width: 992px) {
+    .navbar-expand-lg .navbar-nav {
+        align-items: center;
+        gap: 10px;
+    }
+}

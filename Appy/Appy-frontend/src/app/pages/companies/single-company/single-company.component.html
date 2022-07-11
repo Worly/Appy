@@ -1,0 +1,28 @@
+<div class="w-card w-clickable my-card" (click)="selectCompany()">
+    <div appElementRef class="company-name">{{company.name}}</div>
+
+    <div class="w-overlay"></div>
+
+    <app-button #optionsButton="elementRef" appElementRef icon="ellipsis-v" look="transparent" [style.margin-left]="'auto'"
+        (onClick)="contextMenu.open()">
+    </app-button>
+
+</div>
+
+<app-context-menu #contextMenu [relativeTo]="optionsButton.elementRef">
+    <app-button text="Edit" icon="pen" (onClick)="companyEdit.startEdit()"></app-button>
+    <app-button text="Delete" color="danger" icon="trash" (onClick)="openDeleteDialog()"></app-button>
+</app-context-menu>
+
+<app-dialog #deleteDialog>
+    <div class="delete-dialog-text">Are you sure you want to delete company <b>{{company.name}}</b>? Everything in
+        this company will be <b>permanently deleted including messages and events</b>!</div>
+    <br>
+    <div class="delete-dialog-text">To delete this company type down its name - {{company.name}}</div>
+    <div class="delete-dialog-inputs">
+        <input class="w-input" type="text" placeholder="Company name" [(ngModel)]="deleteName">
+        <app-button text="Delete" color="danger" look="solid" [disabled]="deleteName != company.name || isDeleting" [isLoading]="isDeleting" (onClick)="deleteCompany()"></app-button>
+    </div>
+</app-dialog>
+
+<app-company-edit #companyEdit [company]="company"></app-company-edit>

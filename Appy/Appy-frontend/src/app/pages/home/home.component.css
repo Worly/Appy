@@ -1,0 +1,159 @@
+.title {
+    font-size: 3em;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.single {
+    padding-bottom: 15px;
+}
+
+.filter {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: flex-end;
+    padding: 20px;
+    margin: -20px;
+    margin-bottom: 5px;
+    background-color: #fff7f4;
+}
+
+.button-new {
+    display: block;
+    position: relative;
+    background-color: transparent;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 15px;
+    outline: none;
+    cursor: pointer;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    color: rgb(75, 143, 75);
+    border: 2px dashed rgb(92, 177, 92);
+    background-color: white;
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 110px;
+}
+
+.button-new:not(.disabled):hover::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    opacity: .1;
+    border-radius: 8px;
+}
+
+.button-new:not(.disabled):active::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    opacity: .2;
+    border-radius: 8px;
+}
+
+.newStatisticWrapper {
+    display: flex;
+    position: relative;
+    background-color: #FEE9E1;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    height: 148px;
+    font-size: 1.6rem;
+    align-items: center;
+    padding: 0px 20px;
+}
+
+.newStatisticWrapper>div {
+    margin-right: 10px;
+}
+
+.underlined {
+    font-weight: bold;
+    width: min-content;
+    margin: auto;
+    white-space: nowrap;
+    border-bottom: 2px dashed black;
+    outline: none;
+    margin-left: -3px;
+    padding-left: 3px;
+    margin-right: -10px;
+    padding-right: 10px;
+    margin-bottom: -5px;
+    padding-bottom: 3px;
+    min-width: 100px;
+}
+
+.button {
+    font-size: 1.4rem;
+    display: inline-block;
+    position: relative;
+    background-color: transparent;
+    border: none;
+    border-radius: 8px;
+    padding: 3px 15px;
+    margin-right: 15px;
+    color: white;
+    outline: none;
+    cursor: pointer;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.button-save {
+    margin-left: auto;
+    background-color: rgb(90, 172, 90);
+}
+
+.disabled {
+    background-color: rgb(155, 161, 155);
+    cursor: default;
+}
+
+.button-cancel {
+    background-color: #D05353;
+}
+
+.button:not(.disabled):hover::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    opacity: .2;
+    border-radius: 8px;
+}
+
+.button:not(.disabled):active::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    opacity: .2;
+    border-radius: 8px;
+}

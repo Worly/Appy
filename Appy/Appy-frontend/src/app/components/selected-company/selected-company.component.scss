@@ -1,0 +1,25 @@
+:host {
+    margin: -0.5rem 0;
+}
+
+.my-button {
+    background-color: rgba(255, 255, 255, 0.1);
+
+    &.link-active {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+}
+
+.my-container {
+    color: var(--anti-text);
+}
+
+.company-text {
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+.company-name {
+    margin: 0 10px;
+    font-size: 1rem;
+}

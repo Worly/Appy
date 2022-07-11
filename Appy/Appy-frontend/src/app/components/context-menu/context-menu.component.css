@@ -1,0 +1,8 @@
+.context-menu-container {
+    background-color: var(--input-background-color);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    width: max-content;
+    box-shadow: 0 3px 9px 0px var(--focus-outline-color);
+}

@@ -1,0 +1,12 @@
+<div class="title">Companies</div>
+
+
+<div class="companies-container">
+    <app-button width="100%" text="New company" icon="plus" color="success" look="outlined" borderStyle="dashed"
+        alignContent="center" (onClick)="companyEdit.startAddNew()"></app-button>
+
+    <app-single-company *ngFor="let company of companyService.myCompanies" [company]="company">
+    </app-single-company>
+</div>
+
+<app-company-edit #companyEdit></app-company-edit>

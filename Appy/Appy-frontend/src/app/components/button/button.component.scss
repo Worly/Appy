@@ -1,0 +1,212 @@
+:host {
+    display: inline-block;
+}
+
+.my-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+
+    position: relative;
+
+    width: 100%;
+
+    font-size: 1.4rem;
+
+    &:not(.icon-only) {
+        padding: 6px 15px;
+    }
+    &.icon-only {
+        padding: 0px;
+    }
+
+    cursor: pointer;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+
+    &:focus {
+        outline: none;
+        box-shadow: inset 0 0 4px var(--focus-outline-color);
+    }
+
+    &:not(.my-disabled) {
+        transition: box-shadow 0.1s;
+        &::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+
+            transition: opacity 0.1s;
+        }
+        &:hover::before {
+            background-color: var(--text);
+            opacity: 0.08;
+        }
+        &:active::before {
+            background-color: var(--text);
+            opacity: 0.15;
+        }
+
+        &:active {
+            box-shadow: inset 0 1px 6px -1px var(--text);
+        }
+    }
+}
+
+.curved {
+    --border-radius: 8px;
+    --inside-border-radius: 6px;
+    &.icon-only.circle {
+        --border-radius: 1000px;
+        --inside-border-radius: 1000px;
+    }
+}
+
+.curved {
+    border-radius: var(--border-radius);
+    &::before {
+        border-radius: var(--border-radius);
+    }
+
+    &.look-outlined::before {
+        border-radius: var(--inside-border-radius);
+    }
+}
+
+.curved-top-left {
+    border-top-left-radius: 8px;
+    &::before {
+        border-top-left-radius: 8px;
+    }
+
+    &.look-outlined::before {
+        border-top-left-radius: 6px;
+    }
+}
+
+.curved-top-right {
+    border-top-right-radius: 8px;
+    &::before {
+        border-top-right-radius: 8px;
+    }
+
+    &.look-outlined::before {
+        border-top-right-radius: 6px;
+    }
+}
+
+.curved-bottom-left {
+    border-bottom-left-radius: 8px;
+    &::before {
+        border-bottom-left-radius: 8px;
+    }
+
+    &.look-outlined::before {
+        border-bottom-left-radius: 6px;
+    }
+}
+
+.curved-bottom-right {
+    border-bottom-right-radius: 8px;
+    &::before {
+        border-bottom-right-radius: 8px;
+    }
+
+    &.look-outlined::before {
+        border-bottom-right-radius: 6px;
+    }
+}
+
+.color {
+    &-success {
+        background-color: var(--success);
+        color: var(--success);
+        border-color: var(--success);
+    }
+    &-danger {
+        background-color: var(--danger);
+        color: var(--danger);
+        border-color: var(--danger);
+    }
+    &-normal {
+        background-color: var(--normal);
+        color: var(--normal);
+        border-color: var(--input-border-color);
+    }
+}
+
+.my-disabled {
+    background-color: var(--disabled);
+    color: var(--disabled);
+    border-color: var(--disabled);
+}
+
+.look {
+    &-solid {
+        color: var(--anti-text);
+        border-width: 0px;
+    }
+    &-outlined {
+        background-color: var(--input-background-color);
+        border-width: var(--border-width);
+    }
+    &-normal {
+        background-color: var(--input-background-color);
+        border-width: 0px;
+    }
+    &-transparent {
+        background-color: transparent;
+        border-width: 0px;
+    }
+}
+
+.border {
+    &-solid {
+        border-style: solid;
+    }
+    &-dashed {
+        border-style: dashed;
+    }
+    &-dotted {
+        border-style: dotted;
+    }
+    &-double {
+        border-style: double;
+    }
+}
+
+.align {
+    &-left {
+        justify-content: left;
+    }
+    &-center {
+        justify-content: center;
+    }
+    &-right {
+        justify-content: right;
+    }
+}
+
+.icon-placement {
+    &-left {
+        flex-direction: row;
+    }
+    &-right {
+        flex-direction: row-reverse;
+    }
+}
+
+.my-icon {
+    font-size: 0.8em;
+    vertical-align: middle;
+}
+
+.my-button.icon-only > .my-icon {
+    margin: 4px 6px;
+}

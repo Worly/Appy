@@ -1,0 +1,11 @@
+<!-- <div class="my-container" [routerLink]="'/companies'">
+    
+</div> -->
+
+<app-button class="my-button" look="transparent" [curved]="false" (onClick)="navigateToCompanies()"
+    routerLink="/companies" routerLinkActive="link-active">
+    <div class="my-container">
+        <div class="company-text">COMPANY</div>
+        <div class="company-name">{{companyService.getSelected()?.name}}</div>
+    </div>
+</app-button>

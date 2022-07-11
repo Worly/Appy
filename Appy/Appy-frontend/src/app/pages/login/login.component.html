@@ -1,0 +1,23 @@
+<div [style.height]="height + 'px'" class="my-wrapper">
+    <div class="w-card my-container" (keypress)="keypress($event)">
+        <div class="title">Welcome back!</div>
+
+        <div class="input-container">
+            <div class="label">Email</div>
+            <input class="w-input" type="text" placeholder="Email" [(ngModel)]="email">
+            <div class="validation-message">{{ validationErrors['email'] }}</div>
+        </div>
+
+        <div class="input-container">
+            <div class="label">Password</div>
+            <input class="w-input" type="password" placeholder="Password" [(ngModel)]="password">
+            <div class="validation-message">{{ validationErrors['password'] }}</div>
+            <div class="validation-message">{{ validationErrors['other'] }}</div>
+        </div>
+
+        <app-button text="Login" color="success" look="solid" width="100%" alignContent="center" [disabled]="isLoading"
+            [isLoading]="isLoading" (onClick)="login()"></app-button>
+
+        <div class="register">New here? <a routerLink="/register">Register</a></div>
+    </div>
+</div>

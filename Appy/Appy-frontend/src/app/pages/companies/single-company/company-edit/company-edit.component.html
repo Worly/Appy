@@ -1,0 +1,14 @@
+<app-dialog>
+    <div *ngIf="isNew" class="title">New company</div>
+    <div *ngIf="!isNew" class="title">Edit company - {{company?.name}}</div>
+
+    <div class="input-container">
+        <div class="label">{{isNew ? "Name" : "New name"}}</div>
+        <input class="w-input" type="text" [placeholder]="isNew ? 'Name' : 'New name'" [(ngModel)]="name">
+        <div class="validation-message">{{ validationErrors['name'] }}</div>
+        <div class="validation-message">{{ validationErrors['other'] }}</div>
+    </div>
+
+    <app-button [isLoading]="isLoading" [disabled]="isLoading" text="Save" look="solid" color="success"
+        (onClick)="save()"></app-button>
+</app-dialog>

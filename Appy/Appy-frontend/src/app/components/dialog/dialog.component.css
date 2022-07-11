@@ -1,0 +1,10 @@
+.dialog-container {
+    padding: 30px 30px;
+    position: relative;
+}
+
+.close-button {
+    position: absolute;
+    right: 5px;
+    top: 5px
+}

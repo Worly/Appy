@@ -1,0 +1,53 @@
+/* You can add global styles to this file, and also import other style files */
+
+@import url("https://fonts.googleapis.com/css2?family=Raleway&display=swap");
+* {
+  font-family: "Raleway", sans-serif !important;
+  line-height: 1.5;
+}
+
+.no-select {
+  -webkit-touch-callout: none;
+  /* iOS Safari */
+  -webkit-user-select: none;
+  /* Safari */
+  -khtml-user-select: none;
+  /* Konqueror HTML */
+  -moz-user-select: none;
+  /* Old versions of Firefox */
+  -ms-user-select: none;
+  /* Internet Explorer/Edge */
+  user-select: none;
+  /* Non-prefixed version, currently
+                                    supported by Chrome, Edge, Opera and Firefox */
+}
+
+.emoji-picker__emoji,
+.emoji-picker__preview-emoji {
+  font-family: "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Color Emoji", "Twemoji Mozilla",
+    "Noto Color Emoji", "EmojiOne Color", "Android Emoji" !important;
+}
+
+.emoji-picker__wrapper {
+  z-index: 1000;
+}
+
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.mat-button .mat-button-wrapper > *,
+.mat-flat-button .mat-button-wrapper > *,
+.mat-stroked-button .mat-button-wrapper > *,
+.mat-raised-button .mat-button-wrapper > *,
+.mat-icon-button .mat-button-wrapper > *,
+.mat-fab .mat-button-wrapper > *,
+.mat-mini-fab .mat-button-wrapper > *,
+.mat-calendar-body-cell-content {
+  font-size: 1.1rem;
+}
