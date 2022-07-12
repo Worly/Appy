@@ -1,19 +1,19 @@
 import { Injectable } from '@angular/core';
 import { HttpInterceptor, HttpEvent, HttpRequest, HttpHandler } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { CompanyService } from './company.service';
+import { FacilityService } from './facility.service';
 
 @Injectable()
-export class CompanyInterceptor implements HttpInterceptor {
+export class FacilityInterceptor implements HttpInterceptor {
 
-  constructor(private companyService: CompanyService) {
+  constructor(private facilityService: FacilityService) {
 
   }
 
   intercept(httpRequest: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    if (this.companyService.getSelected()) {
+    if (this.facilityService.getSelected()) {
       httpRequest = httpRequest.clone({
-        setHeaders: { "company-id": this.companyService.getSelected()?.id.toString() as string }
+        setHeaders: { "facility-id": this.facilityService.getSelected()?.id.toString() as string }
       });
     }
 

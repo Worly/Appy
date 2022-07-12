@@ -5,7 +5,7 @@ import { Observable } from "rxjs";
 import { tap } from "rxjs/operators";
 import { appConfig } from "src/app/app.config";
 import jwt_decode from "jwt-decode";
-import { CompanyService } from "../companies/company.service";
+import { FacilityService } from "../facilities/facility.service";
 
 @Injectable({ providedIn: "root" })
 export class AuthService {
@@ -13,7 +13,7 @@ export class AuthService {
 
     private token: string | null = null;
 
-    constructor(private router: Router, private httpClient: HttpClient, private companyService: CompanyService) {
+    constructor(private router: Router, private httpClient: HttpClient, private facilityService: FacilityService) {
     }
 
     public loadFromLocalStorage(): Observable<void> {
@@ -79,7 +79,7 @@ export class AuthService {
         this.token = token;
         localStorage.setItem(this.TOKEN_KEY, token);
 
-        return <any>this.companyService.loadMy();
+        return <any>this.facilityService.loadMy();
     }
 
     public getToken(): string | null {
@@ -93,7 +93,7 @@ export class AuthService {
     public logOut(): void {
         this.token = null;
         localStorage.removeItem(this.TOKEN_KEY);
-        this.companyService.clear();
+        this.facilityService.clear();
         this.router.navigate(["login"]);
     }
 

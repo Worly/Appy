@@ -9,14 +9,14 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarResponsive">
         <ul class="navbar-nav ml-auto">
-          <li class="nav-item" *ngIf="authService.isLoggedIn() && companyService.getSelected()">
+          <li class="nav-item" *ngIf="authService.isLoggedIn() && facilityService.getSelected()">
             <a [routerLink]="'/home'" class="nav-link" [routerLinkActive]="'active'" href="#">Home</a>
           </li>
           <span class="navbar-text welcome-text" *ngIf="authService.isLoggedIn()">
             {{'Welcome, ' + authService.getUsername()}}
           </span>
-          <app-selected-company *ngIf="authService.isLoggedIn() && companyService.getSelected()">
-          </app-selected-company>
+          <app-selected-facility *ngIf="authService.isLoggedIn() && facilityService.getSelected()">
+          </app-selected-facility>
           <li class="nav-item" *ngIf="authService.isLoggedIn()">
             <a class="nav-link" (click)="logOut()">Logout</a>
           </li>

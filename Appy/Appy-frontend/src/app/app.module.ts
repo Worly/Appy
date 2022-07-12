@@ -24,8 +24,8 @@ import { ErrorTranslateInterceptor } from './services/errors/error-translate.ser
 import { RegisterComponent } from './pages/register/register.component';
 import { ErrorComponent } from './pages/error/error.component';
 import { ErrorInterceptor } from './services/errors/error-interceptor.service';
-import { CompaniesComponent } from './pages/companies/companies.component';
-import { SingleCompanyComponent } from './pages/companies/single-company/single-company.component';
+import { FacilitiesComponent } from './pages/facilities/facilities.component';
+import { SingleFacilityComponent } from './pages/facilities/single-facility/single-facility.component';
 import { AppInitializerService } from './services/app-initializer.service';
 import { ContextMenuComponent } from './components/context-menu/context-menu.component';
 import { ButtonComponent } from './components/button/button.component';
@@ -34,9 +34,9 @@ import { ElementRefDirective } from './directives/element-ref.directive';
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import { DialogComponent } from './components/dialog/dialog.component';
-import { CompanyEditComponent } from './pages/companies/single-company/company-edit/company-edit.component';
-import { SelectedCompanyComponent } from './components/selected-company/selected-company.component';
-import { CompanyInterceptor } from './services/companies/company-interceptor.service';
+import { FacilityEditComponent } from './pages/facilities/single-facility/facility-edit/facility-edit.component';
+import { SelectedFacilityComponent } from './components/selected-facility/selected-facility.component';
+import { FacilityInterceptor } from './services/facilities/facility-interceptor.service';
 
 
 
@@ -45,20 +45,20 @@ import { CompanyInterceptor } from './services/companies/company-interceptor.ser
     AppComponent,
     LoginComponent,
     RegisterComponent,
-    CompaniesComponent,
+    FacilitiesComponent,
     ErrorComponent,
     InvokeDirective,
     HomeComponent,
     LoadingComponent,
     ToastComponent,
     DropdownComponent,
-    SingleCompanyComponent,
+    SingleFacilityComponent,
     ContextMenuComponent,
     ButtonComponent,
     ElementRefDirective,
     DialogComponent,
-    CompanyEditComponent,
-    SelectedCompanyComponent
+    FacilityEditComponent,
+    SelectedFacilityComponent
   ],
   imports: [
     BrowserModule,
@@ -84,7 +84,7 @@ import { CompanyInterceptor } from './services/companies/company-interceptor.ser
     { provide: DateAdapter, useClass: CustomDateAdapter },
     { provide: APP_INITIALIZER, useFactory: appInitializerFactory, deps: [AppInitializerService], multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: AuthHttpInterceptor, multi: true },
-    { provide: HTTP_INTERCEPTORS, useClass: CompanyInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: FacilityInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorTranslateInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true }
   ],

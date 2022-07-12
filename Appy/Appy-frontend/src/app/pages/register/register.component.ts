@@ -75,7 +75,7 @@ export class RegisterComponent implements OnInit {
         next: o => {
           this.isLoading = false;
           
-          this.router.navigate(["companies"]);
+          this.router.navigate(["facilities"]);
         },
         error: e => {
           this.isLoading = false;

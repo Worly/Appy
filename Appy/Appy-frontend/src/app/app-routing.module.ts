@@ -4,23 +4,23 @@ import { ErrorComponent } from './pages/error/error.component';
 import { HomeComponent } from './pages/home/home.component';
 import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
-import { CompaniesComponent } from './pages/companies/companies.component';
+import { FacilitiesComponent } from './pages/facilities/facilities.component';
 import { LoggedInGuard, NotLoggedInGuard } from './services/auth/auth.guard';
-import { SelectedCompanyGuard } from './services/companies/company.guard';
+import { SelectedFacilityGuard } from './services/facilities/facility.guard';
 
 const routes: Routes = [
   { path: "login", component: LoginComponent, canActivate: [NotLoggedInGuard] },
   { path: "register", component: RegisterComponent, canActivate: [NotLoggedInGuard] },
 
   {
-    path: "companies",
-    component: CompaniesComponent,
+    path: "facilities",
+    component: FacilitiesComponent,
     canActivate: [LoggedInGuard]
   },
   {
     path: "home",
     component: HomeComponent,
-    canActivate: [LoggedInGuard, SelectedCompanyGuard]
+    canActivate: [LoggedInGuard, SelectedFacilityGuard]
   },
   {
     path: "error",

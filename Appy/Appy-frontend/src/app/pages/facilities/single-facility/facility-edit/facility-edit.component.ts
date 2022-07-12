@@ -2,20 +2,20 @@ import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angu
 import { Router } from '@angular/router';
 import { throwIfEmpty } from 'rxjs/operators';
 import { DialogComponent } from 'src/app/components/dialog/dialog.component';
-import { Company } from 'src/app/dtos/company';
-import { CompanyService } from 'src/app/services/companies/company.service';
+import { Facility } from 'src/app/dtos/facility';
+import { FacilityService } from 'src/app/services/facilities/facility.service';
 
 @Component({
-  selector: 'app-company-edit',
-  templateUrl: './company-edit.component.html',
-  styleUrls: ['./company-edit.component.css']
+  selector: 'app-facility-edit',
+  templateUrl: './facility-edit.component.html',
+  styleUrls: ['./facility-edit.component.css']
 })
-export class CompanyEditComponent implements OnInit {
+export class FacilityEditComponent implements OnInit {
 
   @ViewChild(DialogComponent) dialog?: DialogComponent;
 
   @Input()
-  company?: Company;
+  facility?: Facility;
 
   isNew: boolean = false;
 
@@ -27,7 +27,7 @@ export class CompanyEditComponent implements OnInit {
 
   public isLoading: boolean = false;
 
-  constructor(private companyService: CompanyService, private router: Router) { }
+  constructor(private facilityService: FacilityService, private router: Router) { }
 
   ngOnInit(): void {
   }
@@ -48,7 +48,7 @@ export class CompanyEditComponent implements OnInit {
     if (this.isNew)
       this.name = "";
     else
-      this.name = this.company?.name as string;
+      this.name = this.facility?.name as string;
 
     this.validationErrors = {};
   }
@@ -70,15 +70,15 @@ export class CompanyEditComponent implements OnInit {
 
     let request;
     if (this.isNew)
-      request = this.companyService.addNew(this.name);
+      request = this.facilityService.addNew(this.name);
     else
-      request = this.companyService.edit(this.company?.id as number, this.name);
+      request = this.facilityService.edit(this.facility?.id as number, this.name);
 
     request.subscribe({
       next: w => {
 
         if (this.isNew) {
-          this.companyService.selectCompany(w).subscribe({
+          this.facilityService.selectFacility(w).subscribe({
             next: () => {
               this.isLoading = false;
               this.dialog?.close();

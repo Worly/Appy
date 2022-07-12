@@ -1,0 +1,28 @@
+<div class="w-card w-clickable my-card" (click)="selectFacility()">
+    <div appElementRef class="facility-name">{{facility?.name}}</div>
+
+    <div class="w-overlay"></div>
+
+    <app-button #optionsButton="elementRef" appElementRef icon="ellipsis-v" look="transparent" [style.margin-left]="'auto'"
+        (onClick)="contextMenu.open()">
+    </app-button>
+
+</div>
+
+<app-context-menu #contextMenu [relativeTo]="optionsButton.elementRef">
+    <app-button text="Edit" icon="pen" (onClick)="facilityEdit.startEdit()"></app-button>
+    <app-button text="Delete" color="danger" icon="trash" (onClick)="openDeleteDialog()"></app-button>
+</app-context-menu>
+
+<app-dialog #deleteDialog>
+    <div class="delete-dialog-text">Are you sure you want to delete facility <b>{{facility?.name}}</b>? Everything in
+        this facility will be <b>permanently deleted including messages and events</b>!</div>
+    <br>
+    <div class="delete-dialog-text">To delete this facility type down its name - {{facility?.name}}</div>
+    <div class="delete-dialog-inputs">
+        <input class="w-input" type="text" placeholder="Facility name" [(ngModel)]="deleteName">
+        <app-button text="Delete" color="danger" look="solid" [disabled]="deleteName != facility?.name || isDeleting" [isLoading]="isDeleting" (onClick)="deleteFacility()"></app-button>
+    </div>
+</app-dialog>
+
+<app-facility-edit #facilityEdit [facility]="facility"></app-facility-edit>

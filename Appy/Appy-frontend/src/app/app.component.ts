@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from './services/auth/auth.service';
-import { CompanyService } from './services/companies/company.service';
+import { FacilityService } from './services/facilities/facility.service';
 
 @Component({
   selector: 'app-root',
@@ -9,7 +9,7 @@ import { CompanyService } from './services/companies/company.service';
 })
 export class AppComponent implements OnInit {
 
-  constructor(public authService: AuthService, public companyService: CompanyService) {}
+  constructor(public authService: AuthService, public facilityService: FacilityService) {}
 
   ngOnInit() {
     
