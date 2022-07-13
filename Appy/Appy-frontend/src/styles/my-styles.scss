@@ -13,13 +13,15 @@
     --danger: #d05353;
     --normal: black;
     --disabled: rgb(177, 177, 177);
+
+    --default-border-radius: 4px;
 }
 
 .w-card {
     position: relative;
     background-color: var(--card-background-color);
     padding: 10px;
-    border-radius: 8px;
+    border-radius: var(--default-border-radius);
 }
 
 .w-overlay,
@@ -29,7 +31,7 @@
     height: 100%;
     top: 0;
     left: 0;
-    border-radius: 8px;
+    border-radius: var(--default-border-radius);
 
     &:hover {
         background-color: rgba(255, 255, 255, 0.2);
@@ -54,7 +56,7 @@
     font-size: 1.3rem;
     background-color: var(--input-background-color);
     padding: 6px 15px;
-    border-radius: 8px;
+    border-radius: var(--default-border-radius);
     border: 1px solid var(--input-border-color);
 
     &:focus {
@@ -68,7 +70,7 @@
     position: relative;
     background-color: transparent;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--default-border-radius);
     padding: 3px 15px;
     margin-right: 15px;
     outline: none;
@@ -106,7 +108,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            border-radius: 8px;
+            border-radius: var(--default-border-radius);
         }
         &:hover::before {
             background-color: white;

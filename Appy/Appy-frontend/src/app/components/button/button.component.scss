@@ -57,15 +57,14 @@
             box-shadow: inset 0 1px 6px -1px var(--text);
         }
     }
+
+    --border-radius: var(--default-border-radius);
+    --inside-border-radius: calc(var(--default-border-radius) - var(--border-width));
 }
 
-.curved {
-    --border-radius: 8px;
-    --inside-border-radius: 6px;
-    &.icon-only.circle {
-        --border-radius: 1000px;
-        --inside-border-radius: 1000px;
-    }
+.curved.icon-only.circle {
+    --border-radius: 1000px;
+    --inside-border-radius: 1000px;
 }
 
 .curved {
@@ -80,46 +79,46 @@
 }
 
 .curved-top-left {
-    border-top-left-radius: 8px;
+    border-top-left-radius: var(--border-radius);
     &::before {
-        border-top-left-radius: 8px;
+        border-top-left-radius: var(--border-radius);
     }
 
     &.look-outlined::before {
-        border-top-left-radius: 6px;
+        border-top-left-radius: var(--inside-border-radius);
     }
 }
 
 .curved-top-right {
-    border-top-right-radius: 8px;
+    border-top-right-radius: var(--border-radius);
     &::before {
-        border-top-right-radius: 8px;
+        border-top-right-radius: var(--border-radius);
     }
 
     &.look-outlined::before {
-        border-top-right-radius: 6px;
+        border-top-right-radius: var(--inside-border-radius);
     }
 }
 
 .curved-bottom-left {
-    border-bottom-left-radius: 8px;
+    border-bottom-left-radius: var(--border-radius);
     &::before {
-        border-bottom-left-radius: 8px;
+        border-bottom-left-radius: var(--border-radius);
     }
 
     &.look-outlined::before {
-        border-bottom-left-radius: 6px;
+        border-bottom-left-radius: var(--inside-border-radius);
     }
 }
 
 .curved-bottom-right {
-    border-bottom-right-radius: 8px;
+    border-bottom-right-radius: var(--border-radius);
     &::before {
-        border-bottom-right-radius: 8px;
+        border-bottom-right-radius: var(--border-radius);
     }
 
     &.look-outlined::before {
-        border-bottom-right-radius: 6px;
+        border-bottom-right-radius: var(--inside-border-radius);
     }
 }
 

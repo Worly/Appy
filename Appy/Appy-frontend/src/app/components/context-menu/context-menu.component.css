@@ -1,6 +1,6 @@
 .context-menu-container {
     background-color: var(--input-background-color);
-    border-radius: 8px;
+    border-radius: var(--default-border-radius);
     display: flex;
     flex-direction: column;
     width: max-content;
