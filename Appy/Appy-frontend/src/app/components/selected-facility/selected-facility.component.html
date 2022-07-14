@@ -5,7 +5,7 @@
 <app-button class="my-button" look="transparent" [curved]="false" (onClick)="navigateToFacilities()"
     routerLink="/facilities" routerLinkActive="link-active">
     <div class="my-container">
-        <div class="facility-text">FACILITY</div>
+        <div class="facility-text">{{'pages.facilities.FACILITY' | translate | uppercase}}</div>
         <div class="facility-name">{{facilityService.getSelected()?.name}}</div>
     </div>
 </app-button>

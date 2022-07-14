@@ -10,15 +10,15 @@
       <div class="collapse navbar-collapse" id="navbarResponsive">
         <ul class="navbar-nav ml-auto">
           <li class="nav-item" *ngIf="authService.isLoggedIn() && facilityService.getSelected()">
-            <a [routerLink]="'/home'" class="nav-link" [routerLinkActive]="'active'" href="#">Home</a>
+            <a [routerLink]="'/home'" class="nav-link" [routerLinkActive]="'active'" href="#">{{'HOME' | translate}}</a>
           </li>
           <span class="navbar-text welcome-text" *ngIf="authService.isLoggedIn()">
-            {{'Welcome, ' + authService.getUsername()}}
+            {{('WELCOME' | translate) + ", " + authService.getUsername()}}
           </span>
           <app-selected-facility *ngIf="authService.isLoggedIn() && facilityService.getSelected()">
           </app-selected-facility>
           <li class="nav-item" *ngIf="authService.isLoggedIn()">
-            <a class="nav-link" (click)="logOut()">Logout</a>
+            <a class="nav-link" (click)="logOut()">{{'LOGOUT' | translate}}</a>
           </li>
         </ul>
       </div>

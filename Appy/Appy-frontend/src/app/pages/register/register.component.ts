@@ -2,6 +2,7 @@ import { ViewportRuler } from '@angular/cdk/scrolling';
 import { Component, ElementRef, NgZone, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth/auth.service';
+import { TranslateService } from 'src/app/services/translate/translate.service';
 
 @Component({
   selector: 'app-register',
@@ -30,6 +31,7 @@ export class RegisterComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router,
+    private translateService: TranslateService,
     private readonly viewportRuler: ViewportRuler,
     private readonly ngZone: NgZone
   ) {
@@ -52,18 +54,18 @@ export class RegisterComponent implements OnInit {
     this.validationErrors = {};
 
     if (this.email == null || this.email == "")
-      this.validationErrors["email"] = "Please enter your email";
+      this.validationErrors["email"] = this.translateService.translate("pages.login-register.errors.MISSING_EMAIL");
 
     if (this.username == null || this.username == "")
-      this.validationErrors["username"] = "Please enter your username";
+      this.validationErrors["username"] = this.translateService.translate("pages.login-register.errors.MISSING_USERNAME");
 
     if (this.password == null || this.password == "")
-      this.validationErrors["password"] = "Please enter your password";
+      this.validationErrors["password"] = this.translateService.translate("pages.login-register.errors.MISSING_PASSWORD");
 
     if (this.repeatPassword == null || this.repeatPassword == "")
-      this.validationErrors["repeatPassword"] = "Please repeat your password";
+      this.validationErrors["repeatPassword"] = this.translateService.translate("pages.login-register.errors.MISSING_REPEAT_PASSWORD");
     else if (this.repeatPassword != this.password)
-      this.validationErrors["repeatPassword"] = "Passwords do not match";
+      this.validationErrors["repeatPassword"] = this.translateService.translate("pages.login-register.errors.WRONG_REPEAT_PASSWORD");
 
     return Object.entries(this.validationErrors).length == 0;
   }

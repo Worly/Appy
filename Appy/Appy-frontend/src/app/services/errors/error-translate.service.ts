@@ -2,6 +2,7 @@ import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest
 import { Injectable } from "@angular/core";
 import { Observable, of, throwError } from "rxjs";
 import { catchError, map } from "rxjs/operators";
+import { TranslateService } from "../translate/translate.service";
 
 
 @Injectable()
@@ -46,18 +47,12 @@ function camelize(text: string) {
 
 @Injectable({ providedIn: "root" })
 export class ErrorTranslateService {
-    public translate(errorCode: string) {
-        if (typeof errorCode == "string" && errorCode in this.errors)
-            return this.errors[errorCode];
-        else
-            return this.errors["Unknown"];
-    }
+    constructor(private translateService: TranslateService) { }
 
-    private errors: {
-        [key: string]: string
-    } = {
-        "Unknown": "Unknown error",
-        "WrongLogin": "Username or password is incorrect",
-        "EmailTaken": "Account with this email already exists",
+    public translate(errorCode: string) {
+        if (typeof errorCode === "string")
+            return this.translateService.translate(errorCode);
+        else
+            return this.translateService.translate("UNKOWN_ERROR");
     }
 }

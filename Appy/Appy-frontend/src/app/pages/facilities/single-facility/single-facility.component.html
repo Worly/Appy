@@ -10,18 +10,18 @@
 </div>
 
 <app-context-menu #contextMenu [relativeTo]="optionsButton.elementRef">
-    <app-button text="Edit" icon="pen" (onClick)="facilityEdit.startEdit()"></app-button>
-    <app-button text="Delete" color="danger" icon="trash" (onClick)="openDeleteDialog()"></app-button>
+    <app-button text="{{'EDIT' | translate}}" icon="pen" (onClick)="facilityEdit.startEdit()"></app-button>
+    <app-button text="{{'DELETE' | translate}}" color="danger" icon="trash" (onClick)="openDeleteDialog()"></app-button>
 </app-context-menu>
 
 <app-dialog #deleteDialog>
-    <div class="delete-dialog-text">Are you sure you want to delete facility <b>{{facility?.name}}</b>? Everything in
-        this facility will be <b>permanently deleted including messages and events</b>!</div>
+    <div class="delete-dialog-text">{{"pages.facilities.DELETE_PROMPT_1" | translate}} <b>{{facility?.name}}</b>? 
+        {{"pages.facilities.DELETE_PROMPT_2" | translate}} <b>{{"pages.facilities.DELETE_PROMPT_3" | translate}}</b>!</div>
     <br>
-    <div class="delete-dialog-text">To delete this facility type down its name - {{facility?.name}}</div>
+    <div class="delete-dialog-text">{{"pages.facilities.DELETE_PROMPT_4" | translate}} - {{facility?.name}}</div>
     <div class="delete-dialog-inputs">
-        <input class="w-input" type="text" placeholder="Facility name" [(ngModel)]="deleteName">
-        <app-button text="Delete" color="danger" look="solid" [disabled]="deleteName != facility?.name || isDeleting" [isLoading]="isDeleting" (onClick)="deleteFacility()"></app-button>
+        <input class="w-input" type="text" placeholder="{{'pages.facilities.FACILITY_NAME' | translate}}" [(ngModel)]="deleteName">
+        <app-button text="{{'DELETE' | translate}}" color="danger" look="solid" [disabled]="deleteName != facility?.name || isDeleting" [isLoading]="isDeleting" (onClick)="deleteFacility()"></app-button>
     </div>
 </app-dialog>
 

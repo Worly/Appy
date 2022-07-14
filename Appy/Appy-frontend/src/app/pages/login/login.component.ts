@@ -3,6 +3,7 @@ import { Component, ElementRef, NgZone, OnInit, ViewChild } from '@angular/core'
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth/auth.service';
 import { FacilityService } from 'src/app/services/facilities/facility.service';
+import { TranslateService } from 'src/app/services/translate/translate.service';
 
 @Component({
   selector: 'app-login',
@@ -30,6 +31,7 @@ export class LoginComponent implements OnInit {
     private authService: AuthService,
     private facilityService: FacilityService,
     private router: Router,
+    private translateService: TranslateService,
     private readonly viewportRuler: ViewportRuler,
     private readonly ngZone: NgZone
   ) {
@@ -52,10 +54,10 @@ export class LoginComponent implements OnInit {
     this.validationErrors = {};
 
     if (this.email == null || this.email == "")
-      this.validationErrors["email"] = "Please enter your email";
+      this.validationErrors["email"] = this.translateService.translate("pages.login-register.errors.MISSING_EMAIL");
 
     if (this.password == null || this.password == "")
-      this.validationErrors["password"] = "Please enter your password";
+      this.validationErrors["password"] = this.translateService.translate("pages.login-register.errors.MISSING_PASSWORD");
 
     return Object.entries(this.validationErrors).length == 0;
   }

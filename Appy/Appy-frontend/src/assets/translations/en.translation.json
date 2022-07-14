@@ -1,0 +1,56 @@
+{
+    "LOGOUT": "Logout",
+    "LOGIN": "Login",
+    "HOME": "Home",
+    "WELCOME": "Welcome",
+    "EMAIL": "Email",
+    "UNKNOWN_ERROR": "Unkown error",
+    "EDIT": "Edit",
+    "DELETE": "Delete",
+    "NAME": "Name",
+    "NEW_NAME": "New name",
+    "SAVE": "Save",
+
+    "pages": {
+        "error": {
+            "ERROR": "There was an error"
+        },
+
+        "login-register": {
+            "WELCOME_BACK": "Welcome back",
+            "NEW_HERE": "New here",
+            "USERNAME": "Username",
+            "PASSWORD": "Password",
+            "REPEAT_PASSWORD": "Repeat password",
+            "ALREADY_A_USER": "Already a user",
+            "REGISTER": "Register",
+            "LOGIN": "Login",
+
+            "errors": {
+                "MISSING_EMAIL": "Please enter your email",
+                "MISSING_USERNAME": "Please enter your username",
+                "MISSING_PASSWORD": "Please enter your password",
+                "MISSING_REPEAT_PASSWORD": "Please repeat your password",
+                "WRONG_REPEAT_PASSWORD": "Passwords do not match",
+                "WRONG_LOGIN": "Email or password is incorrect",
+                "EMAIL_TAKEN": "Account with this email already exists"
+            }
+        },
+
+        "facilities": {
+            "FACILITY": "Facility",
+            "FACILITIES": "Facilities",
+            "NEW_FACILITY": "New facility",
+            "EDIT_FACILITY": "Edit facility",
+            "DELETE_PROMPT_1": "Are you sure you want to delete facility",
+            "DELETE_PROMPT_2": "Everything in this facility will be",
+            "DELETE_PROMPT_3": "irreversibly permanently deleted including all data in it",
+            "DELETE_PROMPT_4": "To delete this facility type down its name",
+            "FACILITY_NAME": "Facility name",
+
+            "errors": {
+                "MISSING_NAME": "Please enter a name"
+            }
+        }
+    }
+}

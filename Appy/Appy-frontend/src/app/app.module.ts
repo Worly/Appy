@@ -37,12 +37,14 @@ import { DialogComponent } from './components/dialog/dialog.component';
 import { FacilityEditComponent } from './pages/facilities/single-facility/facility-edit/facility-edit.component';
 import { SelectedFacilityComponent } from './components/selected-facility/selected-facility.component';
 import { FacilityInterceptor } from './services/facilities/facility-interceptor.service';
+import { TranslatePipe } from './services/translate/translate.pipe';
 
 
 
 @NgModule({
   declarations: [
     AppComponent,
+    TranslatePipe,
     LoginComponent,
     RegisterComponent,
     FacilitiesComponent,

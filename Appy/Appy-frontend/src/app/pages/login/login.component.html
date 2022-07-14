@@ -1,23 +1,23 @@
 <div [style.height]="height + 'px'" class="my-wrapper">
     <div class="w-card my-container" (keypress)="keypress($event)">
-        <div class="title">Welcome back!</div>
+        <div class="title">{{'pages.login-register.WELCOME_BACK' | translate}}!</div>
 
         <div class="input-container">
-            <div class="label">Email</div>
-            <input class="w-input" type="text" placeholder="Email" [(ngModel)]="email">
+            <div class="label">{{'EMAIL' | translate}}</div>
+            <input class="w-input" type="text" placeholder="{{'EMAIL' | translate}}" [(ngModel)]="email">
             <div class="validation-message">{{ validationErrors['email'] }}</div>
         </div>
 
         <div class="input-container">
-            <div class="label">Password</div>
-            <input class="w-input" type="password" placeholder="Password" [(ngModel)]="password">
+            <div class="label">{{'pages.login-register.PASSWORD' | translate}}</div>
+            <input class="w-input" type="password" placeholder="{{'pages.login-register.PASSWORD' | translate}}" [(ngModel)]="password">
             <div class="validation-message">{{ validationErrors['password'] }}</div>
             <div class="validation-message">{{ validationErrors['other'] }}</div>
         </div>
 
-        <app-button text="Login" color="success" look="solid" width="100%" alignContent="center" [disabled]="isLoading"
+        <app-button text="{{'LOGIN' | translate}}" color="success" look="solid" width="100%" alignContent="center" [disabled]="isLoading"
             [isLoading]="isLoading" (onClick)="login()"></app-button>
 
-        <div class="register">New here? <a routerLink="/register">Register</a></div>
+        <div class="register">{{'pages.login-register.NEW_HERE' | translate}}? <a routerLink="/register">{{'pages.login-register.REGISTER' | translate}}</a></div>
     </div>
 </div>

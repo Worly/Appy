@@ -1,0 +1,56 @@
+{
+    "LOGOUT": "Odjava",
+    "LOGIN": "Prijava",
+    "HOME": "Početna",
+    "WELCOME": "Dobrodošli",
+    "EMAIL": "Email",
+    "UNKNOWN_ERROR": "Nepoznata pogreška",
+    "EDIT": "Uredi",
+    "DELETE": "Obriši",
+    "NAME": "Naziv",
+    "NEW_NAME": "Novi naziv",
+    "SAVE": "Spremi",
+
+    "pages": {
+        "error": {
+            "ERROR": "Dogodila se greška"
+        },
+
+        "login-register": {
+            "WELCOME_BACK": "Dobrodošli natrag",
+            "NEW_HERE": "Novi ste",
+            "USERNAME": "Korisničko ime",
+            "PASSWORD": "Lozinka",
+            "REPEAT_PASSWORD": "Ponovite lozinku",
+            "ALREADY_A_USER": "Već ste korisnik",
+            "REGISTER": "Registriraj se",
+            "LOGIN": "Prijava",
+
+            "errors": {
+                "MISSING_EMAIL": "Molim upišite Vašu email adresu",
+                "MISSING_USERNAME": "Molim upišite Vaše korisničko ime",
+                "MISSING_PASSWORD": "Molim upišite Vašu lozinku",
+                "MISSING_REPEAT_PASSWORD": "Molim ponovite Vašu lozinku",
+                "WRONG_REPEAT_PASSWORD": "Lozinke se ne podudaraju",
+                "WRONG_LOGIN": "Email ili lozinka su pogrešni",
+                "EMAIL_TAKEN": "Račun s ovom email adresom već postoji"
+            }
+        },
+
+        "facilities": {
+            "FACILITY": "Poslovnica",
+            "FACILITIES": "Poslovnice",
+            "NEW_FACILITY": "Nova poslovnica",
+            "EDIT_FACILITY": "Uređivanje poslovnice",
+            "DELETE_PROMPT_1": "Jeste li sigurni da želite obrisati poslovnicu",
+            "DELETE_PROMPT_2": "Sve u ovoj poslovnici će biti",
+            "DELETE_PROMPT_3": "zauvijek nepovratno obrisano uključujući sve podatke u njoj",
+            "DELETE_PROMPT_4": "Da biste je obrisali upišite njen naziv",
+            "FACILITY_NAME": "Naziv poslovnice",
+
+            "errors": {
+                "MISSING_NAME": "Molim upišite naziv"
+            }
+        }
+    }
+}

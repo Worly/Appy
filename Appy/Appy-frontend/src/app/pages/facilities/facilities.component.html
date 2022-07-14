@@ -1,8 +1,8 @@
-<div class="title">Facilities</div>
+<div class="title">{{'pages.facilities.FACILITIES' | translate}}</div>
 
 
 <div class="facilities-container">
-    <app-button width="100%" text="New facility" icon="plus" color="success" look="outlined" borderStyle="dashed"
+    <app-button width="100%" text="{{'pages.facilities.NEW_FACILITY' | translate}}" icon="plus" color="success" look="outlined" borderStyle="dashed"
         alignContent="center" (onClick)="facilityEdit.startAddNew()"></app-button>
 
     <app-single-facility *ngFor="let facility of facilityService.myFacilities" [facility]="facility">

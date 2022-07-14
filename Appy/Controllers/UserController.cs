@@ -21,7 +21,7 @@ namespace Appy.Controllers
             var response = userService.Authenticate(dto);
 
             if (response == null)
-                return BadRequest(new ErrorBuilder().Add("WrongLogin"));
+                return BadRequest(new ErrorBuilder().Add("pages.login-register.errors.WRONG_LOGIN"));
 
             return Ok(response);
         }
@@ -32,7 +32,7 @@ namespace Appy.Controllers
             var response = userService.Register(dto);
 
             if (response == null)
-                return BadRequest(new ErrorBuilder().Add(nameof(dto.Email), "EmailTaken"));
+                return BadRequest(new ErrorBuilder().Add(nameof(dto.Email), "pages.login-register.errors.EMAIL_TAKEN"));
 
             return Ok(response);
         }
