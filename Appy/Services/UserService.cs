@@ -54,7 +54,8 @@ namespace Appy.Services
             var user = new User()
             {
                 Email = model.Email,
-                Username = model.Username,
+                Name = model.Name,
+                Surname = model.Surname,
                 PasswordHash = passwordHash,
                 Salt = salt
             };
@@ -100,7 +101,8 @@ namespace Appy.Services
         {
             return jwtService.GenerateToken(
                 new Claim("id", user.Id.ToString()),
-                new Claim("username", user.Username),
+                new Claim("name", user.Name),
+                new Claim("surname", user.Surname),
                 new Claim("email", user.Email),
                 new Claim("roles", Newtonsoft.Json.JsonConvert.SerializeObject(user.GetRoles().Select(o => o.ToString())))
             );

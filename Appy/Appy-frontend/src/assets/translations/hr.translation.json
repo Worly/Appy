@@ -19,7 +19,8 @@
         "login-register": {
             "WELCOME_BACK": "Dobrodošli natrag",
             "NEW_HERE": "Novi ste",
-            "USERNAME": "Korisničko ime",
+            "NAME": "Ime",
+            "SURNAME": "Prezime",
             "PASSWORD": "Lozinka",
             "REPEAT_PASSWORD": "Ponovite lozinku",
             "ALREADY_A_USER": "Već ste korisnik",
@@ -28,7 +29,8 @@
 
             "errors": {
                 "MISSING_EMAIL": "Molim upišite Vašu email adresu",
-                "MISSING_USERNAME": "Molim upišite Vaše korisničko ime",
+                "MISSING_NAME": "Molim upišite Vaše ime",
+                "MISSING_SURNAME": "Molim upišite Vaše prezime",
                 "MISSING_PASSWORD": "Molim upišite Vašu lozinku",
                 "MISSING_REPEAT_PASSWORD": "Molim ponovite Vašu lozinku",
                 "WRONG_REPEAT_PASSWORD": "Lozinke se ne podudaraju",

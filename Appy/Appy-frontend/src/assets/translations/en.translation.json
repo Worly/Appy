@@ -19,7 +19,8 @@
         "login-register": {
             "WELCOME_BACK": "Welcome back",
             "NEW_HERE": "New here",
-            "USERNAME": "Username",
+            "NAME": "Name",
+            "SURNAME": "Surname",
             "PASSWORD": "Password",
             "REPEAT_PASSWORD": "Repeat password",
             "ALREADY_A_USER": "Already a user",
@@ -28,7 +29,8 @@
 
             "errors": {
                 "MISSING_EMAIL": "Please enter your email",
-                "MISSING_USERNAME": "Please enter your username",
+                "MISSING_NAME": "Please enter your name",
+                "MISSING_SURNAME": "Please enter your surname",
                 "MISSING_PASSWORD": "Please enter your password",
                 "MISSING_REPEAT_PASSWORD": "Please repeat your password",
                 "WRONG_REPEAT_PASSWORD": "Passwords do not match",

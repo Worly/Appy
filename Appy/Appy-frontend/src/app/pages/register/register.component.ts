@@ -18,7 +18,8 @@ export class RegisterComponent implements OnInit {
   } = {};
 
   public email: string = "";
-  public username: string = "";
+  public name: string = "";
+  public surname: string = "";
   public password: string = "";
   public repeatPassword: string = "";
 
@@ -56,8 +57,11 @@ export class RegisterComponent implements OnInit {
     if (this.email == null || this.email == "")
       this.validationErrors["email"] = this.translateService.translate("pages.login-register.errors.MISSING_EMAIL");
 
-    if (this.username == null || this.username == "")
-      this.validationErrors["username"] = this.translateService.translate("pages.login-register.errors.MISSING_USERNAME");
+    if (this.name == null || this.name == "")
+      this.validationErrors["name"] = this.translateService.translate("pages.login-register.errors.MISSING_NAME");
+
+    if (this.surname == null || this.surname == "")
+      this.validationErrors["surname"] = this.translateService.translate("pages.login-register.errors.MISSING_SURNAME");
 
     if (this.password == null || this.password == "")
       this.validationErrors["password"] = this.translateService.translate("pages.login-register.errors.MISSING_PASSWORD");
@@ -73,10 +77,10 @@ export class RegisterComponent implements OnInit {
   register(): void {
     if (this.validate()) {
       this.isLoading = true;
-      this.authService.register(this.email, this.username, this.password).subscribe({
+      this.authService.register(this.email, this.name, this.surname, this.password).subscribe({
         next: o => {
           this.isLoading = false;
-          
+
           this.router.navigate(["facilities"]);
         },
         error: e => {

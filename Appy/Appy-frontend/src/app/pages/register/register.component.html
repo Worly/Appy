@@ -9,9 +9,15 @@
         </div>
 
         <div class="input-container">
-            <div class="label">{{'pages.login-register.USERNAME' | translate}}</div>
-            <input class="w-input" type="text" placeholder="{{'pages.login-register.USERNAME' | translate}}" [(ngModel)]="username">
-            <div class="validation-message">{{ validationErrors['username'] }}</div>
+            <div class="label">{{'pages.login-register.NAME' | translate}}</div>
+            <input class="w-input" type="text" placeholder="{{'pages.login-register.NAME' | translate}}" [(ngModel)]="name">
+            <div class="validation-message">{{ validationErrors['name'] }}</div>
+        </div>
+
+        <div class="input-container">
+            <div class="label">{{'pages.login-register.SURNAME' | translate}}</div>
+            <input class="w-input" type="text" placeholder="{{'pages.login-register.SURNAME' | translate}}" [(ngModel)]="surname">
+            <div class="validation-message">{{ validationErrors['surname'] }}</div>
         </div>
 
         <div class="input-container">

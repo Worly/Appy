@@ -49,11 +49,12 @@ export class AuthService {
         });
     }
 
-    public register(email: string, username: string, password: string): Observable<void> {
+    public register(email: string, name: string, surname: string, password: string): Observable<void> {
         return new Observable<void>(s => {
             this.httpClient.post<any>(appConfig.apiUrl + "user/register", {
                 email: email,
-                username: username,
+                name: name,
+                surname: surname,
                 password: password
             }).subscribe({
                 next: o => {
@@ -97,11 +98,11 @@ export class AuthService {
         this.router.navigate(["login"]);
     }
 
-    public getUsername(): string | null {
+    public getName(): { name: string, surname: string } | null {
         if (!this.isLoggedIn())
             return null;
 
         var decoded = <any>jwt_decode(this.token as string);
-        return decoded.username;
+        return { name: decoded.name, surname: decoded.surname };
     }
 }

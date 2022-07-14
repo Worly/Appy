@@ -11,7 +11,7 @@
           </li>
           <div class="splitter"></div>
           <span class="navbar-text welcome-text" *ngIf="authService.isLoggedIn()">
-            {{('WELCOME' | translate) + ", " + authService.getUsername()}}
+            {{('WELCOME' | translate) + ", " + authService.getName()?.name}}
           </span>
           <app-selected-facility *ngIf="authService.isLoggedIn() && facilityService.getSelected()">
           </app-selected-facility>
