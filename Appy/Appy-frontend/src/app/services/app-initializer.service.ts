@@ -9,7 +9,7 @@ export class AppInitializerService {
 
     public initialize(): Promise<void> {
         return new Promise((reslove, reject) => {
-            this.translateService.loadLanguage("hr").pipe(
+            this.translateService.loadLanguage().pipe(
                 combineLatestWith(this.authService.loadFromLocalStorage())
             ).subscribe({
                 next: () => reslove(),

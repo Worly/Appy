@@ -38,6 +38,7 @@ import { FacilityEditComponent } from './pages/facilities/single-facility/facili
 import { SelectedFacilityComponent } from './components/selected-facility/selected-facility.component';
 import { FacilityInterceptor } from './services/facilities/facility-interceptor.service';
 import { TranslatePipe } from './services/translate/translate.pipe';
+import { LanguagePickerComponent } from './components/language-picker/language-picker.component';
 
 
 
@@ -60,7 +61,8 @@ import { TranslatePipe } from './services/translate/translate.pipe';
     ElementRefDirective,
     DialogComponent,
     FacilityEditComponent,
-    SelectedFacilityComponent
+    SelectedFacilityComponent,
+    LanguagePickerComponent
   ],
   imports: [
     BrowserModule,

@@ -12,6 +12,7 @@
           <li class="nav-item" *ngIf="authService.isLoggedIn() && facilityService.getSelected()">
             <a [routerLink]="'/home'" class="nav-link" [routerLinkActive]="'active'" href="#">{{'HOME' | translate}}</a>
           </li>
+          <div class="splitter"></div>
           <span class="navbar-text welcome-text" *ngIf="authService.isLoggedIn()">
             {{('WELCOME' | translate) + ", " + authService.getUsername()}}
           </span>
@@ -20,6 +21,7 @@
           <li class="nav-item" *ngIf="authService.isLoggedIn()">
             <a class="nav-link" (click)="logOut()">{{'LOGOUT' | translate}}</a>
           </li>
+          <app-language-picker></app-language-picker>
         </ul>
       </div>
     </div>

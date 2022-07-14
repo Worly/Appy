@@ -1,0 +1,7 @@
+:host {
+    margin: -0.5rem 0;
+}
+
+:host::ng-deep > app-button > div.my-button {
+    color: var(--anti-text);
+}
