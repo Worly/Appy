@@ -1,5 +1,9 @@
 @media (min-width: 1600px) {
-    .container, .container-sm, .container-md, .container-lg, .container-xl {
+    .container,
+    .container-sm,
+    .container-md,
+    .container-lg,
+    .container-xl {
         max-width: 1500px;
     }
 }
@@ -9,7 +13,7 @@
 }
 
 .my-navbar {
-    background-color: #D05353;
+    background-color: #d05353;
 }
 
 .navbar-brand {
@@ -31,4 +35,8 @@
 
 .splitter {
     margin-left: auto;
+}
+
+:host::ng-deep app-button.navbar-toggler > .my-button {
+    color: var(--anti-text);
 }

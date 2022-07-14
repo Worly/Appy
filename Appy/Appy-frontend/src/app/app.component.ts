@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { AuthService } from './services/auth/auth.service';
 import { FacilityService } from './services/facilities/facility.service';
 
@@ -9,6 +9,8 @@ import { FacilityService } from './services/facilities/facility.service';
 })
 export class AppComponent implements OnInit {
 
+  @ViewChild("navbarCollapse") private navbarCollapse?: ElementRef<HTMLElement>;
+
   constructor(public authService: AuthService, public facilityService: FacilityService) {}
 
   ngOnInit() {
@@ -17,6 +19,10 @@ export class AppComponent implements OnInit {
 
   public logOut(): void {
     this.authService.logOut();
+  }
+
+  public toggleNavbar(): void {
+    this.navbarCollapse?.nativeElement.classList.toggle("show");
   }
   
 }
