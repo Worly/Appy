@@ -13,7 +13,7 @@
 }
 
 .my-navbar {
-    background-color: #d05353;
+    background-color: var(--primary-color);
 }
 
 .navbar-brand {
