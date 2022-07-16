@@ -1,4 +1,5 @@
 using Appy.Domain;
+using Appy.Exceptions;
 using Appy.Services;
 using Appy.Services.Facilities;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
@@ -16,6 +17,7 @@ builder.Services.AddDbContext<MainDbContext>(options =>
 builder.Services.AddSingleton<IJwtService, JwtService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IFacilityService, FacilityService>();
+builder.Services.AddScoped<IServiceService, ServiceService>();
 
 
 builder.Services.AddControllers();
@@ -25,7 +27,6 @@ builder.Services.AddSpaStaticFiles(configuration =>
     configuration.RootPath = "Appy-frontend/build";
 });
 
-
 var app = builder.Build();
 
 app.UseHttpsRedirection();
@@ -34,6 +35,7 @@ app.UseSpaStaticFiles();
 
 app.UseRouting();
 
+app.UseMiddleware<ExceptionMiddleware>();
 app.UseMiddleware<Appy.Auth.JwtMiddleware>();
 app.UseMiddleware<FacilityMiddleware>();
 

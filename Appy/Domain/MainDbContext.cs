@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using EntityFramework.Exceptions.PostgreSQL;
+using Microsoft.EntityFrameworkCore;
 
 namespace Appy.Domain
 {
@@ -6,6 +7,7 @@ namespace Appy.Domain
     {
         public DbSet<User> Users { get; set; }
         public DbSet<Facility> Facilities { get; set; }
+        public DbSet<Service> Services { get; set; }
 
         public MainDbContext(DbContextOptions<MainDbContext> options) : base(options)
         {
@@ -16,11 +18,13 @@ namespace Appy.Domain
             optionsBuilder
                 .UseLoggerFactory(LoggerFactory.Create(b => b.AddConsole()))
                 .EnableSensitiveDataLogging()
+                .UseExceptionProcessor()
                 .UseNpgsql();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            Service.OnModelCreating(modelBuilder);
         }
 
         public void UpdateDatabase()

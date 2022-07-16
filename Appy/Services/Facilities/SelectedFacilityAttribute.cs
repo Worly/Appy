@@ -14,15 +14,15 @@ namespace Appy.Services.Facilities
 
         public void OnResourceExecuting(ResourceExecutingContext context)
         {
-            if (!context.HttpContext.Items.ContainsKey("FacilityId"))
+            if (!context.HttpContext.Items.ContainsKey("facilityId"))
             {
-                context.Result = new JsonResult(new { message = "Missing facilityId" }) { StatusCode = StatusCodes.Status400BadRequest };
+                context.Result = new JsonResult(new { message = "Missing facility-id" }) { StatusCode = StatusCodes.Status400BadRequest };
                 return;
             }
 
-            if (!context.HttpContext.CurrentUser().Facilities.Any(w => w.Id == (int)context.HttpContext.Items["FacilityId"]))
+            if (!context.HttpContext.CurrentUser().Facilities.Any(w => w.Id == (int)context.HttpContext.Items["facilityId"]))
             {
-                context.Result = new JsonResult(new { message = "Wrong facilityId" }) { StatusCode = StatusCodes.Status404NotFound };
+                context.Result = new JsonResult(new { message = "Wrong facility-id" }) { StatusCode = StatusCodes.Status404NotFound };
                 return;
             }
         }

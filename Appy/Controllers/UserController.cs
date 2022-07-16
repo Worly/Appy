@@ -32,7 +32,7 @@ namespace Appy.Controllers
             var response = userService.Register(dto);
 
             if (response == null)
-                return BadRequest(new ErrorBuilder().Add(nameof(dto.Email), "pages.login-register.errors.EMAIL_TAKEN"));
+                return BadRequest(new ErrorBuilder().Add(nameof(RegisterDTO.Email), "pages.login-register.errors.EMAIL_TAKEN"));
 
             return Ok(response);
         }

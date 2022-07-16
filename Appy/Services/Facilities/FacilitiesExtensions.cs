@@ -4,7 +4,7 @@
     {
         public static int SelectedFacility(this HttpContext httpContext)
         {
-            return (int)httpContext.Items["FacilityId"];
+            return (int)httpContext.Items["facilityId"];
         }
     }
 }
