@@ -1,13 +1,13 @@
-const brokenValidationsSymbol = Symbol("brokenValidations")
+const brokenValidationsSymbol = Symbol("#S-brokenValidations")
 
-export class BaseModel {
+export abstract class BaseModel {
     protected validations: Validation[] = [];
 
     [brokenValidationsSymbol]: {
         [propertyName: string]: string[]
     } = {};
 
-    init() {
+    initProperties() {
         for (let p in this) {
             let currentValue = this[p] as any;
             let symbol = Symbol(p);
@@ -25,6 +25,12 @@ export class BaseModel {
             (this as any)[symbol] = currentValue;
         }
     }
+
+    public getId(): any {
+        return (this as any).id;
+    }
+
+    public abstract getDTO(): any;
 
     protected propertyChanged(propertyName: string) {
         this.validateProperty(propertyName);

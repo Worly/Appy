@@ -40,7 +40,7 @@ export class Service extends BaseModel {
         this.duration = dto.duration ? moment.duration(dto.duration) : undefined;
         this.colorId = dto.colorId;
 
-        this.init();
+        this.initProperties();
     }
 
     public getDTO(): ServiceDTO {
