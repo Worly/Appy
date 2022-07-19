@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as moment from 'moment';
+import { Subscription } from 'rxjs';
 import { Service } from 'src/app/models/service';
 import { ServiceColorsService } from 'src/app/services/service-colors.service';
 import { ServiceService } from 'src/app/services/service.service';
@@ -10,9 +11,11 @@ import { ServiceService } from 'src/app/services/service.service';
   templateUrl: './services.component.html',
   styleUrls: ['./services.component.scss']
 })
-export class ServicesComponent implements OnInit {
+export class ServicesComponent implements OnInit, OnDestroy {
 
   services?: Service[] = undefined;
+
+  private subs: Subscription[] = [];
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -25,8 +28,12 @@ export class ServicesComponent implements OnInit {
     this.load();
   }
 
+  ngOnDestroy(): void {
+    this.subs.forEach(s => s.unsubscribe());
+  }
+
   private load() {
-    this.serviceService.getAll().subscribe(s => this.services = s);
+    this.subs.push(this.serviceService.getAll().subscribe((s: Service[]) => this.services = s));
   }
 
   public formatDuration(duration?: moment.Duration): string {

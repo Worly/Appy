@@ -25,12 +25,12 @@ export class TranslateService {
         return new Observable(s => {
             this.http.get<Translations>(`/assets/translations/${languageCode}.translation.json`)
                 .subscribe({
-                    next: t => {
+                    next: (t: Translations) => {
                         this.translations = t;
                         this.selectedLanguage = languageCode;
                         s.next();
                     },
-                    error: e => {
+                    error: (e: any) => {
                         console.log("Error while loading the language", e);
                         if (languageCode != "en") {
                             console.log("Retrying with english");
@@ -41,7 +41,7 @@ export class TranslateService {
                                     this.saveLanguageCode();
                                     s.next();
                                 },
-                                error: e => s.error(e)
+                                error: (e: any) => s.error(e)
                             });
                         }
                         else

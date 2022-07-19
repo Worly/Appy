@@ -1,5 +1,6 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { DialogComponent } from 'src/app/components/dialog/dialog.component';
 import { Facility } from 'src/app/models/facility';
 import { FacilityService } from 'src/app/services/facilities/facility.service';
@@ -9,7 +10,7 @@ import { FacilityService } from 'src/app/services/facilities/facility.service';
   templateUrl: './facility-edit.component.html',
   styleUrls: ['./facility-edit.component.css']
 })
-export class FacilityEditComponent implements OnInit {
+export class FacilityEditComponent implements OnInit, OnDestroy {
 
   @ViewChild(DialogComponent) dialog?: DialogComponent;
 
@@ -26,9 +27,15 @@ export class FacilityEditComponent implements OnInit {
 
   public isLoading: boolean = false;
 
+  private subs: Subscription[] = [];
+
   constructor(private facilityService: FacilityService, private router: Router) { }
 
   ngOnInit(): void {
+  }
+
+  ngOnDestroy(): void {
+    this.subs.forEach(s => s.unsubscribe());
   }
 
   startEdit(): void {
@@ -73,11 +80,11 @@ export class FacilityEditComponent implements OnInit {
     else
       request = this.facilityService.edit(this.facility?.id as number, this.name);
 
-    request.subscribe({
-      next: w => {
+    this.subs.push(request.subscribe({
+      next: (w: any) => {
 
         if (this.isNew) {
-          this.facilityService.selectFacility(w).subscribe({
+          this.subs.push(this.facilityService.selectFacility(w).subscribe({
             next: () => {
               this.isLoading = false;
               this.dialog?.close();
@@ -88,17 +95,17 @@ export class FacilityEditComponent implements OnInit {
               this.isLoading = false;
               this.dialog?.close();
             }
-          });
+          }));
         }
         else {
           this.isLoading = false;
           this.dialog?.close();
         }
       },
-      error: e => {
+      error: (e: any) => {
         this.isLoading = false;
         this.validationErrors = e.error.errors;
       }
-    });
+    }));
   }
 }

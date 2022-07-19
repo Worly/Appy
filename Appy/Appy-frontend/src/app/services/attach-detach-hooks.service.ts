@@ -46,7 +46,7 @@ export class AttachDetachHooksService {
 
 
         // Router events
-        router.events.subscribe(event => this.triggerHooksFromRouterEvents(event));
+        router.events.subscribe((event: any) => this.triggerHooksFromRouterEvents(event));
     }
 
     private triggerHooksFromRouterEvents(event: Event) {

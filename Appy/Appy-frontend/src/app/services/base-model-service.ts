@@ -32,8 +32,8 @@ export class BaseModelService<T extends BaseModel> implements IEntityTracker<T> 
             let datasourceContext = this.createDatasourceContext(s);
 
             this.httpClient.get<any[]>(`${appConfig.apiUrl}${this.controllerName}/getAll`).subscribe({
-                next: r => datasourceContext.add(r.map(o => new this.typeFactory(o))),
-                error: e => s.error(s)
+                next: (r: any[]) => datasourceContext.add(r.map(o => new this.typeFactory(o))),
+                error: (e: any) => s.error(s)
             });
         });
     }

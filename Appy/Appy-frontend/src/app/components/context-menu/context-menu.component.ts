@@ -1,6 +1,7 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { ChangeDetectorRef, Component, ContentChildren, ElementRef, Input, OnDestroy, OnInit, QueryList, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { ButtonComponent } from '../button/button.component';
 
 @Component({
@@ -17,7 +18,7 @@ export class ContextMenuComponent implements OnInit, OnDestroy {
         for (let button of buttons) {
           button.curved = false;
           button.width = "100%"
-          button.onClick.subscribe(() => this.close());
+          this.subs.push(button.onClick.subscribe(() => this.close()));
         }
         buttons.first.curvedTopLeft = true;
         buttons.first.curvedTopRight = true;
@@ -38,6 +39,8 @@ export class ContextMenuComponent implements OnInit, OnDestroy {
   keepOpen: boolean = false;
   keepClosed: boolean = false;
 
+  private subs: Subscription[] = [];
+
   constructor(
     private changeDetector: ChangeDetectorRef,
     private viewContainerRef: ViewContainerRef,
@@ -52,6 +55,8 @@ export class ContextMenuComponent implements OnInit, OnDestroy {
 
     if (this.overlayRef != null)
       this.close();
+
+    this.subs.forEach(s => s.unsubscribe());
   }
 
   public open(): void {

@@ -1,6 +1,7 @@
 import { ViewportRuler } from '@angular/cdk/scrolling';
-import { Component, ElementRef, NgZone, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/services/auth/auth.service';
 
 @Component({
@@ -8,7 +9,7 @@ import { AuthService } from 'src/app/services/auth/auth.service';
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css']
 })
-export class RegisterComponent implements OnInit {
+export class RegisterComponent implements OnInit, OnDestroy {
 
   public height: number = 0;
 
@@ -24,9 +25,7 @@ export class RegisterComponent implements OnInit {
 
   public isLoading: boolean = false;
 
-  private readonly viewportChange = this.viewportRuler
-    .change(50)
-    .subscribe(() => this.ngZone.run(() => this.setHeight()));
+  private subs: Subscription[] = [];
 
   constructor(
     private authService: AuthService,
@@ -34,10 +33,15 @@ export class RegisterComponent implements OnInit {
     private readonly viewportRuler: ViewportRuler,
     private readonly ngZone: NgZone
   ) {
+    this.subs.push(this.viewportRuler.change(50).subscribe(() => this.ngZone.run(() => this.setHeight())));
   }
 
   ngOnInit(): void {
     this.setHeight();
+  }
+
+  ngOnDestroy(): void {
+    this.subs.forEach(s => s.unsubscribe());
   }
 
   setHeight(): void {
@@ -75,17 +79,17 @@ export class RegisterComponent implements OnInit {
   register(): void {
     if (this.validate()) {
       this.isLoading = true;
-      this.authService.register(this.email, this.name, this.surname, this.password).subscribe({
-        next: o => {
+      this.subs.push(this.authService.register(this.email, this.name, this.surname, this.password).subscribe({
+        next: () => {
           this.isLoading = false;
 
           this.router.navigate(["facilities"]);
         },
-        error: e => {
+        error: (e: any) => {
           this.isLoading = false;
           this.validationErrors = e.error.errors;
         },
-      });
+      }));
     }
   }
 }

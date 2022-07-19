@@ -13,7 +13,7 @@ export class AppInitializerService {
                 combineLatestWith(this.authService.loadFromLocalStorage())
             ).subscribe({
                 next: () => reslove(),
-                error: e => reject()
+                error: (e: any) => reject()
             });
         });
     }

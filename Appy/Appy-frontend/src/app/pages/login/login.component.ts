@@ -1,6 +1,7 @@
 import { ViewportRuler } from '@angular/cdk/scrolling';
-import { Component, ElementRef, NgZone, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/services/auth/auth.service';
 import { FacilityService } from 'src/app/services/facilities/facility.service';
 
@@ -9,7 +10,7 @@ import { FacilityService } from 'src/app/services/facilities/facility.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, OnDestroy {
 
   public height: number = 0;
 
@@ -22,9 +23,7 @@ export class LoginComponent implements OnInit {
 
   public isLoading: boolean = false;
 
-  private readonly viewportChange = this.viewportRuler
-    .change(50)
-    .subscribe(() => this.ngZone.run(() => this.setHeight()));
+  private subs: Subscription[] = [];
 
   constructor(
     private authService: AuthService,
@@ -33,10 +32,15 @@ export class LoginComponent implements OnInit {
     private readonly viewportRuler: ViewportRuler,
     private readonly ngZone: NgZone
   ) {
+    this.subs.push(this.viewportRuler.change(50).subscribe(() => this.ngZone.run(() => this.setHeight)));
   }
 
   ngOnInit(): void {
     this.setHeight();
+  }
+
+  ngOnDestroy(): void {
+    this.subs.forEach(s => s.unsubscribe());
   }
 
   setHeight(): void {
@@ -63,8 +67,8 @@ export class LoginComponent implements OnInit {
   login(): void {
     if (this.validate()) {
       this.isLoading = true;
-      this.authService.logIn(this.email as string, this.password as string).subscribe({
-        next: o => {
+      this.subs.push(this.authService.logIn(this.email as string, this.password as string).subscribe({
+        next: () => {
           this.isLoading = false;
           
           if (this.facilityService.getSelected() == null)
@@ -72,11 +76,11 @@ export class LoginComponent implements OnInit {
           else
             this.router.navigate(["home"]);
         },
-        error: e => {
+        error: (e: any) => {
           this.isLoading = false;
           this.validationErrors = e.error.errors;
         },
-      });
+      }));
     }
   }
 }

@@ -1,9 +1,9 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Data, ParamMap, Router } from '@angular/router';
 import { Service } from 'src/app/models/service';
 import { ServiceService } from 'src/app/services/service.service';
 import { Location } from '@angular/common';
-import { combineLatest, debounceTime, Observable } from 'rxjs';
+import { combineLatest, debounceTime, Observable, Subscription } from 'rxjs';
 import { NotifyDialogService } from 'src/app/components/notify-dialog/notify-dialog.service';
 import { TranslateService } from 'src/app/services/translate/translate.service';
 
@@ -12,7 +12,7 @@ import { TranslateService } from 'src/app/services/translate/translate.service';
   templateUrl: './service-edit.component.html',
   styleUrls: ['./service-edit.component.scss']
 })
-export class ServiceEditComponent implements OnInit {
+export class ServiceEditComponent implements OnInit, OnDestroy {
 
   public isNew: boolean = false;
   public service?: Service = undefined;
@@ -24,6 +24,8 @@ export class ServiceEditComponent implements OnInit {
     return this.isLoadingSave || this.isLoadingDelete;
   }
 
+  private subs: Subscription[] = [];
+
   constructor(
     private location: Location,
     private activatedRoute: ActivatedRoute,
@@ -33,8 +35,8 @@ export class ServiceEditComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    combineLatest([this.activatedRoute.data, this.activatedRoute.paramMap])
-      .pipe(debounceTime(0)).subscribe(([data, paramMap]) => {
+    this.subs.push(combineLatest([this.activatedRoute.data, this.activatedRoute.paramMap])
+      .pipe(debounceTime(0)).subscribe(([data, paramMap]: [Data, ParamMap]) => {
         this.isNew = data["isNew"] ?? false;
 
         if (this.isNew)
@@ -44,14 +46,18 @@ export class ServiceEditComponent implements OnInit {
           if (idParam)
             this.load(Number.parseInt(idParam));
         }
-      });
+      }));
+  }
+
+  ngOnDestroy(): void {
+    this.subs.forEach(s => s.unsubscribe());
   }
 
   private load(id: number) {
-    this.serviceService.get(id).subscribe(s => {
+    this.subs.push(this.serviceService.get(id).subscribe((s: Service) => {
       this.service = s;
       this.originalName = s.name;
-    });
+    }));
   }
 
   public cancel() {
@@ -71,29 +77,29 @@ export class ServiceEditComponent implements OnInit {
     else
       action = this.serviceService.save(this.service as Service);
 
-    action.subscribe({
+    this.subs.push(action.subscribe({
       next: () => this.goBack(),
-      error: e => {
+      error: (e: any) => {
         this.service?.applyServerValidationErrors(e.error.errors);
         this.isLoadingSave = false;
       }
-    });
+    }));
   }
 
   public deleteService() {
-    this.notifyDialogService.yesNoDialog(this.translateService.translate("pages.services.DELETE_PROMPT")).subscribe(ok => {
+    this.subs.push(this.notifyDialogService.yesNoDialog(this.translateService.translate("pages.services.DELETE_PROMPT")).subscribe((ok: boolean) => {
       if (!ok)
         return;
 
       this.isLoadingDelete = true;
-      this.serviceService.delete(this.service?.id as number).subscribe({
+      this.subs.push(this.serviceService.delete(this.service?.id as number).subscribe({
         next: () => this.goBack(),
-        error: e => {
+        error: (e: any) => {
           this.service?.applyServerValidationErrors(e.error.errors);
           this.isLoadingDelete = false;
         }
-      });
-    });
+      }));
+    }));
   }
 
   public goBack() {

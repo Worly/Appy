@@ -35,16 +35,16 @@ export class AuthService {
                 email: email,
                 password: password,
             }).subscribe({
-                next: o => {
+                next: (o: any) => {
                     this.setToken(o.token)?.subscribe({
                         next: () => s.next(),
-                        error: o => {
+                        error: (o: any) => {
                             this.logOut();
                             s.error(o)
                         }
                     });
                 },
-                error: o => s.error(o)
+                error: (o: any) => s.error(o)
             });
         });
     }
@@ -57,16 +57,16 @@ export class AuthService {
                 surname: surname,
                 password: password
             }).subscribe({
-                next: o => {
+                next: (o: any) => {
                     this.setToken(o.token)?.subscribe({
                         next: () => s.next(),
-                        error: o => {
+                        error: (o: any) => {
                             this.logOut();
                             s.error(o)
                         }
                     });
                 },
-                error: o => s.error(o)
+                error: (o: any) => s.error(o)
             });
         });
     }
