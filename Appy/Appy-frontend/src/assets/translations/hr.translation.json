@@ -10,6 +10,10 @@
     "NAME": "Naziv",
     "NEW_NAME": "Novi naziv",
     "SAVE": "Spremi",
+    "CANCEL": "Odustani",
+    "CHOOSE_DURATION": "Odaberi trajanje",
+    "YES": "Da",
+    "NO": "Ne",
 
     "pages": {
         "error": {
@@ -52,6 +56,23 @@
 
             "errors": {
                 "MISSING_NAME": "Molim upišite naziv"
+            }
+        },
+
+        "services": {
+            "SERVICES": "Usluge",
+            "SERVICE": "Usluga",
+            "DURATION": "Trajanje",
+            "COLOR": "Boja",
+            "NEW_SERVICE": "Nova usluga",
+            "CHOOSE_COLOR": "Odaberi boju",
+            "DELETE_PROMPT": "Jeste li sigurni da želite obrisati ovu uslugu?",
+
+            "errors": {
+                "MISSING_NAME": "Molim upišite naziv",
+                "MISSING_COLOR": "Molim odaberite boju",
+                "MISSING_DURATION": "Molim odaberite trajanje",
+                "NAME_TAKEN": "Usluga s tim imenom već postoji"
             }
         }
     }

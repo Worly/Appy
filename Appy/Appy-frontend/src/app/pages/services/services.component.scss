@@ -1,0 +1,21 @@
+.single-service-outer-container {
+    font-size: 1.4rem;
+    margin-bottom: 10px;
+    padding: 20px;
+}
+
+.service-color-bar {
+    height: calc(100% - 10px);
+    width: 2rem;
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    border-radius: var(--default-border-radius);
+    border: 1px solid var(--input-border-color);
+}
+
+.single-service-container {
+    margin-left: 2rem;
+    display: flex;
+    justify-content: space-between;
+}

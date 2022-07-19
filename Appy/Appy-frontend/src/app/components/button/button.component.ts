@@ -9,7 +9,7 @@ import { IconName, IconPrefix } from '@fortawesome/fontawesome-svg-core';
 export class ButtonComponent implements OnInit {
 
   @Input()
-  text: string = "";
+  text: string | null = null;
 
   @Input()
   curved: boolean = true;
@@ -20,10 +20,16 @@ export class ButtonComponent implements OnInit {
   @Input() curvedBottomRight: boolean = false;
 
   @Input()
-  look: "solid" | "outlined" | "normal" | "transparent" = "normal";
+  look: "solid" | "outlined" | "normal" | "transparent" | "custom" = "normal";
 
   @Input()
   color: "success" | "danger" | "normal" = "normal";
+
+  @Input()
+  customColor: string = "#FFFFFF";
+
+  @Input()
+  customTextColor: string = "black";
 
   @Input()
   borderStyle: "solid" | "dashed" | "dotted" | "double" = "solid";

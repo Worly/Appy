@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { forkJoin, Observable } from "rxjs";
 import { map, tap } from "rxjs/operators";
 import { appConfig } from "../../app.config";
-import { Facility } from "../../dtos/facility";
+import { Facility } from "../../models/facility";
 
 @Injectable({ providedIn: "root" })
 export class FacilityService {

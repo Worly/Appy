@@ -1,0 +1,11 @@
+:host {
+    display: block;
+    border-width: 1px;
+    border-style: solid;
+    border-color: var(--input-border-color);
+    border-radius: var(--default-border-radius);
+}
+
+:host::ng-deep app-button > div.my-button {
+    color: var(--text);
+}

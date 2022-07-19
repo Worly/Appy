@@ -22,16 +22,6 @@
                                     supported by Chrome, Edge, Opera and Firefox */
 }
 
-.emoji-picker__emoji,
-.emoji-picker__preview-emoji {
-  font-family: "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Color Emoji", "Twemoji Mozilla",
-    "Noto Color Emoji", "EmojiOne Color", "Android Emoji" !important;
-}
-
-.emoji-picker__wrapper {
-  z-index: 1000;
-}
-
 html,
 body {
   height: 100%;

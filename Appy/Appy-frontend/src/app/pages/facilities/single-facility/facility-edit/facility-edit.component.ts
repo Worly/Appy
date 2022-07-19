@@ -1,10 +1,8 @@
-import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { throwIfEmpty } from 'rxjs/operators';
 import { DialogComponent } from 'src/app/components/dialog/dialog.component';
-import { Facility } from 'src/app/dtos/facility';
+import { Facility } from 'src/app/models/facility';
 import { FacilityService } from 'src/app/services/facilities/facility.service';
-import { TranslateService } from 'src/app/services/translate/translate.service';
 
 @Component({
   selector: 'app-facility-edit',
@@ -28,7 +26,7 @@ export class FacilityEditComponent implements OnInit {
 
   public isLoading: boolean = false;
 
-  constructor(private facilityService: FacilityService, private router: Router, private translateService: TranslateService) { }
+  constructor(private facilityService: FacilityService, private router: Router) { }
 
   ngOnInit(): void {
   }
@@ -58,7 +56,7 @@ export class FacilityEditComponent implements OnInit {
     this.validationErrors = {};
 
     if (this.name == null || this.name == "")
-      this.validationErrors["name"] = this.translateService.translate("pages.facilities.errors.MISSING_NAME");
+      this.validationErrors["name"] = "pages.facilities.errors.MISSING_NAME";
 
     return Object.entries(this.validationErrors).length == 0;
   }

@@ -163,6 +163,11 @@
         background-color: transparent;
         border-width: 0px;
     }
+    &-custom {
+        background-color: var(--custom-button-color);
+        color: var(--custom-text-color);
+        border-width: 0px;
+    }
 }
 
 .border {

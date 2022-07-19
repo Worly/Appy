@@ -5,8 +5,8 @@
     <div class="input-container">
         <div class="label">{{isNew ? ("NAME" | translate) : ("NEW_NAME" | translate)}}</div>
         <input class="w-input" type="text" [placeholder]="isNew ? ('NAME' | translate) : ('NEW_NAME' | translate)" [(ngModel)]="name">
-        <div class="validation-message">{{ validationErrors['name'] }}</div>
-        <div class="validation-message">{{ validationErrors['other'] }}</div>
+        <div class="validation-message">{{ validationErrors['name'] | translate }}</div>
+        <div class="validation-message">{{ validationErrors['other'] | translate }}</div>
     </div>
 
     <app-button [isLoading]="isLoading" [disabled]="isLoading" text="{{'SAVE' | translate}}" look="solid" color="success"

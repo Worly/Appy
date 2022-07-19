@@ -27,7 +27,7 @@ namespace Appy.Services
 
         public List<Service> GetAll(int facilityId)
         {
-            return context.Services.Where(s => s.FacilityId == facilityId).ToList();
+            return context.Services.Where(s => s.FacilityId == facilityId).OrderBy(o => o.Name).ToList();
         }
 
         public Service GetById(int id, int facilityId)
@@ -43,7 +43,7 @@ namespace Appy.Services
         {
             var nameTaken = context.Services.Where(o => o.FacilityId == facilityId && o.Name == dto.Name).Any();
             if (nameTaken)
-                throw new ValidationException(nameof(Service.Name), "pages.service.errors.NAME_TAKEN");
+                throw new ValidationException(nameof(Service.Name), "pages.services.errors.NAME_TAKEN");
 
             var service = new Service()
             {
@@ -67,7 +67,7 @@ namespace Appy.Services
 
             var nameTaken = context.Services.Where(s => s.Id != id && s.Name == dto.Name && s.FacilityId == facilityId).Any();
             if (nameTaken)
-                throw new ValidationException(nameof(Service.Name), "pages.service.errors.NAME_TAKEN");
+                throw new ValidationException(nameof(Service.Name), "pages.services.errors.NAME_TAKEN");
 
             service.Name = dto.Name;
             service.Duration = dto.Duration;

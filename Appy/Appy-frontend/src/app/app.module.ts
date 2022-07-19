@@ -39,6 +39,12 @@ import { SelectedFacilityComponent } from './components/selected-facility/select
 import { FacilityInterceptor } from './services/facilities/facility-interceptor.service';
 import { TranslatePipe } from './services/translate/translate.pipe';
 import { LanguagePickerComponent } from './components/language-picker/language-picker.component';
+import { ServicesComponent } from './pages/services/services.component';
+import { ServiceEditComponent } from './pages/services/service-edit/service-edit.component';
+import { ServiceColorPickerComponent } from './pages/services/service-edit/service-color-picker/service-color-picker.component';
+import { OverlayModule } from '@angular/cdk/overlay';
+import { DurationPickerComponent } from './components/duration-picker/duration-picker.component';
+import { NotifyDialogComponent } from './components/notify-dialog/notify-dialog.component';
 
 
 
@@ -62,13 +68,19 @@ import { LanguagePickerComponent } from './components/language-picker/language-p
     DialogComponent,
     FacilityEditComponent,
     SelectedFacilityComponent,
-    LanguagePickerComponent
+    LanguagePickerComponent,
+    ServicesComponent,
+    ServiceEditComponent,
+    ServiceColorPickerComponent,
+    DurationPickerComponent,
+    NotifyDialogComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     FormsModule,
     HttpClientModule,
+    OverlayModule,
     OrderModule,
     NoopAnimationsModule,
     MatDatepickerModule,

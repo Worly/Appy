@@ -1,0 +1,18 @@
+.dialog-container {
+    padding: 30px 30px;
+    position: relative;
+    font-size: 1.4rem;
+}
+
+.close-button {
+    position: absolute;
+    right: 5px;
+    top: 5px
+}
+
+.my-buttons {
+    margin-top: 30px;
+    width: 100%;
+    display: flex;
+    justify-content: space-evenly;
+}

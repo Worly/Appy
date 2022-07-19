@@ -7,15 +7,16 @@ import { RegisterComponent } from './pages/register/register.component';
 import { FacilitiesComponent } from './pages/facilities/facilities.component';
 import { LoggedInGuard, NotLoggedInGuard } from './services/auth/auth.guard';
 import { SelectedFacilityGuard } from './services/facilities/facility.guard';
+import { ServicesComponent } from './pages/services/services.component';
+import { ServiceEditComponent } from './pages/services/service-edit/service-edit.component';
 
 const routes: Routes = [
   { path: "login", component: LoginComponent, canActivate: [NotLoggedInGuard] },
   { path: "register", component: RegisterComponent, canActivate: [NotLoggedInGuard] },
 
   {
-    path: "facilities",
-    component: FacilitiesComponent,
-    canActivate: [LoggedInGuard]
+    path: "error",
+    component: ErrorComponent,
   },
   {
     path: "home",
@@ -23,8 +24,27 @@ const routes: Routes = [
     canActivate: [LoggedInGuard, SelectedFacilityGuard]
   },
   {
-    path: "error",
-    component: ErrorComponent,
+    path: "facilities",
+    component: FacilitiesComponent,
+    canActivate: [LoggedInGuard]
+  },
+  {
+    path: "services",
+    component: ServicesComponent,
+    canActivate: [LoggedInGuard],
+    data: { shouldDetach: true, detachGroup: "services" }
+  },
+  {
+    path: "services/edit/:id",
+    component: ServiceEditComponent,
+    canActivate: [LoggedInGuard],
+    data: { detachGroup: "services" }
+  },
+  {
+    path: "services/new",
+    component: ServiceEditComponent,
+    canActivate: [LoggedInGuard],
+    data: { isNew: true, detachGroup: "services" }
   },
   { path: "**", redirectTo: "/home" }
 ];

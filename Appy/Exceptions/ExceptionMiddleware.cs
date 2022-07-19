@@ -1,4 +1,6 @@
 ﻿using Appy.DTOs;
+using Microsoft.AspNetCore.Http.Json;
+using Microsoft.Extensions.Options;
 using System.Net;
 using System.Text.Json;
 
@@ -8,10 +10,13 @@ namespace Appy.Exceptions
     {
         private readonly RequestDelegate _next;
         private readonly ILogger _logger;
-        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
+        private readonly IOptions<JsonOptions> jsonOptions;
+
+        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger, IOptions<JsonOptions> jsonOptions)
         {
             _logger = logger;
             _next = next;
+            jsonOptions = jsonOptions;
         }
 
         public async Task InvokeAsync(HttpContext httpContext)
@@ -41,13 +46,9 @@ namespace Appy.Exceptions
             string text;
 
             if (exception is ValidationException validationException)
-                text = JsonSerializer.Serialize(new ErrorBuilder().Add(validationException.PropertyName, validationException.ErrorCode));
+                text = JsonSerializer.Serialize(new ErrorBuilder().Add(validationException.PropertyName, validationException.ErrorCode), new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
             else
-                text = new ErrorDetails()
-                {
-                    StatusCode = context.Response.StatusCode,
-                    Message = exception.Message,
-                }.ToString();
+                text = JsonSerializer.Serialize(new ErrorDetails() { StatusCode = context.Response.StatusCode, Message = exception.Message }, new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
 
             context.Response.StatusCode = (int)statusCode;
             await context.Response.WriteAsync(text);
@@ -57,10 +58,6 @@ namespace Appy.Exceptions
         {
             public int StatusCode { get; set; }
             public string Message { get; set; }
-            public override string ToString()
-            {
-                return JsonSerializer.Serialize(this);
-            }
         }
     }
 }

@@ -1,5 +1,6 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ContentChildren, ElementRef, HostListener, Input, OnDestroy, OnInit, QueryList, TemplateRef, ViewChild } from '@angular/core';
-import { GlobalPosition, InsidePlacement, OutsidePlacement, RelativePosition, Toppy, ToppyControl } from 'toppy';
+import { Overlay, OverlayRef } from '@angular/cdk/overlay';
+import { TemplatePortal } from '@angular/cdk/portal';
+import { ChangeDetectorRef, Component, ContentChildren, ElementRef, Input, OnDestroy, OnInit, QueryList, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
 import { ButtonComponent } from '../button/button.component';
 
 @Component({
@@ -7,18 +8,40 @@ import { ButtonComponent } from '../button/button.component';
   templateUrl: './context-menu.component.html',
   styleUrls: ['./context-menu.component.css']
 })
-export class ContextMenuComponent implements OnInit, OnDestroy, AfterViewInit {
+export class ContextMenuComponent implements OnInit, OnDestroy {
 
   @ViewChild("template") template?: TemplateRef<any>;
-  @ContentChildren(ButtonComponent) buttons?: QueryList<ButtonComponent>;
+  @ContentChildren(ButtonComponent) set buttons(buttons: QueryList<ButtonComponent>) {
+    setTimeout(() => {
+      if (buttons) {
+        for (let button of buttons) {
+          button.curved = false;
+          button.width = "100%"
+          button.onClick.subscribe(() => this.close());
+        }
+        buttons.first.curvedTopLeft = true;
+        buttons.first.curvedTopRight = true;
+
+        buttons.last.curvedBottomLeft = true;
+        buttons.last.curvedBottomRight = true;
+      }
+    });
+  }
 
   @Input()
   relativeTo?: ElementRef;
 
-  toppyControl?: ToppyControl;
-  keepOpen: boolean = false;
+  @Input()
+  copyOriginWidth: boolean = false;
 
-  constructor(private changeDetector: ChangeDetectorRef, private toppy: Toppy) { }
+  overlayRef?: OverlayRef;
+  keepOpen: boolean = false;
+  keepClosed: boolean = false;
+
+  constructor(
+    private changeDetector: ChangeDetectorRef,
+    private viewContainerRef: ViewContainerRef,
+    private overlay: Overlay) { }
 
   ngOnInit(): void {
     document.addEventListener("click", this.hideDropdown, true);
@@ -27,55 +50,67 @@ export class ContextMenuComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     document.removeEventListener("click", this.hideDropdown, true);
 
-    if (this.toppyControl != null)
-      this.toppyControl.close();
-  }
-
-  ngAfterViewInit(): void {
-    setTimeout(() => {
-      if (this.buttons) {
-        for (let button of this.buttons) {
-          button.curved = false;
-          button.width = "100%"
-          button.onClick.subscribe(() => this.toppyControl?.close());
-        }
-        this.buttons.first.curvedTopLeft = true;
-        this.buttons.first.curvedTopRight = true;
-
-        this.buttons.last.curvedBottomLeft = true;
-        this.buttons.last.curvedBottomRight = true;
-      }
-    });
-
-    this.toppyControl = this.toppy
-      .position(new RelativePosition({
-        src: this.relativeTo?.nativeElement,
-        placement: OutsidePlacement.BOTTOM_RIGHT
-      }))
-      .config({
-        wrapperClass: "overflow-visible"
-      })
-      .content(this.template as TemplateRef<any>)
-      .create();
+    if (this.overlayRef != null)
+      this.close();
   }
 
   public open(): void {
-    this.toppyControl?.open();
-    this.keepOpen = true;
+    this.overlayRef = this.overlay.create({
+      positionStrategy: this.overlay
+        .position()
+        .flexibleConnectedTo(this.relativeTo as ElementRef<any>)
+        .withPush(true)
+        .withFlexibleDimensions(true)
+        .withGrowAfterOpen(true)
+        .withViewportMargin(10)
+        .withPositions([
+          {
+            originX: "end",
+            originY: "bottom",
+            overlayX: "end",
+            overlayY: "top",
+            offsetX: -10
+          }
+        ]),
+      scrollStrategy: this.overlay.scrollStrategies.reposition(),
+      minHeight: 5,
+      width: this.copyOriginWidth ? this.relativeTo?.nativeElement.offsetWidth : null
+    });
+    this.overlayRef.attach(new TemplatePortal(this.template as TemplateRef<any>, this.viewContainerRef));
 
+    this.keepOpen = true;
     setTimeout(() => this.keepOpen = false, 10);
   }
 
+  public close(): void {
+    if (this.overlayRef == null)
+      return;
+
+    this.overlayRef.dispose();
+    this.overlayRef = undefined;
+
+    this.keepClosed = true;
+    setTimeout(() => this.keepClosed = false, 10);
+  }
+
+  public toggle(): void {
+    if (this.overlayRef == null) {
+      if (!this.keepClosed)
+        this.open();
+    }
+    else
+      this.close();
+  }
+
   hideDropdown = (event: any) => {
-    if (this.toppyControl?.compRef?.instance?.wrapperEl?.firstElementChild == null)
+    if (this.overlayRef == null)
       return;
 
     if (this.keepOpen)
       return;
 
-    if (!this.toppyControl.compRef.instance.wrapperEl.firstElementChild.contains(event.target)) {
-      this.toppyControl.close();
-    }
+    if (!this.overlayRef.overlayElement.contains(event.target))
+      this.close();
   }
 
 }

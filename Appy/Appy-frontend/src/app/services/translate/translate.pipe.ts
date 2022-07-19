@@ -12,7 +12,10 @@ export class TranslatePipe implements PipeTransform {
 
     }
 
-    transform(value: string): string {
+    transform(value: string | null): string | null {
+        if (value == null)
+            return null;
+
         if (this.cachedLanguage == this.translateService.getSelectedLanguageCode() && this.cachedValue == value)
             return this.cachedTranslation as string;
 

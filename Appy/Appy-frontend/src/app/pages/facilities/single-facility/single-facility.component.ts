@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { DialogComponent } from 'src/app/components/dialog/dialog.component';
-import { Facility } from 'src/app/dtos/facility';
+import { Facility } from 'src/app/models/facility';
 import { FacilityService } from 'src/app/services/facilities/facility.service';
 
 @Component({

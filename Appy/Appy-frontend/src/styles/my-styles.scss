@@ -46,6 +46,7 @@
 
 .w-clickable {
     cursor: pointer;
+    position: relative;
     & .w-overlay:active {
         background-color: rgba(0, 0, 0, 0.1);
     }
@@ -74,7 +75,6 @@
     border: none;
     border-radius: var(--default-border-radius);
     padding: 3px 15px;
-    margin-right: 15px;
     outline: none;
     cursor: pointer;
     -webkit-touch-callout: none;
@@ -127,9 +127,21 @@
     overflow: visible !important;
 }
 
+.overflow-auto-flex-direction-column {
+    overflow: auto;
+    flex-direction: column;
+}
+
 @media (min-width: 992px) {
     .navbar-expand-lg .navbar-nav {
         align-items: center;
         gap: 10px;
     }
+}
+
+.w-title {
+    font-size: 3em;
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: bold;
 }

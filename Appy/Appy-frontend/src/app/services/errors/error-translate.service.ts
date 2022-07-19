@@ -51,8 +51,8 @@ export class ErrorTranslateService {
 
     public translate(errorCode: string) {
         if (typeof errorCode === "string")
-            return this.translateService.translate(errorCode);
+            return errorCode;
         else
-            return this.translateService.translate("UNKOWN_ERROR");
+            return "UNKOWN_ERROR";
     }
 }

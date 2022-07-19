@@ -1,0 +1,8 @@
+<app-button #buttonRef="elementRef" appElementRef width="100%" [text]="value ? formatDuration(value) : ('CHOOSE_DURATION' | translate)"
+    (onClick)="contextMenu.toggle()"></app-button>
+
+<app-context-menu #contextMenu [relativeTo]="buttonRef.elementRef" [copyOriginWidth]="true">
+    <app-button *ngFor="let duration of durations" width="100%" [text]="formatDuration(duration)"
+        (onClick)="selectDuration(duration)">
+    </app-button>
+</app-context-menu>

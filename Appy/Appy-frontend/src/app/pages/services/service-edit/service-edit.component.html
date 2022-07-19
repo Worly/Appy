@@ -1,0 +1,27 @@
+<app-loading *ngIf="service == null"></app-loading>
+<div *ngIf="service != null">
+    <div class="title" *ngIf="isNew">{{"pages.services.NEW_SERVICE" | translate}}</div>
+    <div class="title" *ngIf="!isNew">{{"pages.services.SERVICE" | translate}} - {{originalName}}</div>
+
+    <div class="input-container">
+        <div class="label">{{'NAME' | translate}}</div>
+        <input class="w-input" type="text" [style.width]="'100%'" placeholder="{{'NAME' | translate}}" [(ngModel)]="service.name">
+        <div class="validation-message">{{ service.getValidationErrors("name") | translate }}</div>
+    </div>
+    <div class="input-container">
+        <div class="label">{{'pages.services.COLOR' | translate}}</div>
+        <app-service-color-picker [(colorId)]="service.colorId"></app-service-color-picker>
+        <div class="validation-message">{{ service.getValidationErrors("colorId") | translate }}</div>
+    </div>
+    <div class="input-container">
+        <div class="label">{{'pages.services.DURATION' | translate}}</div>
+        <app-duration-picker [includeZero]="false" [numberOfChoices]="36" [(value)]="service.duration"></app-duration-picker>
+        <div class="validation-message">{{ service.getValidationErrors("duration") | translate }}</div>
+    </div>
+
+    <div class="my-buttons">
+        <app-button *ngIf="!isNew" [text]="'DELETE' | translate" icon="trash" color="danger" look="solid" [isCircle]="false" [disabled]="isLoading" [isLoading]="isLoadingDelete" (onClick)="deleteService()"></app-button>
+        <app-button class="splitter" [text]="'CANCEL' | translate" color="danger" look="normal" [disabled]="isLoading" (onClick)="cancel()"></app-button>
+        <app-button [text]="'SAVE' | translate" color="success" look="solid" [disabled]="isLoading" [isLoading]="isLoadingSave" (onClick)="save()"></app-button>
+    </div>
+</div>
