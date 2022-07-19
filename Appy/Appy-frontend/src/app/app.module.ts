@@ -29,7 +29,6 @@ import { SingleFacilityComponent } from './pages/facilities/single-facility/sing
 import { AppInitializerService } from './services/app-initializer.service';
 import { ContextMenuComponent } from './components/context-menu/context-menu.component';
 import { ButtonComponent } from './components/button/button.component';
-import { ToppyModule } from 'toppy';
 import { ElementRefDirective } from './directives/element-ref.directive';
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { fas } from '@fortawesome/free-solid-svg-icons';
@@ -85,7 +84,6 @@ import { NotifyDialogComponent } from './components/notify-dialog/notify-dialog.
     NoopAnimationsModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    ToppyModule,
     FontAwesomeModule
   ],
   providers: [
