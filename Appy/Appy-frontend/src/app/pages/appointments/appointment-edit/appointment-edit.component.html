@@ -5,7 +5,7 @@
 
     <div class="input-container">
         <div class="label">{{'pages.services.SERVICE' | translate}}</div>
-        <app-service-lookup [(value)]="appointment.service"></app-service-lookup>
+        <app-service-lookup [(value)]="appointment.service" (serviceSelected)="selectedService($event)"></app-service-lookup>
         <div class="validation-message">{{ appointment.getValidationErrors("service") | translate }}</div>
     </div>
 

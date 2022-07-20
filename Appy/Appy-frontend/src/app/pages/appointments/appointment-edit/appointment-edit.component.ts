@@ -1,9 +1,11 @@
 import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Data, ParamMap } from '@angular/router';
+import * as moment from 'moment';
 import { combineLatest, debounceTime, Observable, Subscription } from 'rxjs';
 import { NotifyDialogService } from 'src/app/components/notify-dialog/notify-dialog.service';
 import { Appointment } from 'src/app/models/appointment';
+import { ServiceDTO } from 'src/app/models/service';
 import { AppointmentService } from 'src/app/services/appointment.service.ts';
 import { TranslateService } from 'src/app/services/translate/translate.service';
 
@@ -98,6 +100,21 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
     this.location.back();
   }
 
+  public selectedService(e: { oldService?: ServiceDTO, newService: ServiceDTO }) {
+    if (this.appointment == null)
+      return;
+
+    if (this.appointment?.duration == null) {
+      this.appointment.duration = moment.duration(e.newService.duration);
+      return;
+    }
+    
+    if (e.oldService != null && this.appointment.duration.asMilliseconds() == moment.duration(e.oldService.duration).asMilliseconds()) {
+      this.appointment.duration = moment.duration(e.newService.duration);
+      return;
+    }
+  }
+
   public formatDateTime(): string {
     var result = this.translateService.translate("pages.appointments.CHOOSE_DATE_TIME");
     if (this.appointment?.date != null) {
@@ -105,16 +122,13 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
       if (this.appointment?.time != null)
         result += " - " + this.appointment.time.format("HH:mm");
     }
-    
+
     return result;
   }
 
+
   public editDateTime() {
 
-  }
-
-  public chooseService() {
-    
   }
 
 }

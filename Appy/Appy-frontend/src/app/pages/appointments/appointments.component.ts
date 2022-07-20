@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import * as moment from 'moment';
 import { Subscription } from 'rxjs';
 import { Appointment } from 'src/app/models/appointment';
@@ -21,7 +22,9 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   private subs: Subscription[] = [];
 
   constructor(
-    private appointmentService: AppointmentService
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+    private appointmentService: AppointmentService,
   ) { }
 
   ngOnInit(): void {
@@ -53,5 +56,9 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
 
   getHeight(): string {
     return (this.timeTo.diff(this.timeFrom, "hours", true) / 9) * 100 + "vh";
+  }
+
+  goToNew() {
+    this.router.navigate(["new"], { relativeTo: this.activatedRoute });
   }
 }

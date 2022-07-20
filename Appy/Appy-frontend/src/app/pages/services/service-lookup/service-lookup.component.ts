@@ -14,7 +14,7 @@ export class ServiceLookupComponent implements OnInit {
   @Input() value?: ServiceDTO;
   @Output() valueChange: EventEmitter<ServiceDTO> = new EventEmitter();
 
-  @Output() serviceSelected: EventEmitter<ServiceDTO> = new EventEmitter();
+  @Output() serviceSelected: EventEmitter<{ oldService?: ServiceDTO, newService: ServiceDTO }> = new EventEmitter();
 
   services: Service[] = [];
   filteredServices: Service[] = [];
@@ -51,9 +51,14 @@ export class ServiceLookupComponent implements OnInit {
   public selectService(service: Service) {
     let dto = service.getDTO();
 
+    let old = this.value;
+
     this.value = dto;
     this.valueChange.emit(dto);
-    this.serviceSelected.emit(dto);
+    this.serviceSelected.emit({
+      oldService: old,
+      newService: dto
+    });
   }
 
   private applyFilter() {
