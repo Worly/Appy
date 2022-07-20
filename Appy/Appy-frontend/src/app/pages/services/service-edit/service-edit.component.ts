@@ -79,10 +79,7 @@ export class ServiceEditComponent implements OnInit, OnDestroy {
 
     this.subs.push(action.subscribe({
       next: () => this.goBack(),
-      error: (e: any) => {
-        this.service?.applyServerValidationErrors(e.error.errors);
-        this.isLoadingSave = false;
-      }
+      error: (e: any) => this.isLoadingSave = false
     }));
   }
 
@@ -94,10 +91,7 @@ export class ServiceEditComponent implements OnInit, OnDestroy {
       this.isLoadingDelete = true;
       this.subs.push(this.serviceService.delete(this.service?.id as number).subscribe({
         next: () => this.goBack(),
-        error: (e: any) => {
-          this.service?.applyServerValidationErrors(e.error.errors);
-          this.isLoadingDelete = false;
-        }
+        error: (e: any) => this.isLoadingDelete = false
       }));
     }));
   }

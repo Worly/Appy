@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Injector } from "@angular/core";
-import { map, Observable, Subscriber } from "rxjs";
+import { catchError, map, Observable, Subscriber, throwError } from "rxjs";
 import { appConfig } from "../app.config";
 import { BaseModel } from "../models/base-model";
 import * as _ from "lodash";
@@ -46,24 +46,38 @@ export class BaseModelService<T extends BaseModel> implements IEntityTracker<T> 
 
     public save(entity: T): Observable<T> {
         return this.httpClient.put<any>(`${appConfig.apiUrl}${this.controllerName}/edit/${entity.getId()}`, entity.getDTO())
-            .pipe(map(s => {
-                let newEntity = new this.typeFactory(s);
+            .pipe(
+                map(s => {
+                    let newEntity = new this.typeFactory(s);
 
-                this.notifyUpdated(newEntity);
+                    this.notifyUpdated(newEntity);
 
-                return newEntity;
-            }));
+                    return newEntity;
+                }),
+                catchError(e => {
+                    if (e?.error?.errors)
+                        entity.applyServerValidationErrors(e.error.errors);
+
+                    return throwError(() => e);
+                }));
     }
 
     public addNew(entity: T): Observable<T> {
         return this.httpClient.post<any>(`${appConfig.apiUrl}${this.controllerName}/addNew`, entity.getDTO())
-            .pipe(map(s => {
-                let newEntity = new this.typeFactory(s);
+            .pipe(
+                map(s => {
+                    let newEntity = new this.typeFactory(s);
 
-                this.notifyAdded(newEntity);
+                    this.notifyAdded(newEntity);
 
-                return newEntity;
-            }));
+                    return newEntity;
+                }),
+                catchError(e => {
+                    if (e?.error?.errors)
+                        entity.applyServerValidationErrors(e.error.errors);
+
+                    return throwError(() => e);
+                }));
     }
 
     public delete(id: any): Observable<void> {
