@@ -17,14 +17,20 @@ export class ContextMenuComponent implements OnInit, OnDestroy {
       if (buttons) {
         for (let button of buttons) {
           button.curved = false;
+          button.curvedBottomLeft = false;
+          button.curvedBottomRight = false;
+          button.curvedTopLeft = false;
+          button.curvedTopRight = false;
           button.width = "100%"
           this.subs.push(button.onClick.subscribe(() => this.close()));
         }
-        buttons.first.curvedTopLeft = true;
-        buttons.first.curvedTopRight = true;
+        if (buttons.length > 0) {
+          buttons.first.curvedTopLeft = true;
+          buttons.first.curvedTopRight = true;
 
-        buttons.last.curvedBottomLeft = true;
-        buttons.last.curvedBottomRight = true;
+          buttons.last.curvedBottomLeft = true;
+          buttons.last.curvedBottomRight = true;
+        }
       }
     });
   }
