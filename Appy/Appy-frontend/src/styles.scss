@@ -1,9 +1,13 @@
 /* You can add global styles to this file, and also import other style files */
 
-@import url("https://fonts.googleapis.com/css2?family=Raleway&display=swap");
+// these are cute but numbers are not monospaced :(
+// @import url('https://fonts.googleapis.com/css2?family=Albert+Sans&display=swap');
+// @import url("https://fonts.googleapis.com/css2?family=Maven+Pro&display=swap");
+
+@import url("https://fonts.googleapis.com/css2?family=Asap&display=swap");
 * {
-  font-family: "Raleway", sans-serif !important;
-  line-height: 1.5;
+  font-family: "Asap", sans-serif !important;
+  line-height: 1.4;
 }
 
 .no-select {

@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { filter } from 'lodash';
+import * as moment from 'moment';
 import { Service, ServiceDTO } from 'src/app/models/service';
 import { ServiceColorsService } from 'src/app/services/service-colors.service';
 import { ServiceService } from 'src/app/services/service.service';
@@ -75,5 +76,9 @@ export class ServiceLookupComponent implements OnInit {
       if (service.name?.toLowerCase().includes(se))
         this.filteredServices.push(service);
     }
+  }
+
+  public formatDuration(duration: moment.Duration): string {
+    return moment.utc(duration.asMilliseconds()).format("HH:mm");
   }
 }
