@@ -24,6 +24,8 @@
             width: 100%;
             height: 100%;
             font-size: min(15vw, 15vh);
+
+            box-shadow: 1px 1px 10px -2px var(--text);
         }
     }
 }
