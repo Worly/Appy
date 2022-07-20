@@ -1,0 +1,74 @@
+:host {
+    display: grid;
+    grid-template-rows: 50px minmax(10px, 1fr);
+    position: relative;
+
+    margin-bottom: 10px;
+    
+    background-color: var(--input-background-color);
+    border-radius: var(--default-border-radius);
+    box-shadow: 0 0 4px -1px var(--text);
+}
+
+.date-container {
+    font-size: 1.3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+
+    border-bottom: 1px solid var(--text);
+
+    &.date-today {
+        background-color: var(--card-background-color);
+    }
+}
+
+.body-container {
+    position: relative;
+    width: 100%;
+}
+
+.time-background {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    table {
+        width: 100%;
+        height: 100%;
+    }
+
+    td {
+        position: relative;
+        border-top: 1px solid var(--input-border-color);
+    }
+}
+
+.hour-display {
+    position: absolute;
+    top: -4px;
+}
+
+.single-appointment {
+    position: absolute;
+    width: 100%;
+
+    border-radius: var(--default-border-radius);
+    border: 1px solid var(--input-border-color);
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+.appointment-service-name {
+    font-size: 1rem;
+}
+
+.current-time-indicator {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background-color: var(--danger);
+}

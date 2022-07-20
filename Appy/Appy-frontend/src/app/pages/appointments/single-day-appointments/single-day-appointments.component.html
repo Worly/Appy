@@ -1,0 +1,30 @@
+<div class="date-container" [ngClass]="{'date-today': data?.date?.isSame(getNowDate(), 'day')}">
+    <div>{{data?.date?.format("ddd")}}</div>
+    <div>{{data?.date?.format("D.M.YY")}}</div>
+</div>
+<div class="body-container">
+    <div class="time-background">
+        <table>
+            <tr *ngFor="let h of getHoursToRender()" [style.height]="(h.heightPercentage * 100) + '%'">
+                <td>
+                    <div class="hour-display">{{h.hour}}</div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div *ngIf="data?.appointments != null">
+        <div *ngFor="let ap of renderedAppointments" class="single-appointment" [style.top]="ap.top + '%'"
+            [style.height]="ap.height + '%'" [style.backgroundColor]="ap.color">
+            <div class="appointment-time">
+                {{ap.time}}
+            </div>
+            <div class="appointment-service-name">
+                {{ap.serviceName}}
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="data != null && data.date.isSame(getNowDate(), 'day') && currentTimeIndicatorTop >= 0 && currentTimeIndicatorTop < 100"
+        class="current-time-indicator" [style.top]="currentTimeIndicatorTop + '%'"></div>
+</div>

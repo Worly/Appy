@@ -28,10 +28,16 @@ export class BaseModelService<T extends BaseModel> implements IEntityTracker<T> 
     }
 
     public getAll(): Observable<T[]> {
+        return this.getAllAdvanced(null);
+    }
+
+    public getAllAdvanced(params: any): Observable<T[]> {
         return new Observable<T[]>(s => {
             let datasourceContext = this.createDatasourceContext(s);
 
-            this.httpClient.get<any[]>(`${appConfig.apiUrl}${this.controllerName}/getAll`).subscribe({
+            this.httpClient.get<any[]>(`${appConfig.apiUrl}${this.controllerName}/getAll`, {
+                params: params
+            }).subscribe({
                 next: (r: any[]) => datasourceContext.add(r.map(o => new this.typeFactory(o))),
                 error: (e: any) => s.error(s)
             });

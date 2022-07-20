@@ -47,7 +47,7 @@ export class Service extends BaseModel {
         let dto = new ServiceDTO();
         dto.id = this.id;
         dto.name = this.name;
-        dto.duration = moment.utc(this.duration?.asMilliseconds()).format("HH:mm:ss");
+        dto.duration = this.duration ? moment.utc(this.duration.asMilliseconds()).format("HH:mm:ss") : undefined;
         dto.colorId = this.colorId;
         
         return dto;

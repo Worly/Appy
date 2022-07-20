@@ -24,18 +24,5 @@ namespace Appy.Domain
                 ColorId = ColorId
             };
         }
-
-        public static void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Service>()
-                .HasKey(x => new { x.Id, x.FacilityId });
-
-            modelBuilder.Entity<Service>()
-                .Property(s => s.Id).ValueGeneratedOnAdd();
-
-            modelBuilder.Entity<Service>()
-                .HasIndex(s => new { s.FacilityId, s.Name })
-                .IsUnique(true);
-        }
     }
 }

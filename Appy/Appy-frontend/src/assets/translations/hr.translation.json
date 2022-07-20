@@ -74,6 +74,10 @@
                 "MISSING_DURATION": "Molim odaberite trajanje",
                 "NAME_TAKEN": "Usluga s tim imenom već postoji"
             }
+        },
+
+        "appointments": {
+            "APPOINTMENTS": "Termini"
         }
     }
 }

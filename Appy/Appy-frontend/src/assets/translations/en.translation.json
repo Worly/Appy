@@ -74,6 +74,10 @@
                 "MISSING_DURATION": "Please choose a duration",
                 "NAME_TAKEN": "Service with that name already exists"
             }
+        },
+
+        "appointments": {
+            "APPOINTMENTS": "Appointments"
         }
     }
 }

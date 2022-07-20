@@ -8,6 +8,7 @@ namespace Appy.Domain
         public DbSet<User> Users { get; set; }
         public DbSet<Facility> Facilities { get; set; }
         public DbSet<Service> Services { get; set; }
+        public DbSet<Appointment> Appointments { get; set; }
 
         public MainDbContext(DbContextOptions<MainDbContext> options) : base(options)
         {
@@ -24,7 +25,6 @@ namespace Appy.Domain
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            Service.OnModelCreating(modelBuilder);
         }
 
         public void UpdateDatabase()

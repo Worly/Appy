@@ -44,6 +44,8 @@ import { ServiceColorPickerComponent } from './pages/services/service-edit/servi
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DurationPickerComponent } from './components/duration-picker/duration-picker.component';
 import { NotifyDialogComponent } from './components/notify-dialog/notify-dialog.component';
+import { AppointmentsComponent } from './pages/appointments/appointments.component';
+import { SingleDayAppointmentsComponent } from './pages/appointments/single-day-appointments/single-day-appointments.component';
 
 
 
@@ -72,7 +74,9 @@ import { NotifyDialogComponent } from './components/notify-dialog/notify-dialog.
     ServiceEditComponent,
     ServiceColorPickerComponent,
     DurationPickerComponent,
-    NotifyDialogComponent
+    NotifyDialogComponent,
+    AppointmentsComponent,
+    SingleDayAppointmentsComponent
   ],
   imports: [
     BrowserModule,

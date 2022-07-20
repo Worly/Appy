@@ -1,5 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
+import * as moment from "moment";
 import { Observable } from "rxjs";
 
 @Injectable({
@@ -28,6 +29,7 @@ export class TranslateService {
                     next: (t: Translations) => {
                         this.translations = t;
                         this.selectedLanguage = languageCode;
+                        moment.locale(this.selectedLanguage);
                         s.next();
                     },
                     error: (e: any) => {

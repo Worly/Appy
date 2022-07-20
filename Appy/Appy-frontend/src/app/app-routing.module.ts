@@ -9,6 +9,7 @@ import { LoggedInGuard, NotLoggedInGuard } from './services/auth/auth.guard';
 import { SelectedFacilityGuard } from './services/facilities/facility.guard';
 import { ServicesComponent } from './pages/services/services.component';
 import { ServiceEditComponent } from './pages/services/service-edit/service-edit.component';
+import { AppointmentsComponent } from './pages/appointments/appointments.component';
 
 const routes: Routes = [
   { path: "login", component: LoginComponent, canActivate: [NotLoggedInGuard] },
@@ -28,6 +29,8 @@ const routes: Routes = [
     component: FacilitiesComponent,
     canActivate: [LoggedInGuard]
   },
+
+  // #region SERVICES
   {
     path: "services",
     component: ServicesComponent,
@@ -46,6 +49,17 @@ const routes: Routes = [
     canActivate: [LoggedInGuard],
     data: { isNew: true, detachGroup: "services" }
   },
+  // #endregion
+
+  // #region APPOINTMENTS
+  {
+    path: "appointments",
+    component: AppointmentsComponent,
+    canActivate: [LoggedInGuard],
+    data: { shouldDetach: true, detachGroup: "appointments" }
+  },
+  // #endregion
+  
   { path: "**", redirectTo: "/home" }
 ];
 
