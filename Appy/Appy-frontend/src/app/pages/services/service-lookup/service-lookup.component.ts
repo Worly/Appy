@@ -17,7 +17,7 @@ export class ServiceLookupComponent implements OnInit {
 
   @Output() serviceSelected: EventEmitter<{ oldService?: ServiceDTO, newService: ServiceDTO }> = new EventEmitter();
 
-  services: Service[] = [];
+  services?: Service[];
   filteredServices: Service[] = [];
 
   private _search: string = "";
@@ -63,6 +63,11 @@ export class ServiceLookupComponent implements OnInit {
   }
 
   private applyFilter() {
+    if (this.services == null) {
+      this.filteredServices = [];
+      return;
+    }
+
     if (this.search == null || this.search.trim() == "") {
       this.filteredServices = this.services;
       return;

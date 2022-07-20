@@ -7,6 +7,9 @@
     <input #searchInput class="w-input search-input" type="text" placeholder="{{'SEARCH' | translate}}"
         [(ngModel)]="search">
 
+    <div *ngIf="services == null" style="height: 200px;">
+        <app-loading></app-loading>
+    </div>
     <app-button *ngFor="let service of filteredServices" width="100%" [text]="service.name ?? ''" look="custom"
         [customColor]="serviceColorsService.get(service.colorId)" (onClick)="selectService(service)">
         <div style="margin-left: auto;">[{{service.duration && formatDuration(service.duration)}}]</div>

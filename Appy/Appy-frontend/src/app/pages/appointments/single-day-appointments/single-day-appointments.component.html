@@ -28,3 +28,5 @@
     <div *ngIf="data != null && data.date.isSame(getNowDate(), 'day') && currentTimeIndicatorTop >= 0 && currentTimeIndicatorTop < 100"
         class="current-time-indicator" [style.top]="currentTimeIndicatorTop + '%'"></div>
 </div>
+
+<app-loading *ngIf="data == null"></app-loading>
