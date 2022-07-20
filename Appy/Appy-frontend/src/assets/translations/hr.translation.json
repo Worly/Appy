@@ -14,6 +14,7 @@
     "CHOOSE_DURATION": "Odaberi trajanje",
     "YES": "Da",
     "NO": "Ne",
+    "SEARCH": "Traži",
 
     "pages": {
         "error": {
@@ -67,6 +68,7 @@
             "NEW_SERVICE": "Nova usluga",
             "CHOOSE_COLOR": "Odaberi boju",
             "DELETE_PROMPT": "Jeste li sigurni da želite obrisati ovu uslugu?",
+            "CHOOSE_SERVICE": "Odaberi uslugu",
 
             "errors": {
                 "MISSING_NAME": "Molim upišite naziv",
@@ -77,7 +79,20 @@
         },
 
         "appointments": {
-            "APPOINTMENTS": "Termini"
+            "APPOINTMENTS": "Termini",
+            "APPOINTMENT": "Termin",
+            "NEW_APPOINTMENT": "Novi termin",
+            "DELETE_PROMPT": "Jeste li sigurni da želite obrisati ovaj termin?",
+            "DATE_TIME": "Datum-vrijeme",
+            "DURATION": "Trajanje",
+            "CHOOSE_DATE_TIME": "Odaberi datum-vrijeme",
+            
+            "errors": {
+                "MISSING_SERVICE": "Molim odaberite uslugu",
+                "MISSING_DURATION": "Molim odaberite trajanje",
+                "MISSING_DATE": "Molim odaberite datum",
+                "MISSING_TIME": "Molim odaberite vrijeme"
+            }
         }
     }
 }

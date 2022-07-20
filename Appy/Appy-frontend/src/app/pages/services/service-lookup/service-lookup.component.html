@@ -1,0 +1,10 @@
+<app-button #buttonRef="elementRef" appElementRef width="100%"
+    [text]="value && value.name ? value.name : ('pages.services.CHOOSE_SERVICE' | translate)" look="custom"
+    [customColor]="serviceColorsService.get(value?.colorId)" (onClick)="contextMenu.toggle(); search = ''; searchInput.focus()"></app-button>
+
+<app-context-menu #contextMenu [relativeTo]="buttonRef.elementRef" [copyOriginWidth]="true">
+    <input #searchInput class="w-input search-input" type="text" placeholder="{{'SEARCH' | translate}}" [(ngModel)]="search">
+
+    <app-button *ngFor="let service of filteredServices" width="100%" [text]="service.name ?? ''" look="custom"
+        [customColor]="serviceColorsService.get(service.colorId)" (onClick)="selectService(service)"></app-button>
+</app-context-menu>

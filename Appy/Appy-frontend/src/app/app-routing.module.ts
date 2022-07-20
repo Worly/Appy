@@ -10,6 +10,7 @@ import { SelectedFacilityGuard } from './services/facilities/facility.guard';
 import { ServicesComponent } from './pages/services/services.component';
 import { ServiceEditComponent } from './pages/services/service-edit/service-edit.component';
 import { AppointmentsComponent } from './pages/appointments/appointments.component';
+import { AppointmentEditComponent } from './pages/appointments/appointment-edit/appointment-edit.component';
 
 const routes: Routes = [
   { path: "login", component: LoginComponent, canActivate: [NotLoggedInGuard] },
@@ -57,6 +58,18 @@ const routes: Routes = [
     component: AppointmentsComponent,
     canActivate: [LoggedInGuard],
     data: { shouldDetach: true, detachGroup: "appointments" }
+  },
+  {
+    path: "appointments/edit/:id",
+    component: AppointmentEditComponent,
+    canActivate: [LoggedInGuard],
+    data: { detachGroup: "appointments" }
+  },
+  {
+    path: "appointments/new",
+    component: AppointmentEditComponent,
+    canActivate: [LoggedInGuard],
+    data: { isNew: true, detachGroup: "appointments" }
   },
   // #endregion
   

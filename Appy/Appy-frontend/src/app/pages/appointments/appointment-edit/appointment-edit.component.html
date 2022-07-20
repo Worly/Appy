@@ -1,0 +1,34 @@
+<app-loading *ngIf="appointment == null"></app-loading>
+<div *ngIf="appointment != null">
+    <div class="title" *ngIf="isNew">{{"pages.appointments.NEW_APPOINTMENT" | translate}}</div>
+    <div class="title" *ngIf="!isNew">{{"pages.appointments.APPOINTMENT" | translate}}</div>
+
+    <div class="input-container">
+        <div class="label">{{'pages.services.SERVICE' | translate}}</div>
+        <app-service-lookup [(value)]="appointment.service"></app-service-lookup>
+        <div class="validation-message">{{ appointment.getValidationErrors("service") | translate }}</div>
+    </div>
+
+    <div class="input-container">
+        <div class="label">{{'pages.appointments.DURATION' | translate}}</div>
+        <app-duration-picker [includeZero]="false" [numberOfChoices]="36" [(value)]="appointment.duration"></app-duration-picker>
+        <div class="validation-message">{{ appointment.getValidationErrors("duration") | translate }}</div>
+    </div>
+    
+    <div class="input-container">
+        <div class="label">{{'pages.appointments.DATE_TIME' | translate}}</div>
+        <app-button width="100%" [text]="formatDateTime()" (onClick)="editDateTime()"></app-button>
+        <div class="validation-message">{{ appointment.getValidationErrors("date") | translate }}</div>
+        <div class="validation-message">{{ appointment.getValidationErrors("time") | translate }}</div>
+    </div>
+
+    <div class="my-buttons">
+        <app-button *ngIf="!isNew" [text]="'DELETE' | translate" icon="trash" color="danger" look="solid"
+            [isCircle]="false" [disabled]="isLoading" [isLoading]="isLoadingDelete" (onClick)="deleteAppointment()">
+        </app-button>
+        <app-button class="splitter" [text]="'CANCEL' | translate" color="danger" look="normal" [disabled]="isLoading"
+            (onClick)="cancel()"></app-button>
+        <app-button [text]="'SAVE' | translate" color="success" look="solid" [disabled]="isLoading"
+            [isLoading]="isLoadingSave" (onClick)="save()"></app-button>
+    </div>
+</div>
