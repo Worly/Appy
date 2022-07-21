@@ -10,4 +10,10 @@
 
         public ServiceDTO Service { get; set; }
     }
+
+    public class FreeTimeDTO
+    {
+        public TimeOnly From { get; set; }
+        public TimeOnly To { get; set; }
+    }
 }

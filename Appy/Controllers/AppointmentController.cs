@@ -12,10 +12,12 @@ namespace Appy.Controllers
     public class AppointmentController : ControllerBase
     {
         private IAppointmentService appointmentService;
+        private IServiceService serviceService;
 
-        public AppointmentController(IAppointmentService appointmentService)
+        public AppointmentController(IAppointmentService appointmentService, IServiceService serviceService)
         {
             this.appointmentService = appointmentService;
+            this.serviceService = serviceService;
         }
 
         [HttpGet("getAll")]
@@ -59,6 +61,19 @@ namespace Appy.Controllers
         public void Delete(int id)
         {
             this.appointmentService.Delete(id, HttpContext.SelectedFacility());
+        }
+
+        [HttpGet("getFreeTimes")]
+        [Authorize]
+        public ActionResult<List<FreeTimeDTO>> GetFreeTimes([FromQuery] DateOnly date, [FromQuery] int serviceId, [FromQuery] TimeSpan duration, [FromQuery] int? ignoreAppointmentId)
+        {
+            var service = this.serviceService.GetById(serviceId, HttpContext.SelectedFacility());
+            var appointmentsOfTheDay = this.appointmentService.GetAll(date, HttpContext.SelectedFacility());
+
+            if (ignoreAppointmentId.HasValue)
+                appointmentsOfTheDay = appointmentsOfTheDay.Where(o => o.Id != ignoreAppointmentId).ToList();
+
+            return this.appointmentService.GetFreeTimes(appointmentsOfTheDay, service, duration);
         }
     }
 }

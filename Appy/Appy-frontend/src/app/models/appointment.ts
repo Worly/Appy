@@ -11,6 +11,21 @@ export class AppointmentDTO {
     public service?: ServiceDTO;
 }
 
+export class FreeTimeDTO {
+    public from: string = "";
+    public to: string = "";
+}
+
+export class FreeTime {
+    public from: moment.Moment;
+    public to: moment.Moment;
+
+    constructor(dto: FreeTimeDTO) {
+        this.from = moment(dto.from, "HH:mm:ss");
+        this.to = moment(dto.to, "HH:mm:ss");
+    }
+}
+
 export class Appointment extends BaseModel {
     public id: number;
     public date?: moment.Moment;
