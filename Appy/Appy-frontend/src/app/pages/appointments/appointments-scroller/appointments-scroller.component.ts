@@ -105,6 +105,10 @@ export class AppointmentsScrollerComponent implements OnInit {
   getHeight(): string {
     return (this.timeTo.diff(this.timeFrom, "hours", true) / 9) * 100 + "vh";
   }
+
+  onlyVisibleDataFilter(data: DayData): boolean {
+    return data.show == true;
+  }
 }
 
 type DayData = {

@@ -49,13 +49,13 @@ import { SingleDayAppointmentsComponent } from './pages/appointments/single-day-
 import { AppointmentEditComponent } from './pages/appointments/appointment-edit/appointment-edit.component';
 import { ServiceLookupComponent } from './pages/services/service-lookup/service-lookup.component';
 import { AppointmentsScrollerComponent } from './pages/appointments/appointments-scroller/appointments-scroller.component';
-
-
+import { FilterPipe } from './pipes/filter.pipe';
 
 @NgModule({
   declarations: [
     AppComponent,
     TranslatePipe,
+    FilterPipe,
     LoginComponent,
     RegisterComponent,
     FacilitiesComponent,
