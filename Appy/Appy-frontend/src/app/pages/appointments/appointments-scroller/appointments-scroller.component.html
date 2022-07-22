@@ -1,0 +1,7 @@
+<app-button icon="angle-left" (onClick)="date = date.clone().add({days: -1})"></app-button>
+<app-button icon="angle-right" (onClick)="date = date.clone().add({days: 1})"></app-button>
+<div class="my-container">
+    <app-single-day-appointments *ngFor="let data of daysData" [ngClass]="{ 'day-hidden': data.show != true }"
+        [date]="data.date" [appointments]="data.appointments" [timeFrom]="timeFrom" [timeTo]="timeTo" [style.height]="getHeight()">
+    </app-single-day-appointments>
+</div>

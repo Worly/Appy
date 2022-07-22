@@ -1,0 +1,9 @@
+.my-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(1px, 1fr));
+    gap: 10px;
+}
+
+.day-hidden {
+    display: none;
+}

@@ -36,7 +36,7 @@ export abstract class BaseModel {
         this.validateProperty(propertyName);
     }
 
-    private validateProperty(propertyName: string) {
+    public validateProperty(propertyName: string) {
         this[brokenValidationsSymbol][propertyName] = [];
 
         for (let validation of this.validations) {

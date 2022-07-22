@@ -1,8 +1,5 @@
-<div class="my-container">
-    <app-single-day-appointments [data]="data" [timeFrom]="timeFrom" [timeTo]="timeTo" [style.height]="getHeight()">
-    </app-single-day-appointments>
-    <app-single-day-appointments [data]="data2" [timeFrom]="timeFrom" [timeTo]="timeTo" [style.height]="getHeight()">
-    </app-single-day-appointments>
+<div class="appointments-container">
+    <app-appointments-scroller [daysToShow]="3"></app-appointments-scroller>
 </div>
 
 <app-button class="add-button" icon="plus" color="success" look="solid" borderStyle="dashed" alignContent="center"

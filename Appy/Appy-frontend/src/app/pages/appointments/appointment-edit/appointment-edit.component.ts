@@ -108,7 +108,7 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
       this.appointment.duration = moment.duration(e.newService.duration);
       return;
     }
-    
+
     if (e.oldService != null && this.appointment.duration.asMilliseconds() == moment.duration(e.oldService.duration).asMilliseconds()) {
       this.appointment.duration = moment.duration(e.newService.duration);
       return;
@@ -128,7 +128,22 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
 
 
   public editDateTime() {
+    if (this.appointment?.service == null) {
+      this.appointment?.validateProperty("service");
+      return;
+    }
 
+    if (this.appointment?.duration == null) {
+      this.appointment.validateProperty("duration");
+      return;
+    }
+
+    var ignoreAppointmentId = undefined;
+    if (!this.isNew)
+      ignoreAppointmentId = this.appointment.id;
+
+    this.subs.push(this.appointmentService.getFreeTimes(moment(), this.appointment.service.id, this.appointment.duration, ignoreAppointmentId)
+      .subscribe(f => console.log(f)));
   }
 
 }

@@ -12,16 +12,27 @@ import { ServiceColorsService } from 'src/app/services/service-colors.service';
 })
 export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
 
-  private _data?: SingleDayAppointmentsData;
-  @Input() set data(value: SingleDayAppointmentsData | undefined) {
-    if (this._data == value)
+  private _appointments: Appointment[] | null = null;
+  @Input() set appointments(value: Appointment[] | null) {
+    if (this._appointments == value)
       return;
 
-    this._data = value;
+    this._appointments = value;
     this.render();
   }
-  public get data(): SingleDayAppointmentsData | undefined {
-    return this._data;
+  public get appointments(): Appointment[] | null {
+    return this._appointments;
+  }
+
+  private _date: moment.Moment | null = null;
+  @Input() set date(value: moment.Moment | null) {
+    if (this._date == value)
+      return;
+
+    this._date = value;
+  }
+  public get date(): moment.Moment | null {
+    return this._date;
   }
 
   private _timeFrom: moment.Moment = moment({ hours: 0 });
@@ -71,8 +82,8 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
     this.renderCurrentTimeIndicator();
 
     this.renderedAppointments = [];
-    if (this.data?.appointments) {
-      for (let ap of this.data?.appointments) {
+    if (this.appointments) {
+      for (let ap of this.appointments) {
         if (ap.time == null || ap.duration == null || ap.service == null)
           return;
 
@@ -127,11 +138,6 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
   public getNowDate(): moment.Moment {
     return moment();
   }
-}
-
-export type SingleDayAppointmentsData = {
-  date: moment.Moment;
-  appointments: Appointment[];
 }
 
 type RenderedAppointment = {

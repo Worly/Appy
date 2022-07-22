@@ -3,11 +3,7 @@
     display: block;
 }
 
-.my-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-
+.appointments-container {
     padding-bottom: calc(min(20vw, 20vh) + 10px);
 }
 

@@ -91,7 +91,8 @@
                 "MISSING_SERVICE": "Molim odaberite uslugu",
                 "MISSING_DURATION": "Molim odaberite trajanje",
                 "MISSING_DATE": "Molim odaberite datum",
-                "MISSING_TIME": "Molim odaberite vrijeme"
+                "MISSING_TIME": "Molim odaberite vrijeme",
+                "TIME_TAKEN": "Odabrano vrijeme je već zauzeto drugim terminom"
             }
         }
     }

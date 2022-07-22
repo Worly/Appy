@@ -91,7 +91,8 @@
                 "MISSING_SERVICE": "Please choose a service",
                 "MISSING_DURATION": "Please choose a duration",
                 "MISSING_DATE": "Please choose a date",
-                "MISSING_TIME": "Please choose a time"
+                "MISSING_TIME": "Please choose a time",
+                "TIME_TAKEN": "Selected time is already taken by another appointment"
             }
         }
     }

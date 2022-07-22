@@ -48,6 +48,7 @@ import { AppointmentsComponent } from './pages/appointments/appointments.compone
 import { SingleDayAppointmentsComponent } from './pages/appointments/single-day-appointments/single-day-appointments.component';
 import { AppointmentEditComponent } from './pages/appointments/appointment-edit/appointment-edit.component';
 import { ServiceLookupComponent } from './pages/services/service-lookup/service-lookup.component';
+import { AppointmentsScrollerComponent } from './pages/appointments/appointments-scroller/appointments-scroller.component';
 
 
 
@@ -80,7 +81,8 @@ import { ServiceLookupComponent } from './pages/services/service-lookup/service-
     AppointmentsComponent,
     SingleDayAppointmentsComponent,
     AppointmentEditComponent,
-    ServiceLookupComponent
+    ServiceLookupComponent,
+    AppointmentsScrollerComponent
   ],
   imports: [
     BrowserModule,
