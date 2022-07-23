@@ -11,32 +11,8 @@
     padding: 20px;
 }
 
-.title {
-    text-align: center;
-    font-size: 2.2rem;
-    font-weight: bold;
-    margin-bottom: 20px;
-}
-
-.input-container {
-    margin-bottom: 15px;
-}
-
-.label {
-    font-size: 1.4rem;
-    font-weight: bold;
-    margin-left: 5px;
-}
-
 input {
     width: 100%;
-}
-
-.validation-message {
-    color: red;
-    font-size: 1rem;
-    margin-left: 2px;
-    margin-top: 1px;
 }
 
 .login {

@@ -81,6 +81,13 @@ export class ContextMenuComponent implements OnInit, OnDestroy {
             overlayX: "end",
             overlayY: "top",
             offsetX: -10
+          },
+          {
+            originX: "end",
+            originY: "top",
+            overlayX: "end",
+            overlayY: "bottom",
+            offsetX: -10
           }
         ]),
       scrollStrategy: this.overlay.scrollStrategies.reposition(),

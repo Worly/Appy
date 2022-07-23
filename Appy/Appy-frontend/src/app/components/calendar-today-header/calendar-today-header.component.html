@@ -2,9 +2,11 @@
     <app-button [text]="periodLabel" (onClick)="periodLabelClick()" look="transparent" alignContent="center">
     </app-button>
 
-    <app-button text="{{'TODAY' | translate}}" look="transparent" alignContent="center" (onClick)="todayClick($event)"></app-button>
+    <app-button [ngClass]="{'bold-button': isTodaySelected()}" [style.marginLeft]="'auto'"
+        text="{{'TODAY' | translate}}" look="transparent" alignContent="center" (onClick)="todayClick($event)">
+    </app-button>
 
-    <div [style.marginLeft]="'auto'">
+    <div>
         <app-button class="arrow-button" icon="angle-left" look="transparent" alignContent="center" [isCircle]="false"
             (onClick)="previousClick()"></app-button>
         <app-button class="arrow-button" icon="angle-right" look="transparent" alignContent="center" [isCircle]="false"

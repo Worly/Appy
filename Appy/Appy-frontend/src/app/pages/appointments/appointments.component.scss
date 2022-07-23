@@ -22,6 +22,7 @@
 
 .button-group {
     display: flex;
+    border-radius: var(--default-border-radius);
 }
 
 :host::ng-deep {

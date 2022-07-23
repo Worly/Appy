@@ -1,12 +1,12 @@
 <app-dialog>
-    <div *ngIf="isNew" class="title">{{'pages.facilities.NEW_FACILITY' | translate}}</div>
-    <div *ngIf="!isNew" class="title">{{'pages.facilities.EDIT_FACILITY' | translate}} - {{facility?.name}}</div>
+    <div *ngIf="isNew" class="w-title">{{'pages.facilities.NEW_FACILITY' | translate}}</div>
+    <div *ngIf="!isNew" class="w-title">{{'pages.facilities.EDIT_FACILITY' | translate}} - {{facility?.name}}</div>
 
-    <div class="input-container">
-        <div class="label">{{isNew ? ("NAME" | translate) : ("NEW_NAME" | translate)}}</div>
+    <div class="w-input-container">
+        <div class="w-label">{{isNew ? ("NAME" | translate) : ("NEW_NAME" | translate)}}</div>
         <input class="w-input" type="text" [placeholder]="isNew ? ('NAME' | translate) : ('NEW_NAME' | translate)" [(ngModel)]="name">
-        <div class="validation-message">{{ validationErrors['name'] | translate }}</div>
-        <div class="validation-message">{{ validationErrors['other'] | translate }}</div>
+        <div class="w-validation-message">{{ validationErrors['name'] | translate }}</div>
+        <div class="w-validation-message">{{ validationErrors['other'] | translate }}</div>
     </div>
 
     <app-button [isLoading]="isLoading" [disabled]="isLoading" text="{{'SAVE' | translate}}" look="solid" color="success"

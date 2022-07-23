@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { DateAdapter, MatDateFormats, MAT_DATE_FORMATS } from '@angular/material/core';
-import { MatCalendar } from '@angular/material/datepicker';
+import { DateRange, MatCalendar } from '@angular/material/datepicker';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -67,5 +67,12 @@ export class CalendarTodayHeaderComponent<D> implements OnDestroy {
       this._calendar.activeDate = this._dateAdapter.addCalendarMonths(this._calendar.activeDate, 1);
     else if (this._calendar.currentView == "year")
       this._calendar.activeDate = this._dateAdapter.addCalendarYears(this._calendar.activeDate, 1);
+  }
+
+  isTodaySelected(): boolean {
+    if (this._calendar.selected == null || this._calendar.selected instanceof DateRange)
+      return false;
+
+    return this._dateAdapter.sameDate(this._calendar.selected, this._dateAdapter.today());
   }
 }

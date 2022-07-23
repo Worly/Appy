@@ -11,7 +11,7 @@
     tabindex="0">
 
     <fa-icon *ngIf="isLoading || icon != null" class="my-icon"
-        [icon]="[iconPrefix, isLoading ? loadingIcon : $any(icon)]" [fixedWidth]="true" [style.font-size]="'0.8em'"
+        [icon]="[iconPrefix, isLoading ? loadingIcon : $any(icon)]" [fixedWidth]="true"
         [spin]="spinIcon || isLoading"></fa-icon>
     {{text}}
     <ng-content></ng-content>

@@ -1,36 +1,36 @@
 <div [style.height]="height + 'px'" class="my-wrapper">
     <div class="w-card my-container" (keypress)="keypress($event)">
-        <div class="title">{{'WELCOME' | translate}}!</div>
+        <div class="w-title">{{'WELCOME' | translate}}!</div>
 
-        <div class="input-container">
-            <div class="label">{{'EMAIL' | translate}}</div>
+        <div class="w-input-container">
+            <div class="w-label">{{'EMAIL' | translate}}</div>
             <input class="w-input" type="text" placeholder="{{'EMAIL' | translate}}" [(ngModel)]="email">
-            <div class="validation-message">{{ validationErrors['email'] | translate }}</div>
+            <div class="w-validation-message">{{ validationErrors['email'] | translate }}</div>
         </div>
 
-        <div class="input-container">
-            <div class="label">{{'pages.login-register.NAME' | translate}}</div>
+        <div class="w-input-container">
+            <div class="w-label">{{'pages.login-register.NAME' | translate}}</div>
             <input class="w-input" type="text" placeholder="{{'pages.login-register.NAME' | translate}}" [(ngModel)]="name">
-            <div class="validation-message">{{ validationErrors['name'] | translate }}</div>
+            <div class="w-validation-message">{{ validationErrors['name'] | translate }}</div>
         </div>
 
-        <div class="input-container">
-            <div class="label">{{'pages.login-register.SURNAME' | translate}}</div>
+        <div class="w-input-container">
+            <div class="w-label">{{'pages.login-register.SURNAME' | translate}}</div>
             <input class="w-input" type="text" placeholder="{{'pages.login-register.SURNAME' | translate}}" [(ngModel)]="surname">
-            <div class="validation-message">{{ validationErrors['surname'] | translate }}</div>
+            <div class="w-validation-message">{{ validationErrors['surname'] | translate }}</div>
         </div>
 
-        <div class="input-container">
-            <div class="label">{{'pages.login-register.PASSWORD' | translate}}</div>
+        <div class="w-input-container">
+            <div class="w-label">{{'pages.login-register.PASSWORD' | translate}}</div>
             <input class="w-input" type="password" placeholder="{{'pages.login-register.PASSWORD' | translate}}" [(ngModel)]="password">
-            <div class="validation-message">{{ validationErrors['password'] | translate }}</div>
+            <div class="w-validation-message">{{ validationErrors['password'] | translate }}</div>
         </div>
 
-        <div class="input-container">
-            <div class="label">{{'pages.login-register.REPEAT_PASSWORD' | translate}}</div>
+        <div class="w-input-container">
+            <div class="w-label">{{'pages.login-register.REPEAT_PASSWORD' | translate}}</div>
             <input class="w-input" type="password" placeholder="{{'pages.login-register.REPEAT_PASSWORD' | translate}}" [(ngModel)]="repeatPassword">
-            <div class="validation-message">{{ validationErrors['repeatPassword'] | translate }}</div>
-            <div class="validation-message">{{ validationErrors['other'] | translate }}</div>
+            <div class="w-validation-message">{{ validationErrors['repeatPassword'] | translate }}</div>
+            <div class="w-validation-message">{{ validationErrors['other'] | translate }}</div>
         </div>
 
         <app-button text="{{'pages.login-register.REGISTER' | translate}}" color="success" look="solid" width="100%" alignContent="center" [disabled]="isLoading"
