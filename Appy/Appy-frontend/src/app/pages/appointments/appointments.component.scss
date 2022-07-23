@@ -4,24 +4,58 @@
 }
 
 .appointments-container {
-    padding-bottom: calc(min(20vw, 20vh) + 10px);
+    padding-bottom: calc(min(15vw, 15vh) + 10px);
+}
+
+.floating-action-bar {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    left: 10px;
+
+    height: min(15vw, 15vh);
+    display: flex;
+    justify-content: flex-end;
+
+    gap: 10px;
+}
+
+.button-group {
+    display: flex;
 }
 
 :host::ng-deep {
-    .add-button {
-        position: fixed;
-        bottom: 10px;
-        right: 10px;
-
-        width: min(20vw, 20vh);
-        height: min(20vw, 20vh);
-
-        .my-button {
-            width: 100%;
+    .floating-action-bar {
+        div {
             height: 100%;
-            font-size: min(15vw, 15vh);
+        }
 
+        div.button-shadow,
+        app-button.button-shadow > .my-button {
             box-shadow: 1px 1px 10px -2px var(--text);
         }
+
+        app-button {
+            width: min(15vw, 15vh);
+            height: 100%;
+
+            .my-button {
+                width: 100%;
+                height: 100%;
+                font-size: min(10vw, 10vh);
+            }
+        }
+
+        app-button.date-button {
+            width: min-content;
+            .my-button {
+                font-size: 1rem;
+            }
+        }
     }
+}
+
+.my-calendar {
+    width: min(80vw, 80vh);
+    height: min(80vw, 80vh);
 }

@@ -68,8 +68,6 @@ export class AppointmentsScrollerComponent implements OnInit {
       var current = beginDate.clone();
 
       while (current.isSameOrBefore(endDate, "date")) {
-        console.log("Doing for", current.format());
-
         let data = this.daysData.find(d => d.date.isSame(current, "date"));
 
         if (data == null) {

@@ -1,0 +1,18 @@
+.calendar-header {
+    display: grid;
+    grid-template-columns: 1fr 0.8fr 0.5fr;
+    align-items: center;
+    padding: 0.5em;
+}
+
+:host::ng-deep {
+    .arrow-button {
+        width: 2.5em;
+        height: 3em;
+    
+        .my-button {
+            width: 100%;
+            height: 100%;
+        }
+    }
+}

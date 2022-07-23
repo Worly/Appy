@@ -1,5 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
+import { DateAdapter } from "@angular/material/core";
 import * as moment from "moment";
 import { Observable } from "rxjs";
 
@@ -11,7 +12,7 @@ export class TranslateService {
 
     private selectedLanguage: string = "en";
 
-    constructor(private http: HttpClient) { }
+    constructor(private http: HttpClient, private dateAdapter: DateAdapter<any>) { }
 
     public loadLanguage(): Observable<void> {
 
@@ -30,6 +31,7 @@ export class TranslateService {
                         this.translations = t;
                         this.selectedLanguage = languageCode;
                         moment.locale(this.selectedLanguage);
+                        this.dateAdapter.setLocale(this.selectedLanguage);
                         s.next();
                     },
                     error: (e: any) => {

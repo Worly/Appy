@@ -16,8 +16,7 @@ import { AttachDetachHooksService } from './services/attach-detach-hooks.service
 import { InvokeDirective } from './directives/invoke-directive/invoke.directive';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { DateAdapter, MatNativeDateModule } from '@angular/material/core';
-import { CustomDateAdapter } from './services/custom-date-adapter';
+import { MatNativeDateModule } from '@angular/material/core';
 import { AuthHttpInterceptor } from './services/auth/auth-http-interceptor.service';
 import { LoginComponent } from './pages/login/login.component';
 import { ErrorTranslateInterceptor } from './services/errors/error-translate.service';
@@ -50,6 +49,9 @@ import { AppointmentEditComponent } from './pages/appointments/appointment-edit/
 import { ServiceLookupComponent } from './pages/services/service-lookup/service-lookup.component';
 import { AppointmentsScrollerComponent } from './pages/appointments/appointments-scroller/appointments-scroller.component';
 import { FilterPipe } from './pipes/filter.pipe';
+import { MatMomentDateModule } from '@angular/material-moment-adapter';
+import { MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular/material-moment-adapter';
+import { CalendarTodayHeaderComponent } from './components/calendar-today-header/calendar-today-header.component';
 
 @NgModule({
   declarations: [
@@ -82,7 +84,8 @@ import { FilterPipe } from './pipes/filter.pipe';
     SingleDayAppointmentsComponent,
     AppointmentEditComponent,
     ServiceLookupComponent,
-    AppointmentsScrollerComponent
+    AppointmentsScrollerComponent,
+    CalendarTodayHeaderComponent
   ],
   imports: [
     BrowserModule,
@@ -94,7 +97,8 @@ import { FilterPipe } from './pipes/filter.pipe';
     NoopAnimationsModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    FontAwesomeModule
+    FontAwesomeModule,
+    MatMomentDateModule
   ],
   providers: [
     { provide: RouteReuseStrategy, useClass: CustomReuseStrategy },
@@ -105,8 +109,8 @@ import { FilterPipe } from './pipes/filter.pipe';
         },
       deps: [Router, RouteReuseStrategy], multi: true
     },
-    { provide: DateAdapter, useClass: CustomDateAdapter },
     { provide: APP_INITIALIZER, useFactory: appInitializerFactory, deps: [AppInitializerService], multi: true },
+    { provide: MAT_MOMENT_DATE_ADAPTER_OPTIONS, useValue: { useUtc: true } },
     { provide: HTTP_INTERCEPTORS, useClass: AuthHttpInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: FacilityInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorTranslateInterceptor, multi: true },
@@ -114,7 +118,7 @@ import { FilterPipe } from './pipes/filter.pipe';
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { 
+export class AppModule {
   constructor(library: FaIconLibrary) {
     library.addIconPacks(fas);
   }
