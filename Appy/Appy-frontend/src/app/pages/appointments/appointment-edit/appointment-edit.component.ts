@@ -1,13 +1,15 @@
 import { Location } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Data, ParamMap } from '@angular/router';
 import * as moment from 'moment';
 import { combineLatest, debounceTime, Observable, Subscription } from 'rxjs';
+import { CalendarTodayHeaderComponent } from 'src/app/components/calendar-today-header/calendar-today-header.component';
 import { NotifyDialogService } from 'src/app/components/notify-dialog/notify-dialog.service';
 import { Appointment } from 'src/app/models/appointment';
 import { ServiceDTO } from 'src/app/models/service';
 import { AppointmentService } from 'src/app/services/appointment.service.ts';
 import { TranslateService } from 'src/app/services/translate/translate.service';
+import { DateTimeChooserResult } from './date-time-chooser/date-time-chooser.component';
 
 @Component({
   selector: 'app-appointment-edit',
@@ -24,6 +26,8 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
   public get isLoading(): boolean {
     return this.isLoadingSave || this.isLoadingDelete;
   }
+
+  public isDateTimeEditing: boolean = false;
 
   private subs: Subscription[] = [];
 
@@ -138,6 +142,8 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.isDateTimeEditing = true;
+
     var ignoreAppointmentId = undefined;
     if (!this.isNew)
       ignoreAppointmentId = this.appointment.id;
@@ -146,4 +152,12 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
       .subscribe(f => console.log(f)));
   }
 
+  onDateTimeChooserFinished(result: DateTimeChooserResult) {
+    if (result.ok && this.appointment != null) {
+      this.appointment.date = result.date?.clone();
+      this.appointment.time = result.time?.clone();
+    }
+
+    this.isDateTimeEditing = false;
+  }
 }

@@ -42,13 +42,17 @@ namespace Appy.Services
 
         public Appointment AddNew(AppointmentDTO dto, int facilityId)
         {
+            var service = context.Services.FirstOrDefault(s => s.Id == dto.Service.Id && s.FacilityId == facilityId);
+            if (service == null)
+                throw new NotFoundException("Unknown service");
+
             var appointment = new Appointment()
             {
                 FacilityId = facilityId,
                 Date = dto.Date,
                 Time = dto.Time,
                 Duration = dto.Duration,
-                ServiceId = dto.Service.Id
+                Service = service
             };
 
             var sameDayAppointments = GetAll(dto.Date, facilityId);
@@ -67,10 +71,14 @@ namespace Appy.Services
             if (appointment == null)
                 throw new NotFoundException();
 
+            var service = context.Services.FirstOrDefault(s => s.Id == dto.Service.Id && s.FacilityId == facilityId);
+            if (service == null)
+                throw new NotFoundException("Unknown service");
+
             appointment.Date = dto.Date;
             appointment.Time = dto.Time;
             appointment.Duration = dto.Duration;
-            appointment.ServiceId = dto.Service.Id;
+            appointment.Service = service;
 
             var sameDayAppointments = GetAll(dto.Date, facilityId).Where(a => a.Id != appointment.Id).ToList();
             if (!IsAppointmentTimeOk(sameDayAppointments, appointment))

@@ -17,7 +17,7 @@ export class AppointmentService extends BaseModelService<Appointment> {
 
         return this.getAllAdvanced({
             date: date.format("yyyy-MM-DD")
-        });
+        }, e => e.date?.isSame(date, "date") == true);
     }
 
     public getFreeTimes(date: moment.Moment, serviceId: number, duration: moment.Duration, ignoreAppointmentId?: number): Observable<FreeTime[]> {

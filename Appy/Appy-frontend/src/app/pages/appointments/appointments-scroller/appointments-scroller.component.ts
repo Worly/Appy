@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import * as moment from 'moment';
 import { Subscription } from 'rxjs';
 import { Appointment } from 'src/app/models/appointment';
@@ -9,7 +9,7 @@ import { AppointmentService } from 'src/app/services/appointment.service.ts';
   templateUrl: './appointments-scroller.component.html',
   styleUrls: ['./appointments-scroller.component.scss']
 })
-export class AppointmentsScrollerComponent implements OnInit {
+export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
 
   daysData: DayData[] = [];
 
@@ -38,11 +38,12 @@ export class AppointmentsScrollerComponent implements OnInit {
   get date(): moment.Moment {
     return this._date;
   }
-
   @Output() dateChange: EventEmitter<moment.Moment> = new EventEmitter();
 
-  public timeFrom: moment.Moment = moment({ hours: 7, minutes: 30 });
-  public timeTo: moment.Moment = moment({ hours: 14, minutes: 30 });
+  @Input() showDateControls: boolean = false;
+
+  public timeFrom: moment.Moment = moment({ hours: 8 });
+  public timeTo: moment.Moment = moment({ hours: 14 });
 
   constructor(
     private appointmentService: AppointmentService
@@ -51,6 +52,11 @@ export class AppointmentsScrollerComponent implements OnInit {
 
   ngOnInit(): void {
     this.recalculateDaysData();
+  }
+
+  ngOnDestroy(): void {
+    for (let data of this.daysData)
+      data.subscription?.unsubscribe();
   }
 
   recalculateDaysData() {
@@ -87,7 +93,7 @@ export class AppointmentsScrollerComponent implements OnInit {
 
         newDaysData.push(data);
 
-        current.add({ days: 1 });
+        current = current.clone().add({ days: 1 });
       }
 
       // unsubscribe old data
@@ -101,7 +107,7 @@ export class AppointmentsScrollerComponent implements OnInit {
   }
 
   getHeight(): string {
-    return (this.timeTo.diff(this.timeFrom, "hours", true) / 9) * 100 + "vh";
+    return (this.timeTo.diff(this.timeFrom, "hours", true) / 8) * 100 + "vh";
   }
 
   onlyVisibleDataFilter(data: DayData): boolean {

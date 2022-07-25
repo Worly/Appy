@@ -1,6 +1,7 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import * as moment from 'moment';
 import { Subscription } from 'rxjs';
+import { CalendarTodayHeaderComponent } from 'src/app/components/calendar-today-header/calendar-today-header.component';
 import { Appointment } from 'src/app/models/appointment';
 import { AppointmentService } from 'src/app/services/appointment.service.ts';
 import { ServiceColorsService } from 'src/app/services/service-colors.service';
@@ -58,6 +59,13 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
   get timeTo(): moment.Moment {
     return this._timeTo;
   }
+
+  @Input() showDateControls: boolean = false;
+  @Output() dateControlPrevious: EventEmitter<void> = new EventEmitter();
+  @Output() dateControlNext: EventEmitter<void> = new EventEmitter();
+  @Output() dateControlSelect: EventEmitter<moment.Moment> = new EventEmitter();
+
+  calendarTodayHeaderComponent = CalendarTodayHeaderComponent;
 
   public currentTimeIndicatorTop: number = 0;
   public renderedAppointments: RenderedAppointment[] = [];

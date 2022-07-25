@@ -1,0 +1,25 @@
+<div class="date-time-chooser-container">
+    <app-appointments-scroller [showDateControls]="true" [(date)]="date" [daysToShow]="1">
+    </app-appointments-scroller>
+
+    <div class="right-side">
+        <div class="action-buttons">
+            <app-button text="{{'CANCEL' | translate}}" color="danger" look="normal" (onClick)="cancel()"></app-button>
+            <app-button text="{{'OK' | translate}}" color="success" look="solid" (onClick)="ok()"></app-button>
+        </div>
+        <div class="time-chooser-container">
+            <div class="hour-buttons">
+                <app-button *ngFor="let h of hours" [text]="h.toString().padStart(2, '0')"
+                    [look]="time.hours() == h ? 'solid' : 'normal'" [color]="time.hours() == h ? 'success' : 'normal'"
+                    (onClick)="selectHours(h)">
+                </app-button>
+            </div>
+            <div class="minutes-buttons">
+                <app-button *ngFor="let h of minutes" [text]="h.toString().padStart(2, '0')"
+                    [look]="time.minutes() == h ? 'solid' : 'normal'"
+                    [color]="time.minutes() == h ? 'success' : 'normal'" (onClick)="selectMinutes(h)">
+                </app-button>
+            </div>
+        </div>
+    </div>
+</div>

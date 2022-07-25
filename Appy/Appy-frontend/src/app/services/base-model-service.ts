@@ -10,7 +10,7 @@ export class BaseModelService<T extends BaseModel> implements IEntityTracker<T> 
 
     protected httpClient: HttpClient;
 
-    private datasourceContexts: DatasourceContext<T>[] = [];
+    private datasources: Datasource<T>[] = [];
 
     constructor(
         protected injector: Injector,
@@ -20,9 +20,9 @@ export class BaseModelService<T extends BaseModel> implements IEntityTracker<T> 
         this.httpClient = this.injector.get(HttpClient);
     }
 
-    private createDatasourceContext(sub: Subscriber<T[]>): DatasourceContext<T> {
-        let dc = new DatasourceContext<T>([], sub);
-        this.datasourceContexts.push(dc);
+    private createDatasource(sub: Subscriber<T[]>, datasourceFilterPredicate?: (entity: T) => boolean): Datasource<T> {
+        let dc = new Datasource<T>([], sub, datasourceFilterPredicate);
+        this.datasources.push(dc);
 
         return dc;
     }
@@ -31,14 +31,14 @@ export class BaseModelService<T extends BaseModel> implements IEntityTracker<T> 
         return this.getAllAdvanced(null);
     }
 
-    public getAllAdvanced(params: any): Observable<T[]> {
+    public getAllAdvanced(params: any, datasourceFilterPredicate?: (entity: T) => boolean): Observable<T[]> {
         return new Observable<T[]>(s => {
-            let datasourceContext = this.createDatasourceContext(s);
+            let datasource = this.createDatasource(s, datasourceFilterPredicate);
 
             this.httpClient.get<any[]>(`${appConfig.apiUrl}${this.controllerName}/getAll`, {
                 params: params
             }).subscribe({
-                next: (r: any[]) => datasourceContext.add(r.map(o => new this.typeFactory(o))),
+                next: (r: any[]) => datasource.add(r.map(o => new this.typeFactory(o))),
                 error: (e: any) => s.error(s)
             });
         });
@@ -92,10 +92,10 @@ export class BaseModelService<T extends BaseModel> implements IEntityTracker<T> 
             .pipe(map(s => new this.typeFactory(s)));
     }
 
-    private getDatasourceContexts(): DatasourceContext<T>[] {
-        let contexts = this.datasourceContexts.filter(c => !c.subscriber.closed);
+    private getDatasourceContexts(): Datasource<T>[] {
+        let contexts = this.datasources.filter(c => !c.subscriber.closed);
 
-        this.datasourceContexts = contexts;
+        this.datasources = contexts;
         return contexts;
     }
 
@@ -121,32 +121,43 @@ export interface IEntityTracker<T extends BaseModel> {
     notifyUpdated(entity: T): void;
 }
 
-class DatasourceContext<T extends BaseModel> {
-    datasource: T[];
+class Datasource<T extends BaseModel> {
+    data: T[];
     subscriber: Subscriber<T[]>;
+    filterPredicate?: (entity: T) => boolean;
 
-    constructor(datasource: T[], subscriber: Subscriber<T[]>) {
-        this.datasource = datasource;
+    constructor(data: T[], subscriber: Subscriber<T[]>, filterPredicate?: (entity: T) => boolean) {
+        this.data = data;
         this.subscriber = subscriber;
+        this.filterPredicate = filterPredicate;
     }
 
     add(entities: T[]) {
         let newEntities: T[] = [];
         for (let newItem of entities) {
-            let oldEntity = this.datasource.find(o => _.isEqual(o.getId(), newItem.getId()));
-            if (oldEntity == null)
+            let oldEntity = this.data.find(o => _.isEqual(o.getId(), newItem.getId()));
+            if (oldEntity == null) {
+                if (this.filterPredicate && !this.filterPredicate(newItem))
+                    continue;
+
                 newEntities.push(newItem);
+            }
             else
                 this.update(newItem);
         }
 
-        this.datasource.splice(0, 0, ...newEntities);
+        this.data.splice(0, 0, ...newEntities);
 
-        this.subscriber.next(this.datasource);
+        this.subscriber.next([...this.data]);
     }
 
     update(entity: T) {
-        let oldEntity = this.datasource.find(o => _.isEqual(o.getId(), entity.getId()));
+        let oldEntity = this.data.find(o => _.isEqual(o.getId(), entity.getId()));
+
+        if (oldEntity == null) {
+            this.add([entity]);
+            return;
+        }
 
         let newSymbols = Object.getOwnPropertySymbols(entity);
         let oldSymbols = Object.getOwnPropertySymbols(oldEntity);
@@ -165,17 +176,20 @@ class DatasourceContext<T extends BaseModel> {
             }
         }
 
-        this.subscriber.next(this.datasource);
+        if (this.filterPredicate && !this.filterPredicate(oldEntity)) 
+            this.data.splice(this.data.indexOf(oldEntity), 1);
+
+        this.subscriber.next([...this.data]);
     }
 
     delete(id: any) {
-        let index = this.datasource.findIndex(o => _.isEqual(o.getId(), id));
+        let index = this.data.findIndex(o => _.isEqual(o.getId(), id));
 
         if (index == -1)
             return;
 
-        this.datasource.splice(index, 1);
+        this.data.splice(index, 1);
 
-        this.subscriber.next(this.datasource);
+        this.subscriber.next([...this.data]);
     }
 }

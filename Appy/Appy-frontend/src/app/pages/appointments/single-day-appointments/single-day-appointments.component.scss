@@ -10,18 +10,62 @@
     box-shadow: 0 0 4px -1px var(--text);
 }
 
-.date-container {
-    font-size: 1.1rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
+.sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+
+    border-top-left-radius: var(--default-border-radius);
+    border-top-right-radius: var(--default-border-radius);
 
     border-bottom: 1px solid var(--text);
 
     &.date-today {
         background-color: var(--card-background-color);
     }
+
+    &:not(.date-today) {
+        background-color: var(--input-background-color);
+    }
+}
+
+.date-container {
+    font-size: 1.1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    height: 100%;
+}
+
+.date-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+:host::ng-deep {
+    app-button.date-button {
+        width: max-content;
+        .my-button {
+            padding-left: 1px;
+            padding-right: 1px;
+            font-size: 1rem;
+        }
+    }
+
+    app-button.arrow-button {
+        .my-button.icon-only > .my-icon {
+            margin-left: 4px;
+            margin-right: 4px;
+        }
+    }
+}
+
+.my-calendar {
+    width: min(80vw, 80vh);
+    height: min(80vw, 80vh);
 }
 
 .body-container {

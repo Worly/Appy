@@ -1,6 +1,29 @@
-<div class="date-container" [ngClass]="{'date-today': date?.isSame(getNowDate(), 'day')}">
-    <div>{{date?.format("ddd")}}</div>
-    <div>{{date?.format("D.M.YY")}}</div>
+<div class="sticky-header" [ngClass]="{'date-today': date?.isSame(getNowDate(), 'day')}">
+    <div *ngIf="!showDateControls" class="date-container">
+        <div>{{date?.format("ddd")}}</div>
+        <div>{{date?.format("D.M.YY")}}</div>
+    </div>
+    <div *ngIf="showDateControls" [style.height]="'100%'">
+        <div class="date-controls">
+            <app-button class="arrow-button" icon="angle-left" alignContent="center" [isCircle]="false" [curved]="false" look="transparent"
+                [curvedBottomLeft]="true" [curvedTopLeft]="true" [curvedBottomRight]="false" [curvedTopRight]="false"
+                (onClick)="dateControlPrevious.emit()">
+            </app-button>
+            <app-button class="date-button" [text]="date?.format('ddd DD.MM.yyyy') ?? ''" alignContent="center"
+                look="transparent" [curved]="false" (onClick)="calendarDialog.open()">
+            </app-button>
+            <app-button class="arrow-button" icon="angle-right" alignContent="center" [isCircle]="false" [curved]="false" look="transparent"
+                [curvedBottomLeft]="false" [curvedTopLeft]="false" [curvedBottomRight]="true" [curvedTopRight]="true"
+                (onClick)="dateControlNext.emit()">
+            </app-button>
+        </div>
+
+        <app-dialog #calendarDialog>
+            <mat-calendar class="my-calendar" [selected]="date" [headerComponent]="calendarTodayHeaderComponent"
+                (selectedChange)="calendarDialog.close(); dateControlSelect.emit($event)">
+            </mat-calendar>
+        </app-dialog>
+    </div>
 </div>
 <div class="body-container">
     <div class="time-background">

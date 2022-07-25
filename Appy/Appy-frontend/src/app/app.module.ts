@@ -52,6 +52,7 @@ import { FilterPipe } from './pipes/filter.pipe';
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular/material-moment-adapter';
 import { CalendarTodayHeaderComponent } from './components/calendar-today-header/calendar-today-header.component';
+import { DateTimeChooserComponent } from './pages/appointments/appointment-edit/date-time-chooser/date-time-chooser.component';
 
 @NgModule({
   declarations: [
@@ -85,7 +86,8 @@ import { CalendarTodayHeaderComponent } from './components/calendar-today-header
     AppointmentEditComponent,
     ServiceLookupComponent,
     AppointmentsScrollerComponent,
-    CalendarTodayHeaderComponent
+    CalendarTodayHeaderComponent,
+    DateTimeChooserComponent
   ],
   imports: [
     BrowserModule,
