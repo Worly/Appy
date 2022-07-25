@@ -13,12 +13,7 @@ export class DateTimeChooserComponent implements OnInit {
   @Input() set appointment(value: Appointment | undefined) {
     this._appointment = value == null ? undefined : new Appointment(value.getDTO());
 
-    if (this._appointment) {
-      this._appointment.date = this.date;
-      this._appointment.time = this.time;
-    }
-
-    this.shadowAppointments = this.appointment ? [this.appointment] : [];
+    this.refreshShadowAppointments();
   }
   get appointment(): Appointment | undefined {
     return this._appointment;
@@ -34,36 +29,32 @@ export class DateTimeChooserComponent implements OnInit {
 
     this._date = value;
 
-    if (this.appointment) {
-      this.appointment.date = this.date;
-      this.shadowAppointments = this.appointment ? [this.appointment] : [];
-    }
+    this.refreshShadowAppointments();
   }
   get date(): moment.Moment {
     return this._date;
   }
 
-  private defaultTime = moment({ hours: 8, minutes: 0 });
-  private _time: moment.Moment = this.defaultTime;
+  private _time: moment.Moment | undefined = undefined;
   @Input() set time(value: moment.Moment | undefined) {
-    if (value == null)
-      value = this.defaultTime;
-
-    if (this._time.isSame(value))
+    if ((this._time == null && value == null) || (this._time != null && this._time.isSame(value)))
       return;
 
     this._time = value;
 
-    if (this.appointment) {
-      this.appointment.time = this.time;
-      this.shadowAppointments = this.appointment ? [this.appointment] : [];
-    }
+    this.selectedHours = this.time?.hours() ?? undefined;
+    this.selectedMinutes = this.time?.minutes() ?? undefined;
+
+    this.refreshShadowAppointments();
   }
-  get time(): moment.Moment {
+  get time(): moment.Moment | undefined {
     return this._time;
   }
 
   @Output() finished: EventEmitter<DateTimeChooserResult> = new EventEmitter();
+
+  selectedHours?: number;
+  selectedMinutes?: number;
 
   minutes: number[] = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
   hours: number[] = [8, 9, 10, 11, 12, 13];
@@ -75,12 +66,32 @@ export class DateTimeChooserComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  selectHours(hours: number) {
-    this.time = this.time.clone().hours(hours);
+  private refreshShadowAppointments() {
+    if (this.appointment) {
+      this.appointment.date = this.date;
+      this.appointment.time = this.time;
+    }
+
+    this.shadowAppointments = [];
+    if (this.appointment && this.appointment.date && this.appointment.time)
+      this.shadowAppointments = [this.appointment];
   }
 
-  selectMinutes(hours: number) {
-    this.time = this.time.clone().minutes(hours);
+  selectHours(hours: number) {
+    this.selectedHours = hours;
+
+    this.updateTime();
+  }
+
+  selectMinutes(minutes: number) {
+    this.selectedMinutes = minutes;
+    
+    this.updateTime();
+  }
+
+  private updateTime() {
+    if (this.selectedHours != null && this.selectedMinutes != null)
+      this.time = moment({ hours: this.selectedHours, minutes: this.selectedMinutes });
   }
 
   cancel() {

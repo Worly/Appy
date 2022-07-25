@@ -6,19 +6,19 @@
     <div class="right-side">
         <div class="action-buttons">
             <app-button text="{{'CANCEL' | translate}}" color="danger" look="normal" (onClick)="cancel()"></app-button>
-            <app-button text="{{'OK' | translate}}" color="success" look="solid" (onClick)="ok()"></app-button>
+            <app-button text="{{'OK' | translate}}" color="success" look="solid" (onClick)="ok()" [disabled]="time == null"></app-button>
         </div>
         <div class="time-chooser-container">
             <div class="hour-buttons">
                 <app-button *ngFor="let h of hours" [text]="h.toString().padStart(2, '0')"
-                    [look]="time.hours() == h ? 'solid' : 'normal'" [color]="time.hours() == h ? 'success' : 'normal'"
+                    [look]="selectedHours == h ? 'solid' : 'normal'" [color]="selectedHours == h ? 'success' : 'normal'"
                     (onClick)="selectHours(h)">
                 </app-button>
             </div>
             <div class="minutes-buttons">
                 <app-button *ngFor="let h of minutes" [text]="h.toString().padStart(2, '0')"
-                    [look]="time.minutes() == h ? 'solid' : 'normal'"
-                    [color]="time.minutes() == h ? 'success' : 'normal'" (onClick)="selectMinutes(h)">
+                    [look]="selectedMinutes == h ? 'solid' : 'normal'"
+                    [color]="selectedMinutes == h ? 'success' : 'normal'" (onClick)="selectMinutes(h)">
                 </app-button>
             </div>
         </div>
