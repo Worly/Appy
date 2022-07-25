@@ -147,9 +147,6 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
     var ignoreAppointmentId = undefined;
     if (!this.isNew)
       ignoreAppointmentId = this.appointment.id;
-
-    this.subs.push(this.appointmentService.getFreeTimes(moment(), this.appointment.service.id, this.appointment.duration, ignoreAppointmentId)
-      .subscribe(f => console.log(f)));
   }
 
   onDateTimeChooserFinished(result: DateTimeChooserResult) {

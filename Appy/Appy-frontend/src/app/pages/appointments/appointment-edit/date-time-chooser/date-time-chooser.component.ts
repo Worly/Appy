@@ -1,6 +1,9 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import * as moment from 'moment';
+import { Subscription } from 'rxjs';
 import { Appointment } from 'src/app/models/appointment';
+import { FreeTime } from 'src/app/models/free-time';
+import { AppointmentService } from 'src/app/services/appointment.service.ts';
 
 @Component({
   selector: 'app-date-time-chooser',
@@ -30,6 +33,7 @@ export class DateTimeChooserComponent implements OnInit {
     this._date = value;
 
     this.refreshShadowAppointments();
+    this.loadFreeTimes();
   }
   get date(): moment.Moment {
     return this._date;
@@ -60,10 +64,16 @@ export class DateTimeChooserComponent implements OnInit {
   hours: number[] = [8, 9, 10, 11, 12, 13];
 
   shadowAppointments: Appointment[] = [];
+  freeTimes: FreeTime[] | null = null;
 
-  constructor() { }
+  private freeTimesSubscription?: Subscription;
+
+  constructor(
+    private appointmentService: AppointmentService
+  ) { }
 
   ngOnInit(): void {
+    this.loadFreeTimes();
   }
 
   private refreshShadowAppointments() {
@@ -85,7 +95,7 @@ export class DateTimeChooserComponent implements OnInit {
 
   selectMinutes(minutes: number) {
     this.selectedMinutes = minutes;
-    
+
     this.updateTime();
   }
 
@@ -106,6 +116,18 @@ export class DateTimeChooserComponent implements OnInit {
       time: this.time,
       ok: true
     });
+  }
+
+  private loadFreeTimes() {
+    this.freeTimes = null;
+
+    if (this.freeTimesSubscription)
+      this.freeTimesSubscription.unsubscribe();
+
+    if (this.appointment && this.appointment.service && this.appointment.duration) {
+      this.freeTimesSubscription = this.appointmentService.getFreeTimes(this.date, this.appointment.service.id, this.appointment.duration, this.appointment.id)
+        .subscribe(f => this.freeTimes = f);
+    }
   }
 }
 

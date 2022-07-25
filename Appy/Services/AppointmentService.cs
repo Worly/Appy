@@ -144,6 +144,7 @@ namespace Appy.Services
                 else if (!ok && currentFreeTime != null)
                 {
                     currentFreeTime.To = time.AddMinutes(-5);
+                    currentFreeTime.ToIncludingDuration = currentFreeTime.To.Add(duration);
                     result.Add(currentFreeTime);
                     currentFreeTime = null;
                 }
@@ -155,6 +156,7 @@ namespace Appy.Services
             if (currentFreeTime != null)
             {
                 currentFreeTime.To = time.AddMinutes(-5);
+                currentFreeTime.ToIncludingDuration = currentFreeTime.To.Add(duration);
                 result.Add(currentFreeTime);
                 currentFreeTime = null;
             }

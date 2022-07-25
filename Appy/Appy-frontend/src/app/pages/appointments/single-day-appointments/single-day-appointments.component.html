@@ -48,8 +48,13 @@
         </div>
     </div>
 
-    <div *ngFor="let ap of renderedShadowAppointments" class="single-appointment shadow-appointment" [style.top]="ap.top + '%'"
-        [style.height]="ap.height + '%'" [style.backgroundColor]="ap.color">
+    <div *ngFor="let rts of renderedTimeStatuses" class="time-status" [ngClass]="rts.status" [style.top]="rts.top + '%'"
+        [style.height]="rts.height + '%'">
+        <div></div>
+    </div>
+
+    <div *ngFor="let ap of renderedShadowAppointments" class="single-appointment shadow-appointment"
+        [style.top]="ap.top + '%'" [style.height]="ap.height + '%'" [style.backgroundColor]="ap.color">
         <div class="appointment-time">
             {{ap.time}}
         </div>

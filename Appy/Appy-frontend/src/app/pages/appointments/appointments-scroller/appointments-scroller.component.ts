@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, O
 import * as moment from 'moment';
 import { Subscription } from 'rxjs';
 import { Appointment } from 'src/app/models/appointment';
+import { FreeTime } from 'src/app/models/free-time';
 import { AppointmentService } from 'src/app/services/appointment.service.ts';
 
 @Component({
@@ -43,6 +44,7 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
   @Input() showDateControls: boolean = false;
 
   @Input() shadowAppointments: Appointment[] = [];
+  @Input() freeTimes: FreeTime[] | null = null;
 
   public timeFrom: moment.Moment = moment({ hours: 8 });
   public timeTo: moment.Moment = moment({ hours: 14 });

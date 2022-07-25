@@ -3,6 +3,7 @@ import * as moment from 'moment';
 import { retryWhen, Subscription } from 'rxjs';
 import { CalendarTodayHeaderComponent } from 'src/app/components/calendar-today-header/calendar-today-header.component';
 import { Appointment } from 'src/app/models/appointment';
+import { FreeTime, getTakenTimesFromFreeTimes } from 'src/app/models/free-time';
 import { AppointmentService } from 'src/app/services/appointment.service.ts';
 import { ServiceColorsService } from 'src/app/services/service-colors.service';
 
@@ -72,6 +73,18 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
     return this._shadowAppointments;
   }
 
+  private _freeTimes: FreeTime[] | null = null;
+  @Input() set freeTimes(value: FreeTime[] | null) {
+    if (this._freeTimes == value)
+      return;
+
+    this._freeTimes = value;
+    this.renderTimeStatuses();
+  }
+  get freeTimes(): FreeTime[] | null {
+    return this._freeTimes;
+  }
+
   @Input() showDateControls: boolean = false;
   @Output() dateControlPrevious: EventEmitter<void> = new EventEmitter();
   @Output() dateControlNext: EventEmitter<void> = new EventEmitter();
@@ -82,6 +95,7 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
   public currentTimeIndicatorTop: number = 0;
   public renderedAppointments: RenderedAppointment[] = [];
   public renderedShadowAppointments: RenderedAppointment[] = [];
+  public renderedTimeStatuses: RenderedTimeStatus[] = [];
 
   private subs: Subscription[] = [];
   private interval: any;
@@ -103,6 +117,7 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
     this.renderCurrentTimeIndicator();
     this.renderAppointments();
     this.renderShadowAppointments();
+    this.renderTimeStatuses();
   }
 
   public renderAppointments(): void {
@@ -127,6 +142,32 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
     }
   }
 
+  public renderTimeStatuses(): void {
+    this.renderedTimeStatuses = [];
+
+    if (this.freeTimes != null) {
+      for (let freeTime of this.freeTimes) {
+        let rts: RenderedTimeStatus = {
+          top: this.getTopPercentage(freeTime.from),
+          height: this.getHeightPercentage(moment.duration(freeTime.toIncludingDuration.diff(freeTime.from))),
+          status: "free-time"
+        };
+
+        this.renderedTimeStatuses.push(rts);
+      }
+
+      for (let takenTime of getTakenTimesFromFreeTimes(this.freeTimes, this.timeFrom, this.timeTo)) {
+        let rts: RenderedTimeStatus = {
+          top: this.getTopPercentage(takenTime.from),
+          height: this.getHeightPercentage(moment.duration(takenTime.to.diff(takenTime.from))),
+          status: "taken-time"
+        };
+
+        this.renderedTimeStatuses.push(rts);
+      }
+    }
+  }
+
   public renderCurrentTimeIndicator(): void {
     this.currentTimeIndicatorTop = (moment().diff(this.timeFrom) / this.timeTo.diff(this.timeFrom)) * 100;
   }
@@ -139,8 +180,8 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
       return null;
 
     let ra: RenderedAppointment = {
-      top: (ap.time.diff(this.timeFrom) / this.timeTo.diff(this.timeFrom)) * 100,
-      height: (ap.duration.asMilliseconds() / this.timeTo.diff(this.timeFrom)) * 100,
+      top: this.getTopPercentage(ap.time),
+      height: this.getHeightPercentage(ap.duration),
       color: this.serviceColorsService.get(ap.service?.colorId),
       time: `${ap.time.format("HH:mm")} - ${ap.time.clone().add(ap.duration).format("HH:mm")}`,
       serviceName: ap.service.name as string
@@ -153,6 +194,14 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
       ra.height = 100 - ra.top;
 
     return ra;
+  }
+
+  private getTopPercentage(time: moment.Moment): number {
+    return (time.diff(this.timeFrom) / this.timeTo.diff(this.timeFrom)) * 100
+  }
+
+  private getHeightPercentage(duration: moment.Duration): number {
+    return (duration.asMilliseconds() / this.timeTo.diff(this.timeFrom)) * 100;
   }
 
   // returns arrays of numbers where each number represents a cell in table which shows hours
@@ -190,4 +239,10 @@ type RenderedAppointment = {
   color: string;
   time: string;
   serviceName: string;
+}
+
+type RenderedTimeStatus = {
+  top: number;
+  height: number;
+  status: string;
 }

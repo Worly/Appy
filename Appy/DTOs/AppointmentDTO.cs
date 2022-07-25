@@ -15,5 +15,6 @@
     {
         public TimeOnly From { get; set; }
         public TimeOnly To { get; set; }
+        public TimeOnly ToIncludingDuration { get; set; }
     }
 }

@@ -2,7 +2,8 @@ import { Injectable, Injector } from "@angular/core";
 import * as moment from "moment";
 import { map, Observable } from "rxjs";
 import { appConfig } from "../app.config";
-import { Appointment, FreeTime, FreeTimeDTO } from "../models/appointment";
+import { Appointment } from "../models/appointment";
+import { FreeTime, FreeTimeDTO } from "../models/free-time";
 import { BaseModelService } from "./base-model-service";
 
 @Injectable({ providedIn: "root" })
