@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import * as moment from 'moment';
-import { Subscription } from 'rxjs';
+import { retryWhen, Subscription } from 'rxjs';
 import { CalendarTodayHeaderComponent } from 'src/app/components/calendar-today-header/calendar-today-header.component';
 import { Appointment } from 'src/app/models/appointment';
 import { AppointmentService } from 'src/app/services/appointment.service.ts';
@@ -19,7 +19,7 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
       return;
 
     this._appointments = value;
-    this.render();
+    this.renderAppointments();
   }
   public get appointments(): Appointment[] | null {
     return this._appointments;
@@ -60,6 +60,18 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
     return this._timeTo;
   }
 
+  private _shadowAppointments: Appointment[] = [];
+  @Input() set shadowAppointments(value: Appointment[]) {
+    if (this._shadowAppointments == value)
+      return;
+
+    this._shadowAppointments = value;
+    this.renderShadowAppointments();
+  }
+  get shadowAppointments(): Appointment[] {
+    return this._shadowAppointments;
+  }
+
   @Input() showDateControls: boolean = false;
   @Output() dateControlPrevious: EventEmitter<void> = new EventEmitter();
   @Output() dateControlNext: EventEmitter<void> = new EventEmitter();
@@ -69,6 +81,7 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
 
   public currentTimeIndicatorTop: number = 0;
   public renderedAppointments: RenderedAppointment[] = [];
+  public renderedShadowAppointments: RenderedAppointment[] = [];
 
   private subs: Subscription[] = [];
   private interval: any;
@@ -88,35 +101,58 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
 
   public render(): void {
     this.renderCurrentTimeIndicator();
+    this.renderAppointments();
+    this.renderShadowAppointments();
+  }
 
+  public renderAppointments(): void {
     this.renderedAppointments = [];
     if (this.appointments) {
       for (let ap of this.appointments) {
-        if (ap.time == null || ap.duration == null || ap.service == null)
-          return;
+        let ra = this.getRenderedAppointment(ap);
 
-        let ra: RenderedAppointment = {
-          top: (ap.time.diff(this.timeFrom) / this.timeTo.diff(this.timeFrom)) * 100,
-          height: (ap.duration.asMilliseconds() / this.timeTo.diff(this.timeFrom)) * 100,
-          color: this.serviceColorsService.get(ap.service?.colorId),
-          time: `${ap.time.format("HH:mm")} - ${ap.time.clone().add(ap.duration).format("HH:mm")}`,
-          serviceName: ap.service.name as string
-        };
-
-        if (ra.top < 0 || ra.top >= 100)
-          continue;
-
-        if (ra.top + ra.height > 100)
-          ra.height = 100 - ra.top;
-
-        this.renderedAppointments.push(ra);
+        if (ra)
+          this.renderedAppointments.push(ra);
       }
+    }
+  }
 
+  public renderShadowAppointments(): void {
+    this.renderedShadowAppointments = [];
+    for (let ap of this.shadowAppointments) {
+      let ra = this.getRenderedAppointment(ap);
+
+      if (ra)
+        this.renderedShadowAppointments.push(ra);
     }
   }
 
   public renderCurrentTimeIndicator(): void {
     this.currentTimeIndicatorTop = (moment().diff(this.timeFrom) / this.timeTo.diff(this.timeFrom)) * 100;
+  }
+
+  private getRenderedAppointment(ap: Appointment): RenderedAppointment | null {
+    if (ap.time == null || ap.duration == null || ap.service == null)
+      return null;
+
+    if (!ap.date?.isSame(this.date, "date"))
+      return null;
+
+    let ra: RenderedAppointment = {
+      top: (ap.time.diff(this.timeFrom) / this.timeTo.diff(this.timeFrom)) * 100,
+      height: (ap.duration.asMilliseconds() / this.timeTo.diff(this.timeFrom)) * 100,
+      color: this.serviceColorsService.get(ap.service?.colorId),
+      time: `${ap.time.format("HH:mm")} - ${ap.time.clone().add(ap.duration).format("HH:mm")}`,
+      serviceName: ap.service.name as string
+    };
+
+    if (ra.top < 0 || ra.top >= 100)
+      return null;
+
+    if (ra.top + ra.height > 100)
+      ra.height = 100 - ra.top;
+
+    return ra;
   }
 
   // returns arrays of numbers where each number represents a cell in table which shows hours

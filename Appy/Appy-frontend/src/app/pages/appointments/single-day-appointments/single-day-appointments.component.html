@@ -5,16 +5,16 @@
     </div>
     <div *ngIf="showDateControls" [style.height]="'100%'">
         <div class="date-controls">
-            <app-button class="arrow-button" icon="angle-left" alignContent="center" [isCircle]="false" [curved]="false" look="transparent"
-                [curvedBottomLeft]="true" [curvedTopLeft]="true" [curvedBottomRight]="false" [curvedTopRight]="false"
-                (onClick)="dateControlPrevious.emit()">
+            <app-button class="arrow-button" icon="angle-left" alignContent="center" [isCircle]="false" [curved]="false"
+                look="transparent" [curvedBottomLeft]="true" [curvedTopLeft]="true" [curvedBottomRight]="false"
+                [curvedTopRight]="false" (onClick)="dateControlPrevious.emit()">
             </app-button>
             <app-button class="date-button" [text]="date?.format('ddd DD.MM.yyyy') ?? ''" alignContent="center"
                 look="transparent" [curved]="false" (onClick)="calendarDialog.open()">
             </app-button>
-            <app-button class="arrow-button" icon="angle-right" alignContent="center" [isCircle]="false" [curved]="false" look="transparent"
-                [curvedBottomLeft]="false" [curvedTopLeft]="false" [curvedBottomRight]="true" [curvedTopRight]="true"
-                (onClick)="dateControlNext.emit()">
+            <app-button class="arrow-button" icon="angle-right" alignContent="center" [isCircle]="false"
+                [curved]="false" look="transparent" [curvedBottomLeft]="false" [curvedTopLeft]="false"
+                [curvedBottomRight]="true" [curvedTopRight]="true" (onClick)="dateControlNext.emit()">
             </app-button>
         </div>
 
@@ -45,6 +45,16 @@
             <div class="appointment-service-name">
                 {{ap.serviceName}}
             </div>
+        </div>
+    </div>
+
+    <div *ngFor="let ap of renderedShadowAppointments" class="single-appointment shadow-appointment" [style.top]="ap.top + '%'"
+        [style.height]="ap.height + '%'" [style.backgroundColor]="ap.color">
+        <div class="appointment-time">
+            {{ap.time}}
+        </div>
+        <div class="appointment-service-name">
+            {{ap.serviceName}}
         </div>
     </div>
 

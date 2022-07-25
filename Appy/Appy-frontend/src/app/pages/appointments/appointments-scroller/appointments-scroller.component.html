@@ -4,6 +4,7 @@
         [showDateControls]="showDateControls && data.date.isSame(date, 'date')"
         (dateControlNext)="date = date.clone().add({days: 1})"
         (dateControlPrevious)="date = date.clone().add({days: -1})" (dateControlSelect)="date = $event"
+        [shadowAppointments]="shadowAppointments"
         [style.height]="getHeight()">
     </app-single-day-appointments>
 </div>

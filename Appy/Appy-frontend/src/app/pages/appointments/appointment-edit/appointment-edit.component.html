@@ -38,7 +38,7 @@
     <div *ngIf="isDateTimeEditing">
         <div class="w-title">{{"pages.appointments.CHOOSE_DATE_TIME" | translate}}</div>
 
-        <app-date-time-chooser [appointment]="appointment" (finished)="onDateTimeChooserFinished($event)">
+        <app-date-time-chooser [appointment]="appointment" [date]="appointment.date" [time]="appointment.time" (finished)="onDateTimeChooserFinished($event)">
         </app-date-time-chooser>
     </div>
 </div>

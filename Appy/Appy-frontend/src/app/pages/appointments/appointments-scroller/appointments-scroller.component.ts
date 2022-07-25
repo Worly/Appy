@@ -42,6 +42,8 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
 
   @Input() showDateControls: boolean = false;
 
+  @Input() shadowAppointments: Appointment[] = [];
+
   public timeFrom: moment.Moment = moment({ hours: 8 });
   public timeTo: moment.Moment = moment({ hours: 14 });
 

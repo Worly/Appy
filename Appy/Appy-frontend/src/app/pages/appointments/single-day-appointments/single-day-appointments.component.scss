@@ -105,6 +105,11 @@
     border: 1px solid var(--input-border-color);
     padding-left: 2px;
     padding-right: 2px;
+
+    &.shadow-appointment {
+        opacity: 60%;
+        border: 2px dashed var(--text);
+    }
 }
 
 .appointment-service-name {
