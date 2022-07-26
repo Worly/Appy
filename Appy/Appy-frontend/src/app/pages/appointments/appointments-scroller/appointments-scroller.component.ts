@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { Appointment } from 'src/app/models/appointment';
 import { FreeTime } from 'src/app/models/free-time';
 import { AppointmentService } from 'src/app/services/appointment.service.ts';
+import { Tween } from 'src/app/utils/tween';
 
 @Component({
   selector: 'app-appointments-scroller',
@@ -47,7 +48,10 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
   @Input() freeTimes: FreeTime[] | null = null;
 
   public timeFrom: moment.Moment = moment({ hours: 8 });
-  public timeTo: moment.Moment = moment({ hours: 14 });
+  public timeTo: moment.Moment = moment({ hours: 20 });
+
+  private timeFromTween: Tween = new Tween(() => this.timeFrom.unix(), v => this.timeFrom = moment.unix(v));
+  private timeToTween: Tween = new Tween(() => this.timeTo.unix(), v => this.timeTo = moment.unix(v));
 
   constructor(
     private appointmentService: AppointmentService
@@ -88,8 +92,10 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
 
           data.subscription = this.appointmentService.getAll(current)
             .subscribe(a => {
-              if (data != null)
+              if (data != null) {
                 data.appointments = a;
+                this.refreshFromToTime();
+              }
             });
         }
 
@@ -108,6 +114,36 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
 
       this.daysData = newDaysData;
     }
+
+    this.refreshFromToTime();
+  }
+
+  refreshFromToTime() {
+    let timeFrom: moment.Moment | null = null;
+    let timeTo: moment.Moment | null = null;
+
+    for (let daysData of this.daysData.filter(d => d.show)) {
+      if (daysData.appointments) {
+        for (let app of daysData.appointments) {
+          if (app.time == null || app.duration == null)
+            continue;
+
+          if (timeFrom == null || app.time.isBefore(timeFrom))
+            timeFrom = app.time.clone();
+
+          if (timeTo == null || app.time?.clone().add(app.duration).isAfter(timeTo))
+            timeTo = app.time.clone().add(app.duration);
+        }
+      }
+    }
+
+    let timeFromStamp = (timeFrom ?? moment({ hours: 8 })).unix();
+    let timeToStamp = (timeTo ?? moment({ hours: 14 })).unix();
+
+    let duration = 300;
+
+    this.timeFromTween.tweenTo(timeFromStamp, duration);
+    this.timeToTween.tweenTo(timeToStamp, duration);
   }
 
   getHeight(): string {

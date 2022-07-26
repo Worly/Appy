@@ -1,10 +1,9 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import * as moment from 'moment';
-import { retryWhen, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { CalendarTodayHeaderComponent } from 'src/app/components/calendar-today-header/calendar-today-header.component';
 import { Appointment } from 'src/app/models/appointment';
 import { FreeTime, getTakenTimesFromFreeTimes } from 'src/app/models/free-time';
-import { AppointmentService } from 'src/app/services/appointment.service.ts';
 import { ServiceColorsService } from 'src/app/services/service-colors.service';
 
 @Component({
@@ -146,15 +145,17 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
     this.renderedTimeStatuses = [];
 
     if (this.freeTimes != null) {
-      for (let freeTime of this.freeTimes) {
-        let rts: RenderedTimeStatus = {
-          top: this.getTopPercentage(freeTime.from),
-          height: this.getHeightPercentage(moment.duration(freeTime.toIncludingDuration.diff(freeTime.from))),
-          status: "free-time"
-        };
+      // for (let freeTime of this.freeTimes) {
+      //   let rts: RenderedTimeStatus = {
+      //     top: this.getTopPercentage(freeTime.from),
+      //     height: this.getHeightPercentage(moment.duration(freeTime.toIncludingDuration.diff(freeTime.from))),
+      //     status: "free-time"
+      //   };
 
-        this.renderedTimeStatuses.push(rts);
-      }
+      //   this.cropRenderedItem(rts);
+
+      //   this.renderedTimeStatuses.push(rts);
+      // }
 
       for (let takenTime of getTakenTimesFromFreeTimes(this.freeTimes, this.timeFrom, this.timeTo)) {
         let rts: RenderedTimeStatus = {
@@ -162,6 +163,8 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
           height: this.getHeightPercentage(moment.duration(takenTime.to.diff(takenTime.from))),
           status: "taken-time"
         };
+
+        this.cropRenderedItem(rts);
 
         this.renderedTimeStatuses.push(rts);
       }
@@ -202,6 +205,19 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
 
   private getHeightPercentage(duration: moment.Duration): number {
     return (duration.asMilliseconds() / this.timeTo.diff(this.timeFrom)) * 100;
+  }
+
+  private cropRenderedItem(item: {top: number, height: number}) {
+    if (item.top < 0) {
+      item.height += item.top;
+      item.top = 0;
+    }
+
+    if (item.height < 0)
+      item.height = 0;
+
+    if (item.top + item.height > 100)
+      item.height = 100 - item.top;
   }
 
   // returns arrays of numbers where each number represents a cell in table which shows hours

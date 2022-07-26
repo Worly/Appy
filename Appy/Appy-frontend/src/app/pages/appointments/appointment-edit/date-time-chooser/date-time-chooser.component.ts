@@ -61,7 +61,7 @@ export class DateTimeChooserComponent implements OnInit {
   selectedMinutes?: number;
 
   minutes: number[] = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
-  hours: number[] = [8, 9, 10, 11, 12, 13];
+  hours: number[] = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
 
   shadowAppointments: Appointment[] = [];
   freeTimes: FreeTime[] | null = null;

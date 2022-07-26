@@ -107,7 +107,7 @@ namespace Appy.Services
 
             // TODO: get schedule, for now just take from 8 to 14
             var startTime = new TimeOnly(8, 0, 0);
-            var endTime = new TimeOnly(14, 0, 0);
+            var endTime = new TimeOnly(20, 0, 0);
 
             // loop through schedule with 5 minutes increment
             var time = startTime;
