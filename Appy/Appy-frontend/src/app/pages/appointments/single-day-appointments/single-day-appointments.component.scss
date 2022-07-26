@@ -107,6 +107,9 @@
 
     &.free-time {
         --status-color: var(--success);
+        & > div {
+            display: none;
+        }
     }
 
     &.taken-time {

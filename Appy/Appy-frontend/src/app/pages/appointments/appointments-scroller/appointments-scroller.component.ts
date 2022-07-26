@@ -44,7 +44,18 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
 
   @Input() showDateControls: boolean = false;
 
-  @Input() shadowAppointments: Appointment[] = [];
+  private _shadowAppointments: Appointment[] = [];
+  @Input() set shadowAppointments(value: Appointment[]) {
+    if (this._shadowAppointments == value)
+      return;
+
+    this._shadowAppointments = value;
+    this.refreshFromToTime();
+  }
+  get shadowAppointments(): Appointment[] {
+    return this._shadowAppointments;
+  }
+
   @Input() freeTimes: FreeTime[] | null = null;
 
   public timeFrom: moment.Moment = moment({ hours: 8 });
@@ -135,6 +146,17 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
             timeTo = app.time.clone().add(app.duration);
         }
       }
+    }
+
+    for (let app of this.shadowAppointments) {
+      if (app.time == null || app.duration == null)
+        continue;
+
+      if (timeFrom == null || app.time.isBefore(timeFrom))
+        timeFrom = app.time.clone();
+
+      if (timeTo == null || app.time?.clone().add(app.duration).isAfter(timeTo))
+        timeTo = app.time.clone().add(app.duration);
     }
 
     let timeFromStamp = (timeFrom ?? moment({ hours: 8 })).unix();

@@ -145,17 +145,17 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
     this.renderedTimeStatuses = [];
 
     if (this.freeTimes != null) {
-      // for (let freeTime of this.freeTimes) {
-      //   let rts: RenderedTimeStatus = {
-      //     top: this.getTopPercentage(freeTime.from),
-      //     height: this.getHeightPercentage(moment.duration(freeTime.toIncludingDuration.diff(freeTime.from))),
-      //     status: "free-time"
-      //   };
+      for (let freeTime of this.freeTimes) {
+        let rts: RenderedTimeStatus = {
+          top: this.getTopPercentage(freeTime.from),
+          height: this.getHeightPercentage(moment.duration(freeTime.toIncludingDuration.diff(freeTime.from))),
+          status: "free-time"
+        };
 
-      //   this.cropRenderedItem(rts);
+        this.cropRenderedItem(rts);
 
-      //   this.renderedTimeStatuses.push(rts);
-      // }
+        this.renderedTimeStatuses.push(rts);
+      }
 
       for (let takenTime of getTakenTimesFromFreeTimes(this.freeTimes, this.timeFrom, this.timeTo)) {
         let rts: RenderedTimeStatus = {
