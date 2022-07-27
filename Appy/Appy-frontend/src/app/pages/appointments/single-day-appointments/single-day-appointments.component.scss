@@ -140,11 +140,18 @@
 .single-appointment {
     position: absolute;
     width: 100%;
-
+    
     border-radius: var(--default-border-radius);
     border: 1px solid var(--input-border-color);
     padding-left: 2px;
     padding-right: 2px;
+
+    display: grid;
+    grid-template-rows: repeat(auto-fit, minmax(20px, max-content));
+    grid-template-columns: max-content;
+    grid-auto-flow: column;
+    column-gap: 10px;
+    align-items: baseline;
 
     &.shadow-appointment {
         opacity: 60%;
@@ -152,7 +159,13 @@
     }
 }
 
+.appointment-time {
+    display: inline;
+    font-size: 0.9rem;
+}
+
 .appointment-service-name {
+    display: inline;
     font-size: 1rem;
 }
 
