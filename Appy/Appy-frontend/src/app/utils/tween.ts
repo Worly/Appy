@@ -17,17 +17,21 @@ export class Tween {
     }
 
     public tweenTo(endValue: number, durationMs: number): void {
-        if (this.running)
-            this.stop();
+        if (this.running && endValue == this.endValue)
+            return;
 
         this.startValue = this.getter();
         this.endValue = endValue;
 
-        this.startTime = Date.now();
+        if (!this.running)
+            this.startTime = Date.now();
+
         this.duration = durationMs;
 
+        if (!this.running)
+            this.intervalId = setInterval(() => this.tick());
+
         this.running = true;
-        this.intervalId = setInterval(() => this.tick());
     }
 
     public stop() {

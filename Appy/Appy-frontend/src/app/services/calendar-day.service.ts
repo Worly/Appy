@@ -1,10 +1,11 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import * as moment from "moment";
-import { map, Observable, Subscriber } from "rxjs";
+import { Observable, takeUntil } from "rxjs";
 import { appConfig } from "../app.config";
 import { Appointment } from "../models/appointment";
 import { CalendarDay, CalendarDayDTO } from "../models/calendar-day";
+import { onUnsubscribed } from "../utils/smart-subscriber";
 import { AppointmentService } from "./appointment.service.ts";
 
 @Injectable({ providedIn: "root" })
@@ -20,24 +21,21 @@ export class CalendarDayService {
                 params: {
                     date: date.format("yyyy-MM-DD")
                 }
-            }).subscribe({
-                next: c => {
-                    let calendarDay = new CalendarDay(c);
+            }).pipe(takeUntil(onUnsubscribed(s)))
+                .subscribe({
+                    next: c => {
+                        let calendarDay = new CalendarDay(c);
 
-                    let dsSub = this.appointmentService.createDatasource(calendarDay.appointments as Appointment[], e => e.date?.isSame(date, "date") == true)
-                        .subscribe(n => {
-                            if (s.closed) {
-                                dsSub.unsubscribe();
-                                return;
-                            }
+                        this.appointmentService.createDatasource(calendarDay.appointments as Appointment[], e => e.date?.isSame(date, "date") == true)
+                            .pipe(takeUntil(onUnsubscribed(s)))
+                            .subscribe(n => {
+                                calendarDay.appointments = n;
+                            });
 
-                            calendarDay.appointments = n;
-                        });
-
-                    s.next(calendarDay);
-                },
-                error: e => s.error(e)
-            });
+                        s.next(calendarDay);
+                    },
+                    error: e => s.error(e)
+                });
         });
     }
 }
