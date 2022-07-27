@@ -11,6 +11,7 @@ import { ServicesComponent } from './pages/services/services.component';
 import { ServiceEditComponent } from './pages/services/service-edit/service-edit.component';
 import { AppointmentsComponent } from './pages/appointments/appointments.component';
 import { AppointmentEditComponent } from './pages/appointments/appointment-edit/appointment-edit.component';
+import { WorkingHoursComponent } from './pages/working-hours/working-hours.component';
 
 const routes: Routes = [
   { path: "login", component: LoginComponent, canActivate: [NotLoggedInGuard] },
@@ -72,7 +73,15 @@ const routes: Routes = [
     data: { isNew: true, detachGroup: "appointments" }
   },
   // #endregion
-  
+
+  // #region WORKING-HOURS
+  {
+    path: "working-hours",
+    component: WorkingHoursComponent,
+    canActivate: [LoggedInGuard],
+  },
+  // #endregion
+
   { path: "**", redirectTo: "/home" }
 ];
 

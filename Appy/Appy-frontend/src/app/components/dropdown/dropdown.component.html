@@ -1,17 +1,16 @@
 <div class="my-container">
-    <app-button [text]="value == null ? 'Select...' : display(value)" look="outlined" borderWidth="1px"
-        [icon]="pickerVisible ? 'caret-up' : 'caret-down'" iconPlacement="right" alignContent="center"
-        (onClick)="togglePicker()">
+    <app-button #mainButton="elementRef" appElementRef
+        [text]="value == null ? (selectString | translate) : display(value)" look="outlined" borderWidth="1px"
+        [icon]="hasIcon ? 'caret-down' : undefined" iconPlacement="right"
+        alignContent="center" (onClick)="contextMenu.toggle()">
     </app-button>
 
-    <div *ngIf="pickerVisible" class="picker">
-        <div>
-            <app-button *ngFor="let item of items" [text]="display(item)" width="100%"
-                [ngClass]="{'selected': value == item}" (onClick)="select(item); $event.stopImmediatePropagation()">
-            </app-button>
-        </div>
+    <app-context-menu #contextMenu [relativeTo]="mainButton.elementRef">
+        <app-button *ngFor="let item of items" [text]="display(item)" [ngClass]="{'selected': value == item}"
+            (onClick)="select(item); $event.stopImmediatePropagation()">
+        </app-button>
         <div *ngIf="items == null || items.length == 0">
             No items...
         </div>
-    </div>
+    </app-context-menu>
 </div>

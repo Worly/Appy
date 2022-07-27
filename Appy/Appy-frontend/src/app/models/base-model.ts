@@ -40,11 +40,23 @@ export abstract class BaseModel {
         this[brokenValidationsSymbol][propertyName] = [];
 
         for (let validation of this.validations) {
-            if (validation.propertyName != propertyName)
+            if (validation.propertyName != propertyName
+                && (validation.responsibleProperties == null || !validation.responsibleProperties.includes(propertyName)))
                 continue;
 
-            if (!validation.isValid())
-                this[brokenValidationsSymbol][propertyName].push(validation.errorCode);
+            if (!validation.isValid()) {
+                if (this[brokenValidationsSymbol][validation.propertyName] == null)
+                    this[brokenValidationsSymbol][validation.propertyName] = [];
+
+                if (!this[brokenValidationsSymbol][validation.propertyName].includes(validation.errorCode))
+                    this[brokenValidationsSymbol][validation.propertyName].push(validation.errorCode);
+            }
+            else {
+                if (this[brokenValidationsSymbol][validation.propertyName] != null) {
+                    let index = this[brokenValidationsSymbol][validation.propertyName].indexOf(validation.errorCode);
+                    this[brokenValidationsSymbol][validation.propertyName].splice(index, 1);
+                }
+            }
         }
     }
 
@@ -86,6 +98,7 @@ export abstract class BaseModel {
 export type Validation = {
     isValid: (() => boolean);
     propertyName: string;
+    responsibleProperties?: string[];
     errorCode: string;
 }
 

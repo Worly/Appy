@@ -1,0 +1,45 @@
+<app-loading *ngIf="workingHours == null"></app-loading>
+<div *ngIf="workingHours != null">
+    <div class="w-title">{{"pages.working-hours.WORKING_HOURS" | translate}}</div>
+
+    <div *ngFor="let day of days" class="single-day">
+        <div class="day-name">{{day.display | translate}}</div>
+        <div *ngIf="getWorkingHoursFor(day.dayOfWeek).length == 0" class="closed-text">
+            {{"pages.working-hours.CLOSED" | translate}}
+        </div>
+
+        <div *ngFor="let wh of getWorkingHoursFor(day.dayOfWeek)" class="single-working-hour">
+            <div>
+                <app-dropdown [items]="hours" [displayFunction]="formatHourMinute" [hasIcon]="false"
+                    [value]="wh.timeFrom?.hours()" (valueChange)="setFromHours(wh, $event)"></app-dropdown>
+                <div class="two-dots">:</div>
+                <app-dropdown [items]="minutes" [displayFunction]="formatHourMinute" [hasIcon]="false"
+                    [value]="wh.timeFrom?.minutes()" (valueChange)="setFromMinutes(wh, $event)"></app-dropdown>
+                <div class="dash">-</div>
+                <app-dropdown [items]="hours" [displayFunction]="formatHourMinute" [hasIcon]="false"
+                    [value]="wh.timeTo?.hours()" (valueChange)="setToHours(wh, $event)"></app-dropdown>
+                <div class="two-dots">:</div>
+                <app-dropdown [items]="minutes" [displayFunction]="formatHourMinute" [hasIcon]="false"
+                    [value]="wh.timeTo?.minutes()" (valueChange)="setToMinutes(wh, $event)"></app-dropdown>
+
+                <app-button icon="trash" color="danger" look="transparent" [style.marginLeft.px]="10"
+                    (onClick)="removeWorkingHour(wh)"></app-button>
+            </div>
+            <div class="w-validation-message">{{ wh.getValidationErrors("timeFrom") | translate }}</div>
+            <div class="w-validation-message">{{ wh.getValidationErrors("timeTo") | translate }}</div>
+        </div>
+
+        <app-button text="{{'pages.working-hours.ADD_WORKING_HOURS' | translate}}" color="success" look="transparent"
+            icon="plus" (onClick)="addWorkingHour(day.dayOfWeek)"></app-button>
+    </div>
+
+    <div *ngIf="this.workingHours.length > 0" class="w-validation-message">
+        {{this.workingHours[0].getValidationErrors("other")| translate}}</div>
+
+    <div class="my-buttons">
+        <app-button class="splitter" [text]="'CANCEL' | translate" color="danger" look="normal" [disabled]="isLoading"
+            (onClick)="cancel()"></app-button>
+        <app-button [text]="'SAVE' | translate" color="success" look="solid" [disabled]="isLoading"
+            [isLoading]="isLoading" (onClick)="save()"></app-button>
+    </div>
+</div>

@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 
 @Component({
   selector: 'app-dropdown',
@@ -27,16 +27,13 @@ export class DropdownComponent implements OnInit {
   @Input()
   displayFunction?: (obj: any) => string;
 
-  pickerVisible: boolean = false;
+  @Input() hasIcon: boolean = true;
+  @Input() selectString: string = "SELECT";
 
-  constructor(private elementRef: ElementRef) { }
+  constructor() { }
 
   ngOnInit(): void {
 
-  }
-
-  togglePicker() {
-    this.pickerVisible = !this.pickerVisible;
   }
 
   select(item: any) {
@@ -44,7 +41,6 @@ export class DropdownComponent implements OnInit {
       this._value = item;
       this.valueChange.emit(this._value);
     }
-    this.pickerVisible = false;
   }
 
   display(item: any) {
@@ -55,12 +51,4 @@ export class DropdownComponent implements OnInit {
     else
       return item;
   }
-
-  @HostListener('document:mousedown', ['$event'])
-  onGlobalClick(event: Event): void {
-    if (!this.elementRef.nativeElement.contains(event.target)) {
-      this.pickerVisible = false;
-    }
-  }
-
 }

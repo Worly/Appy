@@ -18,6 +18,14 @@
     "TODAY": "Today",
     "LOADING_PLEASE_WAIT": "Loading, please wait...",
     "OK": "Ok",
+    "SELECT": "Select",
+    "MONDAY": "Monday",
+    "TUESDAY": "Tuesday",
+    "WEDNESDAY": "Wednesday",
+    "THURSDAY": "Thursday",
+    "FRIDAY": "Friday",
+    "SATURDAY": "Saturday",
+    "SUNDAY": "Sunday",
 
     "pages": {
         "error": {
@@ -96,6 +104,19 @@
                 "MISSING_DATE": "Please choose a date",
                 "MISSING_TIME": "Please choose a time",
                 "TIME_TAKEN": "Selected time is already taken by another appointment"
+            }
+        },
+
+        "working-hours": {
+            "WORKING_HOURS": "Working hours",
+            "CLOSED": "Closed",
+            "ADD_WORKING_HOURS": "Add working hours",
+
+            "errors": {
+                "MISSING_TIME_FROM": "Please choose open time",
+                "MISSING_TIME_TO": "Please choose closing time",
+                "TIMES_NOT_IN_ORDER": "Open time must be before closing time",
+                "TIMES_OVERLAP": "Working hours must not overlap"
             }
         }
     }

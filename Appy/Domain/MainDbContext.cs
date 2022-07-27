@@ -9,6 +9,7 @@ namespace Appy.Domain
         public DbSet<Facility> Facilities { get; set; }
         public DbSet<Service> Services { get; set; }
         public DbSet<Appointment> Appointments { get; set; }
+        public DbSet<WorkingHour> WorkingHours { get; set; }
 
         public MainDbContext(DbContextOptions<MainDbContext> options) : base(options)
         {

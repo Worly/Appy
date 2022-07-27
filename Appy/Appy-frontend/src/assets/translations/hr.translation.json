@@ -18,6 +18,14 @@
     "TODAY": "Danas",
     "LOADING_PLEASE_WAIT": "Učitavanje, molim pričekajte...",
     "OK": "Ok",
+    "SELECT": "Odaberi",
+    "MONDAY": "Ponedjeljak",
+    "TUESDAY": "Utorak",
+    "WEDNESDAY": "Srijeda",
+    "THURSDAY": "Četvrtak",
+    "FRIDAY": "Petak",
+    "SATURDAY": "Subota",
+    "SUNDAY": "Nedjelja",
 
     "pages": {
         "error": {
@@ -96,6 +104,19 @@
                 "MISSING_DATE": "Molim odaberite datum",
                 "MISSING_TIME": "Molim odaberite vrijeme",
                 "TIME_TAKEN": "Odabrano vrijeme je već zauzeto drugim terminom"
+            }
+        },
+
+        "working-hours": {
+            "WORKING_HOURS": "Radni sati",
+            "CLOSED": "Zatvoreno",
+            "ADD_WORKING_HOURS": "Dodaj radne sate",
+
+            "errors": {
+                "MISSING_TIME_FROM": "Molim odaberite vrijeme otvaranja",
+                "MISSING_TIME_TO": "Molim odaberite vrijeme zatvaranja",
+                "TIMES_NOT_IN_ORDER": "Vrijeme otvaranja mora biti prije vremena zatvaranja",
+                "TIMES_OVERLAP": "Radna vremena se ne smiju preklapati"
             }
         }
     }

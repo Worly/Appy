@@ -3,18 +3,6 @@
     display: inline-block;
 }
 
-.picker {
-    position: absolute;
-    left: 0px;
-    top: 100%;
-    transform: translateY(2px);
-    background-color: white;
-    border-radius: var(--default-border-radius);
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    padding: 2px 4px;
-    z-index: 5000;
-}
-
 .selected {
     font-weight: bold;
 }

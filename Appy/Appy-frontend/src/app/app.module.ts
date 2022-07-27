@@ -53,6 +53,7 @@ import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular/material-moment-adapter';
 import { CalendarTodayHeaderComponent } from './components/calendar-today-header/calendar-today-header.component';
 import { DateTimeChooserComponent } from './pages/appointments/appointment-edit/date-time-chooser/date-time-chooser.component';
+import { WorkingHoursComponent } from './pages/working-hours/working-hours.component';
 
 @NgModule({
   declarations: [
@@ -87,7 +88,8 @@ import { DateTimeChooserComponent } from './pages/appointments/appointment-edit/
     ServiceLookupComponent,
     AppointmentsScrollerComponent,
     CalendarTodayHeaderComponent,
-    DateTimeChooserComponent
+    DateTimeChooserComponent,
+    WorkingHoursComponent
   ],
   imports: [
     BrowserModule,
