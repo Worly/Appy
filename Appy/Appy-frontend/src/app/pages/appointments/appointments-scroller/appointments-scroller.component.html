@@ -1,6 +1,6 @@
 <div class="my-container">
     <app-single-day-appointments *ngFor="let data of daysData | filter : onlyVisibleDataFilter" [date]="data.date"
-        [appointments]="data.appointments" [timeFrom]="timeFrom" [timeTo]="timeTo"
+        [appointments]="data.calendarDay?.appointments" [timeFrom]="timeFrom" [timeTo]="timeTo"
         [showDateControls]="showDateControls && data.date.isSame(date, 'date')"
         (dateControlNext)="date = date.clone().add({days: 1})"
         (dateControlPrevious)="date = date.clone().add({days: -1})" (dateControlSelect)="date = $event"

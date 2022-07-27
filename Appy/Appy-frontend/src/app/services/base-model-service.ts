@@ -20,11 +20,18 @@ export class BaseModelService<T extends BaseModel> implements IEntityTracker<T> 
         this.httpClient = this.injector.get(HttpClient);
     }
 
-    private createDatasource(sub: Subscriber<T[]>, datasourceFilterPredicate?: (entity: T) => boolean): Datasource<T> {
+    private createDatasourceInternal(sub: Subscriber<T[]>, datasourceFilterPredicate?: (entity: T) => boolean): Datasource<T> {
         let dc = new Datasource<T>([], sub, datasourceFilterPredicate);
         this.datasources.push(dc);
 
         return dc;
+    }
+
+    public createDatasource(initialData: T[], datasourceFilterPredicate?: (entity: T) => boolean): Observable<T[]> {
+        return new Observable<T[]>(s => {
+            let ds = this.createDatasourceInternal(s, datasourceFilterPredicate);
+            ds.add(initialData);
+        });
     }
 
     public getAll(): Observable<T[]> {
@@ -33,7 +40,7 @@ export class BaseModelService<T extends BaseModel> implements IEntityTracker<T> 
 
     public getAllAdvanced(params: any, datasourceFilterPredicate?: (entity: T) => boolean): Observable<T[]> {
         return new Observable<T[]>(s => {
-            let datasource = this.createDatasource(s, datasourceFilterPredicate);
+            let datasource = this.createDatasourceInternal(s, datasourceFilterPredicate);
 
             this.httpClient.get<any[]>(`${appConfig.apiUrl}${this.controllerName}/getAll`, {
                 params: params

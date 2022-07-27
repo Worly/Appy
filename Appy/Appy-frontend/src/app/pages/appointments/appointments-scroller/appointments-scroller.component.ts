@@ -1,9 +1,10 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import * as moment from 'moment';
 import { Subscription } from 'rxjs';
 import { Appointment } from 'src/app/models/appointment';
+import { CalendarDay } from 'src/app/models/calendar-day';
 import { FreeTime } from 'src/app/models/free-time';
-import { AppointmentService } from 'src/app/services/appointment.service.ts';
+import { CalendarDayService } from 'src/app/services/calendar-day.service';
 import { Tween } from 'src/app/utils/tween';
 
 @Component({
@@ -12,9 +13,6 @@ import { Tween } from 'src/app/utils/tween';
   styleUrls: ['./appointments-scroller.component.scss']
 })
 export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
-
-  daysData: DayData[] = [];
-
   private _daysToShow: number = 1;
   @Input() set daysToShow(value: number) {
     if (this._daysToShow == value)
@@ -58,6 +56,9 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
 
   @Input() freeTimes: FreeTime[] | null = null;
 
+
+  public daysData: DayData[] = [];
+
   public timeFrom: moment.Moment = moment({ hours: 8 });
   public timeTo: moment.Moment = moment({ hours: 20 });
 
@@ -65,7 +66,7 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
   private timeToTween: Tween = new Tween(() => this.timeTo.unix(), v => this.timeTo = moment.unix(v));
 
   constructor(
-    private appointmentService: AppointmentService
+    private calendarDayService: CalendarDayService,
   ) {
   }
 
@@ -98,13 +99,13 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
         if (data == null) {
           data = {
             date: current.clone(),
-            appointments: null
+            calendarDay: null
           };
 
-          data.subscription = this.appointmentService.getAll(current)
-            .subscribe(a => {
+          data.subscription = this.calendarDayService.getAll(current)
+            .subscribe(c => {
               if (data != null) {
-                data.appointments = a;
+                data.calendarDay = c;
                 this.refreshFromToTime();
               }
             });
@@ -134,8 +135,25 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
     let timeTo: moment.Moment | null = null;
 
     for (let daysData of this.daysData.filter(d => d.show)) {
-      if (daysData.appointments) {
-        for (let app of daysData.appointments) {
+      if (daysData.calendarDay == null)
+        continue;
+
+      if (daysData.calendarDay.workingHours) {
+        for (let wh of daysData.calendarDay.workingHours) {
+          if (wh.timeFrom == null || wh.timeTo == null)
+            continue;
+
+          if (timeFrom == null || wh.timeFrom.isBefore(timeFrom))
+            timeFrom = wh.timeFrom.clone();
+
+          if (timeTo == null || wh.timeTo.isAfter(timeTo))
+            timeTo = wh.timeTo.clone();
+        }
+
+      }
+
+      if (daysData.calendarDay.appointments) {
+        for (let app of daysData.calendarDay.appointments) {
           if (app.time == null || app.duration == null)
             continue;
 
@@ -179,7 +197,7 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
 
 type DayData = {
   date: moment.Moment;
-  appointments: Appointment[] | null;
+  calendarDay: CalendarDay | null;
   show?: boolean;
   subscription?: Subscription;
 }
