@@ -10,6 +10,8 @@ export class SmartCaching<keyT, valueT> {
     public showCount: number;
     private cacheCount: number;
 
+    private loadedKey: keyT | null = null;
+
     public onDataLoaded: Subject<Data<keyT, valueT>> = new Subject();
 
     constructor(
@@ -28,6 +30,17 @@ export class SmartCaching<keyT, valueT> {
 
     public get data(): Data<keyT, valueT>[] {
         return this._data;
+    }
+
+    public get singleData(): valueT | null {
+        if (this.loadedKey == null)
+            return null;
+
+        let d = this._data.find(d => this.keyCompareFunction(d.key, this.loadedKey as keyT) == 0);
+        if (d == null)
+            return null;
+
+        return d.data;
     }
 
     public load(key: keyT) {
@@ -73,6 +86,7 @@ export class SmartCaching<keyT, valueT> {
         }
 
         this._data = newData;
+        this.loadedKey = key;
     }
 
     public dispose() {

@@ -1,16 +1,16 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import * as moment from 'moment';
-import { Subscription } from 'rxjs';
 import { Appointment } from 'src/app/models/appointment';
 import { FreeTime } from 'src/app/models/free-time';
 import { AppointmentService } from 'src/app/services/appointment.service.ts';
+import { DateSmartCaching } from 'src/app/utils/smart-caching';
 
 @Component({
   selector: 'app-date-time-chooser',
   templateUrl: './date-time-chooser.component.html',
   styleUrls: ['./date-time-chooser.component.scss']
 })
-export class DateTimeChooserComponent implements OnInit {
+export class DateTimeChooserComponent implements OnInit, OnDestroy {
 
   private _appointment?: Appointment;
   @Input() set appointment(value: Appointment | undefined) {
@@ -64,9 +64,13 @@ export class DateTimeChooserComponent implements OnInit {
   hours: number[] = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
 
   shadowAppointments: Appointment[] = [];
-  freeTimes: FreeTime[] | null = null;
+  public freeTimesSmartCaching: DateSmartCaching<FreeTime[]> = new DateSmartCaching(d => {
+    if (this.appointment == null || this.appointment.service == null || this.appointment.duration == null) {
+      throw new Error("Appointment or its data is null");
+    }
 
-  private freeTimesSubscription?: Subscription;
+    return this.appointmentService.getFreeTimes(d, this.appointment.service.id, this.appointment.duration, this.appointment.id);
+  }, 1);
 
   constructor(
     private appointmentService: AppointmentService
@@ -74,6 +78,10 @@ export class DateTimeChooserComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadFreeTimes();
+  }
+
+  ngOnDestroy(): void {
+    this.freeTimesSmartCaching.dispose();
   }
 
   private refreshShadowAppointments() {
@@ -119,15 +127,16 @@ export class DateTimeChooserComponent implements OnInit {
   }
 
   private loadFreeTimes() {
-    this.freeTimes = null;
+    this.freeTimesSmartCaching.load(this.date);
+    // this.freeTimes = null;
 
-    if (this.freeTimesSubscription)
-      this.freeTimesSubscription.unsubscribe();
+    // if (this.freeTimesSubscription)
+    //   this.freeTimesSubscription.unsubscribe();
 
-    if (this.appointment && this.appointment.service && this.appointment.duration) {
-      this.freeTimesSubscription = this.appointmentService.getFreeTimes(this.date, this.appointment.service.id, this.appointment.duration, this.appointment.id)
-        .subscribe(f => this.freeTimes = f);
-    }
+    // if (this.appointment && this.appointment.service && this.appointment.duration) {
+    //   this.freeTimesSubscription = this.appointmentService.getFreeTimes(this.date, this.appointment.service.id, this.appointment.duration, this.appointment.id)
+    //     .subscribe(f => this.freeTimes = f);
+    // }
   }
 }
 

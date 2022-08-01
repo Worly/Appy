@@ -1,9 +1,8 @@
 import { Location } from '@angular/common';
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Data, ParamMap } from '@angular/router';
 import * as moment from 'moment';
 import { combineLatest, debounceTime, Observable, Subscription } from 'rxjs';
-import { CalendarTodayHeaderComponent } from 'src/app/components/calendar-today-header/calendar-today-header.component';
 import { NotifyDialogService } from 'src/app/components/notify-dialog/notify-dialog.service';
 import { Appointment } from 'src/app/models/appointment';
 import { ServiceDTO } from 'src/app/models/service';
