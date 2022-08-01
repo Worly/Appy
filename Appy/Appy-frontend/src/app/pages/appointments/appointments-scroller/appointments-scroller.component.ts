@@ -5,6 +5,7 @@ import { Appointment } from 'src/app/models/appointment';
 import { CalendarDay } from 'src/app/models/calendar-day';
 import { FreeTime } from 'src/app/models/free-time';
 import { CalendarDayService } from 'src/app/services/calendar-day.service';
+import { Data, DateSmartCaching } from 'src/app/utils/smart-caching';
 import { Tween } from 'src/app/utils/tween';
 
 @Component({
@@ -19,7 +20,8 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
       return;
 
     this._daysToShow = value;
-    this.recalculateDaysData();
+    this.smartCaching.showCount = this._daysToShow;
+    this.load();
   }
   get daysToShow(): number {
     return this._daysToShow;
@@ -31,7 +33,7 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
       return;
 
     this._date = value;
-    this.recalculateDaysData();
+    this.load();
 
     this.dateChange.emit(value);
   }
@@ -56,8 +58,7 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
 
   @Input() freeTimes: FreeTime[] | null = null;
 
-
-  public daysData: DayData[] = [];
+  public smartCaching: DateSmartCaching<CalendarDay> = new DateSmartCaching(d => this.calendarDayService.getAll(d), this.daysToShow);
 
   public timeFrom: moment.Moment = moment({ hours: 8 });
   public timeTo: moment.Moment = moment({ hours: 20 });
@@ -65,68 +66,29 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
   private timeFromTween: Tween = new Tween(() => this.timeFrom.unix(), v => this.timeFrom = moment.unix(v));
   private timeToTween: Tween = new Tween(() => this.timeTo.unix(), v => this.timeTo = moment.unix(v));
 
+  private subs: Subscription[] = [];
+
   constructor(
     private calendarDayService: CalendarDayService,
   ) {
   }
 
   ngOnInit(): void {
-    this.recalculateDaysData();
+    this.subs.push(this.smartCaching.onDataLoaded.subscribe(d => {
+      this.refreshFromToTime();
+    }));
+
+    this.load();
   }
 
   ngOnDestroy(): void {
-    for (let data of this.daysData)
-      data.subscription?.unsubscribe();
+    this.subs.forEach(s => s.unsubscribe());
+
+    this.smartCaching.dispose();
   }
 
-  recalculateDaysData() {
-    if (this.daysData.filter(d => d.show).length != this.daysToShow || !this.daysData.find(d => d.show)?.date?.isSame(this.date, "date")) {
-      let newDaysData: DayData[] = [];
-
-      let firstDate = this.date;
-      let lastDate = this.date.clone().add({ days: this.daysToShow - 1 });
-
-      let numberOfCachedDates = 2;
-
-      let beginDate = firstDate.clone().add({ days: -numberOfCachedDates });
-      let endDate = lastDate.clone().add({ days: numberOfCachedDates });
-
-      var current = beginDate.clone();
-
-      while (current.isSameOrBefore(endDate, "date")) {
-        let data = this.daysData.find(d => d.date.isSame(current, "date"));
-
-        if (data == null) {
-          data = {
-            date: current.clone(),
-            calendarDay: null
-          };
-
-          data.subscription = this.calendarDayService.getAll(current)
-            .subscribe(c => {
-              if (data != null) {
-                data.calendarDay = c;
-                this.refreshFromToTime();
-              }
-            });
-        }
-
-        data.show = current.isSameOrAfter(firstDate) && current.isSameOrBefore(lastDate);
-
-        newDaysData.push(data);
-
-        current = current.clone().add({ days: 1 });
-      }
-
-      // unsubscribe old data
-      for (let oldData of this.daysData) {
-        if (newDaysData.findIndex(d => d.date == oldData.date) == -1)
-          oldData.subscription?.unsubscribe();
-      }
-
-      this.daysData = newDaysData;
-    }
-
+  load() {
+    this.smartCaching.load(this.date);
     this.refreshFromToTime();
   }
 
@@ -134,12 +96,12 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
     let timeFrom: moment.Moment | null = null;
     let timeTo: moment.Moment | null = null;
 
-    for (let daysData of this.daysData.filter(d => d.show)) {
-      if (daysData.calendarDay == null)
+    for (let daysData of this.smartCaching.data.filter(d => d.show)) {
+      if (daysData.data == null)
         continue;
 
-      if (daysData.calendarDay.workingHours) {
-        for (let wh of daysData.calendarDay.workingHours) {
+      if (daysData.data.workingHours) {
+        for (let wh of daysData.data.workingHours) {
           if (wh.timeFrom == null || wh.timeTo == null)
             continue;
 
@@ -152,8 +114,8 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
 
       }
 
-      if (daysData.calendarDay.appointments) {
-        for (let app of daysData.calendarDay.appointments) {
+      if (daysData.data.appointments) {
+        for (let app of daysData.data.appointments) {
           if (app.time == null || app.duration == null)
             continue;
 
@@ -190,14 +152,7 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
     return (this.timeTo.diff(this.timeFrom, "hours", true) / 8) * 100 + "vh";
   }
 
-  onlyVisibleDataFilter(data: DayData): boolean {
+  onlyVisibleDataFilter(data: Data<moment.Moment, CalendarDay>): boolean {
     return data.show == true;
   }
-}
-
-type DayData = {
-  date: moment.Moment;
-  calendarDay: CalendarDay | null;
-  show?: boolean;
-  subscription?: Subscription;
 }
