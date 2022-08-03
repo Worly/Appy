@@ -1,6 +1,6 @@
 # Dockerfile
 
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build-env
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:6.0 AS build-env
 WORKDIR /app
 RUN apt-get update -yq \
     && apt-get install curl gnupg -yq \
