@@ -25,7 +25,7 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v3
         with:
-          context: {{defaultContext}}:Appy
+          context: "{{defaultContext}}:Appy"
           platforms: linux/arm64,linux/amd64
           tags: worly/appy:latest
           push: true
