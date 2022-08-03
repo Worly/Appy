@@ -29,3 +29,9 @@ jobs:
           platforms: linux/arm64,linux/amd64
           tags: worly/appy:latest
           push: true
+      -
+        name: Notify Watchtower
+        uses: wei/curl@master
+        with:
+          args: -H "Authorization: Bearer {{ secrets.WATCHTOWER_TOKEN }}" http://worly.ddns.net:8080/v1/update
+
