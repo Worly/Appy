@@ -33,5 +33,5 @@ jobs:
         name: Notify Watchtower
         uses: wei/curl@master
         with:
-          args: "-H\ \"Authorization:\ Bearer\ ${{secrets.WATCHTOWER_TOKEN}}\"\ http://worly.ddns.net:80/v1/update"
+          args: "http://worly.ddns.net:80/v1/update"
 
