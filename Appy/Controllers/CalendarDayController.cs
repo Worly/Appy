@@ -29,6 +29,7 @@ namespace Appy.Controllers
 
             return Ok(new CalendarDayDTO()
             {
+                Date = date,
                 Appointments = appointments.Select(a => a.GetDTO()).ToList(),
                 WorkingHours = workingHours.Select(w => w.GetDTO()).ToList()
             });

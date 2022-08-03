@@ -11,7 +11,26 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<MainDbContext>(options =>
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("Main"));
+    var connectionString = builder.Configuration.GetConnectionString("Main");
+    if (builder.Environment.IsProduction() && Environment.GetEnvironmentVariable("POSTGRES_HOSTNAME") != null)
+    {
+        var hostname = Environment.GetEnvironmentVariable("POSTGRES_HOSTNAME");
+        var port = Environment.GetEnvironmentVariable("POSTGRES_PORT");
+        if (port == null)
+            throw new ArgumentNullException("POSTGRES_PORT");
+
+        var user = Environment.GetEnvironmentVariable("POSTGRES_USER");
+        if (user == null)
+            throw new ArgumentNullException("POSTGRES_USER");
+
+        var password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
+        if (password == null)
+            throw new ArgumentNullException("POSTGRES_PASSWORD");
+
+        connectionString = $"Server={hostname};Port={port};Database=Appy;Userid={user};Password={password}";
+    }
+
+    options.UseNpgsql(connectionString);
 });
 
 builder.Services.AddSingleton<IJwtService, JwtService>();
