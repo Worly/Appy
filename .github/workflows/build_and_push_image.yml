@@ -31,7 +31,6 @@ jobs:
       #    push: true
       -
         name: Notify Watchtower
-        uses: wei/curl@master
-        with:
-          args: "http://worly.ddns.net:80/v1/update"
+        run: |
+          curl -H "Authorization:\ Bearer ${{secrets.WATCHTOWER_TOKEN}}" http://worly.ddns.net:80/v1/update
 
