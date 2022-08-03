@@ -20,7 +20,7 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
       return;
 
     this._daysToShow = value;
-    this.smartCaching.showCount = this._daysToShow;
+    this.calendarDaySmartCaching.showCount = this._daysToShow;
     this.load();
   }
   get daysToShow(): number {
@@ -58,7 +58,7 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
 
   @Input() freeTimes: FreeTime[] | null = null;
 
-  public smartCaching: DateSmartCaching<CalendarDay> = new DateSmartCaching(d => this.calendarDayService.getAll(d), this.daysToShow);
+  public calendarDaySmartCaching: DateSmartCaching<CalendarDay> = new DateSmartCaching(d => this.calendarDayService.getAll(d), this.daysToShow);
 
   public timeFrom: moment.Moment = moment({ hours: 8 });
   public timeTo: moment.Moment = moment({ hours: 20 });
@@ -74,7 +74,7 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.subs.push(this.smartCaching.onDataLoaded.subscribe(d => {
+    this.subs.push(this.calendarDaySmartCaching.onDataLoaded.subscribe(d => {
       this.refreshFromToTime();
     }));
 
@@ -84,11 +84,11 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subs.forEach(s => s.unsubscribe());
 
-    this.smartCaching.dispose();
+    this.calendarDaySmartCaching.dispose();
   }
 
   load() {
-    this.smartCaching.load(this.date);
+    this.calendarDaySmartCaching.load(this.date);
     this.refreshFromToTime();
   }
 
@@ -96,7 +96,7 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
     let timeFrom: moment.Moment | null = null;
     let timeTo: moment.Moment | null = null;
 
-    for (let daysData of this.smartCaching.data.filter(d => d.show)) {
+    for (let daysData of this.calendarDaySmartCaching.data.filter(d => d.show)) {
       if (daysData.data == null)
         continue;
 

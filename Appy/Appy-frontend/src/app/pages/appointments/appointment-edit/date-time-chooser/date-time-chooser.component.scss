@@ -1,6 +1,7 @@
 .date-time-chooser-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    gap: 10px;
 }
 
 .right-side {
@@ -18,22 +19,39 @@
 .time-chooser-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    gap: 5px;
 }
 
 .hour-buttons {
     height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    align-items: center;
+    display: grid;
+    grid-template-rows: repeat(auto-fit, minmax(30px, 1fr));
+    gap: 2px;
 }
 
 .minutes-buttons {
-    position: fixed;
+    position: sticky;
+    top: 100px;
+
+    height: 70vh;
+
+    display: grid;
+    grid-template-rows: repeat(12, 1fr);
+    gap: 2px;
+}
+
+.time-button {
+    width: 100%;
+    text-align: center;
+    background-color: var(--input-background-color);
+    border-radius: var(--default-border-radius);
+    font-size: 1rem;
+
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
-    align-items: center;
-    right: 20px;
-    gap: 2px;
+    justify-content: center;
+
+    &.selected {
+        box-shadow: 0 0 0 2px var(--danger) inset;
+    }
 }

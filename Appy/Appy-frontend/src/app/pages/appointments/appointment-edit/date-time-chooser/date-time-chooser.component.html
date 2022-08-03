@@ -6,20 +6,26 @@
     <div class="right-side">
         <div class="action-buttons">
             <app-button text="{{'CANCEL' | translate}}" color="danger" look="normal" (onClick)="cancel()"></app-button>
-            <app-button text="{{'OK' | translate}}" color="success" look="solid" (onClick)="ok()" [disabled]="time == null"></app-button>
+            <app-button text="{{'OK' | translate}}" color="success" look="solid" (onClick)="ok()"
+                [disabled]="time == null"></app-button>
         </div>
-        <div class="time-chooser-container">
+        <div *ngIf="hoursData != null && displayHoursData != null && minutesData != null"
+            class="time-chooser-container">
             <div class="hour-buttons">
-                <app-button *ngFor="let h of hours" [text]="h.toString().padStart(2, '0')"
-                    [look]="selectedHours == h ? 'solid' : 'normal'" [color]="selectedHours == h ? 'success' : 'normal'"
-                    (onClick)="selectHours(h)">
-                </app-button>
+                <div *ngFor="let h of displayHoursData" class="time-button w-clickable"
+                    [ngClass]="{'selected': selectedHours == h.time}" (click)="selectHours(h.time)">
+                    {{h.time.toString().padStart(2, '0')}}
+                    <div class="w-overlay"></div>
+                </div>
             </div>
-            <div class="minutes-buttons">
-                <app-button *ngFor="let h of minutes" [text]="h.toString().padStart(2, '0')"
-                    [look]="selectedMinutes == h ? 'solid' : 'normal'"
-                    [color]="selectedMinutes == h ? 'success' : 'normal'" (onClick)="selectMinutes(h)">
-                </app-button>
+            <div class="minutes-buttons-container">
+                <div class="minutes-buttons">
+                    <div *ngFor="let m of minutesData[$any(selectedHours)]" class="time-button w-clickable"
+                        [ngClass]="{'selected': selectedMinutes == m.time}" (click)="selectMinutes(m.time)">
+                        {{m.time.toString().padStart(2, '0')}}
+                        <div class="w-overlay"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
