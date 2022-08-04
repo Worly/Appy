@@ -25,7 +25,8 @@
             "inlineStyleLanguage": "scss",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              "src/manifest.webmanifest"
             ],
             "styles": [
               "src/styles/custom-theme.scss",
@@ -37,7 +38,9 @@
             "scripts": [
               "node_modules/bootstrap/dist/js/bootstrap.js",
               "node_modules/@fortawesome/fontawesome-free/js/all.js"
-            ]
+            ],
+            "serviceWorker": true,
+            "ngswConfigPath": "ngsw-config.json"
           },
           "configurations": {
             "production": {
@@ -99,7 +102,8 @@
             "inlineStyleLanguage": "scss",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              "src/manifest.webmanifest"
             ],
             "styles": [
               "src/styles.scss"
