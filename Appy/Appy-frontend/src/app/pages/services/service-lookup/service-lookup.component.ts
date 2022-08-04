@@ -1,9 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { filter } from 'lodash';
-import * as moment from 'moment';
 import { Service, ServiceDTO } from 'src/app/models/service';
 import { ServiceColorsService } from 'src/app/services/service-colors.service';
 import { ServiceService } from 'src/app/services/service.service';
+import { Duration, utc } from 'moment';
 
 @Component({
   selector: 'app-service-lookup',
@@ -83,7 +82,7 @@ export class ServiceLookupComponent implements OnInit {
     }
   }
 
-  public formatDuration(duration: moment.Duration): string {
-    return moment.utc(duration.asMilliseconds()).format("HH:mm");
+  public formatDuration(duration: Duration): string {
+    return utc(duration.asMilliseconds()).format("HH:mm");
   }
 }

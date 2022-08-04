@@ -1,4 +1,5 @@
-import * as moment from "moment";
+import moment from "moment/moment";
+import { Moment } from "moment";
 
 export class FreeTimeDTO {
     public from: string = "";
@@ -7,9 +8,9 @@ export class FreeTimeDTO {
 }
 
 export class FreeTime {
-    public from: moment.Moment;
-    public to: moment.Moment;
-    public toIncludingDuration: moment.Moment;
+    public from: Moment;
+    public to: Moment;
+    public toIncludingDuration: Moment;
 
     constructor(dto: FreeTimeDTO) {
         this.from = moment(dto.from, "HH:mm:ss");
@@ -19,16 +20,16 @@ export class FreeTime {
 }
 
 export class TakenTime {
-    public from: moment.Moment;
-    public to: moment.Moment;
+    public from: Moment;
+    public to: Moment;
 
-    constructor(from: moment.Moment, to: moment.Moment) {
+    constructor(from: Moment, to: Moment) {
         this.from = from;
         this.to = to;
     }
 }
 
-export function getTakenTimesFromFreeTimes(freeTimes: FreeTime[], startTime: moment.Moment, endTime: moment.Moment, stepInMins: number = 5): TakenTime[] {
+export function getTakenTimesFromFreeTimes(freeTimes: FreeTime[], startTime: Moment, endTime: Moment, stepInMins: number = 5): TakenTime[] {
     let takenTimes: TakenTime[] = [];
 
     let time = startTime.clone();

@@ -3,8 +3,7 @@ import { Injector } from "@angular/core";
 import { catchError, map, Observable, Subscriber, throwError } from "rxjs";
 import { appConfig } from "../app.config";
 import { BaseModel } from "../models/base-model";
-import * as _ from "lodash";
-
+import { isEqual } from "lodash-es";
 
 export class BaseModelService<T extends BaseModel> implements IEntityTracker<T> {
 
@@ -142,7 +141,7 @@ class Datasource<T extends BaseModel> {
     add(entities: T[]) {
         let newEntities: T[] = [];
         for (let newItem of entities) {
-            let oldEntity = this.data.find(o => _.isEqual(o.getId(), newItem.getId()));
+            let oldEntity = this.data.find(o => isEqual(o.getId(), newItem.getId()));
             if (oldEntity == null) {
                 if (this.filterPredicate && !this.filterPredicate(newItem))
                     continue;
@@ -159,7 +158,7 @@ class Datasource<T extends BaseModel> {
     }
 
     update(entity: T) {
-        let oldEntity = this.data.find(o => _.isEqual(o.getId(), entity.getId()));
+        let oldEntity = this.data.find(o => isEqual(o.getId(), entity.getId()));
 
         if (oldEntity == null) {
             this.add([entity]);
@@ -183,14 +182,14 @@ class Datasource<T extends BaseModel> {
             }
         }
 
-        if (this.filterPredicate && !this.filterPredicate(oldEntity)) 
+        if (this.filterPredicate && !this.filterPredicate(oldEntity))
             this.data.splice(this.data.indexOf(oldEntity), 1);
 
         this.subscriber.next([...this.data]);
     }
 
     delete(id: any) {
-        let index = this.data.findIndex(o => _.isEqual(o.getId(), id));
+        let index = this.data.findIndex(o => isEqual(o.getId(), id));
 
         if (index == -1)
             return;

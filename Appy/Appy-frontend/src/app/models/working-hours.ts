@@ -1,5 +1,6 @@
-import * as moment from "moment";
 import { BaseModel, REQUIRED_VALIDATION, Validation } from "./base-model";
+import moment from "moment/moment";
+import { Moment } from "moment";
 
 export class WorkingHourDTO {
     public dayOfWeek?: DayOfWeek;
@@ -9,8 +10,8 @@ export class WorkingHourDTO {
 
 export class WorkingHour extends BaseModel {
     public dayOfWeek?: DayOfWeek;
-    public timeFrom?: moment.Moment;
-    public timeTo?: moment.Moment;
+    public timeFrom?: Moment;
+    public timeTo?: Moment;
 
     override validations: Validation[] = [
         {

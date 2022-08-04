@@ -1,10 +1,10 @@
 import { Injectable, Injector } from "@angular/core";
-import * as moment from "moment";
 import { map, Observable } from "rxjs";
 import { appConfig } from "../app.config";
 import { Appointment } from "../models/appointment";
 import { FreeTime, FreeTimeDTO } from "../models/free-time";
 import { BaseModelService } from "./base-model-service";
+import { Moment, Duration, utc } from "moment";
 
 @Injectable({ providedIn: "root" })
 export class AppointmentService extends BaseModelService<Appointment> {
@@ -12,7 +12,7 @@ export class AppointmentService extends BaseModelService<Appointment> {
         super(injector, "appointment", Appointment);
     }
 
-    public override getAll(date?: moment.Moment): Observable<Appointment[]> {
+    public override getAll(date?: Moment): Observable<Appointment[]> {
         if (date == null)
             throw "Date cannot be null";
 
@@ -21,11 +21,11 @@ export class AppointmentService extends BaseModelService<Appointment> {
         }, e => e.date?.isSame(date, "date") == true);
     }
 
-    public getFreeTimes(date: moment.Moment, serviceId: number, duration: moment.Duration, ignoreAppointmentId?: number): Observable<FreeTime[]> {
+    public getFreeTimes(date: Moment, serviceId: number, duration: Duration, ignoreAppointmentId?: number): Observable<FreeTime[]> {
         let params: any = {
             date: date.format("yyyy-MM-DD"),
             serviceId: serviceId,
-            duration: moment.utc(duration.asMilliseconds()).format("HH:mm:ss")
+            duration: utc(duration.asMilliseconds()).format("HH:mm:ss")
         }
 
         if (ignoreAppointmentId != null)

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import * as moment from 'moment';
+import moment from "moment/moment";
 import { Subscription } from 'rxjs';
 import { DayOfWeek, WorkingHour } from 'src/app/models/working-hours';
 import { TranslateService } from 'src/app/services/translate/translate.service';

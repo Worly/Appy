@@ -1,10 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import * as moment from 'moment';
 import { Subscription } from 'rxjs';
 import { Service } from 'src/app/models/service';
 import { ServiceColorsService } from 'src/app/services/service-colors.service';
 import { ServiceService } from 'src/app/services/service.service';
+import { Duration, utc } from 'moment';
 
 @Component({
   selector: 'app-services',
@@ -36,8 +36,8 @@ export class ServicesComponent implements OnInit, OnDestroy {
     this.subs.push(this.serviceService.getAll().subscribe((s: Service[]) => this.services = s));
   }
 
-  public formatDuration(duration?: moment.Duration): string {
-    return moment.utc(duration?.asMilliseconds()).format("HH:mm");
+  public formatDuration(duration?: Duration): string {
+    return utc(duration?.asMilliseconds()).format("HH:mm");
   }
 
   public goToNew() {

@@ -1,5 +1,4 @@
 import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
-import * as moment from 'moment';
 import { Subscription } from 'rxjs';
 import { Appointment } from 'src/app/models/appointment';
 import { CalendarDay } from 'src/app/models/calendar-day';
@@ -8,6 +7,8 @@ import { WorkingHour } from 'src/app/models/working-hours';
 import { AppointmentService } from 'src/app/services/appointment.service.ts';
 import { DateSmartCaching } from 'src/app/utils/smart-caching';
 import { AppointmentsScrollerComponent } from '../../appointments-scroller/appointments-scroller.component';
+import moment from "moment/moment";
+import { Moment } from 'moment';
 
 @Component({
   selector: 'app-date-time-chooser',
@@ -28,8 +29,8 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
     return this._appointment;
   }
 
-  private _date: moment.Moment = moment();
-  @Input() set date(value: moment.Moment | undefined) {
+  private _date: Moment = moment();
+  @Input() set date(value: Moment | undefined) {
     if (value == null)
       value = moment();
 
@@ -41,12 +42,12 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
     this.refreshShadowAppointments();
     this.load();
   }
-  get date(): moment.Moment {
+  get date(): Moment {
     return this._date;
   }
 
-  private _time: moment.Moment | undefined = undefined;
-  @Input() set time(value: moment.Moment | undefined) {
+  private _time: Moment | undefined = undefined;
+  @Input() set time(value: Moment | undefined) {
     if ((this._time == null && value == null) || (this._time != null && this._time.isSame(value)))
       return;
 
@@ -57,7 +58,7 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
 
     this.refreshShadowAppointments();
   }
-  get time(): moment.Moment | undefined {
+  get time(): Moment | undefined {
     return this._time;
   }
 
@@ -177,16 +178,16 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
     this.displayHoursData = [];
     this.minutesData = {};
 
-    let dayStart: moment.Moment | null = null;
-    let dayEnd: moment.Moment | null = null;
+    let dayStart: Moment | null = null;
+    let dayEnd: Moment | null = null;
 
     if (this.calendarDay?.workingHours) {
       for (let workingHour of this.calendarDay.workingHours as WorkingHour[]) {
         if (dayStart == null || workingHour.timeFrom?.isBefore(dayStart))
-          dayStart = workingHour.timeFrom as moment.Moment;
+          dayStart = workingHour.timeFrom as Moment;
 
         if (dayEnd == null || workingHour.timeTo?.isAfter(dayEnd))
-          dayEnd = workingHour.timeTo as moment.Moment;
+          dayEnd = workingHour.timeTo as Moment;
       }
     }
 
@@ -228,8 +229,8 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
 }
 
 export type DateTimeChooserResult = {
-  date?: moment.Moment;
-  time?: moment.Moment;
+  date?: Moment;
+  time?: Moment;
   ok: boolean;
 }
 
