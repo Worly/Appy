@@ -29,7 +29,7 @@ import { AppInitializerService } from './services/app-initializer.service';
 import { ContextMenuComponent } from './components/context-menu/context-menu.component';
 import { ButtonComponent } from './components/button/button.component';
 import { ElementRefDirective } from './directives/element-ref.directive';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { DialogComponent } from './components/dialog/dialog.component';
 import { FacilityEditComponent } from './pages/facilities/single-facility/facility-edit/facility-edit.component';
 import { SelectedFacilityComponent } from './components/selected-facility/selected-facility.component';
@@ -66,7 +66,6 @@ import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons/faSpinner";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faTrash } from "@fortawesome/free-solid-svg-icons/faTrash";
-import { library } from '@fortawesome/fontawesome-svg-core';
 
 import "moment/locale/hr";
 import "moment/locale/en-gb";
@@ -145,8 +144,8 @@ import "moment/locale/en-gb";
   bootstrap: [AppComponent]
 })
 export class AppModule {
-  constructor() {
-    library.add(
+  constructor(library: FaIconLibrary) {
+    library.addIcons(
       faBars, 
       faSpinner, 
       faAngleLeft, faAngleRight,
