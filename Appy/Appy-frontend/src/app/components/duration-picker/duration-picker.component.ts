@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
-import * as moment from 'moment';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
+import { duration, Duration, utc } from 'moment';
 
 @Component({
   selector: 'app-duration-picker',
@@ -8,14 +8,14 @@ import * as moment from 'moment';
 })
 export class DurationPickerComponent implements OnInit, OnChanges {
 
-  @Input() value?: moment.Duration = moment.duration(0);
-  @Output() valueChange: EventEmitter<moment.Duration> = new EventEmitter();
+  @Input() value?: Duration = duration(0);
+  @Output() valueChange: EventEmitter<Duration> = new EventEmitter();
 
   @Input() includeZero: boolean = false;
   @Input() stepInMinutes: number = 5;
   @Input() numberOfChoices: number = 20;
 
-  durations: moment.Duration[] = [];
+  durations: Duration[] = [];
 
   constructor() { }
 
@@ -29,8 +29,8 @@ export class DurationPickerComponent implements OnInit, OnChanges {
 
   private calcDurations() {
     this.durations = [];
-    let current = moment.duration(0);
-    let step = moment.duration({
+    let current = duration(0);
+    let step = duration({
       minutes: this.stepInMinutes
     });
 
@@ -39,15 +39,15 @@ export class DurationPickerComponent implements OnInit, OnChanges {
 
     for (let i = 0; i < this.numberOfChoices; i++) {
       this.durations.push(current);
-      current = moment.duration(current).add(step);
+      current = duration(current).add(step);
     }
   }
 
-  formatDuration(duration?: moment.Duration): string {
-    return moment.utc(duration?.asMilliseconds()).format("HH:mm");
+  formatDuration(duration?: Duration): string {
+    return utc(duration?.asMilliseconds()).format("HH:mm");
   }
 
-  selectDuration(duration: moment.Duration) {
+  selectDuration(duration: Duration) {
     this.value = duration;
     this.valueChange.emit(duration);
   }

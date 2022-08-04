@@ -1,8 +1,8 @@
-import * as moment from "moment";
 import { Appointment, AppointmentDTO } from "./appointment";
-import { BaseModel, REQUIRED_VALIDATION, Validation } from "./base-model";
-import { ServiceDTO } from "./service";
 import { WorkingHour, WorkingHourDTO } from "./working-hours";
+import moment from "moment/moment";
+import { Moment } from "moment";
+
 
 export class CalendarDayDTO {
     public date?: string;
@@ -11,7 +11,7 @@ export class CalendarDayDTO {
 }
 
 export class CalendarDay {
-    public date?: moment.Moment;
+    public date?: Moment;
     public appointments?: Appointment[];
     public workingHours?: WorkingHour[];
 

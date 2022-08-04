@@ -36,8 +36,6 @@
               "src/styles.scss"
             ],
             "scripts": [
-              "node_modules/bootstrap/dist/js/bootstrap.js",
-              "node_modules/@fortawesome/fontawesome-free/js/all.js"
             ],
             "serviceWorker": true,
             "ngswConfigPath": "ngsw-config.json"

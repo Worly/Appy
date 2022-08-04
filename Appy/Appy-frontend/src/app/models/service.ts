@@ -1,5 +1,5 @@
-import * as moment from "moment";
 import { BaseModel, REQUIRED_VALIDATION, Validation } from "./base-model";
+import { Duration, duration, utc } from "moment";
 
 export class ServiceDTO {
     public id: number = 0;
@@ -11,7 +11,7 @@ export class ServiceDTO {
 export class Service extends BaseModel {
     public id: number;
     public name?: string;
-    public duration?: moment.Duration;
+    public duration?: Duration;
     public colorId?: number;
 
     override validations: Validation[] = [
@@ -37,7 +37,7 @@ export class Service extends BaseModel {
         
         this.id = dto.id;
         this.name = dto.name;
-        this.duration = dto.duration ? moment.duration(dto.duration) : undefined;
+        this.duration = dto.duration ? duration(dto.duration) : undefined;
         this.colorId = dto.colorId;
 
         this.initProperties();
@@ -47,7 +47,7 @@ export class Service extends BaseModel {
         let dto = new ServiceDTO();
         dto.id = this.id;
         dto.name = this.name;
-        dto.duration = this.duration ? moment.utc(this.duration.asMilliseconds()).format("HH:mm:ss") : undefined;
+        dto.duration = this.duration ? utc(this.duration.asMilliseconds()).format("HH:mm:ss") : undefined;
         dto.colorId = this.colorId;
         
         return dto;

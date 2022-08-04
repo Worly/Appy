@@ -30,7 +30,6 @@ import { ContextMenuComponent } from './components/context-menu/context-menu.com
 import { ButtonComponent } from './components/button/button.component';
 import { ElementRefDirective } from './directives/element-ref.directive';
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { fas } from '@fortawesome/free-solid-svg-icons';
 import { DialogComponent } from './components/dialog/dialog.component';
 import { FacilityEditComponent } from './pages/facilities/single-facility/facility-edit/facility-edit.component';
 import { SelectedFacilityComponent } from './components/selected-facility/selected-facility.component';
@@ -56,6 +55,7 @@ import { DateTimeChooserComponent } from './pages/appointments/appointment-edit/
 import { WorkingHoursComponent } from './pages/working-hours/working-hours.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
+import { faAngleLeft, faAngleRight, faBars, faCaretDown, faCaretUp, faEllipsisV, faPen, faPlus, faSpinner, faTimes, faTrash } from '@fortawesome/free-solid-svg-icons';
 
 @NgModule({
   declarations: [
@@ -132,7 +132,15 @@ import { environment } from '../environments/environment';
 })
 export class AppModule {
   constructor(library: FaIconLibrary) {
-    library.addIconPacks(fas);
+    library.addIcons(
+      faBars, 
+      faSpinner, 
+      faAngleLeft, faAngleRight,
+      faTimes, faPlus,
+      faCaretDown, faCaretUp,
+      faTrash, faPen,
+      faEllipsisV,
+      )
   }
 
 }

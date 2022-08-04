@@ -1,5 +1,4 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import * as moment from 'moment';
 import { Subscription } from 'rxjs';
 import { Appointment } from 'src/app/models/appointment';
 import { CalendarDay } from 'src/app/models/calendar-day';
@@ -7,6 +6,8 @@ import { FreeTime } from 'src/app/models/free-time';
 import { CalendarDayService } from 'src/app/services/calendar-day.service';
 import { Data, DateSmartCaching } from 'src/app/utils/smart-caching';
 import { Tween } from 'src/app/utils/tween';
+import moment from "moment/moment";
+import { Moment, unix } from 'moment';
 
 @Component({
   selector: 'app-appointments-scroller',
@@ -27,8 +28,8 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
     return this._daysToShow;
   }
 
-  private _date: moment.Moment = moment();
-  @Input() set date(value: moment.Moment) {
+  private _date: Moment = moment();
+  @Input() set date(value: Moment) {
     if (this.date.isSame(value, "date"))
       return;
 
@@ -37,10 +38,10 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
 
     this.dateChange.emit(value);
   }
-  get date(): moment.Moment {
+  get date(): Moment {
     return this._date;
   }
-  @Output() dateChange: EventEmitter<moment.Moment> = new EventEmitter();
+  @Output() dateChange: EventEmitter<Moment> = new EventEmitter();
 
   @Input() showDateControls: boolean = false;
 
@@ -60,11 +61,11 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
 
   public calendarDaySmartCaching: DateSmartCaching<CalendarDay> = new DateSmartCaching(d => this.calendarDayService.getAll(d), this.daysToShow);
 
-  public timeFrom: moment.Moment = moment({ hours: 8 });
-  public timeTo: moment.Moment = moment({ hours: 20 });
+  public timeFrom: Moment = moment({ hours: 8 });
+  public timeTo: Moment = moment({ hours: 20 });
 
-  private timeFromTween: Tween = new Tween(() => this.timeFrom.unix(), v => this.timeFrom = moment.unix(v));
-  private timeToTween: Tween = new Tween(() => this.timeTo.unix(), v => this.timeTo = moment.unix(v));
+  private timeFromTween: Tween = new Tween(() => this.timeFrom.unix(), v => this.timeFrom = unix(v));
+  private timeToTween: Tween = new Tween(() => this.timeTo.unix(), v => this.timeTo = unix(v));
 
   private subs: Subscription[] = [];
 
@@ -93,8 +94,8 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
   }
 
   refreshFromToTime() {
-    let timeFrom: moment.Moment | null = null;
-    let timeTo: moment.Moment | null = null;
+    let timeFrom: Moment | null = null;
+    let timeTo: Moment | null = null;
 
     for (let daysData of this.calendarDaySmartCaching.data.filter(d => d.show)) {
       if (daysData.data == null)
@@ -152,7 +153,7 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
     return (this.timeTo.diff(this.timeFrom, "hours", true) / 8) * 100 + "vh";
   }
 
-  onlyVisibleDataFilter(data: Data<moment.Moment, CalendarDay>): boolean {
+  onlyVisibleDataFilter(data: Data<Moment, CalendarDay>): boolean {
     return data.show == true;
   }
 }

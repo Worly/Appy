@@ -1,7 +1,6 @@
 import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Data, ParamMap } from '@angular/router';
-import * as moment from 'moment';
 import { combineLatest, debounceTime, Observable, Subscription } from 'rxjs';
 import { NotifyDialogService } from 'src/app/components/notify-dialog/notify-dialog.service';
 import { Appointment } from 'src/app/models/appointment';
@@ -9,6 +8,7 @@ import { ServiceDTO } from 'src/app/models/service';
 import { AppointmentService } from 'src/app/services/appointment.service.ts';
 import { TranslateService } from 'src/app/services/translate/translate.service';
 import { DateTimeChooserResult } from './date-time-chooser/date-time-chooser.component';
+import { duration } from 'moment';
 
 @Component({
   selector: 'app-appointment-edit',
@@ -108,12 +108,12 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
       return;
 
     if (this.appointment?.duration == null) {
-      this.appointment.duration = moment.duration(e.newService.duration);
+      this.appointment.duration = duration(e.newService.duration);
       return;
     }
 
-    if (e.oldService != null && this.appointment.duration.asMilliseconds() == moment.duration(e.oldService.duration).asMilliseconds()) {
-      this.appointment.duration = moment.duration(e.newService.duration);
+    if (e.oldService != null && this.appointment.duration.asMilliseconds() == duration(e.oldService.duration).asMilliseconds()) {
+      this.appointment.duration = duration(e.newService.duration);
       return;
     }
   }

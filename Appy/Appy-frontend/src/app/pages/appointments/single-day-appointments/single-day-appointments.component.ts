@@ -1,10 +1,11 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import * as moment from 'moment';
 import { Subscription } from 'rxjs';
 import { CalendarTodayHeaderComponent } from 'src/app/components/calendar-today-header/calendar-today-header.component';
 import { Appointment } from 'src/app/models/appointment';
 import { FreeTime, getTakenTimesFromFreeTimes } from 'src/app/models/free-time';
 import { ServiceColorsService } from 'src/app/services/service-colors.service';
+import moment from "moment/moment";
+import { Moment, Duration, duration } from "moment";
 
 @Component({
   selector: 'app-single-day-appointments',
@@ -25,38 +26,38 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
     return this._appointments;
   }
 
-  private _date: moment.Moment | null = null;
-  @Input() set date(value: moment.Moment | null) {
+  private _date: Moment | null = null;
+  @Input() set date(value: Moment | null) {
     if (this._date == value)
       return;
 
     this._date = value;
   }
-  public get date(): moment.Moment | null {
+  public get date(): Moment | null {
     return this._date;
   }
 
-  private _timeFrom: moment.Moment = moment({ hours: 0 });
-  @Input() set timeFrom(value: moment.Moment) {
+  private _timeFrom: Moment = moment({ hours: 0 });
+  @Input() set timeFrom(value: Moment) {
     if (this._timeFrom.isSame(value))
       return;
 
     this._timeFrom = value;
     this.render();
   }
-  get timeFrom(): moment.Moment {
+  get timeFrom(): Moment {
     return this._timeFrom;
   }
 
-  private _timeTo: moment.Moment = moment({ hours: 23, minutes: 59 });
-  @Input() set timeTo(value: moment.Moment) {
+  private _timeTo: Moment = moment({ hours: 23, minutes: 59 });
+  @Input() set timeTo(value: Moment) {
     if (this._timeTo.isSame(value))
       return;
 
     this._timeTo = value;
     this.render();
   }
-  get timeTo(): moment.Moment {
+  get timeTo(): Moment {
     return this._timeTo;
   }
 
@@ -87,7 +88,7 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
   @Input() showDateControls: boolean = false;
   @Output() dateControlPrevious: EventEmitter<void> = new EventEmitter();
   @Output() dateControlNext: EventEmitter<void> = new EventEmitter();
-  @Output() dateControlSelect: EventEmitter<moment.Moment> = new EventEmitter();
+  @Output() dateControlSelect: EventEmitter<Moment> = new EventEmitter();
 
   calendarTodayHeaderComponent = CalendarTodayHeaderComponent;
 
@@ -148,7 +149,7 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
       for (let freeTime of this.freeTimes) {
         let rts: RenderedTimeStatus = {
           top: this.getTopPercentage(freeTime.from),
-          height: this.getHeightPercentage(moment.duration(freeTime.toIncludingDuration.diff(freeTime.from))),
+          height: this.getHeightPercentage(duration(freeTime.toIncludingDuration.diff(freeTime.from))),
           status: "free-time"
         };
 
@@ -160,7 +161,7 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
       for (let takenTime of getTakenTimesFromFreeTimes(this.freeTimes, this.timeFrom, this.timeTo)) {
         let rts: RenderedTimeStatus = {
           top: this.getTopPercentage(takenTime.from),
-          height: this.getHeightPercentage(moment.duration(takenTime.to.diff(takenTime.from))),
+          height: this.getHeightPercentage(duration(takenTime.to.diff(takenTime.from))),
           status: "taken-time"
         };
 
@@ -199,15 +200,15 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
     return ra;
   }
 
-  private getTopPercentage(time: moment.Moment): number {
+  private getTopPercentage(time: Moment): number {
     return (time.diff(this.timeFrom) / this.timeTo.diff(this.timeFrom)) * 100
   }
 
-  private getHeightPercentage(duration: moment.Duration): number {
+  private getHeightPercentage(duration: Duration): number {
     return (duration.asMilliseconds() / this.timeTo.diff(this.timeFrom)) * 100;
   }
 
-  private cropRenderedItem(item: {top: number, height: number}) {
+  private cropRenderedItem(item: { top: number, height: number }) {
     if (item.top < 0) {
       item.height += item.top;
       item.top = 0;
@@ -244,7 +245,7 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
     return hours.map(h => { return { hour: h.hour, heightPercentage: h.heightPercentage / hours.length } });
   }
 
-  public getNowDate(): moment.Moment {
+  public getNowDate(): Moment {
     return moment();
   }
 }
