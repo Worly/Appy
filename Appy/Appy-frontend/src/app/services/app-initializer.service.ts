@@ -9,7 +9,7 @@ export class AppInitializerService {
     constructor(private authService: AuthService, private translateService: TranslateService) { }
 
     public initialize(): Promise<void> {
-        updateLocale("en", {
+        updateLocale("en-gb", {
             week: {
                 dow: 1
             }

@@ -29,7 +29,7 @@ import { AppInitializerService } from './services/app-initializer.service';
 import { ContextMenuComponent } from './components/context-menu/context-menu.component';
 import { ButtonComponent } from './components/button/button.component';
 import { ElementRefDirective } from './directives/element-ref.directive';
-import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { DialogComponent } from './components/dialog/dialog.component';
 import { FacilityEditComponent } from './pages/facilities/single-facility/facility-edit/facility-edit.component';
 import { SelectedFacilityComponent } from './components/selected-facility/selected-facility.component';
@@ -55,7 +55,21 @@ import { DateTimeChooserComponent } from './pages/appointments/appointment-edit/
 import { WorkingHoursComponent } from './pages/working-hours/working-hours.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
-import { faAngleLeft, faAngleRight, faBars, faCaretDown, faCaretUp, faEllipsisV, faPen, faPlus, faSpinner, faTimes, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
+import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
+import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
+import { faCaretDown } from "@fortawesome/free-solid-svg-icons/faCaretDown";
+import { faCaretUp } from "@fortawesome/free-solid-svg-icons/faCaretUp";
+import { faEllipsisV } from "@fortawesome/free-solid-svg-icons/faEllipsisV";
+import { faPen } from "@fortawesome/free-solid-svg-icons/faPen";
+import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
+import { faSpinner } from "@fortawesome/free-solid-svg-icons/faSpinner";
+import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
+import { faTrash } from "@fortawesome/free-solid-svg-icons/faTrash";
+import { library } from '@fortawesome/fontawesome-svg-core';
+
+import "moment/locale/hr";
+import "moment/locale/en-gb";
 
 @NgModule({
   declarations: [
@@ -131,8 +145,8 @@ import { faAngleLeft, faAngleRight, faBars, faCaretDown, faCaretUp, faEllipsisV,
   bootstrap: [AppComponent]
 })
 export class AppModule {
-  constructor(library: FaIconLibrary) {
-    library.addIcons(
+  constructor() {
+    library.add(
       faBars, 
       faSpinner, 
       faAngleLeft, faAngleRight,
@@ -140,7 +154,7 @@ export class AppModule {
       faCaretDown, faCaretUp,
       faTrash, faPen,
       faEllipsisV,
-      )
+    );
   }
 
 }
