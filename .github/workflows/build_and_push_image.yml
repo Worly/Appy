@@ -32,5 +32,5 @@ jobs:
       -
         name: Notify Watchtower
         run: |
-          curl -H "Authorization: Bearer ${{secrets.WATCHTOWER_TOKEN}}" http://worly.ddns.net:80/v1/update
+          curl -H "Authorization: Bearer ${{secrets.WATCHTOWER_TOKEN}}" http://worly.ddns.net:9444/v1/update
 
