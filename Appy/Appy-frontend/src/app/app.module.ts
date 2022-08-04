@@ -54,6 +54,8 @@ import { MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular/material-moment-adapte
 import { CalendarTodayHeaderComponent } from './components/calendar-today-header/calendar-today-header.component';
 import { DateTimeChooserComponent } from './pages/appointments/appointment-edit/date-time-chooser/date-time-chooser.component';
 import { WorkingHoursComponent } from './pages/working-hours/working-hours.component';
+import { ServiceWorkerModule } from '@angular/service-worker';
+import { environment } from '../environments/environment';
 
 @NgModule({
   declarations: [
@@ -102,7 +104,13 @@ import { WorkingHoursComponent } from './pages/working-hours/working-hours.compo
     MatDatepickerModule,
     MatNativeDateModule,
     FontAwesomeModule,
-    MatMomentDateModule
+    MatMomentDateModule,
+    ServiceWorkerModule.register('ngsw-worker.js', {
+      enabled: environment.production,
+      // Register the ServiceWorker as soon as the application is stable
+      // or after 30 seconds (whichever comes first).
+      registrationStrategy: 'registerWhenStable:30000'
+    })
   ],
   providers: [
     { provide: RouteReuseStrategy, useClass: CustomReuseStrategy },
