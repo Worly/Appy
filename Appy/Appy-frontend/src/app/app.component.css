@@ -20,7 +20,7 @@
     color: white;
 }
 
-.nav-link {
+.nav-link, .nav-link.active {
     color: white;
     cursor: pointer;
 }
@@ -37,6 +37,6 @@
     margin-left: auto;
 }
 
-:host::ng-deep app-button.navbar-toggler > .my-button {
+:host::ng-deep app-button.my-navbar-toggler > .my-button {
     color: var(--anti-text);
 }

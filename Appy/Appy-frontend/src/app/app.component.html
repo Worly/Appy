@@ -3,7 +3,7 @@
   <nav class="navbar navbar-expand-lg my-navbar static-top">
     <div class="container">
       <a class="navbar-brand" href="home">Appy</a>
-      <app-button class="navbar-toggler" (onClick)="toggleNavbar()" icon="bars" [isCircle]="false" look="transparent"></app-button>
+      <app-button class="my-navbar-toggler" (onClick)="toggleNavbar()" icon="bars" [isCircle]="false" look="transparent"></app-button>
       <div #navbarCollapse class="collapse navbar-collapse" id="navbarResponsive">
         <ul class="navbar-nav ml-auto">
           <li class="nav-item" *ngIf="authService.isLoggedIn() && facilityService.getSelected()">
