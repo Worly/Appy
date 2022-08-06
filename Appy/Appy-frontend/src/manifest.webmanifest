@@ -6,7 +6,7 @@
   "display": "standalone",
   "scope": "./",
   "start_url": "./",
-  "decription": "App for appointments for cosmetic, hair and similar salons and studios.",
+  "description": "App for appointments for cosmetic, hair and similar salons and studios.",
   "categories": ["business", "productivity", "utilities"],
   "screenshots": [
     {
