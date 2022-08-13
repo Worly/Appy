@@ -13,17 +13,20 @@ namespace Appy.Services
         Appointment Edit(int id, AppointmentDTO dto, int facilityId);
         void Delete(int id, int facilityId);
 
-        List<FreeTimeDTO> GetFreeTimes(List<Appointment> appointmentsOfTheDay, Service service, TimeSpan duration);
-        bool IsAppointmentTimeOk(List<Appointment> appointmentsOfTheDay, Appointment appointment);
+        List<FreeTimeDTO> GetFreeTimes(List<Appointment> appointmentsOfTheDay, List<WorkingHour> workingHours, Service service, TimeSpan duration);
+        bool IsAppointmentTimeOk(List<Appointment> appointmentsOfTheDay, List<WorkingHour> workingHours, Appointment appointment);
     }
 
     public class AppointmentService : IAppointmentService
     {
         private MainDbContext context;
 
-        public AppointmentService(MainDbContext context)
+        private IWorkingHourService workingHourService;
+
+        public AppointmentService(MainDbContext context, IWorkingHourService workingHourService)
         {
             this.context = context;
+            this.workingHourService = workingHourService;
         }
 
         public List<Appointment> GetAll(DateOnly date, int facilityId)
@@ -56,7 +59,8 @@ namespace Appy.Services
             };
 
             var sameDayAppointments = GetAll(dto.Date, facilityId);
-            if (!IsAppointmentTimeOk(sameDayAppointments, appointment))
+            var workingHours = workingHourService.GetWorkingHours(dto.Date, facilityId);
+            if (!IsAppointmentTimeOk(sameDayAppointments, workingHours, appointment))
                 throw new ValidationException(nameof(AppointmentDTO.Time), "pages.appointments.errors.TIME_TAKEN");
 
             context.Appointments.Add(appointment);
@@ -81,7 +85,8 @@ namespace Appy.Services
             appointment.Service = service;
 
             var sameDayAppointments = GetAll(dto.Date, facilityId).Where(a => a.Id != appointment.Id).ToList();
-            if (!IsAppointmentTimeOk(sameDayAppointments, appointment))
+            var workingHours = workingHourService.GetWorkingHours(dto.Date, facilityId);
+            if (!IsAppointmentTimeOk(sameDayAppointments, workingHours, appointment))
                 throw new ValidationException(nameof(AppointmentDTO.Time), "pages.appointments.errors.TIME_TAKEN");
 
             context.SaveChanges();
@@ -99,38 +104,30 @@ namespace Appy.Services
             context.SaveChanges();
         }
 
-        public List<FreeTimeDTO> GetFreeTimes(List<Appointment> appointmentsOfTheDay, Service service, TimeSpan duration)
+        public List<FreeTimeDTO> GetFreeTimes(List<Appointment> appointmentsOfTheDay, List<WorkingHour> workingHours, Service service, TimeSpan duration)
         {
             var result = new List<FreeTimeDTO>();
 
             FreeTimeDTO? currentFreeTime = null;
 
-            // TODO: get schedule, for now just take from 8 to 14
-            var startTime = new TimeOnly(8, 0, 0);
-            var endTime = new TimeOnly(20, 0, 0);
+            var startTime = new TimeOnly(0, 0, 0);
+            var endTime = new TimeOnly(23, 55, 0);
 
             // loop through schedule with 5 minutes increment
-            var time = startTime;
-            while (time < endTime)
+            TimeOnly time;
+            for (time = startTime; time < endTime; time = time.AddMinutes(5))
             {
                 bool ok = true;
 
-                // if appointment exceedes schedule duration thats not ok
-                if (time.Add(duration) > endTime)
+                // if appointment exceedes midnight set ok to false
+                if (time.Add(duration) < time)
                     ok = false;
-                else
-                {
-                    // loop through all appointments
-                    foreach (var app in appointmentsOfTheDay)
-                    {
-                        // check if they overlap
-                        if (time < app.Time.Add(app.Duration) && time.Add(duration) > app.Time)
-                        {
-                            ok = false;
-                            break;
-                        }
-                    }
-                }
+                // if any two appointments overlap set ok to false
+                else if (appointmentsOfTheDay.Any(app => Overlap(time, time.Add(duration), app.Time, app.Time.Add(app.Duration))))
+                    ok = false;
+                // if none of working hours contains the appointment set ok to false
+                else if (!workingHours.Any(wh => Contains(wh.TimeFrom, wh.TimeTo, time, time.Add(duration))))
+                    ok = false;
 
                 // if current time is ok and currentFreeTime has not begun, then start it
                 if (ok && currentFreeTime == null)
@@ -148,8 +145,6 @@ namespace Appy.Services
                     result.Add(currentFreeTime);
                     currentFreeTime = null;
                 }
-
-                time = time.AddMinutes(5);
             }
 
             // check one last time if its available in the last slot of the day
@@ -164,9 +159,9 @@ namespace Appy.Services
             return result;
         }
 
-        public bool IsAppointmentTimeOk(List<Appointment> appointmentsOfTheDay, Appointment appointment)
+        public bool IsAppointmentTimeOk(List<Appointment> appointmentsOfTheDay, List<WorkingHour> workingHours, Appointment appointment)
         {
-            var freeTimes = GetFreeTimes(appointmentsOfTheDay, appointment.Service, appointment.Duration);
+            var freeTimes = GetFreeTimes(appointmentsOfTheDay, workingHours, appointment.Service, appointment.Duration);
 
             foreach (var freeTime in freeTimes)
             {
@@ -175,6 +170,16 @@ namespace Appy.Services
             }
 
             return false;
+        }
+
+        private bool Overlap(TimeOnly startA, TimeOnly endA, TimeOnly startB, TimeOnly endB)
+        {
+            return startA < endB && endA > startB;
+        }
+
+        private bool Contains(TimeOnly startOuter, TimeOnly endOuter, TimeOnly startInner, TimeOnly endInner)
+        {
+            return startOuter <= startInner && endOuter >= endInner;
         }
     }
 }
