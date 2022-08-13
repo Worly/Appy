@@ -97,6 +97,8 @@
             "DATE_TIME": "Date-time",
             "DURATION": "Duration",
             "CHOOSE_DATE_TIME": "Choose date-time",
+            "CLOSED": "Facility is closed on this day.",
+            "EDIT_WORKING_HOURS": "Edit working hours",
             
             "errors": {
                 "MISSING_SERVICE": "Please choose a service",

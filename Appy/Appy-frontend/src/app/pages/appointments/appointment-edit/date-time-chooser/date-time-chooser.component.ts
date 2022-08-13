@@ -9,6 +9,7 @@ import { DateSmartCaching } from 'src/app/utils/smart-caching';
 import { AppointmentsScrollerComponent } from '../../appointments-scroller/appointments-scroller.component';
 import moment from "moment/moment";
 import { Moment } from 'moment';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-date-time-chooser',
@@ -85,6 +86,7 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
   private subs: Subscription[] = [];
 
   constructor(
+    private router: Router,
     private appointmentService: AppointmentService
   ) { }
 
@@ -225,6 +227,10 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
         && (dayEnd.minutes() == 0 && h < dayEnd.hours() || dayEnd.minutes() > 0 && h <= dayEnd.hours()))
         this.displayHoursData?.push(hourData);
     }
+  }
+
+  goToWorkingHours() {
+    this.router.navigate(["/working-hours"]);
   }
 }
 

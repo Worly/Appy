@@ -9,7 +9,7 @@
             <app-button text="{{'OK' | translate}}" color="success" look="solid" (onClick)="ok()"
                 [disabled]="time == null"></app-button>
         </div>
-        <div *ngIf="hoursData != null && displayHoursData != null && minutesData != null"
+        <div *ngIf="calendarDay?.workingHours?.length != 0 && hoursData != null && displayHoursData != null && minutesData != null"
             class="time-chooser-container">
             <div class="hour-buttons">
                 <div *ngFor="let h of displayHoursData" class="time-button w-clickable"
@@ -27,6 +27,11 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div *ngIf="calendarDay?.workingHours?.length == 0" class="facility-closed">
+            {{"pages.appointments.CLOSED" | translate}}
+            <app-button icon="pen" text="{{'pages.appointments.EDIT_WORKING_HOURS' | translate}}" (onClick)="goToWorkingHours()"></app-button>
         </div>
     </div>
 </div>

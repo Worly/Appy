@@ -55,3 +55,13 @@
         box-shadow: 0 0 0 2px var(--danger) inset;
     }
 }
+
+.facility-closed {
+    font-size: 1.5rem;
+    display: flex;
+    text-align: center;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
