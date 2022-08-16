@@ -1,6 +1,6 @@
 import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, Data, ParamMap } from '@angular/router';
+import { ActivatedRoute, Data, ParamMap, Router } from '@angular/router';
 import { combineLatest, debounceTime, Observable, Subscription } from 'rxjs';
 import { NotifyDialogService } from 'src/app/components/notify-dialog/notify-dialog.service';
 import { Appointment } from 'src/app/models/appointment';
@@ -8,7 +8,7 @@ import { ServiceDTO } from 'src/app/models/service';
 import { AppointmentService } from 'src/app/services/appointment.service.ts';
 import { TranslateService } from 'src/app/services/translate/translate.service';
 import { DateTimeChooserResult } from './date-time-chooser/date-time-chooser.component';
-import { duration } from 'moment';
+import { duration, utc } from 'moment';
 
 @Component({
   selector: 'app-appointment-edit',
@@ -31,6 +31,7 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
   private subs: Subscription[] = [];
 
   constructor(
+    private router: Router,
     private location: Location,
     private activatedRoute: ActivatedRoute,
     private appointmentService: AppointmentService,
@@ -39,12 +40,29 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
-    this.subs.push(combineLatest([this.activatedRoute.data, this.activatedRoute.paramMap])
-      .pipe(debounceTime(0)).subscribe(([data, paramMap]: [Data, ParamMap]) => {
+    this.subs.push(combineLatest([this.activatedRoute.data, this.activatedRoute.paramMap, this.activatedRoute.queryParamMap])
+      .pipe(debounceTime(0)).subscribe(([data, paramMap, queryParamMap]: [Data, ParamMap, ParamMap]) => {
         this.isNew = data["isNew"] ?? false;
 
-        if (this.isNew)
-          this.appointment = new Appointment();
+        if (this.isNew) {
+          let date = queryParamMap.get("date") ?? undefined;
+          let time = queryParamMap.get("time") ?? undefined;
+          let duration = queryParamMap.get("duration") ?? undefined;
+          let serviceJSON = queryParamMap.get("service");
+          let service: ServiceDTO | undefined;
+          if (serviceJSON != null)
+            service = JSON.parse(serviceJSON);
+
+          this.appointment = new Appointment({
+            id: 0,
+            date: date,
+            time: time,
+            service: service,
+            duration: duration ?? service?.duration
+          });
+
+          this.registerPropertyChanged();
+        }
         else {
           var idParam = paramMap.get("id");
           if (idParam)
@@ -60,6 +78,7 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
   private load(id: number) {
     this.subs.push(this.appointmentService.get(id).subscribe((a: Appointment) => {
       this.appointment = a;
+      this.registerPropertyChanged();
     }));
   }
 
@@ -103,6 +122,26 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
     this.location.back();
   }
 
+  private registerPropertyChanged() {
+    if (this.appointment == null)
+      return;
+
+    this.subs.push(this.appointment.getOnPropertyChanged().subscribe(() => {
+      let date = this.appointment?.date ? this.appointment.date.format("yyyy-MM-DD") : null;
+      let time = this.appointment?.time ? this.appointment.time.format("HH:mm:ss") : null;
+      let duration = this.appointment?.duration ? utc(this.appointment.duration.asMilliseconds()).format("HH:mm:ss") : null;
+      let service = this.appointment?.service ? JSON.stringify(this.appointment.service) : null;
+
+      this.router.navigate([], {
+        relativeTo: this.activatedRoute,
+        queryParams: {
+          date, time, duration, service
+        },
+        replaceUrl: true
+      });
+    }));
+  }
+
   public selectedService(e: { oldService?: ServiceDTO, newService: ServiceDTO }) {
     if (this.appointment == null)
       return;
@@ -128,7 +167,6 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
 
     return result;
   }
-
 
   public editDateTime() {
     if (this.appointment?.service == null) {

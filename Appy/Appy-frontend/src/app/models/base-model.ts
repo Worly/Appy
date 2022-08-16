@@ -1,4 +1,7 @@
+import { Observable, Subject } from "rxjs";
+
 const brokenValidationsSymbol = Symbol("#S-brokenValidations")
+const onPropertyChangedSymbol = Symbol("#S-onPropertyChanged");
 
 export abstract class BaseModel {
     protected validations: Validation[] = [];
@@ -6,6 +9,8 @@ export abstract class BaseModel {
     [brokenValidationsSymbol]: {
         [propertyName: string]: string[]
     } = {};
+
+    [onPropertyChangedSymbol]: Subject<string> = new Subject();
 
     initProperties() {
         for (let p in this) {
@@ -34,6 +39,8 @@ export abstract class BaseModel {
 
     protected propertyChanged(propertyName: string) {
         this.validateProperty(propertyName);
+
+        this[onPropertyChangedSymbol].next(propertyName);
     }
 
     public validateProperty(propertyName: string) {
@@ -92,6 +99,10 @@ export abstract class BaseModel {
 
             this[brokenValidationsSymbol][propertyName].push(errors[propertyName]);
         }
+    }
+
+    public getOnPropertyChanged(): Observable<string> {
+        return this[onPropertyChangedSymbol];
     }
 }
 

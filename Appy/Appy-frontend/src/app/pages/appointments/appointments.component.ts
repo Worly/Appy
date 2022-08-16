@@ -30,6 +30,11 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   }
 
   goToNew() {
-    this.router.navigate(["new"], { relativeTo: this.activatedRoute });
+    this.router.navigate(["new"], {
+      queryParams: {
+        date: this.date.format("yyyy-MM-DD")
+      },
+      relativeTo: this.activatedRoute
+    });
   }
 }
