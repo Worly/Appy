@@ -13,11 +13,13 @@ namespace Appy.Controllers
     {
         private IAppointmentService appointmentService;
         private IServiceService serviceService;
+        private IWorkingHourService workingHourService;
 
-        public AppointmentController(IAppointmentService appointmentService, IServiceService serviceService)
+        public AppointmentController(IAppointmentService appointmentService, IServiceService serviceService, IWorkingHourService workingHourService)
         {
             this.appointmentService = appointmentService;
             this.serviceService = serviceService;
+            this.workingHourService = workingHourService;
         }
 
         [HttpGet("getAll")]
@@ -69,11 +71,12 @@ namespace Appy.Controllers
         {
             var service = this.serviceService.GetById(serviceId, HttpContext.SelectedFacility());
             var appointmentsOfTheDay = this.appointmentService.GetAll(date, HttpContext.SelectedFacility());
+            var workingHours = this.workingHourService.GetWorkingHours(date, HttpContext.SelectedFacility());
 
             if (ignoreAppointmentId.HasValue)
                 appointmentsOfTheDay = appointmentsOfTheDay.Where(o => o.Id != ignoreAppointmentId).ToList();
 
-            return this.appointmentService.GetFreeTimes(appointmentsOfTheDay, service, duration);
+            return this.appointmentService.GetFreeTimes(appointmentsOfTheDay, workingHours, service, duration);
         }
     }
 }

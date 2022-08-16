@@ -2,10 +2,13 @@ import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angu
 import { Subscription } from 'rxjs';
 import { CalendarTodayHeaderComponent } from 'src/app/components/calendar-today-header/calendar-today-header.component';
 import { Appointment } from 'src/app/models/appointment';
-import { FreeTime, getTakenTimesFromFreeTimes } from 'src/app/models/free-time';
+import { FreeTime } from 'src/app/models/free-time';
 import { ServiceColorsService } from 'src/app/services/service-colors.service';
 import moment from "moment/moment";
 import { Moment, Duration, duration } from "moment";
+import { invertTimesCustom } from 'src/app/utils/invert-times';
+import { WorkingHour } from 'src/app/models/working-hours';
+import { cropRenderedInterval, getRenderedInterval, RenderedInterval } from 'src/app/utils/rendered-interval';
 
 @Component({
   selector: 'app-single-day-appointments',
@@ -35,6 +38,18 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
   }
   public get date(): Moment | null {
     return this._date;
+  }
+
+  private _workingHours: WorkingHour[] | null = null;
+  @Input() set workingHours(value: WorkingHour[] | null) {
+    if (this._workingHours == value)
+      return;
+
+    this._workingHours = value;
+    this.renderTimeStatuses();
+  }
+  public get workingHours(): WorkingHour[] | null {
+    return this._workingHours;
   }
 
   private _timeFrom: Moment = moment({ hours: 0 });
@@ -93,9 +108,9 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
   calendarTodayHeaderComponent = CalendarTodayHeaderComponent;
 
   public currentTimeIndicatorTop: number = 0;
-  public renderedAppointments: RenderedAppointment[] = [];
-  public renderedShadowAppointments: RenderedAppointment[] = [];
-  public renderedTimeStatuses: RenderedTimeStatus[] = [];
+  public renderedAppointments: RenderedInterval<Appointment>[] = [];
+  public renderedShadowAppointments: RenderedInterval<Appointment>[] = [];
+  public renderedTimeStatuses: RenderedInterval<string>[] = [];
 
   private subs: Subscription[] = [];
   private interval: any;
@@ -147,27 +162,28 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
 
     if (this.freeTimes != null) {
       for (let freeTime of this.freeTimes) {
-        let rts: RenderedTimeStatus = {
-          top: this.getTopPercentage(freeTime.from),
-          height: this.getHeightPercentage(duration(freeTime.toIncludingDuration.diff(freeTime.from))),
-          status: "free-time"
-        };
-
-        this.cropRenderedItem(rts);
-
-        this.renderedTimeStatuses.push(rts);
+        let ri = getRenderedInterval<string>(this.timeFrom, this.timeTo, "free-time", freeTime.from, duration(freeTime.toIncludingDuration.diff(freeTime.from)));
+        ri = cropRenderedInterval(ri);
+        if (ri)
+          this.renderedTimeStatuses.push(ri);
       }
 
-      for (let takenTime of getTakenTimesFromFreeTimes(this.freeTimes, this.timeFrom, this.timeTo)) {
-        let rts: RenderedTimeStatus = {
-          top: this.getTopPercentage(takenTime.from),
-          height: this.getHeightPercentage(duration(takenTime.to.diff(takenTime.from))),
-          status: "taken-time"
-        };
+      let takenTimes = invertTimesCustom(this.freeTimes, t => t.from, t => t.toIncludingDuration, this.timeFrom, this.timeTo);
+      for (let takenTime of takenTimes) {
+        let ri = getRenderedInterval<string>(this.timeFrom, this.timeTo, "taken-time", takenTime.from, duration(takenTime.to.diff(takenTime.from)));
+        ri = cropRenderedInterval(ri);
+        if (ri)
+          this.renderedTimeStatuses.push(ri);
+      }
+    }
 
-        this.cropRenderedItem(rts);
-
-        this.renderedTimeStatuses.push(rts);
+    if (this.workingHours != null) {
+      let closedTimes = invertTimesCustom(this.workingHours, t => t.timeFrom as Moment, t => t.timeTo as Moment, this.timeFrom, this.timeTo);
+      for (let closedTime of closedTimes) {
+        let ri = getRenderedInterval<string>(this.timeFrom, this.timeTo, "closed-time", closedTime.from, duration(closedTime.to.diff(closedTime.from)));
+        ri = cropRenderedInterval(ri);
+        if (ri)
+          this.renderedTimeStatuses.push(ri);
       }
     }
   }
@@ -176,49 +192,12 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
     this.currentTimeIndicatorTop = (moment().diff(this.timeFrom) / this.timeTo.diff(this.timeFrom)) * 100;
   }
 
-  private getRenderedAppointment(ap: Appointment): RenderedAppointment | null {
-    if (ap.time == null || ap.duration == null || ap.service == null)
-      return null;
-
+  private getRenderedAppointment(ap: Appointment): RenderedInterval<Appointment> | null {
     if (!ap.date?.isSame(this.date, "date"))
       return null;
 
-    let ra: RenderedAppointment = {
-      top: this.getTopPercentage(ap.time),
-      height: this.getHeightPercentage(ap.duration),
-      color: this.serviceColorsService.get(ap.service?.colorId),
-      time: `${ap.time.format("HH:mm")} - ${ap.time.clone().add(ap.duration).format("HH:mm")}`,
-      serviceName: ap.service.name as string
-    };
-
-    if (ra.top < 0 || ra.top >= 100)
-      return null;
-
-    if (ra.top + ra.height > 100)
-      ra.height = 100 - ra.top;
-
-    return ra;
-  }
-
-  private getTopPercentage(time: Moment): number {
-    return (time.diff(this.timeFrom) / this.timeTo.diff(this.timeFrom)) * 100
-  }
-
-  private getHeightPercentage(duration: Duration): number {
-    return (duration.asMilliseconds() / this.timeTo.diff(this.timeFrom)) * 100;
-  }
-
-  private cropRenderedItem(item: { top: number, height: number }) {
-    if (item.top < 0) {
-      item.height += item.top;
-      item.top = 0;
-    }
-
-    if (item.height < 0)
-      item.height = 0;
-
-    if (item.top + item.height > 100)
-      item.height = 100 - item.top;
+    let ri = getRenderedInterval(this.timeFrom, this.timeTo, ap, ap.time as Moment, ap.duration as Duration, this.serviceColorsService.get(ap.service?.colorId))
+    return cropRenderedInterval(ri, true);
   }
 
   // returns arrays of numbers where each number represents a cell in table which shows hours
@@ -248,18 +227,4 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
   public getNowDate(): Moment {
     return moment();
   }
-}
-
-type RenderedAppointment = {
-  top: number;
-  height: number;
-  color: string;
-  time: string;
-  serviceName: string;
-}
-
-type RenderedTimeStatus = {
-  top: number;
-  height: number;
-  status: string;
 }

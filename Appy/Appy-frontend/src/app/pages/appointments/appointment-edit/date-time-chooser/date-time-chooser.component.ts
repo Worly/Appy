@@ -7,8 +7,11 @@ import { WorkingHour } from 'src/app/models/working-hours';
 import { AppointmentService } from 'src/app/services/appointment.service.ts';
 import { DateSmartCaching } from 'src/app/utils/smart-caching';
 import { AppointmentsScrollerComponent } from '../../appointments-scroller/appointments-scroller.component';
-import moment from "moment/moment";
+import moment, { Duration } from "moment/moment";
 import { Moment } from 'moment';
+import { Router } from '@angular/router';
+import { cropRenderedInterval, getRenderedInterval, RenderedInterval } from 'src/app/utils/rendered-interval';
+import { ServiceColorsService } from 'src/app/services/service-colors.service';
 
 @Component({
   selector: 'app-date-time-chooser',
@@ -85,7 +88,9 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
   private subs: Subscription[] = [];
 
   constructor(
-    private appointmentService: AppointmentService
+    private router: Router,
+    private appointmentService: AppointmentService,
+    private serviceColorsService: ServiceColorsService
   ) { }
 
   ngOnInit(): void {
@@ -206,17 +211,41 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
           }
         }
 
+        let renderedAppointments: RenderedInterval<Appointment>[] = [];
+        if (this.calendarDay?.appointments) {
+          for (let ap of this.calendarDay?.appointments) {
+            let ri = getRenderedInterval<Appointment>(time.clone(), time.clone().add({ minutes: 5 }), ap, ap.time as Moment, ap.duration as Duration, this.serviceColorsService.get(ap.service?.colorId));
+            ri = cropRenderedInterval(ri);
+            if (ri)
+              renderedAppointments.push(ri);
+          }
+        }
+
         let minutesData: TimeData = {
           time: m,
-          isWorkingHour: isWorkingHour
+          isWorkingHour: isWorkingHour,
+          renderedAppointments: renderedAppointments
         };
 
         this.minutesData[h].push(minutesData);
       }
 
+      let time = moment({hours: h, minutes: 0});
+
+      let renderedAppointments: RenderedInterval<Appointment>[] = [];
+      if (this.calendarDay?.appointments) {
+        for (let ap of this.calendarDay?.appointments) {
+          let ri = getRenderedInterval<Appointment>(time.clone(), time.clone().add({ hours: 1 }), ap, ap.time as Moment, ap.duration as Duration, this.serviceColorsService.get(ap.service?.colorId));
+          ri = cropRenderedInterval(ri);
+          if (ri)
+            renderedAppointments.push(ri);
+        }
+      }
+
       let hourData: TimeData = {
         time: h,
-        isWorkingHour: this.minutesData[h].some(p => p.isWorkingHour)
+        isWorkingHour: this.minutesData[h].some(p => p.isWorkingHour),
+        renderedAppointments: renderedAppointments
       };
 
       this.hoursData.push(hourData);
@@ -225,6 +254,10 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
         && (dayEnd.minutes() == 0 && h < dayEnd.hours() || dayEnd.minutes() > 0 && h <= dayEnd.hours()))
         this.displayHoursData?.push(hourData);
     }
+  }
+
+  goToWorkingHours() {
+    this.router.navigate(["/working-hours"]);
   }
 }
 
@@ -237,4 +270,5 @@ export type DateTimeChooserResult = {
 type TimeData = {
   time: number;
   isWorkingHour: boolean;
+  renderedAppointments: RenderedInterval<Appointment>[];
 }

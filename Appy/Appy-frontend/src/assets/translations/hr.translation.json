@@ -97,6 +97,8 @@
             "DATE_TIME": "Datum-vrijeme",
             "DURATION": "Trajanje",
             "CHOOSE_DATE_TIME": "Odaberi datum-vrijeme",
+            "CLOSED": "Poslovnica je zatvorena na ovaj dan.",
+            "EDIT_WORKING_HOURS": "Uredi radne sate",
             
             "errors": {
                 "MISSING_SERVICE": "Molim odaberite uslugu",

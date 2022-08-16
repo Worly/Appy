@@ -40,3 +40,9 @@
 :host::ng-deep app-button.my-navbar-toggler > .my-button {
     color: var(--anti-text);
 }
+
+@media (min-width: 992px){
+    .my-navbar-toggler {
+        display: none;
+    }
+}
