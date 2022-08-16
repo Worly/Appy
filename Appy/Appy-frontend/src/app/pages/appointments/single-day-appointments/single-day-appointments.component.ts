@@ -2,10 +2,12 @@ import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angu
 import { Subscription } from 'rxjs';
 import { CalendarTodayHeaderComponent } from 'src/app/components/calendar-today-header/calendar-today-header.component';
 import { Appointment } from 'src/app/models/appointment';
-import { FreeTime, getTakenTimesFromFreeTimes } from 'src/app/models/free-time';
+import { FreeTime } from 'src/app/models/free-time';
 import { ServiceColorsService } from 'src/app/services/service-colors.service';
 import moment from "moment/moment";
 import { Moment, Duration, duration } from "moment";
+import { invertTimesCustom } from 'src/app/utils/invert-times';
+import { WorkingHour } from 'src/app/models/working-hours';
 
 @Component({
   selector: 'app-single-day-appointments',
@@ -35,6 +37,18 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
   }
   public get date(): Moment | null {
     return this._date;
+  }
+
+  private _workingHours: WorkingHour[] | null = null;
+  @Input() set workingHours(value: WorkingHour[] | null) {
+    if (this._workingHours == value)
+      return;
+
+    this._workingHours = value;
+    this.renderTimeStatuses();
+  }
+  public get workingHours(): WorkingHour[] | null {
+    return this._workingHours;
   }
 
   private _timeFrom: Moment = moment({ hours: 0 });
@@ -154,11 +168,11 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
         };
 
         this.cropRenderedItem(rts);
-
         this.renderedTimeStatuses.push(rts);
       }
 
-      for (let takenTime of getTakenTimesFromFreeTimes(this.freeTimes, this.timeFrom, this.timeTo)) {
+      let takenTimes = invertTimesCustom(this.freeTimes, t => t.from, t => t.toIncludingDuration, this.timeFrom, this.timeTo);
+      for (let takenTime of takenTimes) {
         let rts: RenderedTimeStatus = {
           top: this.getTopPercentage(takenTime.from),
           height: this.getHeightPercentage(duration(takenTime.to.diff(takenTime.from))),
@@ -166,7 +180,20 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
         };
 
         this.cropRenderedItem(rts);
+        this.renderedTimeStatuses.push(rts);
+      }
+    }
 
+    if (this.workingHours != null) {
+      let closedTimes = invertTimesCustom(this.workingHours, t => t.timeFrom as Moment, t => t.timeTo as Moment, this.timeFrom, this.timeTo);
+      for (let closedTime of closedTimes) {
+        let rts: RenderedTimeStatus = {
+          top: this.getTopPercentage(closedTime.from),
+          height: this.getHeightPercentage(duration(closedTime.to.diff(closedTime.from))),
+          status: "closed-time"
+        };
+
+        this.cropRenderedItem(rts);
         this.renderedTimeStatuses.push(rts);
       }
     }

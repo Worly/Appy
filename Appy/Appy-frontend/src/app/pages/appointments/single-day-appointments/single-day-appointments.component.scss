@@ -116,6 +116,10 @@
         --status-color: var(--danger);
     }
 
+    &.closed-time {
+        --status-color: var(--input-border-color);
+    }
+
     & > div {
         opacity: 30%;
         width: 100%;
