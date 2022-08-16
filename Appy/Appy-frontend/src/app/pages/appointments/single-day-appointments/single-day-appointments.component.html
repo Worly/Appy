@@ -43,12 +43,12 @@
                 {{ap.time}}
             </div>
             <div class="appointment-service-name">
-                {{ap.serviceName}}
+                {{ap.source.service?.name}}
             </div>
         </div>
     </div>
 
-    <div *ngFor="let rts of renderedTimeStatuses" class="time-status" [ngClass]="rts.status" [style.top]="rts.top + '%'"
+    <div *ngFor="let rts of renderedTimeStatuses" class="time-status" [ngClass]="rts.source" [style.top]="rts.top + '%'"
         [style.height]="rts.height + '%'">
         <div></div>
     </div>
@@ -59,7 +59,7 @@
             {{ap.time}}
         </div>
         <div class="appointment-service-name">
-            {{ap.serviceName}}
+            {{ap.source.service?.name}}
         </div>
     </div>
 
