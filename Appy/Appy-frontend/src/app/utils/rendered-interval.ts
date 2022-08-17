@@ -18,8 +18,6 @@ export function getRenderedInterval<T>(timeFrom: Dayjs, timeTo: Dayjs, source: T
         source: source
     };
 
-    console.log(dayjs().add(dayjs.duration({ minutes: 30 })));
-
     return ri;
 }
 

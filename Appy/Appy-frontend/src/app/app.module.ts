@@ -67,18 +67,24 @@ import { faSpinner } from "@fortawesome/free-solid-svg-icons/faSpinner";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faTrash } from "@fortawesome/free-solid-svg-icons/faTrash";
 
+import dayjs from "dayjs";
 import "dayjs/locale/hr";
 import "dayjs/locale/en-gb";
-import dayjs from "dayjs";
-import * as duration from "dayjs/plugin/duration";
-import * as updateLocale from "dayjs/plugin/updateLocale";
-import * as customParseFormat from "dayjs/plugin/customParseFormat";
-import * as objectSupport from "dayjs/plugin/objectSupport";
+import duration from "dayjs/plugin/duration";
+import updateLocale from "dayjs/plugin/updateLocale";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import objectSupport from "dayjs/plugin/objectSupport";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import isBetween from "dayjs/plugin/isBetween";
 
 dayjs.extend(updateLocale);
 dayjs.extend(customParseFormat);
 dayjs.extend(objectSupport);
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 dayjs.extend(duration);
+dayjs.extend(isBetween);
 
 @NgModule({
   declarations: [
@@ -164,8 +170,6 @@ export class AppModule {
       faTrash, faPen,
       faEllipsisV,
     );
-
-    console.log(dayjs().add(dayjs.duration({ minutes: 30 })));
   }
 
 }

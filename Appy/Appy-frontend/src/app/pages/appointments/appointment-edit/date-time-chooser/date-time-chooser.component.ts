@@ -286,7 +286,7 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
     if (ft == null)
       return;
 
-    let timeOnHour = time.startOf("hour");
+    let timeOnHour = timeOnly(time.startOf("hour"));
     if (timeOnHour.isBetween(timeOnly(ft.from), timeOnly(ft.to), null, "[]"))
       this.time = timeOnHour;
     else
