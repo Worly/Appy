@@ -75,10 +75,10 @@ import * as updateLocale from "dayjs/plugin/updateLocale";
 import * as customParseFormat from "dayjs/plugin/customParseFormat";
 import * as objectSupport from "dayjs/plugin/objectSupport";
 
-dayjs.extend(duration);
 dayjs.extend(updateLocale);
 dayjs.extend(customParseFormat);
 dayjs.extend(objectSupport);
+dayjs.extend(duration);
 
 @NgModule({
   declarations: [
