@@ -12,6 +12,7 @@ import { Moment } from 'moment';
 import { Router } from '@angular/router';
 import { cropRenderedInterval, getRenderedInterval, RenderedInterval } from 'src/app/utils/rendered-interval';
 import { ServiceColorsService } from 'src/app/services/service-colors.service';
+import { timeOnly } from 'src/app/utils/time-utils';
 
 @Component({
   selector: 'app-date-time-chooser',
@@ -65,6 +66,8 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
     return this._time;
   }
 
+  @Input() clickedTime?: Moment;
+
   @Output() finished: EventEmitter<DateTimeChooserResult> = new EventEmitter();
 
   selectedHours?: number;
@@ -95,6 +98,11 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
 
   ngOnInit(): void {
     this.load();
+
+    this.subs.push(this.freeTimesSmartCaching.onDataLoaded.subscribe(e => {
+      if (this.time == null && this.clickedTime != null && e.key.isSame(this.clickedTime, "date"))
+        this.onCalendarClick(this.clickedTime);
+    }))
   }
 
   ngAfterViewInit(): void {
@@ -230,7 +238,7 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
         this.minutesData[h].push(minutesData);
       }
 
-      let time = moment({hours: h, minutes: 0});
+      let time = moment({ hours: h, minutes: 0 });
 
       let renderedAppointments: RenderedInterval<Appointment>[] = [];
       if (this.calendarDay?.appointments) {
@@ -254,6 +262,24 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
         && (dayEnd.minutes() == 0 && h < dayEnd.hours() || dayEnd.minutes() > 0 && h <= dayEnd.hours()))
         this.displayHoursData?.push(hourData);
     }
+  }
+
+  onCalendarClick(time: Moment) {
+    let freeTimes = this.freeTimesSmartCaching.data.find(d => d.key.isSame(time, "date"));
+    if (freeTimes?.data == null)
+      return;
+
+    let ft = freeTimes.data.find(f => timeOnly(f.from).isSameOrBefore(timeOnly(time)) && timeOnly(f.toIncludingDuration).isSameOrAfter(timeOnly(time)));
+    if (ft == null)
+      return;
+
+    this.date = time.clone();
+
+    let timeOnHour = moment({ hours: time.hours() });
+    if (timeOnHour.isBetween(timeOnly(ft.from), timeOnly(ft.to), null, "[]"))
+      this.time = timeOnHour;
+    else
+      this.time = ft.from.clone();
   }
 
   goToWorkingHours() {

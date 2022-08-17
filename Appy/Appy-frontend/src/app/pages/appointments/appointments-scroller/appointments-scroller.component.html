@@ -4,6 +4,7 @@
         [showDateControls]="showDateControls && data.key.isSame(date, 'date')"
         (dateControlNext)="date = date.clone().add({days: 1})"
         (dateControlPrevious)="date = date.clone().add({days: -1})" (dateControlSelect)="date = $event"
+        (onCalendarClick)="calendarClicked($event)"
         [shadowAppointments]="shadowAppointments" [freeTimes]="freeTimes"
         [style.height]="getHeight()">
     </app-single-day-appointments>

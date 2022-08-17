@@ -59,6 +59,8 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
 
   @Input() freeTimes: FreeTime[] | null = null;
 
+  @Output() onCalendarClick: EventEmitter<Moment> = new EventEmitter();
+
   public calendarDaySmartCaching: DateSmartCaching<CalendarDay> = new DateSmartCaching(d => this.calendarDayService.getAll(d), this.daysToShow);
 
   public timeFrom: Moment = moment({ hours: 8 });
@@ -155,5 +157,9 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
 
   onlyVisibleDataFilter(data: Data<Moment, CalendarDay>): boolean {
     return data.show == true;
+  }
+
+  calendarClicked(time: Moment) {
+    this.onCalendarClick.next(time);
   }
 }

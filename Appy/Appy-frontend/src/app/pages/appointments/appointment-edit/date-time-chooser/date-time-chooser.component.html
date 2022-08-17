@@ -1,6 +1,6 @@
 <div class="date-time-chooser-container">
     <app-appointments-scroller [showDateControls]="true" [(date)]="date" [daysToShow]="1"
-        [shadowAppointments]="shadowAppointments" [freeTimes]="freeTimesSmartCaching.singleData">
+        [shadowAppointments]="shadowAppointments" [freeTimes]="freeTimesSmartCaching.singleData" (onCalendarClick)="onCalendarClick($event)">
     </app-appointments-scroller>
 
     <div class="right-side">

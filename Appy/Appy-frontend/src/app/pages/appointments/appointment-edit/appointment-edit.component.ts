@@ -8,7 +8,8 @@ import { ServiceDTO } from 'src/app/models/service';
 import { AppointmentService } from 'src/app/services/appointment.service.ts';
 import { TranslateService } from 'src/app/services/translate/translate.service';
 import { DateTimeChooserResult } from './date-time-chooser/date-time-chooser.component';
-import { duration, utc } from 'moment';
+import { duration, Moment, utc } from 'moment';
+import moment from 'moment';
 
 @Component({
   selector: 'app-appointment-edit',
@@ -19,6 +20,8 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
 
   public isNew: boolean = false;
   public appointment?: Appointment = undefined;
+
+  public clickedTime?: Moment;
 
   public isLoadingSave: boolean = false;
   public isLoadingDelete: boolean = false;
@@ -40,6 +43,11 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
+    let queryParamMap = this.activatedRoute.snapshot.queryParamMap;
+
+    let clickedTimeParam = queryParamMap.get("clickedTime");
+    this.clickedTime = clickedTimeParam ? moment(clickedTimeParam, "HH:mm:ss") : undefined;
+
     this.subs.push(combineLatest([this.activatedRoute.data, this.activatedRoute.paramMap, this.activatedRoute.queryParamMap])
       .pipe(debounceTime(0)).subscribe(([data, paramMap, queryParamMap]: [Data, ParamMap, ParamMap]) => {
         this.isNew = data["isNew"] ?? false;

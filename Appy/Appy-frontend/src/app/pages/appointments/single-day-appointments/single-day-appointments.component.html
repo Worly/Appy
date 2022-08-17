@@ -26,7 +26,7 @@
     </div>
 </div>
 <div class="body-container">
-    <div class="time-background">
+    <div #timeBackground class="time-background" (click)="onTimeBackgroundClick($event)">
         <table>
             <tr *ngFor="let h of getHoursToRender()" [style.height]="(h.heightPercentage * 100) + '%'">
                 <td>
