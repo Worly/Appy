@@ -1,5 +1,7 @@
 import { BaseModel, REQUIRED_VALIDATION, Validation } from "./base-model";
-import { Duration, duration, utc } from "moment";
+import dayjs from "dayjs";
+import { Duration } from "dayjs/plugin/duration";
+import { parseDuration } from "../utils/time-utils";
 
 export class ServiceDTO {
     public id: number = 0;
@@ -34,10 +36,10 @@ export class Service extends BaseModel {
 
     constructor(dto: ServiceDTO = new ServiceDTO()) {
         super();
-        
+
         this.id = dto.id;
         this.name = dto.name;
-        this.duration = dto.duration ? duration(dto.duration) : undefined;
+        this.duration = dto.duration ? parseDuration(dto.duration) : undefined;
         this.colorId = dto.colorId;
 
         this.initProperties();
@@ -47,9 +49,9 @@ export class Service extends BaseModel {
         let dto = new ServiceDTO();
         dto.id = this.id;
         dto.name = this.name;
-        dto.duration = this.duration ? utc(this.duration.asMilliseconds()).format("HH:mm:ss") : undefined;
+        dto.duration = this.duration ? this.duration.format("HH:mm:ss") : undefined;
         dto.colorId = this.colorId;
-        
+
         return dto;
     }
 }

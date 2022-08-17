@@ -1,4 +1,5 @@
-import { Duration, Moment } from "moment";
+import dayjs, { Dayjs } from "dayjs";
+import { Duration } from "dayjs/plugin/duration";
 
 export interface RenderedInterval<T> {
     top: number;
@@ -8,12 +9,12 @@ export interface RenderedInterval<T> {
     source: T;
 }
 
-export function getRenderedInterval<T>(timeFrom: Moment, timeTo: Moment, source: T, time: Moment, duration: Duration, color?: string): RenderedInterval<T> | null {
+export function getRenderedInterval<T>(timeFrom: Dayjs, timeTo: Dayjs, source: T, time: Dayjs, duration: Duration, color?: string): RenderedInterval<T> | null {
     let ri: RenderedInterval<T> = {
         top: (time.diff(timeFrom) / timeTo.diff(timeFrom)) * 100,
         height: (duration.asMilliseconds() / timeTo.diff(timeFrom)) * 100,
         color: color,
-        time: `${time.format("HH:mm")} - ${time.clone().add(duration).format("HH:mm")}`,
+        time: `${time.format("HH:mm")} - ${time.add(duration).format("HH:mm")}`,
         source: source
     };
 

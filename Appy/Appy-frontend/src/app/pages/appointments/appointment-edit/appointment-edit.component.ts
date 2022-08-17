@@ -8,9 +8,9 @@ import { ServiceDTO } from 'src/app/models/service';
 import { AppointmentService } from 'src/app/services/appointment.service.ts';
 import { TranslateService } from 'src/app/services/translate/translate.service';
 import { DateTimeChooserResult } from './date-time-chooser/date-time-chooser.component';
-import { duration, Moment, utc } from 'moment';
-import moment from 'moment';
 import { setUrlParams } from 'src/app/utils/dynamic-url-params';
+import dayjs, { Dayjs } from 'dayjs';
+import { parseDuration } from 'src/app/utils/time-utils';
 
 @Component({
   selector: 'app-appointment-edit',
@@ -22,7 +22,7 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
   public isNew: boolean = false;
   public appointment?: Appointment = undefined;
 
-  public clickedTime?: Moment;
+  public clickedTime?: Dayjs;
 
   public isLoadingSave: boolean = false;
   public isLoadingDelete: boolean = false;
@@ -47,7 +47,7 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
     let queryParamMap = this.activatedRoute.snapshot.queryParamMap;
 
     let clickedTimeParam = queryParamMap.get("clickedTime");
-    this.clickedTime = clickedTimeParam ? moment(clickedTimeParam, "HH:mm:ss") : undefined;
+    this.clickedTime = clickedTimeParam ? dayjs(clickedTimeParam, "HH:mm:ss") : undefined;
 
     this.subs.push(combineLatest([this.activatedRoute.data, this.activatedRoute.paramMap, this.activatedRoute.queryParamMap])
       .pipe(debounceTime(0)).subscribe(([data, paramMap, queryParamMap]: [Data, ParamMap, ParamMap]) => {
@@ -136,9 +136,9 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
       return;
 
     this.subs.push(this.appointment.getOnPropertyChanged().subscribe(() => {
-      let date = this.appointment?.date ? this.appointment.date.format("yyyy-MM-DD") : null;
+      let date = this.appointment?.date ? this.appointment.date.format("YYYY-MM-DD") : null;
       let time = this.appointment?.time ? this.appointment.time.format("HH:mm:ss") : null;
-      let duration = this.appointment?.duration ? utc(this.appointment.duration.asMilliseconds()).format("HH:mm:ss") : null;
+      let duration = this.appointment?.duration ? this.appointment.duration.format("HH:mm:ss") : null;
       let service = this.appointment?.service ? JSON.stringify(this.appointment.service) : null;
 
       setUrlParams(this.router, this.activatedRoute, this.location, {
@@ -152,12 +152,12 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
       return;
 
     if (this.appointment?.duration == null) {
-      this.appointment.duration = duration(e.newService.duration);
+      this.appointment.duration = parseDuration(e.newService.duration as string);
       return;
     }
 
-    if (e.oldService != null && this.appointment.duration.asMilliseconds() == duration(e.oldService.duration).asMilliseconds()) {
-      this.appointment.duration = duration(e.newService.duration);
+    if (e.oldService != null && this.appointment.duration.asMilliseconds() == parseDuration(e.oldService.duration as string).asMilliseconds()) {
+      this.appointment.duration = parseDuration(e.newService.duration as string);
       return;
     }
   }
@@ -193,8 +193,8 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
 
   onDateTimeChooserFinished(result: DateTimeChooserResult) {
     if (result.ok && this.appointment != null) {
-      this.appointment.date = result.date?.clone();
-      this.appointment.time = result.time?.clone();
+      this.appointment.date = result.date;
+      this.appointment.time = result.time;
     }
 
     this.isDateTimeEditing = false;

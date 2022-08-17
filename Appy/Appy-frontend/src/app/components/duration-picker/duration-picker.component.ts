@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
-import { duration, Duration, utc } from 'moment';
+import dayjs from "dayjs";
+import { Duration } from 'dayjs/plugin/duration';
 
 @Component({
   selector: 'app-duration-picker',
@@ -8,7 +9,7 @@ import { duration, Duration, utc } from 'moment';
 })
 export class DurationPickerComponent implements OnInit, OnChanges {
 
-  @Input() value?: Duration = duration(0);
+  @Input() value?: Duration = dayjs.duration(0);
   @Output() valueChange: EventEmitter<Duration> = new EventEmitter();
 
   @Input() includeZero: boolean = false;
@@ -29,22 +30,18 @@ export class DurationPickerComponent implements OnInit, OnChanges {
 
   private calcDurations() {
     this.durations = [];
-    let current = duration(0);
-    let step = duration({
+    let current = dayjs.duration(0);
+    let step = dayjs.duration({
       minutes: this.stepInMinutes
     });
 
     if (!this.includeZero)
-      current.add(step);
+      current = current.add(step);
 
     for (let i = 0; i < this.numberOfChoices; i++) {
       this.durations.push(current);
-      current = duration(current).add(step);
+      current = current.add(step);
     }
-  }
-
-  formatDuration(duration?: Duration): string {
-    return utc(duration?.asMilliseconds()).format("HH:mm");
   }
 
   selectDuration(duration: Duration) {

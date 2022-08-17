@@ -1,13 +1,12 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import dayjs, { Dayjs, unix } from 'dayjs';
 import { Subscription } from 'rxjs';
 import { Appointment } from 'src/app/models/appointment';
 import { CalendarDay } from 'src/app/models/calendar-day';
 import { FreeTime } from 'src/app/models/free-time';
 import { CalendarDayService } from 'src/app/services/calendar-day.service';
 import { Data, DateSmartCaching } from 'src/app/utils/smart-caching';
-import { Tween } from 'src/app/utils/tween';
-import moment from "moment/moment";
-import { Moment, unix } from 'moment';
+import { Tween, TweenManager } from 'src/app/utils/tween';
 
 @Component({
   selector: 'app-appointments-scroller',
@@ -28,8 +27,8 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
     return this._daysToShow;
   }
 
-  private _date: Moment = moment();
-  @Input() set date(value: Moment) {
+  private _date: Dayjs = dayjs();
+  @Input() set date(value: Dayjs) {
     if (this.date.isSame(value, "date"))
       return;
 
@@ -38,10 +37,10 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
 
     this.dateChange.emit(value);
   }
-  get date(): Moment {
+  get date(): Dayjs {
     return this._date;
   }
-  @Output() dateChange: EventEmitter<Moment> = new EventEmitter();
+  @Output() dateChange: EventEmitter<Dayjs> = new EventEmitter();
 
   @Input() showDateControls: boolean = false;
   @Input() appointmentsEditable: boolean = true;
@@ -61,15 +60,16 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
 
   @Input() freeTimes: FreeTime[] | null = null;
 
-  @Output() onCalendarClick: EventEmitter<Moment> = new EventEmitter();
+  @Output() onCalendarClick: EventEmitter<Dayjs> = new EventEmitter();
 
   public calendarDaySmartCaching: DateSmartCaching<CalendarDay> = new DateSmartCaching(d => this.calendarDayService.getAll(d), this.daysToShow);
 
-  public timeFrom: Moment = moment({ hours: 8 });
-  public timeTo: Moment = moment({ hours: 20 });
+  public timeFrom: Dayjs = dayjs({ hours: 8 });
+  public timeTo: Dayjs = dayjs({ hours: 20 });
 
-  private timeFromTween: Tween = new Tween(() => this.timeFrom.unix(), v => this.timeFrom = unix(v));
-  private timeToTween: Tween = new Tween(() => this.timeTo.unix(), v => this.timeTo = unix(v));
+  private timeTweenManager: TweenManager = new TweenManager();
+  private timeFromTween: Tween = new Tween(() => this.timeFrom.unix(), v => this.timeFrom = unix(v), this.timeTweenManager);
+  private timeToTween: Tween = new Tween(() => this.timeTo.unix(), v => this.timeTo = unix(v), this.timeTweenManager);
 
   private subs: Subscription[] = [];
 
@@ -98,8 +98,8 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
   }
 
   refreshFromToTime() {
-    let timeFrom: Moment | null = null;
-    let timeTo: Moment | null = null;
+    let timeFrom: Dayjs | null = null;
+    let timeTo: Dayjs | null = null;
 
     for (let daysData of this.calendarDaySmartCaching.data.filter(d => d.show)) {
       if (daysData.data == null)
@@ -111,10 +111,10 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
             continue;
 
           if (timeFrom == null || wh.timeFrom.isBefore(timeFrom))
-            timeFrom = wh.timeFrom.clone();
+            timeFrom = wh.timeFrom;
 
           if (timeTo == null || wh.timeTo.isAfter(timeTo))
-            timeTo = wh.timeTo.clone();
+            timeTo = wh.timeTo;
         }
 
       }
@@ -125,10 +125,10 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
             continue;
 
           if (timeFrom == null || app.time.isBefore(timeFrom))
-            timeFrom = app.time.clone();
+            timeFrom = app.time;
 
-          if (timeTo == null || app.time?.clone().add(app.duration).isAfter(timeTo))
-            timeTo = app.time.clone().add(app.duration);
+          if (timeTo == null || app.time?.add(app.duration).isAfter(timeTo))
+            timeTo = app.time.add(app.duration);
         }
       }
     }
@@ -138,14 +138,14 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
         continue;
 
       if (timeFrom == null || app.time.isBefore(timeFrom))
-        timeFrom = app.time.clone();
+        timeFrom = app.time;
 
-      if (timeTo == null || app.time?.clone().add(app.duration).isAfter(timeTo))
-        timeTo = app.time.clone().add(app.duration);
+      if (timeTo == null || app.time?.add(app.duration).isAfter(timeTo))
+        timeTo = app.time.add(app.duration);
     }
 
-    let timeFromStamp = (timeFrom ?? moment({ hours: 8 })).unix();
-    let timeToStamp = (timeTo ?? moment({ hours: 14 })).unix();
+    let timeFromStamp = (timeFrom ?? dayjs({ hours: 8 })).unix();
+    let timeToStamp = (timeTo ?? dayjs({ hours: 14 })).unix();
 
     let duration = 300;
 
@@ -157,7 +157,7 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
     return (this.timeTo.diff(this.timeFrom, "hours", true) / 8) * 100 + "vh";
   }
 
-  onlyVisibleDataFilter(data: Data<Moment, CalendarDay>): boolean {
+  onlyVisibleDataFilter(data: Data<Dayjs, CalendarDay>): boolean {
     return data.show == true;
   }
 
@@ -165,7 +165,7 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
     return this.hiddenAppointmentIds == null || !this.hiddenAppointmentIds.includes(ap.id);
   }
 
-  calendarClicked(time: Moment) {
+  calendarClicked(time: Dayjs) {
     this.onCalendarClick.next(time);
   }
 }

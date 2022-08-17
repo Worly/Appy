@@ -11,12 +11,14 @@
         </div>
         <div class="time">
             {{appointment.time?.format("HH:mm")}} -
-            {{appointment.time?.clone()?.add(appointment.duration)?.format("HH:mm")}}
+            {{appointment.time?.add($any(appointment.duration))?.format("HH:mm")}}
         </div>
     </div>
     <div *ngIf="editable" class="action-bar">
-        <app-button icon="trash" color="danger" look="solid" text="{{'DELETE' | translate}}" (onClick)="onDelete()">
+        <app-button icon="trash" color="danger" look="solid" text="{{'DELETE' | translate}}" [disabled]="isLoadingDelete"
+            [isLoading]="isLoadingDelete" (onClick)="onDelete()">
         </app-button>
-        <app-button style="margin-left: auto" icon="pen" text="{{'EDIT' | translate}}" (onClick)="goToEdit()"></app-button>
+        <app-button style="margin-left: auto" icon="pen" text="{{'EDIT' | translate}}" (onClick)="goToEdit()">
+        </app-button>
     </div>
 </div>

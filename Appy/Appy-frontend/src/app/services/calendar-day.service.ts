@@ -1,12 +1,12 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
+import { Dayjs } from "dayjs";
 import { Observable, takeUntil } from "rxjs";
 import { appConfig } from "../app.config";
 import { Appointment } from "../models/appointment";
 import { CalendarDay, CalendarDayDTO } from "../models/calendar-day";
 import { onUnsubscribed } from "../utils/smart-subscriber";
 import { AppointmentService } from "./appointment.service.ts";
-import { Moment } from "moment";
 
 @Injectable({ providedIn: "root" })
 export class CalendarDayService {
@@ -15,11 +15,11 @@ export class CalendarDayService {
         private appointmentService: AppointmentService
     ) { }
 
-    public getAll(date: Moment): Observable<CalendarDay> {
+    public getAll(date: Dayjs): Observable<CalendarDay> {
         return new Observable<CalendarDay>(s => {
             this.httpClient.get<CalendarDayDTO>(appConfig.apiUrl + "CalendarDay/getAll", {
                 params: {
-                    date: date.format("yyyy-MM-DD")
+                    date: date.format("YYYY-MM-DD")
                 }
             }).pipe(takeUntil(onUnsubscribed(s)))
                 .subscribe({

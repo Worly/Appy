@@ -1,10 +1,11 @@
 import { Injectable, Injector } from "@angular/core";
+import { Dayjs } from "dayjs";
+import { Duration } from "dayjs/plugin/duration";
 import { map, Observable } from "rxjs";
 import { appConfig } from "../app.config";
 import { Appointment } from "../models/appointment";
 import { FreeTime, FreeTimeDTO } from "../models/free-time";
 import { BaseModelService } from "./base-model-service";
-import { Moment, Duration, utc } from "moment";
 
 @Injectable({ providedIn: "root" })
 export class AppointmentService extends BaseModelService<Appointment> {
@@ -12,20 +13,20 @@ export class AppointmentService extends BaseModelService<Appointment> {
         super(injector, "appointment", Appointment);
     }
 
-    public override getAll(date?: Moment): Observable<Appointment[]> {
+    public override getAll(date?: Dayjs): Observable<Appointment[]> {
         if (date == null)
             throw "Date cannot be null";
 
         return this.getAllAdvanced({
-            date: date.format("yyyy-MM-DD")
+            date: date.format("YYYY-MM-DD")
         }, e => e.date?.isSame(date, "date") == true);
     }
 
-    public getFreeTimes(date: Moment, serviceId: number, duration: Duration, ignoreAppointmentId?: number): Observable<FreeTime[]> {
+    public getFreeTimes(date: Dayjs, serviceId: number, duration: Duration, ignoreAppointmentId?: number): Observable<FreeTime[]> {
         let params: any = {
-            date: date.format("yyyy-MM-DD"),
+            date: date.format("YYYY-MM-DD"),
             serviceId: serviceId,
-            duration: utc(duration.asMilliseconds()).format("HH:mm:ss")
+            duration: duration.format("HH:mm:ss")
         }
 
         if (ignoreAppointmentId != null)

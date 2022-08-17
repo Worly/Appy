@@ -9,7 +9,7 @@
                 look="transparent" [curvedBottomLeft]="true" [curvedTopLeft]="true" [curvedBottomRight]="false"
                 [curvedTopRight]="false" (onClick)="dateControlPrevious.emit()">
             </app-button>
-            <app-button class="date-button" [text]="date?.format('ddd DD.MM.yyyy') ?? ''" alignContent="center"
+            <app-button class="date-button" [text]="date?.format('ddd DD.MM.YYYY') ?? ''" alignContent="center"
                 look="transparent" [curved]="false" (onClick)="calendarDialog.open()">
             </app-button>
             <app-button class="arrow-button" icon="angle-right" alignContent="center" [isCircle]="false"

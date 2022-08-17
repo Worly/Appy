@@ -9,14 +9,14 @@
     <div class="button-shadow button-group">
         <app-button icon="angle-left" alignContent="center" [isCircle]="false" [curved]="false"
             [curvedBottomLeft]="true" [curvedTopLeft]="true" [curvedBottomRight]="false" [curvedTopRight]="false"
-            (onClick)="date = date.clone().add({days: -1})">
+            (onClick)="date = date.add(-1, 'days')">
         </app-button>
-        <app-button class="date-button" [text]="date.format('DD.MM.yyyy')" alignContent="center" [curved]="false"
+        <app-button class="date-button" [text]="date.format('DD.MM.YYYY')" alignContent="center" [curved]="false"
             (onClick)="calendarDialog.open()">
         </app-button>
         <app-button icon="angle-right" alignContent="center" [isCircle]="false" [curved]="false"
             [curvedBottomLeft]="false" [curvedTopLeft]="false" [curvedBottomRight]="true" [curvedTopRight]="true"
-            (onClick)="date = date.clone().add({days: 1})">
+            (onClick)="date = date.add(1, 'days')">
         </app-button>
     </div>
 </div>

@@ -1,5 +1,5 @@
+import { Dayjs } from "dayjs";
 import { Observable, Subject, Subscription } from "rxjs";
-import { Moment } from "moment";
 
 export class SmartCaching<keyT, valueT> {
 
@@ -98,14 +98,14 @@ export class SmartCaching<keyT, valueT> {
     }
 }
 
-export class DateSmartCaching<valueT> extends SmartCaching<Moment, valueT> {
+export class DateSmartCaching<valueT> extends SmartCaching<Dayjs, valueT> {
     constructor(
-        load: (key: Moment) => Observable<valueT>,
+        load: (key: Dayjs) => Observable<valueT>,
         showCount: number = 1,
         cacheCount: number = 2) {
         super(
-            (date: Moment, add: number) => date.clone().add({ days: add }),
-            (left: Moment, right: Moment) => {
+            (date: Dayjs, add: number) => date.add(add, "days"),
+            (left: Dayjs, right: Dayjs) => {
                 if (left.isBefore(right, "date"))
                     return -1;
                 else if (left.isSame(right, "date"))

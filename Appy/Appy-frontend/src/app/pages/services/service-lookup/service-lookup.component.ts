@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Duration } from 'dayjs/plugin/duration';
 import { Service, ServiceDTO } from 'src/app/models/service';
 import { ServiceColorsService } from 'src/app/services/service-colors.service';
 import { ServiceService } from 'src/app/services/service.service';
-import { Duration, utc } from 'moment';
 
 @Component({
   selector: 'app-service-lookup',
@@ -80,9 +80,5 @@ export class ServiceLookupComponent implements OnInit {
       if (service.name?.toLowerCase().includes(se))
         this.filteredServices.push(service);
     }
-  }
-
-  public formatDuration(duration: Duration): string {
-    return utc(duration.asMilliseconds()).format("HH:mm");
   }
 }

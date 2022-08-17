@@ -11,16 +11,16 @@
         <div *ngFor="let wh of getWorkingHoursFor(day.dayOfWeek)" class="single-working-hour">
             <div>
                 <app-dropdown [items]="hours" [displayFunction]="formatHourMinute" [hasIcon]="false"
-                    [value]="wh.timeFrom?.hours()" (valueChange)="setFromHours(wh, $event)"></app-dropdown>
+                    [value]="wh.timeFrom?.hour()" (valueChange)="setFromHours(wh, $event)"></app-dropdown>
                 <div class="two-dots">:</div>
                 <app-dropdown [items]="minutes" [displayFunction]="formatHourMinute" [hasIcon]="false"
-                    [value]="wh.timeFrom?.minutes()" (valueChange)="setFromMinutes(wh, $event)"></app-dropdown>
+                    [value]="wh.timeFrom?.minute()" (valueChange)="setFromMinutes(wh, $event)"></app-dropdown>
                 <div class="dash">-</div>
                 <app-dropdown [items]="hours" [displayFunction]="formatHourMinute" [hasIcon]="false"
-                    [value]="wh.timeTo?.hours()" (valueChange)="setToHours(wh, $event)"></app-dropdown>
+                    [value]="wh.timeTo?.hour()" (valueChange)="setToHours(wh, $event)"></app-dropdown>
                 <div class="two-dots">:</div>
                 <app-dropdown [items]="minutes" [displayFunction]="formatHourMinute" [hasIcon]="false"
-                    [value]="wh.timeTo?.minutes()" (valueChange)="setToMinutes(wh, $event)"></app-dropdown>
+                    [value]="wh.timeTo?.minute()" (valueChange)="setToMinutes(wh, $event)"></app-dropdown>
 
                 <app-button icon="trash" color="danger" look="transparent" [style.marginLeft.px]="10"
                     (onClick)="removeWorkingHour(wh)"></app-button>

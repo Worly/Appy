@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { min, Subscription } from 'rxjs';
 import { Appointment } from 'src/app/models/appointment';
 import { CalendarDay } from 'src/app/models/calendar-day';
 import { FreeTime } from 'src/app/models/free-time';
@@ -7,12 +7,16 @@ import { WorkingHour } from 'src/app/models/working-hours';
 import { AppointmentService } from 'src/app/services/appointment.service.ts';
 import { DateSmartCaching } from 'src/app/utils/smart-caching';
 import { AppointmentsScrollerComponent } from '../../appointments-scroller/appointments-scroller.component';
-import moment, { Duration } from "moment/moment";
-import { Moment } from 'moment';
 import { Router } from '@angular/router';
 import { cropRenderedInterval, getRenderedInterval, RenderedInterval } from 'src/app/utils/rendered-interval';
 import { ServiceColorsService } from 'src/app/services/service-colors.service';
 import { timeOnly } from 'src/app/utils/time-utils';
+import dayjs from "dayjs";
+import "dayjs/plugin/isSameOrAfter";
+import "dayjs/plugin/isSameOrBefore";
+import "dayjs/plugin/isBetween";
+import { Dayjs } from "dayjs";
+import { Duration } from "dayjs/plugin/duration";
 
 @Component({
   selector: 'app-date-time-chooser',
@@ -33,13 +37,13 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
     return this._appointment;
   }
 
-  private _date: Moment = moment();
-  @Input() set date(value: Moment | undefined) {
+  private _date: Dayjs = dayjs();
+  @Input() set date(value: Dayjs | undefined) {
     if (this.startDate == null)
       this.startDate = value;
 
     if (value == null)
-      value = moment();
+      value = dayjs();
 
     if (this._date.isSame(value, "date"))
       return;
@@ -49,31 +53,31 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
     this.refreshShadowAppointments();
     this.load();
   }
-  get date(): Moment {
+  get date(): Dayjs {
     return this._date;
   }
 
-  private _time: Moment | undefined = undefined;
-  @Input() set time(value: Moment | undefined) {
+  private _time: Dayjs | undefined = undefined;
+  @Input() set time(value: Dayjs | undefined) {
     if ((this._time == null && value == null) || (this._time != null && this._time.isSame(value)))
       return;
 
     this._time = value;
 
-    this.selectedHours = this.time?.hours() ?? undefined;
-    this.selectedMinutes = this.time?.minutes() ?? undefined;
+    this.selectedHours = this.time?.hour() ?? undefined;
+    this.selectedMinutes = this.time?.minute() ?? undefined;
 
     this.refreshShadowAppointments();
   }
-  get time(): Moment | undefined {
+  get time(): Dayjs | undefined {
     return this._time;
   }
 
-  @Input() clickedTime?: Moment;
+  @Input() clickedTime?: Dayjs;
 
   @Output() finished: EventEmitter<DateTimeChooserResult> = new EventEmitter();
 
-  private startDate?: Moment;
+  private startDate?: Dayjs;
 
   selectedHours?: number;
   selectedMinutes?: number;
@@ -146,7 +150,7 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
 
   private updateTime() {
     if (this.selectedHours != null && this.selectedMinutes != null)
-      this.time = moment({ hours: this.selectedHours, minutes: this.selectedMinutes });
+      this.time = dayjs({ hour: this.selectedHours, minutes: this.selectedMinutes });
     else
       this.time = undefined;
   }
@@ -198,16 +202,16 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
     this.displayHoursData = [];
     this.minutesData = {};
 
-    let dayStart: Moment | null = null;
-    let dayEnd: Moment | null = null;
+    let dayStart: Dayjs | null = null;
+    let dayEnd: Dayjs | null = null;
 
     if (this.calendarDay?.workingHours) {
       for (let workingHour of this.calendarDay.workingHours as WorkingHour[]) {
         if (dayStart == null || workingHour.timeFrom?.isBefore(dayStart))
-          dayStart = workingHour.timeFrom as Moment;
+          dayStart = workingHour.timeFrom as Dayjs;
 
         if (dayEnd == null || workingHour.timeTo?.isAfter(dayEnd))
-          dayEnd = workingHour.timeTo as Moment;
+          dayEnd = workingHour.timeTo as Dayjs;
       }
     }
 
@@ -217,7 +221,7 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
       this.minutesData[h] = [];
 
       for (let m = 0; m < 60; m += 5) {
-        let time = moment({ hours: h, minutes: m });
+        let time = dayjs({ hour: h, minute: m });
 
         let isWorkingHour: boolean = false;
 
@@ -231,7 +235,7 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
         let renderedAppointments: RenderedInterval<Appointment>[] = [];
         if (appointments) {
           for (let ap of appointments) {
-            let ri = getRenderedInterval<Appointment>(time.clone(), time.clone().add({ minutes: 5 }), ap, ap.time as Moment, ap.duration as Duration, this.serviceColorsService.get(ap.service?.colorId));
+            let ri = getRenderedInterval<Appointment>(time, time.add(5, "minutes"), ap, ap.time as Dayjs, ap.duration as Duration, this.serviceColorsService.get(ap.service?.colorId));
             ri = cropRenderedInterval(ri);
             if (ri)
               renderedAppointments.push(ri);
@@ -247,12 +251,12 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
         this.minutesData[h].push(minutesData);
       }
 
-      let time = moment({ hours: h, minutes: 0 });
+      let time = dayjs({ hour: h });
 
       let renderedAppointments: RenderedInterval<Appointment>[] = [];
       if (appointments) {
         for (let ap of appointments) {
-          let ri = getRenderedInterval<Appointment>(time.clone(), time.clone().add({ hours: 1 }), ap, ap.time as Moment, ap.duration as Duration, this.serviceColorsService.get(ap.service?.colorId));
+          let ri = getRenderedInterval<Appointment>(time, time.add(1, "hour"), ap, ap.time as Dayjs, ap.duration as Duration, this.serviceColorsService.get(ap.service?.colorId));
           ri = cropRenderedInterval(ri);
           if (ri)
             renderedAppointments.push(ri);
@@ -267,13 +271,13 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
 
       this.hoursData.push(hourData);
       if (dayStart != null && dayEnd != null
-        && h >= dayStart.hours()
-        && (dayEnd.minutes() == 0 && h < dayEnd.hours() || dayEnd.minutes() > 0 && h <= dayEnd.hours()))
+        && h >= dayStart.hour()
+        && (dayEnd.minute() == 0 && h < dayEnd.hour() || dayEnd.minute() > 0 && h <= dayEnd.hour()))
         this.displayHoursData?.push(hourData);
     }
   }
 
-  onCalendarClick(time: Moment) {
+  onCalendarClick(time: Dayjs) {
     let freeTimes = this.freeTimesSmartCaching.data.find(d => d.key.isSame(this.date, "date"));
     if (freeTimes?.data == null)
       return;
@@ -282,23 +286,20 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
     if (ft == null)
       return;
 
-    let timeOnHour = moment({ hours: time.hours() });
+    let timeOnHour = timeOnly(time.startOf("hour"));
     if (timeOnHour.isBetween(timeOnly(ft.from), timeOnly(ft.to), null, "[]"))
       this.time = timeOnHour;
     else
-      this.time = ft.from.clone();
+      this.time = ft.from;
   }
 
   getContainsSelection(hours: number, minutes: number): boolean {
-    let time = moment({
-      hours: hours,
-      minutes: minutes
-    });
+    let time = dayjs({ hour: hours, minute: minutes });
 
     if (this.appointment?.duration == null || this.appointment?.time == null)
       return false;
 
-    return time.isBetween(this.appointment.time, this.appointment.time.clone().add(this.appointment.duration), null, "[)");
+    return time.isBetween(this.appointment.time, this.appointment.time.add(this.appointment.duration), null, "[)");
   }
 
   goToWorkingHours() {
@@ -307,8 +308,8 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
 }
 
 export type DateTimeChooserResult = {
-  date?: Moment;
-  time?: Moment;
+  date?: Dayjs;
+  time?: Dayjs;
   ok: boolean;
 }
 

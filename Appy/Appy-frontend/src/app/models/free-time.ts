@@ -1,5 +1,5 @@
-import moment from "moment/moment";
-import { Moment } from "moment";
+import dayjs from "dayjs";
+import { Dayjs } from "dayjs";
 
 export class FreeTimeDTO {
     public from: string = "";
@@ -8,13 +8,13 @@ export class FreeTimeDTO {
 }
 
 export class FreeTime {
-    public from: Moment;
-    public to: Moment;
-    public toIncludingDuration: Moment;
+    public from: Dayjs;
+    public to: Dayjs;
+    public toIncludingDuration: Dayjs;
 
     constructor(dto: FreeTimeDTO) {
-        this.from = moment(dto.from, "HH:mm:ss");
-        this.to = moment(dto.to, "HH:mm:ss");
-        this.toIncludingDuration = moment(dto.toIncludingDuration, "HH:mm:ss");
+        this.from = dayjs(dto.from, "HH:mm:ss");
+        this.to = dayjs(dto.to, "HH:mm:ss");
+        this.toIncludingDuration = dayjs(dto.toIncludingDuration, "HH:mm:ss");
     }
 }

@@ -16,7 +16,7 @@ import { AttachDetachHooksService } from './services/attach-detach-hooks.service
 import { InvokeDirective } from './directives/invoke-directive/invoke.directive';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
+import { DateAdapter, MatNativeDateModule, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 import { AuthHttpInterceptor } from './services/auth/auth-http-interceptor.service';
 import { LoginComponent } from './pages/login/login.component';
 import { ErrorTranslateInterceptor } from './services/errors/error-translate.service';
@@ -50,8 +50,6 @@ import { ServiceLookupComponent } from './pages/services/service-lookup/service-
 import { AppointmentsScrollerComponent } from './pages/appointments/appointments-scroller/appointments-scroller.component';
 import { FilterPipe } from './pipes/filter.pipe';
 import { FormatDurationPipe } from './pipes/format-duration.pipe';
-import { MatMomentDateModule } from '@angular/material-moment-adapter';
-import { MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular/material-moment-adapter';
 import { CalendarTodayHeaderComponent } from './components/calendar-today-header/calendar-today-header.component';
 import { DateTimeChooserComponent } from './pages/appointments/appointment-edit/date-time-chooser/date-time-chooser.component';
 import { WorkingHoursComponent } from './pages/working-hours/working-hours.component';
@@ -69,8 +67,29 @@ import { faSpinner } from "@fortawesome/free-solid-svg-icons/faSpinner";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faTrash } from "@fortawesome/free-solid-svg-icons/faTrash";
 
-import "moment/locale/hr";
-import "moment/locale/en-gb";
+import dayjs from "dayjs";
+import "dayjs/locale/hr";
+import "dayjs/locale/en-gb";
+import updateLocale from "dayjs/plugin/updateLocale";
+import localeData from "dayjs/plugin/localeData";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import objectSupport from "dayjs/plugin/objectSupport";
+import utc from "dayjs/plugin/utc";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import isBetween from "dayjs/plugin/isBetween";
+import duration from "dayjs/plugin/duration";
+import { DayjsDateAdapter, MAT_DAYJS_DATE_ADAPTER_OPTIONS, MAT_DAYJS_DATE_FORMATS } from './utils/material-dayjs-adapter';
+
+dayjs.extend(updateLocale);
+dayjs.extend(localeData);
+dayjs.extend(customParseFormat);
+dayjs.extend(objectSupport);
+dayjs.extend(utc);
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
+dayjs.extend(isBetween);
+dayjs.extend(duration);
 
 @NgModule({
   declarations: [
@@ -121,7 +140,6 @@ import "moment/locale/en-gb";
     MatDatepickerModule,
     MatNativeDateModule,
     FontAwesomeModule,
-    MatMomentDateModule,
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: environment.production,
       // Register the ServiceWorker as soon as the application is stable
@@ -139,7 +157,9 @@ import "moment/locale/en-gb";
       deps: [Router, RouteReuseStrategy], multi: true
     },
     { provide: APP_INITIALIZER, useFactory: appInitializerFactory, deps: [AppInitializerService], multi: true },
-    { provide: MAT_MOMENT_DATE_ADAPTER_OPTIONS, useValue: { useUtc: true } },
+    { provide: MAT_DAYJS_DATE_ADAPTER_OPTIONS, useValue: { useUtc: true } },
+    { provide: DateAdapter, useClass: DayjsDateAdapter, deps: [MAT_DATE_LOCALE, MAT_DAYJS_DATE_ADAPTER_OPTIONS], },
+    { provide: MAT_DATE_FORMATS, useValue: MAT_DAYJS_DATE_FORMATS },
     { provide: HTTP_INTERCEPTORS, useClass: AuthHttpInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: FacilityInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorTranslateInterceptor, multi: true },
@@ -150,8 +170,8 @@ import "moment/locale/en-gb";
 export class AppModule {
   constructor(library: FaIconLibrary) {
     library.addIcons(
-      faBars, 
-      faSpinner, 
+      faBars,
+      faSpinner,
       faAngleLeft, faAngleRight,
       faTimes, faPlus,
       faCaretDown, faCaretUp,

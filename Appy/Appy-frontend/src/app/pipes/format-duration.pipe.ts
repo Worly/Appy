@@ -1,15 +1,15 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { Duration, utc } from 'moment';
 import { TranslateService } from '../services/translate/translate.service';
+import { Duration } from "dayjs/plugin/duration";
 
 @Pipe({ name: 'formatDuration' })
 export class FormatDurationPipe implements PipeTransform {
     constructor(
         private translateService: TranslateService
-    ) {}
+    ) { }
 
     transform(duration: Duration): string {
-        let parts = [];
+        let parts: string[] = [];
 
         // return nothing when the duration is falsy or not correctly parsed (P0D)
         if (!duration || duration.toISOString() === "P0D")

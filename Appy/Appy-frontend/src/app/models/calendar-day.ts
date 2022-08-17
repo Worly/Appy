@@ -1,8 +1,7 @@
 import { Appointment, AppointmentDTO } from "./appointment";
 import { WorkingHour, WorkingHourDTO } from "./working-hours";
-import moment from "moment/moment";
-import { Moment } from "moment";
-
+import dayjs from "dayjs";
+import { Dayjs } from "dayjs";
 
 export class CalendarDayDTO {
     public date?: string;
@@ -11,12 +10,12 @@ export class CalendarDayDTO {
 }
 
 export class CalendarDay {
-    public date?: Moment;
+    public date?: Dayjs;
     public appointments?: Appointment[];
     public workingHours?: WorkingHour[];
 
     constructor(dto: CalendarDayDTO = new CalendarDayDTO()) {
-        this.date = dto.date ? moment(dto.date) : undefined;
+        this.date = dto.date ? dayjs(dto.date) : undefined;
         this.appointments = dto.appointments ? dto.appointments.map(a => new Appointment(a)) : undefined;
         this.workingHours = dto.workingHours ? dto.workingHours.map(w => new WorkingHour(w)) : undefined;
     }

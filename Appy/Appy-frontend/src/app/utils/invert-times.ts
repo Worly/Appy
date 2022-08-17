@@ -1,42 +1,26 @@
-import moment, { Moment } from "moment";
+import { Dayjs } from "dayjs";
+import { timeOnly } from "./time-utils";
 
 export interface TimeInterval {
-    from: Moment;
-    to: Moment;
+    from: Dayjs;
+    to: Dayjs;
 }
 
-export function invertTimes(times: TimeInterval[], timeStart: Moment, timeEnd: Moment): TimeInterval[] {
+export function invertTimes(times: TimeInterval[], timeStart: Dayjs, timeEnd: Dayjs): TimeInterval[] {
     return invertTimesCustom<TimeInterval>(times, t => t.from, t => t.to, timeStart, timeEnd);
 }
 
-export function invertTimesCustom<T>(timesT: T[], fromSelector: ((t: T) => Moment), toSelector: ((t: T) => Moment), timeStart: Moment, timeEnd: Moment): TimeInterval[] {
-    timeStart = moment({
-        hours: timeStart.hours(),
-        minute: timeStart.minutes(),
-        seconds: timeStart.seconds()
-    });
-
-    timeEnd = moment({
-        hours: timeEnd.hours(),
-        minute: timeEnd.minutes(),
-        seconds: timeEnd.seconds()
-    });
+export function invertTimesCustom<T>(timesT: T[], fromSelector: ((t: T) => Dayjs), toSelector: ((t: T) => Dayjs), timeStart: Dayjs, timeEnd: Dayjs): TimeInterval[] {
+    timeStart = timeOnly(timeStart);
+    timeEnd = timeOnly(timeEnd);
 
     // duplicate times array and map DateTime to time only to be sure we are dealing with time only
     let times = timesT.map(t => {
         let from = fromSelector(t);
         let to = toSelector(t);
         return {
-            from: moment({
-                hours: from.hours(),
-                minute: from.minutes(),
-                seconds: from.seconds()
-            }),
-            to: moment({
-                hours: to.hours(),
-                minute: to.minutes(),
-                seconds: to.seconds()
-            })
+            from: timeOnly(from),
+            to: timeOnly(to)
         };
     });
 
