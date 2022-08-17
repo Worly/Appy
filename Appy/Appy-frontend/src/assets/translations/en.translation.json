@@ -26,6 +26,13 @@
     "FRIDAY": "Friday",
     "SATURDAY": "Saturday",
     "SUNDAY": "Sunday",
+    "HOUR": "hour",
+    "HOURS": "hours",
+    "MINUTE": "minute",
+    "MINUTES": "minutes",
+    "SECOND": "second",
+    "SECONDS": "seconds",
+    "AND": "and",
 
     "pages": {
         "error": {

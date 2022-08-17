@@ -10,6 +10,7 @@ import { TranslateService } from 'src/app/services/translate/translate.service';
 import { DateTimeChooserResult } from './date-time-chooser/date-time-chooser.component';
 import { duration, Moment, utc } from 'moment';
 import moment from 'moment';
+import { setUrlParams } from 'src/app/utils/dynamic-url-params';
 
 @Component({
   selector: 'app-appointment-edit',
@@ -140,12 +141,8 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
       let duration = this.appointment?.duration ? utc(this.appointment.duration.asMilliseconds()).format("HH:mm:ss") : null;
       let service = this.appointment?.service ? JSON.stringify(this.appointment.service) : null;
 
-      this.router.navigate([], {
-        relativeTo: this.activatedRoute,
-        queryParams: {
-          date, time, duration, service
-        },
-        replaceUrl: true
+      setUrlParams(this.router, this.activatedRoute, this.location, {
+        date, time, duration, service
       });
     }));
   }

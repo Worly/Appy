@@ -44,6 +44,8 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
   @Output() dateChange: EventEmitter<Moment> = new EventEmitter();
 
   @Input() showDateControls: boolean = false;
+  @Input() appointmentsEditable: boolean = true;
+  @Input() hiddenAppointmentIds?: number[]
 
   private _shadowAppointments: Appointment[] = [];
   @Input() set shadowAppointments(value: Appointment[]) {
@@ -157,6 +159,10 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
 
   onlyVisibleDataFilter(data: Data<Moment, CalendarDay>): boolean {
     return data.show == true;
+  }
+
+  notInHiddenFilter(ap: Appointment): boolean {
+    return this.hiddenAppointmentIds == null || !this.hiddenAppointmentIds.includes(ap.id);
   }
 
   calendarClicked(time: Moment) {

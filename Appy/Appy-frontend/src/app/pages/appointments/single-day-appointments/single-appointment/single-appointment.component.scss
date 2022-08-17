@@ -1,0 +1,30 @@
+:host {
+    display: block;
+    min-width: min(60vw, 400px);
+    min-height: 20vh;
+}
+
+.title {
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.service {
+    font-size: 1rem;
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.date-time {
+    font-size: 1rem;
+    display: flex;
+    gap: 10px;
+}
+
+.action-bar {
+    display: flex;
+    gap: 5px;
+    margin-top: 15px;
+}

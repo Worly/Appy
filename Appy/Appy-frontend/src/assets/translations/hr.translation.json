@@ -26,6 +26,13 @@
     "FRIDAY": "Petak",
     "SATURDAY": "Subota",
     "SUNDAY": "Nedjelja",
+    "HOUR": "sat",
+    "HOURS": "sata",
+    "MINUTE": "minuta",
+    "MINUTES": "minuta",
+    "SECOND": "sekunda",
+    "SECONDS": "sekundi",
+    "AND": "i",
 
     "pages": {
         "error": {

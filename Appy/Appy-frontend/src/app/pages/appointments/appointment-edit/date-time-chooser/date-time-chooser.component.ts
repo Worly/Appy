@@ -35,6 +35,9 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
 
   private _date: Moment = moment();
   @Input() set date(value: Moment | undefined) {
+    if (this.startDate == null)
+      this.startDate = value;
+
     if (value == null)
       value = moment();
 
@@ -69,6 +72,8 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
   @Input() clickedTime?: Moment;
 
   @Output() finished: EventEmitter<DateTimeChooserResult> = new EventEmitter();
+
+  private startDate?: Moment;
 
   selectedHours?: number;
   selectedMinutes?: number;
@@ -167,7 +172,9 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
     this.displayHoursData = null;
     this.hoursData = null;
     this.minutesData = null;
-    this.time = undefined;
+
+    if (!this.startDate?.isSame(this.date, "date"))
+      this.time = undefined;
 
     this.tryGetCalendarDay();
   }
@@ -204,6 +211,8 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
       }
     }
 
+    let appointments = this.calendarDay?.appointments?.filter(a => a.id != this.appointment?.id);
+
     for (let h = 0; h < 24; h++) {
       this.minutesData[h] = [];
 
@@ -220,8 +229,8 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
         }
 
         let renderedAppointments: RenderedInterval<Appointment>[] = [];
-        if (this.calendarDay?.appointments) {
-          for (let ap of this.calendarDay?.appointments) {
+        if (appointments) {
+          for (let ap of appointments) {
             let ri = getRenderedInterval<Appointment>(time.clone(), time.clone().add({ minutes: 5 }), ap, ap.time as Moment, ap.duration as Duration, this.serviceColorsService.get(ap.service?.colorId));
             ri = cropRenderedInterval(ri);
             if (ri)
@@ -241,8 +250,8 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
       let time = moment({ hours: h, minutes: 0 });
 
       let renderedAppointments: RenderedInterval<Appointment>[] = [];
-      if (this.calendarDay?.appointments) {
-        for (let ap of this.calendarDay?.appointments) {
+      if (appointments) {
+        for (let ap of appointments) {
           let ri = getRenderedInterval<Appointment>(time.clone(), time.clone().add({ hours: 1 }), ap, ap.time as Moment, ap.duration as Duration, this.serviceColorsService.get(ap.service?.colorId));
           ri = cropRenderedInterval(ri);
           if (ri)

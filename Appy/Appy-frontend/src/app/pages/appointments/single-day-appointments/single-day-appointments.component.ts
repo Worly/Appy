@@ -9,6 +9,7 @@ import { Moment, Duration, duration } from "moment";
 import { invertTimesCustom } from 'src/app/utils/invert-times';
 import { WorkingHour } from 'src/app/models/working-hours';
 import { cropRenderedInterval, getRenderedInterval, RenderedInterval } from 'src/app/utils/rendered-interval';
+import { DialogComponent } from 'src/app/components/dialog/dialog.component';
 
 @Component({
   selector: 'app-single-day-appointments',
@@ -18,6 +19,7 @@ import { cropRenderedInterval, getRenderedInterval, RenderedInterval } from 'src
 export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
 
   @ViewChild("timeBackground", { read: ElementRef }) timeBackground?: ElementRef<HTMLElement>;
+  @ViewChild("appointmentDialog", { read: DialogComponent }) appointmentDialog?: DialogComponent;
 
   private _appointments: Appointment[] | null = null;
   @Input() set appointments(value: Appointment[] | null) {
@@ -103,6 +105,7 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
   }
 
   @Input() showDateControls: boolean = false;
+  @Input() appointmentsEditable: boolean = true;
   @Output() dateControlPrevious: EventEmitter<void> = new EventEmitter();
   @Output() dateControlNext: EventEmitter<void> = new EventEmitter();
   @Output() dateControlSelect: EventEmitter<Moment> = new EventEmitter();
@@ -114,6 +117,8 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
   public renderedAppointments: RenderedInterval<Appointment>[] = [];
   public renderedShadowAppointments: RenderedInterval<Appointment>[] = [];
   public renderedTimeStatuses: RenderedInterval<string>[] = [];
+
+  viewAppointmentId?: number;
 
   private subs: Subscription[] = [];
   private interval: any;
@@ -261,5 +266,15 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
     });
 
     this.onCalendarClick.next(time);
+  }
+
+  onAppointmentClick(ap: Appointment) {
+    this.viewAppointmentId = ap.id;
+    this.appointmentDialog?.open();
+  }
+
+  closeAppointmentDialog() {
+    this.viewAppointmentId = undefined;
+    this.appointmentDialog?.close();
   }
 }

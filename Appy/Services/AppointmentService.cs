@@ -82,7 +82,7 @@ namespace Appy.Services
             appointment.Date = dto.Date;
             appointment.Time = dto.Time;
             appointment.Duration = dto.Duration;
-            appointment.Service = service;
+            appointment.ServiceId = service.Id;
 
             var sameDayAppointments = GetAll(dto.Date, facilityId).Where(a => a.Id != appointment.Id).ToList();
             var workingHours = workingHourService.GetWorkingHours(dto.Date, facilityId);

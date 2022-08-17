@@ -1,7 +1,7 @@
 <div class="date-time-chooser-container">
-    <app-appointments-scroller [showDateControls]="true" [(date)]="date" [daysToShow]="1"
-        [shadowAppointments]="shadowAppointments" [freeTimes]="freeTimesSmartCaching.singleData"
-        (onCalendarClick)="onCalendarClick($event)">
+    <app-appointments-scroller [showDateControls]="true" [appointmentsEditable]="false" [(date)]="date" [daysToShow]="1"
+        [hiddenAppointmentIds]="[$any(appointment?.id)]" [shadowAppointments]="shadowAppointments"
+        [freeTimes]="freeTimesSmartCaching.singleData" (onCalendarClick)="onCalendarClick($event)">
     </app-appointments-scroller>
 
     <div class="right-side">
@@ -19,7 +19,8 @@
                         [style.top]="ap.top + '%'" [style.height]="ap.height + '%'" [style.backgroundColor]="ap.color">
                     </div>
 
-                    <div class="time-button w-clickable" [ngClass]="{'selected': selectedHours == h.time, 'contains-selection': getContainsSelection(h.time, 0)}">
+                    <div class="time-button w-clickable"
+                        [ngClass]="{'selected': selectedHours == h.time, 'contains-selection': getContainsSelection(h.time, 0)}">
                         {{h.time.toString().padStart(2, '0')}}
                         <div class="w-overlay"></div>
                     </div>

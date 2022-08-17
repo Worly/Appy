@@ -1,0 +1,22 @@
+<app-loading *ngIf="isLoading"></app-loading>
+<div *ngIf="!isLoading && appointment != null">
+    <div class="title">{{"pages.appointments.APPOINTMENT" | translate}}</div>
+    <div class="service">
+        <div class="service-name">{{appointment.service?.name}}</div>
+        <div class="duration">- {{$any(appointment.duration) | formatDuration}}</div>
+    </div>
+    <div class="date-time">
+        <div class="date">
+            {{appointment.date?.format("DD.MM.YYYY")}}
+        </div>
+        <div class="time">
+            {{appointment.time?.format("HH:mm")}} -
+            {{appointment.time?.clone()?.add(appointment.duration)?.format("HH:mm")}}
+        </div>
+    </div>
+    <div *ngIf="editable" class="action-bar">
+        <app-button icon="trash" color="danger" look="solid" text="{{'DELETE' | translate}}" (onClick)="onDelete()">
+        </app-button>
+        <app-button style="margin-left: auto" icon="pen" text="{{'EDIT' | translate}}" (onClick)="goToEdit()"></app-button>
+    </div>
+</div>
