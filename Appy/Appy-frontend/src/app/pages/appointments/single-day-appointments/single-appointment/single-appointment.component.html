@@ -11,7 +11,7 @@
         </div>
         <div class="time">
             {{appointment.time?.format("HH:mm")}} -
-            {{appointment.time?.clone()?.add(appointment.duration)?.format("HH:mm")}}
+            {{appointment.time?.add($any(appointment.duration))?.format("HH:mm")}}
         </div>
     </div>
     <div *ngIf="editable" class="action-bar">

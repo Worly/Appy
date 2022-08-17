@@ -1,21 +1,22 @@
 import { Injectable } from "@angular/core";
+import dayjs from "dayjs";
+import "dayjs/plugin/updateLocale";
 import { combineLatestWith } from "rxjs";
 import { AuthService } from "./auth/auth.service";
 import { TranslateService } from "./translate/translate.service";
-import { updateLocale } from "moment";
 
 @Injectable({ providedIn: "root" })
 export class AppInitializerService {
     constructor(private authService: AuthService, private translateService: TranslateService) { }
 
     public initialize(): Promise<void> {
-        updateLocale("en-gb", {
+        dayjs.updateLocale("en-gb", {
             week: {
                 dow: 1
             }
         });
 
-        updateLocale("hr", {
+        dayjs.updateLocale("hr", {
             week: {
                 dow: 1
             }

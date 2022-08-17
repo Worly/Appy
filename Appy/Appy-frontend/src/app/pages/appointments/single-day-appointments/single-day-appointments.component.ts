@@ -1,15 +1,15 @@
 import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { min, Subscription } from 'rxjs';
 import { CalendarTodayHeaderComponent } from 'src/app/components/calendar-today-header/calendar-today-header.component';
 import { Appointment } from 'src/app/models/appointment';
 import { FreeTime } from 'src/app/models/free-time';
 import { ServiceColorsService } from 'src/app/services/service-colors.service';
-import moment, { unix } from "moment/moment";
-import { Moment, Duration, duration } from "moment";
 import { invertTimesCustom } from 'src/app/utils/invert-times';
 import { WorkingHour } from 'src/app/models/working-hours';
 import { cropRenderedInterval, getRenderedInterval, RenderedInterval } from 'src/app/utils/rendered-interval';
 import { DialogComponent } from 'src/app/components/dialog/dialog.component';
+import dayjs, { Dayjs, unix } from 'dayjs';
+import { Duration } from 'dayjs/plugin/duration';
 
 @Component({
   selector: 'app-single-day-appointments',
@@ -33,14 +33,14 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
     return this._appointments;
   }
 
-  private _date: Moment | null = null;
-  @Input() set date(value: Moment | null) {
+  private _date: Dayjs | null = null;
+  @Input() set date(value: Dayjs | null) {
     if (this._date == value)
       return;
 
     this._date = value;
   }
-  public get date(): Moment | null {
+  public get date(): Dayjs | null {
     return this._date;
   }
 
@@ -56,27 +56,27 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
     return this._workingHours;
   }
 
-  private _timeFrom: Moment = moment({ hours: 0 });
-  @Input() set timeFrom(value: Moment) {
+  private _timeFrom: Dayjs = dayjs({ hours: 0 });
+  @Input() set timeFrom(value: Dayjs) {
     if (this._timeFrom.isSame(value))
       return;
 
     this._timeFrom = value;
     this.render();
   }
-  get timeFrom(): Moment {
+  get timeFrom(): Dayjs {
     return this._timeFrom;
   }
 
-  private _timeTo: Moment = moment({ hours: 23, minutes: 59 });
-  @Input() set timeTo(value: Moment) {
+  private _timeTo: Dayjs = dayjs({ hour: 23, minute: 59 });
+  @Input() set timeTo(value: Dayjs) {
     if (this._timeTo.isSame(value))
       return;
 
     this._timeTo = value;
     this.render();
   }
-  get timeTo(): Moment {
+  get timeTo(): Dayjs {
     return this._timeTo;
   }
 
@@ -108,8 +108,8 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
   @Input() appointmentsEditable: boolean = true;
   @Output() dateControlPrevious: EventEmitter<void> = new EventEmitter();
   @Output() dateControlNext: EventEmitter<void> = new EventEmitter();
-  @Output() dateControlSelect: EventEmitter<Moment> = new EventEmitter();
-  @Output() onCalendarClick: EventEmitter<Moment> = new EventEmitter();
+  @Output() dateControlSelect: EventEmitter<Dayjs> = new EventEmitter();
+  @Output() onCalendarClick: EventEmitter<Dayjs> = new EventEmitter();
 
   calendarTodayHeaderComponent = CalendarTodayHeaderComponent;
 
@@ -170,7 +170,7 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
 
     if (this.freeTimes != null) {
       for (let freeTime of this.freeTimes) {
-        let ri = getRenderedInterval<string>(this.timeFrom, this.timeTo, "free-time", freeTime.from, duration(freeTime.toIncludingDuration.diff(freeTime.from)));
+        let ri = getRenderedInterval<string>(this.timeFrom, this.timeTo, "free-time", freeTime.from, dayjs.duration(freeTime.toIncludingDuration.diff(freeTime.from)));
         ri = cropRenderedInterval(ri);
         if (ri)
           this.renderedTimeStatuses.push(ri);
@@ -178,7 +178,7 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
 
       let takenTimes = invertTimesCustom(this.freeTimes, t => t.from, t => t.toIncludingDuration, this.timeFrom, this.timeTo);
       for (let takenTime of takenTimes) {
-        let ri = getRenderedInterval<string>(this.timeFrom, this.timeTo, "taken-time", takenTime.from, duration(takenTime.to.diff(takenTime.from)));
+        let ri = getRenderedInterval<string>(this.timeFrom, this.timeTo, "taken-time", takenTime.from, dayjs.duration(takenTime.to.diff(takenTime.from)));
         ri = cropRenderedInterval(ri);
         if (ri)
           this.renderedTimeStatuses.push(ri);
@@ -186,9 +186,9 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
     }
 
     if (this.workingHours != null) {
-      let closedTimes = invertTimesCustom(this.workingHours, t => t.timeFrom as Moment, t => t.timeTo as Moment, this.timeFrom, this.timeTo);
+      let closedTimes = invertTimesCustom(this.workingHours, t => t.timeFrom as Dayjs, t => t.timeTo as Dayjs, this.timeFrom, this.timeTo);
       for (let closedTime of closedTimes) {
-        let ri = getRenderedInterval<string>(this.timeFrom, this.timeTo, "closed-time", closedTime.from, duration(closedTime.to.diff(closedTime.from)));
+        let ri = getRenderedInterval<string>(this.timeFrom, this.timeTo, "closed-time", closedTime.from, dayjs.duration(closedTime.to.diff(closedTime.from)));
         ri = cropRenderedInterval(ri);
         if (ri)
           this.renderedTimeStatuses.push(ri);
@@ -197,43 +197,43 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
   }
 
   public renderCurrentTimeIndicator(): void {
-    this.currentTimeIndicatorTop = (moment().diff(this.timeFrom) / this.timeTo.diff(this.timeFrom)) * 100;
+    this.currentTimeIndicatorTop = (dayjs().diff(this.timeFrom) / this.timeTo.diff(this.timeFrom)) * 100;
   }
 
   private getRenderedAppointment(ap: Appointment): RenderedInterval<Appointment> | null {
     if (!ap.date?.isSame(this.date, "date"))
       return null;
 
-    let ri = getRenderedInterval(this.timeFrom, this.timeTo, ap, ap.time as Moment, ap.duration as Duration, this.serviceColorsService.get(ap.service?.colorId))
+    let ri = getRenderedInterval(this.timeFrom, this.timeTo, ap, ap.time as Dayjs, ap.duration as Duration, this.serviceColorsService.get(ap.service?.colorId))
     return cropRenderedInterval(ri, true);
   }
 
   // returns arrays of numbers where each number represents a cell in table which shows hours
   // each number is from <0 to 1] where it represents percentage of table height
   public getHoursToRender(): { hour: string, heightPercentage: number }[] {
-    if (this.timeFrom.hours() == this.timeTo.hours())
+    if (this.timeFrom.hour() == this.timeTo.hour())
       return [{ hour: this.timeFrom.format("H:mm"), heightPercentage: 1 }];
 
     let hours = [];
 
-    let current = this.timeFrom.hours();
+    let current = this.timeFrom.hour();
 
-    hours.push({ hour: this.timeFrom.format("H:mm"), heightPercentage: (60 - this.timeFrom.minutes()) / 60 });
+    hours.push({ hour: this.timeFrom.format("H:mm"), heightPercentage: (60 - this.timeFrom.minute()) / 60 });
     current++;
 
-    while (current < this.timeTo.hours()) {
+    while (current < this.timeTo.hour()) {
       hours.push({ hour: current + ":00", heightPercentage: 1 });
       current++;
     }
 
-    if (this.timeTo.minutes() > 0)
-      hours.push({ hour: this.timeTo.hours() + ":00", heightPercentage: this.timeTo.minutes() / 60 });
+    if (this.timeTo.minute() > 0)
+      hours.push({ hour: this.timeTo.hour() + ":00", heightPercentage: this.timeTo.minute() / 60 });
 
     return hours.map(h => { return { hour: h.hour, heightPercentage: h.heightPercentage / hours.length } });
   }
 
-  public getNowDate(): Moment {
-    return moment();
+  public getNowDate(): Dayjs {
+    return dayjs();
   }
 
   public onTimeBackgroundClick(e: MouseEvent) {
@@ -250,19 +250,19 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
 
     let time = unix((this.timeTo.unix() - this.timeFrom.unix()) * percentage + this.timeFrom.unix());
 
-    let hours = time.hours();
-    let minutes = Math.round(time.minutes() / 5) * 5 // round to nearest 5
+    let hours = time.hour();
+    let minutes = Math.round(time.minute() / 5) * 5 // round to nearest 5
     if (minutes >= 60) {
       hours++;
       minutes = 0;
     }
 
-    time = moment({
+    time = dayjs({
       year: this.date?.year(),
       month: this.date?.month(),
       date: this.date?.date(),
-      hours: hours,
-      minutes: minutes
+      hour: hours,
+      minute: minutes
     });
 
     this.onCalendarClick.next(time);

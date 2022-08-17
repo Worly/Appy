@@ -1,6 +1,6 @@
 import { BaseModel, REQUIRED_VALIDATION, Validation } from "./base-model";
-import moment from "moment/moment";
-import { Moment } from "moment";
+import dayjs from "dayjs";
+import { Dayjs } from "dayjs";
 
 export class WorkingHourDTO {
     public dayOfWeek?: DayOfWeek;
@@ -10,8 +10,8 @@ export class WorkingHourDTO {
 
 export class WorkingHour extends BaseModel {
     public dayOfWeek?: DayOfWeek;
-    public timeFrom?: Moment;
-    public timeTo?: Moment;
+    public timeFrom?: Dayjs;
+    public timeTo?: Dayjs;
 
     override validations: Validation[] = [
         {
@@ -36,8 +36,8 @@ export class WorkingHour extends BaseModel {
         super();
 
         this.dayOfWeek = dto.dayOfWeek;
-        this.timeFrom = dto.timeFrom ? moment(dto.timeFrom, "HH:mm:ss") : undefined;
-        this.timeTo = dto.timeTo ? moment(dto.timeTo, "HH:mm:ss") : undefined;
+        this.timeFrom = dto.timeFrom ? dayjs(dto.timeFrom, "HH:mm:ss") : undefined;
+        this.timeTo = dto.timeTo ? dayjs(dto.timeTo, "HH:mm:ss") : undefined;
 
         this.initProperties();
     }

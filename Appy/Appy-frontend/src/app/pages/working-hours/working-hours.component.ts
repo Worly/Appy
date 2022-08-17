@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import moment from "moment/moment";
+import dayjs from 'dayjs';
 import { Subscription } from 'rxjs';
 import { DayOfWeek, WorkingHour } from 'src/app/models/working-hours';
 import { TranslateService } from 'src/app/services/translate/translate.service';
@@ -89,8 +89,8 @@ export class WorkingHoursComponent implements OnInit {
   public addWorkingHour(dayOfWeek: DayOfWeek) {
     let w = new WorkingHour();
     w.dayOfWeek = dayOfWeek;
-    w.timeFrom = moment({ hours: 8 });
-    w.timeTo = moment({ hours: 16 });
+    w.timeFrom = dayjs({ hour: 8 })
+    w.timeTo = dayjs({ hour: 16 });
 
     this.workingHours?.push(w);
   }
@@ -100,18 +100,18 @@ export class WorkingHoursComponent implements OnInit {
   }
 
   public setFromHours(wh: WorkingHour, hours: number) {
-    wh.timeFrom = wh.timeFrom?.clone().hours(hours);
+    wh.timeFrom = wh.timeFrom?.hour(hours);
   }
 
   public setFromMinutes(wh: WorkingHour, minutes: number) {
-    wh.timeFrom = wh.timeFrom?.clone().minutes(minutes);
+    wh.timeFrom = wh.timeFrom?.minute(minutes);
   }
 
   public setToHours(wh: WorkingHour, hours: number) {
-    wh.timeTo = wh.timeTo?.clone().hours(hours);
+    wh.timeTo = wh.timeTo?.hour(hours);
   }
 
   public setToMinutes(wh: WorkingHour, minutes: number) {
-    wh.timeTo = wh.timeTo?.clone().minutes(minutes);
+    wh.timeTo = wh.timeTo?.minute(minutes);
   }
 }

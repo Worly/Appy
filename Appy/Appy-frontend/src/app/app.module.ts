@@ -50,8 +50,6 @@ import { ServiceLookupComponent } from './pages/services/service-lookup/service-
 import { AppointmentsScrollerComponent } from './pages/appointments/appointments-scroller/appointments-scroller.component';
 import { FilterPipe } from './pipes/filter.pipe';
 import { FormatDurationPipe } from './pipes/format-duration.pipe';
-import { MatMomentDateModule } from '@angular/material-moment-adapter';
-import { MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular/material-moment-adapter';
 import { CalendarTodayHeaderComponent } from './components/calendar-today-header/calendar-today-header.component';
 import { DateTimeChooserComponent } from './pages/appointments/appointment-edit/date-time-chooser/date-time-chooser.component';
 import { WorkingHoursComponent } from './pages/working-hours/working-hours.component';
@@ -69,8 +67,18 @@ import { faSpinner } from "@fortawesome/free-solid-svg-icons/faSpinner";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faTrash } from "@fortawesome/free-solid-svg-icons/faTrash";
 
-import "moment/locale/hr";
-import "moment/locale/en-gb";
+import "dayjs/locale/hr";
+import "dayjs/locale/en-gb";
+import dayjs from "dayjs";
+import * as duration from "dayjs/plugin/duration";
+import * as updateLocale from "dayjs/plugin/updateLocale";
+import * as customParseFormat from "dayjs/plugin/customParseFormat";
+import * as objectSupport from "dayjs/plugin/objectSupport";
+
+dayjs.extend(duration);
+dayjs.extend(updateLocale);
+dayjs.extend(customParseFormat);
+dayjs.extend(objectSupport);
 
 @NgModule({
   declarations: [
@@ -121,7 +129,6 @@ import "moment/locale/en-gb";
     MatDatepickerModule,
     MatNativeDateModule,
     FontAwesomeModule,
-    MatMomentDateModule,
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: environment.production,
       // Register the ServiceWorker as soon as the application is stable
@@ -139,7 +146,6 @@ import "moment/locale/en-gb";
       deps: [Router, RouteReuseStrategy], multi: true
     },
     { provide: APP_INITIALIZER, useFactory: appInitializerFactory, deps: [AppInitializerService], multi: true },
-    { provide: MAT_MOMENT_DATE_ADAPTER_OPTIONS, useValue: { useUtc: true } },
     { provide: HTTP_INTERCEPTORS, useClass: AuthHttpInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: FacilityInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorTranslateInterceptor, multi: true },
@@ -150,14 +156,16 @@ import "moment/locale/en-gb";
 export class AppModule {
   constructor(library: FaIconLibrary) {
     library.addIcons(
-      faBars, 
-      faSpinner, 
+      faBars,
+      faSpinner,
       faAngleLeft, faAngleRight,
       faTimes, faPlus,
       faCaretDown, faCaretUp,
       faTrash, faPen,
       faEllipsisV,
     );
+
+    console.log(dayjs().add(dayjs.duration({ minutes: 30 })));
   }
 
 }

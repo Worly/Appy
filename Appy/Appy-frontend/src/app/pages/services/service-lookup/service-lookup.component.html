@@ -12,6 +12,6 @@
     </div>
     <app-button *ngFor="let service of filteredServices" width="100%" [text]="service.name ?? ''" look="custom"
         [customColor]="serviceColorsService.get(service.colorId)" (onClick)="selectService(service)">
-        <div style="margin-left: auto;">[{{service.duration && formatDuration(service.duration)}}]</div>
+        <div style="margin-left: auto;">[{{service.duration && service.duration.format("HH:mm")}}]</div>
     </app-button>
 </app-context-menu>

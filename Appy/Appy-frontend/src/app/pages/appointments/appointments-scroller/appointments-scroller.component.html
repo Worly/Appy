@@ -3,8 +3,8 @@
         [date]="data.key" [appointments]="data.data?.appointments | filter : notInHiddenFilter:this"
         [workingHours]="data.data?.workingHours ?? null" [timeFrom]="timeFrom" [timeTo]="timeTo"
         [showDateControls]="showDateControls && data.key.isSame(date, 'date')"
-        [appointmentsEditable]="appointmentsEditable" (dateControlNext)="date = date.clone().add({days: 1})"
-        (dateControlPrevious)="date = date.clone().add({days: -1})" (dateControlSelect)="date = $event"
+        [appointmentsEditable]="appointmentsEditable" (dateControlNext)="date = date.add(1, 'days')"
+        (dateControlPrevious)="date = date.add(-1, 'days')" (dateControlSelect)="date = $event"
         (onCalendarClick)="calendarClicked($event)" [shadowAppointments]="shadowAppointments" [freeTimes]="freeTimes"
         [style.height]="getHeight()">
     </app-single-day-appointments>

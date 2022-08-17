@@ -1,7 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { DateAdapter } from "@angular/material/core";
-import { locale } from "moment";
+import { locale } from "dayjs";
 import { Observable } from "rxjs";
 
 @Injectable({
