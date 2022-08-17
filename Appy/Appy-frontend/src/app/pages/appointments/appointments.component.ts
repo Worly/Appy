@@ -29,7 +29,20 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
     this.subs.forEach(s => s.unsubscribe());
   }
 
-  goToNew() {
-    this.router.navigate(["new"], { relativeTo: this.activatedRoute });
+  goToNew(date?: Moment, clickedTime?: Moment) {
+    if (date == null)
+      date = this.date;
+
+    this.router.navigate(["new"], {
+      queryParams: {
+        date: date.format("yyyy-MM-DD"),
+        clickedTime: clickedTime ? clickedTime.format("HH:mm:ss") : null
+      },
+      relativeTo: this.activatedRoute
+    });
+  }
+
+  onCalendarClick(time: Moment) {
+    this.goToNew(time, time);
   }
 }

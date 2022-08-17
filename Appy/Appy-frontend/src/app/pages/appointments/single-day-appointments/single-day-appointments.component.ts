@@ -1,14 +1,15 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { CalendarTodayHeaderComponent } from 'src/app/components/calendar-today-header/calendar-today-header.component';
 import { Appointment } from 'src/app/models/appointment';
 import { FreeTime } from 'src/app/models/free-time';
 import { ServiceColorsService } from 'src/app/services/service-colors.service';
-import moment from "moment/moment";
+import moment, { unix } from "moment/moment";
 import { Moment, Duration, duration } from "moment";
 import { invertTimesCustom } from 'src/app/utils/invert-times';
 import { WorkingHour } from 'src/app/models/working-hours';
 import { cropRenderedInterval, getRenderedInterval, RenderedInterval } from 'src/app/utils/rendered-interval';
+import { DialogComponent } from 'src/app/components/dialog/dialog.component';
 
 @Component({
   selector: 'app-single-day-appointments',
@@ -16,6 +17,9 @@ import { cropRenderedInterval, getRenderedInterval, RenderedInterval } from 'src
   styleUrls: ['./single-day-appointments.component.scss']
 })
 export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
+
+  @ViewChild("timeBackground", { read: ElementRef }) timeBackground?: ElementRef<HTMLElement>;
+  @ViewChild("appointmentDialog", { read: DialogComponent }) appointmentDialog?: DialogComponent;
 
   private _appointments: Appointment[] | null = null;
   @Input() set appointments(value: Appointment[] | null) {
@@ -101,9 +105,11 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
   }
 
   @Input() showDateControls: boolean = false;
+  @Input() appointmentsEditable: boolean = true;
   @Output() dateControlPrevious: EventEmitter<void> = new EventEmitter();
   @Output() dateControlNext: EventEmitter<void> = new EventEmitter();
   @Output() dateControlSelect: EventEmitter<Moment> = new EventEmitter();
+  @Output() onCalendarClick: EventEmitter<Moment> = new EventEmitter();
 
   calendarTodayHeaderComponent = CalendarTodayHeaderComponent;
 
@@ -111,6 +117,8 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
   public renderedAppointments: RenderedInterval<Appointment>[] = [];
   public renderedShadowAppointments: RenderedInterval<Appointment>[] = [];
   public renderedTimeStatuses: RenderedInterval<string>[] = [];
+
+  viewAppointmentId?: number;
 
   private subs: Subscription[] = [];
   private interval: any;
@@ -226,5 +234,47 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
 
   public getNowDate(): Moment {
     return moment();
+  }
+
+  public onTimeBackgroundClick(e: MouseEvent) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+
+    if (this.timeBackground == null)
+      return;
+
+    let rect = this.timeBackground.nativeElement.getBoundingClientRect();
+    let y = e.clientY - rect.top;
+
+    let percentage = y / rect.height;
+
+    let time = unix((this.timeTo.unix() - this.timeFrom.unix()) * percentage + this.timeFrom.unix());
+
+    let hours = time.hours();
+    let minutes = Math.round(time.minutes() / 5) * 5 // round to nearest 5
+    if (minutes >= 60) {
+      hours++;
+      minutes = 0;
+    }
+
+    time = moment({
+      year: this.date?.year(),
+      month: this.date?.month(),
+      date: this.date?.date(),
+      hours: hours,
+      minutes: minutes
+    });
+
+    this.onCalendarClick.next(time);
+  }
+
+  onAppointmentClick(ap: Appointment) {
+    this.viewAppointmentId = ap.id;
+    this.appointmentDialog?.open();
+  }
+
+  closeAppointmentDialog() {
+    this.viewAppointmentId = undefined;
+    this.appointmentDialog?.close();
   }
 }

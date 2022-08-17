@@ -1,10 +1,11 @@
 <div class="my-container">
-    <app-single-day-appointments *ngFor="let data of calendarDaySmartCaching.data | filter : onlyVisibleDataFilter" [date]="data.key"
-        [appointments]="data.data?.appointments" [workingHours]="data.data?.workingHours" [timeFrom]="timeFrom" [timeTo]="timeTo"
+    <app-single-day-appointments *ngFor="let data of calendarDaySmartCaching.data | filter : onlyVisibleDataFilter"
+        [date]="data.key" [appointments]="data.data?.appointments | filter : notInHiddenFilter:this"
+        [workingHours]="data.data?.workingHours ?? null" [timeFrom]="timeFrom" [timeTo]="timeTo"
         [showDateControls]="showDateControls && data.key.isSame(date, 'date')"
-        (dateControlNext)="date = date.clone().add({days: 1})"
+        [appointmentsEditable]="appointmentsEditable" (dateControlNext)="date = date.clone().add({days: 1})"
         (dateControlPrevious)="date = date.clone().add({days: -1})" (dateControlSelect)="date = $event"
-        [shadowAppointments]="shadowAppointments" [freeTimes]="freeTimes"
+        (onCalendarClick)="calendarClicked($event)" [shadowAppointments]="shadowAppointments" [freeTimes]="freeTimes"
         [style.height]="getHeight()">
     </app-single-day-appointments>
 </div>

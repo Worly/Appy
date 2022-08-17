@@ -66,8 +66,13 @@
         
         box-shadow: 0 0 0 1px var(--input-border-color) inset;
 
+        &.contains-selection {
+            box-shadow: 0 0 0 2px var(--text) inset;
+        }
+
         &.selected {
             box-shadow: 0 0 0 3px var(--text) inset;
+            font-weight: bold;
         }
     }
 }

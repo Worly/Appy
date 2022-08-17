@@ -14,14 +14,14 @@ export class AppComponent implements OnInit {
 
   constructor(
     private router: Router,
-    public authService: AuthService, 
-    public facilityService: FacilityService) {}
+    public authService: AuthService,
+    public facilityService: FacilityService) { }
 
   ngOnInit() {
     this.router.events.subscribe(e => {
       if (e instanceof NavigationEnd)
         this.closeNavbar();
-    })
+    });
   }
 
   public logOut(): void {
@@ -35,5 +35,5 @@ export class AppComponent implements OnInit {
   public closeNavbar(): void {
     this.navbarCollapse?.nativeElement.classList.remove("show");
   }
-  
+
 }

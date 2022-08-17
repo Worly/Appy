@@ -42,12 +42,14 @@ import { ServiceColorPickerComponent } from './pages/services/service-edit/servi
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DurationPickerComponent } from './components/duration-picker/duration-picker.component';
 import { NotifyDialogComponent } from './components/notify-dialog/notify-dialog.component';
+import { SingleAppointmentComponent } from './pages/appointments/single-day-appointments/single-appointment/single-appointment.component';
 import { AppointmentsComponent } from './pages/appointments/appointments.component';
 import { SingleDayAppointmentsComponent } from './pages/appointments/single-day-appointments/single-day-appointments.component';
 import { AppointmentEditComponent } from './pages/appointments/appointment-edit/appointment-edit.component';
 import { ServiceLookupComponent } from './pages/services/service-lookup/service-lookup.component';
 import { AppointmentsScrollerComponent } from './pages/appointments/appointments-scroller/appointments-scroller.component';
 import { FilterPipe } from './pipes/filter.pipe';
+import { FormatDurationPipe } from './pipes/format-duration.pipe';
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular/material-moment-adapter';
 import { CalendarTodayHeaderComponent } from './components/calendar-today-header/calendar-today-header.component';
@@ -75,6 +77,7 @@ import "moment/locale/en-gb";
     AppComponent,
     TranslatePipe,
     FilterPipe,
+    FormatDurationPipe,
     LoginComponent,
     RegisterComponent,
     FacilitiesComponent,
@@ -104,7 +107,8 @@ import "moment/locale/en-gb";
     AppointmentsScrollerComponent,
     CalendarTodayHeaderComponent,
     DateTimeChooserComponent,
-    WorkingHoursComponent
+    WorkingHoursComponent,
+    SingleAppointmentComponent
   ],
   imports: [
     BrowserModule,
