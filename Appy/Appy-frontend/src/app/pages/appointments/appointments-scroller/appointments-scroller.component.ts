@@ -5,7 +5,7 @@ import { CalendarDay } from 'src/app/models/calendar-day';
 import { FreeTime } from 'src/app/models/free-time';
 import { CalendarDayService } from 'src/app/services/calendar-day.service';
 import { Data, DateSmartCaching } from 'src/app/utils/smart-caching';
-import { Tween } from 'src/app/utils/tween';
+import { Tween, TweenManager } from 'src/app/utils/tween';
 import moment from "moment/moment";
 import { Moment, unix } from 'moment';
 
@@ -68,8 +68,9 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
   public timeFrom: Moment = moment({ hours: 8 });
   public timeTo: Moment = moment({ hours: 20 });
 
-  private timeFromTween: Tween = new Tween(() => this.timeFrom.unix(), v => this.timeFrom = unix(v));
-  private timeToTween: Tween = new Tween(() => this.timeTo.unix(), v => this.timeTo = unix(v));
+  private timeTweenManager: TweenManager = new TweenManager();
+  private timeFromTween: Tween = new Tween(() => this.timeFrom.unix(), v => this.timeFrom = unix(v), this.timeTweenManager);
+  private timeToTween: Tween = new Tween(() => this.timeTo.unix(), v => this.timeTo = unix(v), this.timeTweenManager);
 
   private subs: Subscription[] = [];
 

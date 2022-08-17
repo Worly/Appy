@@ -1,3 +1,40 @@
+export class TweenManager {
+    private tweens: Tween[] = [];
+    private intervalId?: any;
+
+    public addTween(tween: Tween) {
+        this.tweens.push(tween);
+    }
+
+    public start() {
+        if (this.tweens.every(t => !t.running))
+            return;
+
+        if (this.intervalId != null)
+            return;
+
+        this.intervalId = setInterval(() => this.tick());
+    }
+
+    public stop() {
+        if (this.tweens.some(t => t.running))
+            return;
+
+        if (this.intervalId == null)
+            return;
+
+        clearInterval(this.intervalId);
+        this.intervalId = null;
+    }
+
+    private tick() {
+        for (let t of this.tweens) {
+            if (t.running)
+                t.tick();
+        }
+    }
+}
+
 export class Tween {
     private getter: Getter;
     private setter: Setter;
@@ -7,13 +44,23 @@ export class Tween {
     private startTime?: number;
     private duration?: number;
 
-    private running: boolean = false;
+    private _running: boolean = false;
+    public get running(): boolean {
+        return this._running;
+    }
+    private set running(value: boolean) {
+        this._running = value;
+    }
 
-    private intervalId?: any;
+    private manager: TweenManager;
 
-    constructor(getter: Getter, setter: Setter) {
+    constructor(getter: Getter, setter: Setter, manager?: TweenManager) {
         this.getter = getter;
         this.setter = setter;
+
+        this.manager = manager ?? new TweenManager();
+
+        this.manager.addTween(this);
     }
 
     public tweenTo(endValue: number, durationMs: number): void {
@@ -28,18 +75,17 @@ export class Tween {
 
         this.duration = durationMs;
 
-        if (!this.running)
-            this.intervalId = setInterval(() => this.tick());
-
         this.running = true;
+
+        this.manager.start();
     }
 
     public stop() {
-        clearInterval(this.intervalId);
         this.running = false;
+        this.manager.stop();
     }
 
-    private tick() {
+    public tick() {
         if (this.startTime == null || this.startValue == null || this.endValue == null || this.duration == null) {
             console.error("Error in tween, missing data!");
             this.stop();
