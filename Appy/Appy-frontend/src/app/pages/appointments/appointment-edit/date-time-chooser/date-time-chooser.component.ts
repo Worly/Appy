@@ -269,8 +269,6 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
     if (freeTimes?.data == null)
       return;
 
-    console.log(freeTimes);
-
     let ft = freeTimes.data.find(f => timeOnly(f.from).isSameOrBefore(timeOnly(time)) && timeOnly(f.toIncludingDuration).isSameOrAfter(timeOnly(time)));
     if (ft == null)
       return;
@@ -280,6 +278,18 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
       this.time = timeOnHour;
     else
       this.time = ft.from.clone();
+  }
+
+  getContainsSelection(hours: number, minutes: number): boolean {
+    let time = moment({
+      hours: hours,
+      minutes: minutes
+    });
+
+    if (this.appointment?.duration == null || this.appointment?.time == null)
+      return false;
+
+    return time.isBetween(this.appointment.time, this.appointment.time.clone().add(this.appointment.duration), null, "[)");
   }
 
   goToWorkingHours() {
