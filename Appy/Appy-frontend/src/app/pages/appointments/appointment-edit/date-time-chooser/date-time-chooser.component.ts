@@ -100,7 +100,7 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
     this.load();
 
     this.subs.push(this.freeTimesSmartCaching.onDataLoaded.subscribe(e => {
-      if (this.time == null && this.clickedTime != null && e.key.isSame(this.clickedTime, "date"))
+      if (this.time == null && this.clickedTime != null && e.key.isSame(this.date, "date"))
         this.onCalendarClick(this.clickedTime);
     }))
   }
@@ -265,15 +265,15 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   onCalendarClick(time: Moment) {
-    let freeTimes = this.freeTimesSmartCaching.data.find(d => d.key.isSame(time, "date"));
+    let freeTimes = this.freeTimesSmartCaching.data.find(d => d.key.isSame(this.date, "date"));
     if (freeTimes?.data == null)
       return;
+
+    console.log(freeTimes);
 
     let ft = freeTimes.data.find(f => timeOnly(f.from).isSameOrBefore(timeOnly(time)) && timeOnly(f.toIncludingDuration).isSameOrAfter(timeOnly(time)));
     if (ft == null)
       return;
-
-    this.date = time.clone();
 
     let timeOnHour = moment({ hours: time.hours() });
     if (timeOnHour.isBetween(timeOnly(ft.from), timeOnly(ft.to), null, "[]"))
