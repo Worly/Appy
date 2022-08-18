@@ -55,9 +55,9 @@ export function layoutRenderedIntervals<T>(intervals: RenderedInterval<T>[]) {
     intervals.sort((a, b) => {
         let aBottom = a.top + a.height;
         let bBottom = b.top + b.height;
-        let c = compareFloats(aBottom, bBottom);
+        let c = compareFloats(a.top, b.top);
         if (c == 0)
-            return compareFloats(a.top, b.top);
+            return compareFloats(a.top + a.height, b.top + b.height);
         else
             return c;
     });
@@ -86,6 +86,7 @@ function packGroup<T>(group: RenderedInterval<T>[]) {
         bottom: number
     }[] = [];
 
+    
     for (let ri of group) {
         let found = false;
         for (let col of columns) {
@@ -103,14 +104,14 @@ function packGroup<T>(group: RenderedInterval<T>[]) {
                 bottom: ri.top + ri.height
             });
         }
+
+        columns.sort((a, b) => {
+            let aSum = a.ris.map(r => r.height).reduce((a, b) => a + b);
+            let bSum = b.ris.map(r => r.height).reduce((a, b) => a + b);
+
+            return bSum - aSum;
+        });
     }
-
-    columns.sort((a, b) => {
-        let aSum = a.ris.map(r => r.height).reduce((a, b) => a + b);
-        let bSum = b.ris.map(r => r.height).reduce((a, b) => a + b);
-
-        return bSum - aSum;
-    })
 
     let columnWidth = 100 / columns.length;
     for (let i = 0; i < columns.length; i++) {
