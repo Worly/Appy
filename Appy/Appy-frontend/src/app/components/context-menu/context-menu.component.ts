@@ -120,6 +120,10 @@ export class ContextMenuComponent implements OnInit, OnDestroy {
       this.close();
   }
 
+  public isOpen(): boolean {
+    return this.overlayRef != null;
+  }
+
   hideDropdown = (event: any) => {
     if (this.overlayRef == null)
       return;

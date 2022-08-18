@@ -1,8 +1,9 @@
-<app-button #buttonRef="elementRef" appElementRef width="100%" [text]="value ? value.format('HH:mm') : ('CHOOSE_DURATION' | translate)"
-    (onClick)="contextMenu.toggle()"></app-button>
+<app-button #buttonRef="elementRef" appElementRef width="100%"
+    [text]="value ? value.format('HH:mm') : ('CHOOSE_DURATION' | translate)" (onClick)="buttonClicked()"></app-button>
 
 <app-context-menu #contextMenu [relativeTo]="buttonRef.elementRef" [copyOriginWidth]="true">
-    <app-button *ngFor="let duration of durations" width="100%" [text]="duration.format('HH:mm')"
+    <app-button #contextMenuButtons *ngFor="let duration of durations" width="100%" [text]="duration.format('HH:mm')"
+        [ngClass]="{'selected': duration.asMilliseconds() == value?.asMilliseconds()}"
         (onClick)="selectDuration(duration)">
     </app-button>
 </app-context-menu>
