@@ -9,8 +9,8 @@ namespace Appy.Services
     {
         List<Appointment> GetAll(DateOnly date, int facilityId);
         Appointment GetById(int id, int facilityId);
-        Appointment AddNew(AppointmentDTO dto, int facilityId);
-        Appointment Edit(int id, AppointmentDTO dto, int facilityId);
+        Appointment AddNew(AppointmentDTO dto, int facilityId, bool ignoreTimeNotAvailable);
+        Appointment Edit(int id, AppointmentDTO dto, int facilityId, bool ignoreTimeNotAvailable);
         void Delete(int id, int facilityId);
 
         List<FreeTimeDTO> GetFreeTimes(List<Appointment> appointmentsOfTheDay, List<WorkingHour> workingHours, Service service, TimeSpan duration);
@@ -43,7 +43,7 @@ namespace Appy.Services
             return appointment;
         }
 
-        public Appointment AddNew(AppointmentDTO dto, int facilityId)
+        public Appointment AddNew(AppointmentDTO dto, int facilityId, bool ignoreTimeNotAvailable)
         {
             var service = context.Services.FirstOrDefault(s => s.Id == dto.Service.Id && s.FacilityId == facilityId);
             if (service == null)
@@ -60,8 +60,8 @@ namespace Appy.Services
 
             var sameDayAppointments = GetAll(dto.Date, facilityId);
             var workingHours = workingHourService.GetWorkingHours(dto.Date, facilityId);
-            if (!IsAppointmentTimeOk(sameDayAppointments, workingHours, appointment))
-                throw new ValidationException(nameof(AppointmentDTO.Time), "pages.appointments.errors.TIME_TAKEN");
+            if (!ignoreTimeNotAvailable && !IsAppointmentTimeOk(sameDayAppointments, workingHours, appointment))
+                throw new ValidationException(nameof(AppointmentDTO.Time), "pages.appointments.errors.TIME_NOT_AVAILABLE");
 
             context.Appointments.Add(appointment);
             context.SaveChanges();
@@ -69,7 +69,7 @@ namespace Appy.Services
             return appointment;
         }
 
-        public Appointment Edit(int id, AppointmentDTO dto, int facilityId)
+        public Appointment Edit(int id, AppointmentDTO dto, int facilityId, bool ignoreTimeNotAvailable)
         {
             var appointment = context.Appointments.FirstOrDefault(s => s.Id == id && s.FacilityId == facilityId);
             if (appointment == null)
@@ -86,8 +86,8 @@ namespace Appy.Services
 
             var sameDayAppointments = GetAll(dto.Date, facilityId).Where(a => a.Id != appointment.Id).ToList();
             var workingHours = workingHourService.GetWorkingHours(dto.Date, facilityId);
-            if (!IsAppointmentTimeOk(sameDayAppointments, workingHours, appointment))
-                throw new ValidationException(nameof(AppointmentDTO.Time), "pages.appointments.errors.TIME_TAKEN");
+            if (!ignoreTimeNotAvailable && !IsAppointmentTimeOk(sameDayAppointments, workingHours, appointment))
+                throw new ValidationException(nameof(AppointmentDTO.Time), "pages.appointments.errors.TIME_NOT_AVAILABLE");
 
             context.SaveChanges();
 

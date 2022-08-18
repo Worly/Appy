@@ -1,0 +1,31 @@
+.action-bar-container {
+    position: relative;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.action-bar-spacer {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    height: 0px;
+}
+
+@media (max-width: 992px) {
+    .action-bar-container {
+        position: fixed;
+        bottom: 0px;
+        left: 0px;
+        right: 0px;
+        
+        margin: 0;
+        padding: 15px;
+        background-color: var(--input-background-color);
+        box-shadow: 0 25px 22px 19px var(--text);
+    }
+
+    .action-bar-spacer {
+        height: var(--content-height);
+    }
+}

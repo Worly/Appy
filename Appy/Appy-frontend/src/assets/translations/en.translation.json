@@ -87,6 +87,8 @@
             "CHOOSE_COLOR": "Choose color",
             "DELETE_PROMPT": "Are you sure you want to delete this service?",
             "CHOOSE_SERVICE": "Choose service",
+            "NO_SERVICES_FOUND": "No services found",
+            "ADD_SERVICE": "Add a service",
 
             "errors": {
                 "MISSING_NAME": "Please enter a name",
@@ -106,13 +108,14 @@
             "CHOOSE_DATE_TIME": "Choose date-time",
             "CLOSED": "Facility is closed on this day.",
             "EDIT_WORKING_HOURS": "Edit working hours",
+            "TIME_NOT_AVAILABLE_PROMPT": "Selected time is taken by another appointment, outside of working hours or not available for other reasons. Are you sure you want to save it anyway?",
             
             "errors": {
                 "MISSING_SERVICE": "Please choose a service",
                 "MISSING_DURATION": "Please choose a duration",
                 "MISSING_DATE": "Please choose a date",
                 "MISSING_TIME": "Please choose a time",
-                "TIME_TAKEN": "Selected time is already taken by another appointment"
+                "TIME_NOT_AVAILABLE": "Selected time is not available"
             }
         },
 

@@ -11,6 +11,7 @@ import { DateTimeChooserResult } from './date-time-chooser/date-time-chooser.com
 import { setUrlParams } from 'src/app/utils/dynamic-url-params';
 import dayjs, { Dayjs } from 'dayjs';
 import { parseDuration } from 'src/app/utils/time-utils';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-appointment-edit',
@@ -95,7 +96,7 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
     this.goBack();
   }
 
-  public save() {
+  public save(ignoreTimeNotAvailable: boolean) {
     if (!this.appointment?.validate())
       return;
 
@@ -104,27 +105,37 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
     let action: Observable<Appointment>;
 
     if (this.isNew)
-      action = this.appointmentService.addNew(this.appointment as Appointment);
+      action = this.appointmentService.addNew(this.appointment as Appointment, { ignoreTimeNotAvailable });
     else
-      action = this.appointmentService.save(this.appointment as Appointment);
+      action = this.appointmentService.save(this.appointment as Appointment, { ignoreTimeNotAvailable });
 
     this.subs.push(action.subscribe({
       next: () => this.goBack(),
-      error: (e: any) => this.isLoadingSave = false
+      error: (e: HttpErrorResponse) => {
+        this.isLoadingSave = false;
+        if (e.error?.errors?.time == "pages.appointments.errors.TIME_NOT_AVAILABLE") {
+          this.notifyDialogService.yesNoDialog(this.translateService.translate("pages.appointments.TIME_NOT_AVAILABLE_PROMPT"))
+            .subscribe((ok: boolean) => {
+              if (ok)
+                this.save(true);
+            })
+        }
+      }
     }));
   }
 
   public deleteAppointment() {
-    this.subs.push(this.notifyDialogService.yesNoDialog(this.translateService.translate("pages.appointments.DELETE_PROMPT")).subscribe((ok: boolean) => {
-      if (!ok)
-        return;
+    this.subs.push(this.notifyDialogService.yesNoDialog(this.translateService.translate("pages.appointments.DELETE_PROMPT"))
+      .subscribe((ok: boolean) => {
+        if (!ok)
+          return;
 
-      this.isLoadingDelete = true;
-      this.subs.push(this.appointmentService.delete(this.appointment?.id as number).subscribe({
-        next: () => this.goBack(),
-        error: (e: any) => this.isLoadingDelete = false
+        this.isLoadingDelete = true;
+        this.subs.push(this.appointmentService.delete(this.appointment?.id as number).subscribe({
+          next: () => this.goBack(),
+          error: (e: any) => this.isLoadingDelete = false
+        }));
       }));
-    }));
   }
 
   public goBack() {

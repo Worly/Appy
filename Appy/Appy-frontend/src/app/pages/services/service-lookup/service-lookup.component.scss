@@ -9,3 +9,16 @@
 .search-input {
     margin: 5px;
 }
+
+.no-services-found {
+    margin: 20px 0;
+
+    font-size: 1.5rem;
+
+    display: flex;
+    text-align: center;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}

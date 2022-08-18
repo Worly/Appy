@@ -14,4 +14,10 @@
         [customColor]="serviceColorsService.get(service.colorId)" (onClick)="selectService(service)">
         <div style="margin-left: auto;">[{{service.duration && service.duration.format("HH:mm")}}]</div>
     </app-button>
+
+    <div *ngIf="services != null && filteredServices.length == 0" class="no-services-found">
+        {{ "pages.services.NO_SERVICES_FOUND" | translate }}
+        <app-button icon="plus" text="{{'pages.services.ADD_SERVICE' | translate}}" color="success"
+            (onClick)="goToServices()"></app-button>
+    </div>
 </app-context-menu>

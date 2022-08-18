@@ -3,17 +3,6 @@
     border-radius: var(--default-border-radius);
 }
 
-.my-buttons {
-    margin-top: 20px;
-    display: flex;
-    gap: 10px;
-    justify-content: end;
-
-    & > .splitter {
-        margin-left: auto;
-    }
-}
-
 .display-none {
     display: none;
 }

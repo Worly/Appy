@@ -1,6 +1,8 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import dayjs from "dayjs";
 import { Duration } from 'dayjs/plugin/duration';
+import { ButtonComponent } from '../button/button.component';
+import { ContextMenuComponent } from '../context-menu/context-menu.component';
 
 @Component({
   selector: 'app-duration-picker',
@@ -8,6 +10,9 @@ import { Duration } from 'dayjs/plugin/duration';
   styleUrls: ['./duration-picker.component.scss']
 })
 export class DurationPickerComponent implements OnInit, OnChanges {
+
+  @ViewChild("contextMenu", { read: ContextMenuComponent }) contextMenu?: ContextMenuComponent;
+  @ViewChildren("contextMenuButtons", { read: ButtonComponent }) buttons?: QueryList<ButtonComponent>;
 
   @Input() value?: Duration = dayjs.duration(0);
   @Output() valueChange: EventEmitter<Duration> = new EventEmitter();
@@ -47,5 +52,31 @@ export class DurationPickerComponent implements OnInit, OnChanges {
   selectDuration(duration: Duration) {
     this.value = duration;
     this.valueChange.emit(duration);
+  }
+
+  buttonClicked() {
+    this.contextMenu?.toggle();
+
+    // scroll selected into view
+    if (this.value == null)
+      return;
+
+    if (this.contextMenu?.isOpen() && this.buttons != null) {
+      let selectedButton = this.buttons.find(b => b.text == this.value?.format("HH:mm"));
+      if (selectedButton == null)
+        return;
+
+      let buttonElement = selectedButton.elementRef.nativeElement as HTMLElement;
+      let parentElement = buttonElement.parentElement as HTMLElement;
+
+      let scrollPosition = buttonElement.getBoundingClientRect().top;
+
+      parentElement.scrollTop = scrollPosition - 80;
+
+      parentElement.scrollTo({
+        top: scrollPosition,
+        behavior: "smooth"
+      });
+    }
   }
 }

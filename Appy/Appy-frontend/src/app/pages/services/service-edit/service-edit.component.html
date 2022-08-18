@@ -5,7 +5,8 @@
 
     <div class="w-input-container">
         <div class="w-label">{{'NAME' | translate}}</div>
-        <input class="w-input" type="text" [style.width]="'100%'" placeholder="{{'NAME' | translate}}" [(ngModel)]="service.name">
+        <input class="w-input" type="text" [style.width]="'100%'" placeholder="{{'NAME' | translate}}"
+            [(ngModel)]="service.name">
         <div class="w-validation-message">{{ service.getValidationErrors("name") | translate }}</div>
     </div>
     <div class="w-input-container">
@@ -15,13 +16,18 @@
     </div>
     <div class="w-input-container">
         <div class="w-label">{{'pages.services.DURATION' | translate}}</div>
-        <app-duration-picker [includeZero]="false" [numberOfChoices]="36" [(value)]="service.duration"></app-duration-picker>
+        <app-duration-picker [includeZero]="false" [numberOfChoices]="36" [(value)]="service.duration">
+        </app-duration-picker>
         <div class="w-validation-message">{{ service.getValidationErrors("duration") | translate }}</div>
     </div>
 
-    <div class="my-buttons">
-        <app-button *ngIf="!isNew" [text]="'DELETE' | translate" icon="trash" color="danger" look="solid" [isCircle]="false" [disabled]="isLoading" [isLoading]="isLoadingDelete" (onClick)="deleteService()"></app-button>
-        <app-button class="splitter" [text]="'CANCEL' | translate" color="danger" look="normal" [disabled]="isLoading" (onClick)="cancel()"></app-button>
-        <app-button [text]="'SAVE' | translate" color="success" look="solid" [disabled]="isLoading" [isLoading]="isLoadingSave" (onClick)="save()"></app-button>
-    </div>
+    <app-action-bar>
+        <app-button *ngIf="!isNew" [text]="'DELETE' | translate" icon="trash" color="danger" look="solid"
+            [isCircle]="false" [disabled]="isLoading" [isLoading]="isLoadingDelete" (onClick)="deleteService()">
+        </app-button>
+        <app-button flex-splitter [text]="'CANCEL' | translate" color="danger" look="normal" [disabled]="isLoading"
+            (onClick)="cancel()"></app-button>
+        <app-button [text]="'SAVE' | translate" color="success" look="solid" [disabled]="isLoading"
+            [isLoading]="isLoadingSave" (onClick)="save()"></app-button>
+    </app-action-bar>
 </div>

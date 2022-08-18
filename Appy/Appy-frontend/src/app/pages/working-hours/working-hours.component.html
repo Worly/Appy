@@ -36,10 +36,10 @@
     <div *ngIf="this.workingHours.length > 0" class="w-validation-message">
         {{this.workingHours[0].getValidationErrors("other")| translate}}</div>
 
-    <div class="my-buttons">
-        <app-button class="splitter" [text]="'CANCEL' | translate" color="danger" look="normal" [disabled]="isLoading"
+    <app-action-bar>
+        <app-button flex-splitter [text]="'CANCEL' | translate" color="danger" look="normal" [disabled]="isLoading"
             (onClick)="cancel()"></app-button>
         <app-button [text]="'SAVE' | translate" color="success" look="solid" [disabled]="isLoading"
             [isLoading]="isLoading" (onClick)="save()"></app-button>
-    </div>
+    </app-action-bar>
 </div>
