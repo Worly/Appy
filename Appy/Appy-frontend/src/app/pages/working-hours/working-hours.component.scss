@@ -33,15 +33,3 @@
     margin-left: 10px;
     margin-right: 10px;
 }
-
-.my-buttons {
-    margin-top: 20px;
-    margin-bottom: 20px;
-    display: flex;
-    gap: 10px;
-    justify-content: end;
-
-    & > .splitter {
-        margin-left: auto;
-    }
-}

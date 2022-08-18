@@ -1,3 +1,4 @@
+import { Location } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import dayjs from 'dayjs';
@@ -32,10 +33,8 @@ export class WorkingHoursComponent implements OnInit {
   minutes = [0, 15, 30, 45];
 
   constructor(
-    private activatedRoute: ActivatedRoute,
-    private router: Router,
+    private location: Location,
     private workingHoursService: WorkingHoursService,
-    private translateService: TranslateService
   ) { }
 
   ngOnInit(): void {
@@ -83,7 +82,7 @@ export class WorkingHoursComponent implements OnInit {
   }
 
   public goBack() {
-    this.router.navigate([".."], { relativeTo: this.activatedRoute });
+    this.location.back();
   }
 
   public addWorkingHour(dayOfWeek: DayOfWeek) {

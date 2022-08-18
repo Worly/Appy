@@ -80,6 +80,8 @@ import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import isBetween from "dayjs/plugin/isBetween";
 import duration from "dayjs/plugin/duration";
 import { DayjsDateAdapter, MAT_DAYJS_DATE_ADAPTER_OPTIONS, MAT_DAYJS_DATE_FORMATS } from './utils/material-dayjs-adapter';
+import { ActionBarComponent } from './components/action-bar/action-bar.component';
+import { FlexSplitterDirective } from './components/action-bar/directives/flex-splitter.directive';
 
 dayjs.extend(updateLocale);
 dayjs.extend(localeData);
@@ -127,7 +129,9 @@ dayjs.extend(duration);
     CalendarTodayHeaderComponent,
     DateTimeChooserComponent,
     WorkingHoursComponent,
-    SingleAppointmentComponent
+    SingleAppointmentComponent,
+    ActionBarComponent,
+    FlexSplitterDirective
   ],
   imports: [
     BrowserModule,
