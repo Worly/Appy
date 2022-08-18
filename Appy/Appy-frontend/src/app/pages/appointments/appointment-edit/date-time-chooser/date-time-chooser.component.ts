@@ -8,7 +8,7 @@ import { AppointmentService } from 'src/app/services/appointment.service.ts';
 import { DateSmartCaching } from 'src/app/utils/smart-caching';
 import { AppointmentsScrollerComponent } from '../../appointments-scroller/appointments-scroller.component';
 import { Router } from '@angular/router';
-import { cropRenderedInterval, getRenderedInterval, RenderedInterval } from 'src/app/utils/rendered-interval';
+import { cropRenderedInterval, getRenderedInterval, layoutRenderedIntervals, RenderedInterval } from 'src/app/utils/rendered-interval';
 import { ServiceColorsService } from 'src/app/services/service-colors.service';
 import { timeOnly } from 'src/app/utils/time-utils';
 import dayjs from "dayjs";
@@ -241,6 +241,7 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
               renderedAppointments.push(ri);
           }
         }
+        layoutRenderedIntervals(renderedAppointments);
 
         let minutesData: TimeData = {
           time: m,
@@ -262,6 +263,7 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
             renderedAppointments.push(ri);
         }
       }
+      layoutRenderedIntervals(renderedAppointments);
 
       let hourData: TimeData = {
         time: h,

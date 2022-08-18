@@ -37,8 +37,9 @@
     </div>
 
     <div *ngIf="appointments != null">
-        <div *ngFor="let ap of renderedAppointments" class="single-appointment" [style.top]="ap.top + '%'"
-            [style.height]="ap.height + '%'" [style.backgroundColor]="ap.color" (click)="onAppointmentClick(ap.source)">
+        <div *ngFor="let ap of renderedAppointments" class="single-appointment" [style.top.%]="ap.top"
+            [style.left.%]="ap.left" [style.height.%]="ap.height" [style.width.%]="ap.width"
+            [style.backgroundColor]="ap.color" (click)="onAppointmentClick(ap.source)">
             <div class="appointment-time">
                 {{ap.time}}
             </div>
@@ -54,7 +55,8 @@
     </div>
 
     <div *ngFor="let ap of renderedShadowAppointments" class="single-appointment shadow-appointment"
-        [style.top]="ap.top + '%'" [style.height]="ap.height + '%'" [style.backgroundColor]="ap.color">
+        [style.top.%]="ap.top" [style.left.%]="ap.left" [style.height.%]="ap.height" [style.width.%]="ap.width"
+        [style.backgroundColor]="ap.color">
         <div class="appointment-time">
             {{ap.time}}
         </div>
@@ -70,5 +72,6 @@
 <app-loading *ngIf="appointments == null"></app-loading>
 
 <app-dialog #appointmentDialog>
-    <app-single-appointment [id]="viewAppointmentId" [editable]="appointmentsEditable" (onDone)="closeAppointmentDialog()"></app-single-appointment>
+    <app-single-appointment [id]="viewAppointmentId" [editable]="appointmentsEditable"
+        (onDone)="closeAppointmentDialog()"></app-single-appointment>
 </app-dialog>

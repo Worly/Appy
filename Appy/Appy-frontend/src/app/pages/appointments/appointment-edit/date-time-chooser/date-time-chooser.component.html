@@ -15,8 +15,9 @@
             <div class="hour-buttons">
                 <div *ngFor="let h of displayHoursData" class="time-button-container" (click)="selectHours(h.time)">
 
-                    <div *ngFor="let ap of h.renderedAppointments" class="rendered-appointment"
-                        [style.top]="ap.top + '%'" [style.height]="ap.height + '%'" [style.backgroundColor]="ap.color">
+                    <div *ngFor="let ap of h.renderedAppointments" class="rendered-appointment" [style.top.%]="ap.top"
+                        [style.left.%]="ap.left" [style.height.%]="ap.height" [style.width.%]="ap.width"
+                        [style.backgroundColor]="ap.color">
                     </div>
 
                     <div class="time-button w-clickable"
@@ -32,8 +33,8 @@
                         (click)="selectMinutes(m.time)">
 
                         <div *ngFor="let ap of m.renderedAppointments" class="rendered-appointment"
-                            [style.top]="ap.top + '%'" [style.height]="ap.height + '%'"
-                            [style.backgroundColor]="ap.color">
+                            [style.top.%]="ap.top" [style.left.%]="ap.left" [style.height.%]="ap.height"
+                            [style.width.%]="ap.width" [style.backgroundColor]="ap.color">
                         </div>
 
                         <div class="time-button w-clickable"

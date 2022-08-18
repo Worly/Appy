@@ -159,6 +159,8 @@
     column-gap: 10px;
     align-items: baseline;
 
+    overflow: hidden;
+
     &.shadow-appointment {
         opacity: 60%;
         border: 2px dashed var(--text);

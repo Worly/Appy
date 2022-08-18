@@ -6,7 +6,7 @@ import { FreeTime } from 'src/app/models/free-time';
 import { ServiceColorsService } from 'src/app/services/service-colors.service';
 import { invertTimesCustom } from 'src/app/utils/invert-times';
 import { WorkingHour } from 'src/app/models/working-hours';
-import { cropRenderedInterval, getRenderedInterval, RenderedInterval } from 'src/app/utils/rendered-interval';
+import { cropRenderedInterval, getRenderedInterval, layoutRenderedIntervals, RenderedInterval } from 'src/app/utils/rendered-interval';
 import { DialogComponent } from 'src/app/components/dialog/dialog.component';
 import dayjs, { Dayjs, unix } from 'dayjs';
 import { Duration } from 'dayjs/plugin/duration';
@@ -153,6 +153,7 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
           this.renderedAppointments.push(ra);
       }
     }
+    layoutRenderedIntervals(this.renderedAppointments);
   }
 
   public renderShadowAppointments(): void {
