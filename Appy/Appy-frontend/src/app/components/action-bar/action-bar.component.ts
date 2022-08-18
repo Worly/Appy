@@ -13,6 +13,8 @@ export class ActionBarComponent implements OnInit {
       return;
 
     this._container = value;
+
+    setTimeout(() => this.calculateContentHeight());
   }
   get container(): ElementRef<HTMLElement> | undefined {
     return this._container;
@@ -20,16 +22,20 @@ export class ActionBarComponent implements OnInit {
 
   @Input() leaveSpaceWhenAnchored: boolean = true;
 
-  get contentHeight(): number {
-    if (this._container?.nativeElement == null)
-      return 0;
-
-    return this._container.nativeElement.getBoundingClientRect().height;
-  }
+  contentHeight: number = 0;
 
   constructor() { }
 
   ngOnInit(): void {
+  }
+
+  calculateContentHeight() {
+    if (this._container?.nativeElement == null) {
+      this.contentHeight = 0;
+      return;
+    }
+
+    this.contentHeight = this._container.nativeElement.getBoundingClientRect().height - 10;
   }
 
 }
