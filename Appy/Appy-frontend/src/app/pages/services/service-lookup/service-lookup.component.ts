@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Router } from '@angular/router';
 import { Duration } from 'dayjs/plugin/duration';
 import { Service, ServiceDTO } from 'src/app/models/service';
 import { ServiceColorsService } from 'src/app/services/service-colors.service';
@@ -33,6 +34,7 @@ export class ServiceLookupComponent implements OnInit {
   }
 
   constructor(
+    private router: Router,
     private serviceService: ServiceService,
     public serviceColorsService: ServiceColorsService
   ) { }
@@ -80,5 +82,9 @@ export class ServiceLookupComponent implements OnInit {
       if (service.name?.toLowerCase().includes(se))
         this.filteredServices.push(service);
     }
+  }
+
+  goToServices() {
+    this.router.navigate(["services"]);
   }
 }

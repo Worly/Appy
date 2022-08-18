@@ -87,6 +87,8 @@
             "CHOOSE_COLOR": "Choose color",
             "DELETE_PROMPT": "Are you sure you want to delete this service?",
             "CHOOSE_SERVICE": "Choose service",
+            "NO_SERVICES_FOUND": "No services found",
+            "ADD_SERVICE": "Add a service",
 
             "errors": {
                 "MISSING_NAME": "Please enter a name",

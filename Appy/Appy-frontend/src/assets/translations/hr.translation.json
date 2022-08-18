@@ -87,6 +87,8 @@
             "CHOOSE_COLOR": "Odaberi boju",
             "DELETE_PROMPT": "Jeste li sigurni da želite obrisati ovu uslugu?",
             "CHOOSE_SERVICE": "Odaberi uslugu",
+            "NO_SERVICES_FOUND": "Nije pronađena nijedna usluga",
+            "ADD_SERVICE": "Dodaj uslugu",
 
             "errors": {
                 "MISSING_NAME": "Molim upišite naziv",
