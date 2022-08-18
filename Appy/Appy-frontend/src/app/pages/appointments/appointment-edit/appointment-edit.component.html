@@ -32,7 +32,7 @@
             <app-button flex-splitter [text]="'CANCEL' | translate" color="danger" look="normal"
                 [disabled]="isLoading" (onClick)="cancel()"></app-button>
             <app-button [text]="'SAVE' | translate" color="success" look="solid" [disabled]="isLoading"
-                [isLoading]="isLoadingSave" (onClick)="save()"></app-button>
+                [isLoading]="isLoadingSave" (onClick)="save(false)"></app-button>
         </app-action-bar>
     </div>
     <div *ngIf="isDateTimeEditing">

@@ -50,8 +50,8 @@ export class BaseModelService<T extends BaseModel> implements IEntityTracker<T> 
         });
     }
 
-    public save(entity: T): Observable<T> {
-        return this.httpClient.put<any>(`${appConfig.apiUrl}${this.controllerName}/edit/${entity.getId()}`, entity.getDTO())
+    public save(entity: T, params?: any): Observable<T> {
+        return this.httpClient.put<any>(`${appConfig.apiUrl}${this.controllerName}/edit/${entity.getId()}`, entity.getDTO(), { params })
             .pipe(
                 map(s => {
                     let newEntity = new this.typeFactory(s);
@@ -68,8 +68,8 @@ export class BaseModelService<T extends BaseModel> implements IEntityTracker<T> 
                 }));
     }
 
-    public addNew(entity: T): Observable<T> {
-        return this.httpClient.post<any>(`${appConfig.apiUrl}${this.controllerName}/addNew`, entity.getDTO())
+    public addNew(entity: T, params?: any): Observable<T> {
+        return this.httpClient.post<any>(`${appConfig.apiUrl}${this.controllerName}/addNew`, entity.getDTO(), { params })
             .pipe(
                 map(s => {
                     let newEntity = new this.typeFactory(s);

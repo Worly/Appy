@@ -42,18 +42,18 @@ namespace Appy.Controllers
 
         [HttpPost("addNew")]
         [Authorize]
-        public ActionResult<AppointmentDTO> AddNew(AppointmentDTO dto)
+        public ActionResult<AppointmentDTO> AddNew(AppointmentDTO dto, [FromQuery] bool ignoreTimeNotAvailable = false)
         {
-            var result = this.appointmentService.AddNew(dto, HttpContext.SelectedFacility());
+            var result = this.appointmentService.AddNew(dto, HttpContext.SelectedFacility(), ignoreTimeNotAvailable);
 
             return Ok(result.GetDTO());
         }
 
         [HttpPut("edit/{id}")]
         [Authorize]
-        public ActionResult<AppointmentDTO> Edit(int id, AppointmentDTO dto)
+        public ActionResult<AppointmentDTO> Edit(int id, AppointmentDTO dto, [FromQuery] bool ignoreTimeNotAvailable = false)
         {
-            var result = this.appointmentService.Edit(id, dto, HttpContext.SelectedFacility());
+            var result = this.appointmentService.Edit(id, dto, HttpContext.SelectedFacility(), ignoreTimeNotAvailable);
 
             return Ok(result.GetDTO());
         }
