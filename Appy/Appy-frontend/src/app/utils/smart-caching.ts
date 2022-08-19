@@ -19,7 +19,7 @@ export class SmartCaching<keyT, valueT> {
         keyCompare: (left: keyT, right: keyT) => number,
         load: (key: keyT) => Observable<valueT>,
         showCount: number = 1,
-        cacheCount: number = 2,
+        cacheCount: number = 1,
     ) {
         this.keyTransformFunction = keyTransform;
         this.keyCompareFunction = keyCompare;
@@ -85,7 +85,7 @@ export class SmartCaching<keyT, valueT> {
 
     private callLoad() {
         // first call load on all showing data, and when they are complete call it on all others
-        let shownNotLoaded = this._data.filter(d => d.show && d.subscription == null);
+        let shownNotLoaded = this._data.filter(d => d.show && !d.hasData);
         if (shownNotLoaded.length > 0)
             this.loadInternal(shownNotLoaded);
         else
@@ -99,6 +99,7 @@ export class SmartCaching<keyT, valueT> {
                     .subscribe(c => {
                         if (data != null) {
                             data.data = c;
+                            data.hasData = true;
                             this.onDataLoadedInternal(data);
                         }
                     });
@@ -124,7 +125,7 @@ export class DateSmartCaching<valueT> extends SmartCaching<Dayjs, valueT> {
     constructor(
         load: (key: Dayjs) => Observable<valueT>,
         showCount: number = 1,
-        cacheCount: number = 2) {
+        cacheCount: number = 1) {
         super(
             (date: Dayjs, add: number) => date.add(add, "days"),
             (left: Dayjs, right: Dayjs) => {
@@ -144,6 +145,7 @@ export class DateSmartCaching<valueT> extends SmartCaching<Dayjs, valueT> {
 export type Data<keyT, valueT> = {
     key: keyT;
     data: valueT | null;
+    hasData: boolean;
     show: boolean;
     subscription: Subscription;
 };
