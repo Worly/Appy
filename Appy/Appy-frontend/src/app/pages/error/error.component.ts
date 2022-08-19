@@ -7,7 +7,10 @@ import { Router } from '@angular/router';
   styleUrls: ['./error.component.css']
 })
 export class ErrorComponent {
-  error;
+  error?: {
+    status: number,
+    message: string
+  };
 
   errorTitle: string = "";
 
@@ -16,8 +19,10 @@ export class ErrorComponent {
     if (state)
       this.error = state['error'];
 
-    if (this.error == null)
+    if (this.error == null) {
       this.router.navigate(["home"])
+      return;
+    }
 
     if (this.error.status == 0)
       this.error.status = 503;

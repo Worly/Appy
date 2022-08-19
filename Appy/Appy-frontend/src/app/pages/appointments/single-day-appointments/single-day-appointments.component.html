@@ -72,6 +72,6 @@
 <app-loading *ngIf="appointments == null"></app-loading>
 
 <app-dialog #appointmentDialog>
-    <app-single-appointment [id]="viewAppointmentId" [editable]="appointmentsEditable"
+    <app-single-appointment *ngIf="appointmentDialog.isOpen" [id]="viewAppointmentId" [editable]="appointmentsEditable"
         (onDone)="closeAppointmentDialog()"></app-single-appointment>
 </app-dialog>
