@@ -30,6 +30,7 @@ export class CalendarDayService {
                             .pipe(takeUntil(onUnsubscribed(s)))
                             .subscribe(n => {
                                 calendarDay.appointments = n;
+                                s.next(calendarDay);
                             });
 
                         s.next(calendarDay);
