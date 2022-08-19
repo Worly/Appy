@@ -1,15 +1,14 @@
 import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
-import { min, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { CalendarTodayHeaderComponent } from 'src/app/components/calendar-today-header/calendar-today-header.component';
 import { Appointment } from 'src/app/models/appointment';
 import { FreeTime } from 'src/app/models/free-time';
 import { ServiceColorsService } from 'src/app/services/service-colors.service';
 import { invertTimesCustom } from 'src/app/utils/invert-times';
 import { WorkingHour } from 'src/app/models/working-hours';
-import { cropRenderedInterval, getRenderedInterval, layoutRenderedIntervals, RenderedInterval } from 'src/app/utils/rendered-interval';
+import { getRenderedAppointments, getRenderedIntervals, RenderedInterval } from 'src/app/utils/rendered-interval';
 import { DialogComponent } from 'src/app/components/dialog/dialog.component';
 import dayjs, { Dayjs, unix } from 'dayjs';
-import { Duration } from 'dayjs/plugin/duration';
 
 @Component({
   selector: 'app-single-day-appointments',
@@ -144,69 +143,44 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
   }
 
   public renderAppointments(): void {
-    this.renderedAppointments = [];
-    if (this.appointments) {
-      for (let ap of this.appointments) {
-        let ra = this.getRenderedAppointment(ap);
-
-        if (ra)
-          this.renderedAppointments.push(ra);
-      }
-    }
-    layoutRenderedIntervals(this.renderedAppointments);
+    this.renderedAppointments = getRenderedAppointments(this.date as Dayjs, this.timeFrom, this.timeTo, this.appointments, this.serviceColorsService, {
+      crop: true,
+      removeTopOverflow: true,
+      layout: true
+    });
   }
 
   public renderShadowAppointments(): void {
-    this.renderedShadowAppointments = [];
-    for (let ap of this.shadowAppointments) {
-      let ra = this.getRenderedAppointment(ap);
-
-      if (ra)
-        this.renderedShadowAppointments.push(ra);
-    }
+    this.renderedShadowAppointments = getRenderedAppointments(this.date as Dayjs, this.timeFrom, this.timeTo, this.shadowAppointments, this.serviceColorsService, {
+      crop: true,
+      removeTopOverflow: true,
+    });
   }
 
   public renderTimeStatuses(): void {
     this.renderedTimeStatuses = [];
 
     if (this.freeTimes != null) {
-      for (let freeTime of this.freeTimes) {
-        let ri = getRenderedInterval<string>(this.timeFrom, this.timeTo, "free-time", freeTime.from, dayjs.duration(freeTime.toIncludingDuration.diff(freeTime.from)));
-        let cropped = cropRenderedInterval(ri);
-        if (cropped)
-          this.renderedTimeStatuses.push(cropped);
-      }
+      this.renderedTimeStatuses.push(...getRenderedIntervals(this.timeFrom, this.timeTo, this.freeTimes.map(f => {
+        return { source: "free-time", time: f.from, duration: dayjs.duration(f.toIncludingDuration.diff(f.from)) };
+      }), { crop: true }));
 
       let takenTimes = invertTimesCustom(this.freeTimes, t => t.from, t => t.toIncludingDuration, this.timeFrom, this.timeTo);
-      for (let takenTime of takenTimes) {
-        let ri = getRenderedInterval<string>(this.timeFrom, this.timeTo, "taken-time", takenTime.from, dayjs.duration(takenTime.to.diff(takenTime.from)));
-        let cropped = cropRenderedInterval(ri);
-        if (cropped)
-          this.renderedTimeStatuses.push(cropped);
-      }
+      this.renderedTimeStatuses.push(...getRenderedIntervals(this.timeFrom, this.timeTo, takenTimes.map(f => {
+        return { source: "taken-time", time: f.from, duration: dayjs.duration(f.to.diff(f.from)) };
+      }), { crop: true }));
     }
 
     if (this.workingHours != null) {
       let closedTimes = invertTimesCustom(this.workingHours, t => t.timeFrom as Dayjs, t => t.timeTo as Dayjs, this.timeFrom, this.timeTo);
-      for (let closedTime of closedTimes) {
-        let ri = getRenderedInterval<string>(this.timeFrom, this.timeTo, "closed-time", closedTime.from, dayjs.duration(closedTime.to.diff(closedTime.from)));
-        let cropped = cropRenderedInterval(ri);
-        if (cropped)
-          this.renderedTimeStatuses.push(cropped);
-      }
+      this.renderedTimeStatuses.push(...getRenderedIntervals(this.timeFrom, this.timeTo, closedTimes.map(f => {
+        return { source: "closed-time", time: f.from, duration: dayjs.duration(f.to.diff(f.from)) };
+      }), { crop: true }));
     }
   }
 
   public renderCurrentTimeIndicator(): void {
     this.currentTimeIndicatorTop = (dayjs().diff(this.timeFrom) / this.timeTo.diff(this.timeFrom)) * 100;
-  }
-
-  private getRenderedAppointment(ap: Appointment): RenderedInterval<Appointment> | null {
-    if (!ap.date?.isSame(this.date, "date"))
-      return null;
-
-    let ri = getRenderedInterval(this.timeFrom, this.timeTo, ap, ap.time as Dayjs, ap.duration as Duration, this.serviceColorsService.get(ap.service?.colorId))
-    return cropRenderedInterval(ri, true);
   }
 
   // returns arrays of numbers where each number represents a cell in table which shows hours

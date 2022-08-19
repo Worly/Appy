@@ -8,13 +8,10 @@ import { AppointmentService } from 'src/app/services/appointment.service.ts';
 import { DateSmartCaching } from 'src/app/utils/smart-caching';
 import { AppointmentsScrollerComponent } from '../../appointments-scroller/appointments-scroller.component';
 import { Router } from '@angular/router';
-import { cropRenderedInterval, getIntervalHeight, getIntervalTop, getRenderedInterval, layoutRenderedIntervals, RenderedInterval } from 'src/app/utils/rendered-interval';
+import { cropRenderedInterval, getIntervalHeight, getIntervalTop, getRenderedAppointments, RenderedInterval } from 'src/app/utils/rendered-interval';
 import { ServiceColorsService } from 'src/app/services/service-colors.service';
 import { timeOnly } from 'src/app/utils/time-utils';
 import dayjs from "dayjs";
-import "dayjs/plugin/isSameOrAfter";
-import "dayjs/plugin/isSameOrBefore";
-import "dayjs/plugin/isBetween";
 import { Dayjs } from "dayjs";
 import { Duration } from "dayjs/plugin/duration";
 
@@ -217,10 +214,7 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
 
     let appointments = this.calendarDay?.appointments?.filter(a => a.id != this.appointment?.id);
 
-    let renderedAppointments: RenderedInterval<Appointment>[] = [];
-    if (appointments)
-      renderedAppointments = appointments.map(ap => getRenderedInterval<Appointment>(dayjs({ hours: 0 }), dayjs({ hours: 23 }), ap, ap.time as Dayjs, ap.duration as Duration, this.serviceColorsService.get(ap.service?.colorId)));
-    layoutRenderedIntervals(renderedAppointments);
+    let renderedAppointments = getRenderedAppointments(this.date, dayjs({ hours: 0 }), dayjs({ hours: 23 }), appointments ?? null, this.serviceColorsService, { layout: true });
 
     for (let h = 0; h < 24; h++) {
       this.minutesData[h] = [];

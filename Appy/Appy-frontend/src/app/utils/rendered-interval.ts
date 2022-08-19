@@ -1,5 +1,7 @@
 import dayjs, { Dayjs } from "dayjs";
 import { Duration } from "dayjs/plugin/duration";
+import { Appointment } from "../models/appointment";
+import { ServiceColorsService } from "../services/service-colors.service";
 
 export interface RenderedInterval<T> {
     top: number;
@@ -9,6 +11,52 @@ export interface RenderedInterval<T> {
     color?: string;
     time: string;
     source: T;
+}
+
+export type RenderOptions = {
+    crop?: boolean,
+    removeTopOverflow?: boolean,
+    layout?: boolean
+};
+
+export function getRenderedAppointments(date: Dayjs, timeFrom: Dayjs, timeTo: Dayjs, appointments: Appointment[] | null, serviceColorsService: ServiceColorsService, options?: RenderOptions): RenderedInterval<Appointment>[] {
+    if (appointments == null) {
+        return [];
+    }
+
+    return getRenderedIntervals(timeFrom, timeTo, appointments
+        .filter(ap => ap.date?.isSame(date, "date"))
+        .map(ap => {
+            return {
+                source: ap,
+                time: ap.time as Dayjs,
+                duration: ap.duration as Duration,
+                color: serviceColorsService.get(ap.service?.colorId)
+            };
+        }), options);
+}
+
+export function getRenderedIntervals<T>(
+    timeFrom: Dayjs, timeTo: Dayjs,
+    items: { source: T, time: Dayjs, duration: Duration, color?: string }[],
+    options?: RenderOptions): RenderedInterval<T>[] {
+
+    let intervals: RenderedInterval<T>[] = [];
+
+    for (let i of items) {
+        let ri: RenderedInterval<T> | null = getRenderedInterval(timeFrom, timeTo, i.source, i.time, i.duration, i.color);
+
+        if (options?.crop)
+            ri = cropRenderedInterval(ri, options?.removeTopOverflow);
+
+        if (ri)
+            intervals.push(ri);
+    }
+
+    if (options?.layout)
+        layoutRenderedIntervals(intervals);
+
+    return intervals;
 }
 
 export function getRenderedInterval<T>(timeFrom: Dayjs, timeTo: Dayjs, source: T, time: Dayjs, duration: Duration, color?: string): RenderedInterval<T> {
@@ -29,7 +77,7 @@ export function getIntervalTop(timeFrom: Dayjs, timeTo: Dayjs, time: Dayjs): num
     return (time.diff(timeFrom) / timeTo.diff(timeFrom)) * 100;
 }
 
-export function getIntervalHeight(timeFrom: Dayjs, timeTo: Dayjs, duration: Duration): number { 
+export function getIntervalHeight(timeFrom: Dayjs, timeTo: Dayjs, duration: Duration): number {
     return (duration.asMilliseconds() / timeTo.diff(timeFrom)) * 100
 }
 
