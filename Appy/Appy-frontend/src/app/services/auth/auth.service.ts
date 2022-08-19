@@ -24,7 +24,7 @@ export class AuthService {
 
             obs?.subscribe({
                 next: () => s.next(),
-                error: () => s.error()
+                error: e => s.error(e)
             });
         });
     }
