@@ -1,5 +1,5 @@
 <app-button #buttonRef="elementRef" appElementRef width="100%"
-    [text]="value && value.name ? value.name : ('pages.services.CHOOSE_SERVICE' | translate)" look="custom"
+    [text]="value && value.name ? value.name : ('pages.services.CHOOSE_SERVICE' | translate)" look="custom" borderWidth="0"
     [customColor]="serviceColorsService.get(value?.colorId)"
     (onClick)="contextMenu.toggle(); search = ''; searchInput.focus()"></app-button>
 
@@ -10,7 +10,7 @@
     <div *ngIf="services == null" style="height: 200px;">
         <app-loading></app-loading>
     </div>
-    <app-button *ngFor="let service of filteredServices" width="100%" [text]="service.name ?? ''" look="custom"
+    <app-button *ngFor="let service of filteredServices" width="100%" [text]="service.name ?? ''" look="custom" borderWidth="0"
         [customColor]="serviceColorsService.get(service.colorId)" (onClick)="selectService(service)">
         <div style="margin-left: auto;">[{{service.duration && service.duration.format("HH:mm")}}]</div>
     </app-button>

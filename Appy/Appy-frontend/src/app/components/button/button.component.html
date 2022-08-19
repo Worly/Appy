@@ -1,18 +1,14 @@
-<div class="my-button" 
-    [class.curved]="curved" 
-    [class.curved-top-left]="curvedTopLeft" [class.curved-top-right]="curvedTopRight" 
-    [class.curved-bottom-left]="curvedBottomLeft" [class.curved-bottom-right]="curvedBottomRight" 
-    [class.my-disabled]="disabled"
-    [class.icon-only]="(text == null || text == '') && icon != null" 
-    [class.circle]="isCircle"
-    [ngClass]="['color-' + color, 'look-' + look, 'border-' + borderStyle, 'align-' + alignContent, 'icon-placement-' + iconPlacement]"
-    [style]="'--custom-button-color: ' + customColor + '; --custom-text-color: ' + customTextColor + '; --border-width: ' + borderWidth + '; --width: ' + width" 
-    (click)="onClicked($event)" 
-    tabindex="0">
+<div class="my-button" [class.curved]="curved" [class.curved-top-left]="curvedTopLeft"
+    [class.curved-top-right]="curvedTopRight" [class.curved-bottom-left]="curvedBottomLeft"
+    [class.curved-bottom-right]="curvedBottomRight" [class.my-disabled]="disabled"
+    [class.icon-only]="(text == null || text == '') && icon != null" [class.circle]="isCircle"
+    [ngClass]="['color-' + color, 'look-' + look, 'border-' + borderStyle, 'align-' + alignContent, 'text-align-' + textAlign, 'icon-placement-' + iconPlacement]"
+    [style]="'--custom-button-color: ' + customColor + '; --custom-text-color: ' + customTextColor + '; --custom-border-color: ' + customBorderColor + '; --border-width: ' + borderWidth + '; --width: ' + width"
+    (click)="onClicked($event)" tabindex="0">
 
     <fa-icon *ngIf="isLoading || icon != null" class="my-icon"
-        [icon]="[iconPrefix, isLoading ? loadingIcon : $any(icon)]" [fixedWidth]="true"
-        [spin]="spinIcon || isLoading"></fa-icon>
+        [icon]="[iconPrefix, isLoading ? loadingIcon : $any(icon)]" [fixedWidth]="true" [spin]="spinIcon || isLoading">
+    </fa-icon>
     {{text}}
     <ng-content></ng-content>
 </div>

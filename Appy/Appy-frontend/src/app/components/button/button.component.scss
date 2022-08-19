@@ -166,7 +166,8 @@
     &-custom {
         background-color: var(--custom-button-color);
         color: var(--custom-text-color);
-        border-width: 0px;
+        border-width: var(--border-width);
+        border-color: var(--custom-border-color);
     }
 }
 
@@ -194,6 +195,18 @@
     }
     &-right {
         justify-content: right;
+    }
+}
+
+.text-align {
+    &-left {
+        text-align: left;
+    }
+    &-center {
+        text-align: center;
+    }
+    &-right {
+        text-align: right;
     }
 }
 
