@@ -77,6 +77,52 @@
     }
 }
 
+.time-status {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+
+    pointer-events: none;
+
+    border-right: 6px solid var(--status-color);
+
+    &.free-time {
+        --status-color: var(--success);
+        & > div {
+            display: none;
+        }
+    }
+
+    &.taken-time {
+        --status-color: var(--danger);
+    }
+
+    &.closed-time {
+        --status-color: var(--input-border-color);
+    }
+
+    & > div {
+        opacity: 30%;
+        width: 100%;
+        height: 100%;
+
+        background-color: var(--status-color);
+
+        &::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+
+            background: repeating-linear-gradient(45deg, transparent, transparent 10px, white 10px, white 20px);
+            opacity: 30%;
+        }
+    }
+}
+
 .facility-closed {
     font-size: 1.5rem;
     display: flex;

@@ -21,3 +21,10 @@ export function parseDuration(duration: string): Duration {
         milliseconds: time.millisecond()
     });
 }
+
+export function overlap(startA: Dayjs, endA: Dayjs, startB: Dayjs, endB: Dayjs) {
+    if (startA.isAfter(endA) || startB.isAfter(endB))
+        throw new Error("Start cannot be after end!");
+
+    return startA.isBefore(endB) && endA.isAfter(startB);
+}

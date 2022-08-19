@@ -10,7 +10,7 @@ import { AppointmentsScrollerComponent } from '../../appointments-scroller/appoi
 import { Router } from '@angular/router';
 import { cropRenderedInterval, getIntervalHeight, getIntervalTop, getRenderedAppointments, RenderedInterval } from 'src/app/utils/rendered-interval';
 import { ServiceColorsService } from 'src/app/services/service-colors.service';
-import { timeOnly } from 'src/app/utils/time-utils';
+import { overlap, timeOnly } from 'src/app/utils/time-utils';
 import dayjs from "dayjs";
 import { Dayjs } from "dayjs";
 import { Duration } from "dayjs/plugin/duration";
@@ -106,9 +106,12 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
     this.load();
 
     this.subs.push(this.freeTimesSmartCaching.onDataLoaded.subscribe(e => {
+      this.tryCalculateTimeData();
+
+      // apply calendar click from AppointmentsComponent
       if (this.time == null && this.clickedTime != null && e.key.isSame(this.date, "date"))
         this.onCalendarClick(this.clickedTime);
-    }))
+    }));
   }
 
   ngAfterViewInit(): void {
@@ -174,8 +177,11 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
     this.hoursData = null;
     this.minutesData = null;
 
-    if (!this.startDate?.isSame(this.date, "date"))
+    if (!this.startDate?.isSame(this.date, "date")) {
       this.time = undefined;
+      this.selectedHours = undefined;
+      this.selectedMinutes = undefined;
+    }
 
     this.tryGetCalendarDay();
   }
@@ -190,11 +196,17 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
     if (calendarDay != null &&
       (this.calendarDay == null || !this.calendarDay.date?.isSame(calendarDay.date, "date"))) {
       this.calendarDay = calendarDay;
-      this.calculateTimeData();
+      this.tryCalculateTimeData();
     }
   }
 
-  private calculateTimeData() {
+  private tryCalculateTimeData() {
+    if (this.calendarDay?.workingHours == null || this.freeTimesSmartCaching.singleData == null)
+      return;
+
+    if (this.hoursData != null && this.minutesData != null && this.displayHoursData != null)
+      return;
+
     this.hoursData = [];
     this.displayHoursData = [];
     this.minutesData = {};
@@ -202,7 +214,7 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
     let dayStart: Dayjs | null = null;
     let dayEnd: Dayjs | null = null;
 
-    if (this.calendarDay?.workingHours) {
+    if (this.calendarDay.workingHours) {
       for (let workingHour of this.calendarDay.workingHours as WorkingHour[]) {
         if (dayStart == null || workingHour.timeFrom?.isBefore(dayStart))
           dayStart = workingHour.timeFrom as Dayjs;
@@ -212,24 +224,24 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
       }
     }
 
-    let appointments = this.calendarDay?.appointments?.filter(a => a.id != this.appointment?.id);
+    let appointments = this.calendarDay.appointments?.filter(a => a.id != this.appointment?.id);
 
     let renderedAppointments = getRenderedAppointments(this.date, dayjs({ hours: 0 }), dayjs({ hours: 23 }), appointments ?? null, this.serviceColorsService, { layout: true });
 
     for (let h = 0; h < 24; h++) {
       this.minutesData[h] = [];
+      let time = dayjs({ hour: h });
+
+      let isWorkingHour = this.calendarDay.workingHours.some(wh => overlap(time, time.add(1, "hour"), wh.timeFrom as Dayjs, wh.timeTo as Dayjs));
+      let isFreeHour = this.freeTimesSmartCaching.singleData.some(f => overlap(time, time.add(1, "hour"), f.from, f.to));
+      let isFreeHourIncluding = this.freeTimesSmartCaching.singleData.some(f => overlap(time, time.add(1, "hour"), f.from, f.toIncludingDuration));
 
       for (let m = 0; m < 60; m += 5) {
         let time = dayjs({ hour: h, minute: m });
 
-        let isWorkingHour: boolean = false;
-
-        for (let wh of this.calendarDay?.workingHours as WorkingHour[]) {
-          if (time.isSameOrAfter(wh.timeFrom) && time.isSameOrBefore(wh.timeTo)) {
-            isWorkingHour = true;
-            break;
-          }
-        }
+        let isWorkingMinute = isWorkingHour && this.calendarDay.workingHours.some(wh => time.isBetween(wh.timeFrom, wh.timeTo, null, "[)"));
+        let isFreeMinute = isFreeHour && this.freeTimesSmartCaching.singleData.some(f => time.isBetween(f.from, f.to, null, "[]"));
+        let isFreeMinuteIncluding = isFreeHourIncluding && this.freeTimesSmartCaching.singleData.some(f => time.isBetween(f.from, f.toIncludingDuration, null, "[)"));
 
         let localRenderedAppointments: RenderedInterval<Appointment>[] = [];
         for (let ap of renderedAppointments) {
@@ -243,14 +255,14 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
 
         let minutesData: TimeData = {
           time: m,
-          isWorkingHour: isWorkingHour,
+          isWorkingHour: isWorkingMinute,
+          isFreeTime: isFreeMinute,
+          isFreeTimeIncluding: isFreeMinuteIncluding,
           renderedAppointments: localRenderedAppointments
         };
 
         this.minutesData[h].push(minutesData);
       }
-
-      let time = dayjs({ hour: h });
 
       let localRenderedAppointments: RenderedInterval<Appointment>[] = [];
       for (let ap of renderedAppointments) {
@@ -262,10 +274,11 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
           localRenderedAppointments.push(cropped);
       }
 
-
       let hourData: TimeData = {
         time: h,
-        isWorkingHour: this.minutesData[h].some(p => p.isWorkingHour),
+        isWorkingHour: isWorkingHour,
+        isFreeTime: isFreeHour,
+        isFreeTimeIncluding: isFreeHourIncluding,
         renderedAppointments: localRenderedAppointments
       };
 
@@ -316,5 +329,7 @@ export type DateTimeChooserResult = {
 type TimeData = {
   time: number;
   isWorkingHour: boolean;
+  isFreeTime: boolean;
+  isFreeTimeIncluding: boolean;
   renderedAppointments: RenderedInterval<Appointment>[];
 }

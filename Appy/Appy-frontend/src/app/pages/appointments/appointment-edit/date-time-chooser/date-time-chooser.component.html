@@ -20,6 +20,13 @@
                         [style.backgroundColor]="ap.color">
                     </div>
 
+                    <div class="time-status" [ngClass]="h.isFreeTime ? 'free-time' : 'taken-time'">
+                        <div *ngIf="!h.isFreeTimeIncluding"></div>
+                    </div>
+                    <div *ngIf="!h.isWorkingHour" class="time-status closed-time">
+                        <div></div>
+                    </div>
+
                     <div class="time-button w-clickable"
                         [ngClass]="{'selected': selectedHours == h.time, 'contains-selection': getContainsSelection(h.time, 0)}">
                         {{h.time.toString().padStart(2, '0')}}
@@ -35,6 +42,13 @@
                         <div *ngFor="let ap of m.renderedAppointments" class="rendered-appointment"
                             [style.top.%]="ap.top" [style.left.%]="ap.left" [style.height.%]="ap.height"
                             [style.width.%]="ap.width" [style.backgroundColor]="ap.color">
+                        </div>
+
+                        <div class="time-status" [ngClass]="m.isFreeTime ? 'free-time' : 'taken-time'">
+                            <div *ngIf="!m.isFreeTimeIncluding"></div>
+                        </div>
+                        <div *ngIf="!m.isWorkingHour" class="time-status closed-time">
+                            <div></div>
                         </div>
 
                         <div class="time-button w-clickable"
