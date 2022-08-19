@@ -11,8 +11,12 @@ export class DialogComponent implements OnInit {
 
   @ViewChild("template") template?: TemplateRef<any>;
 
-  @Input()
-  showCloseButton: boolean = true;
+  @Input() showCloseButton: boolean = true;
+
+  private _isOpen: boolean = false;
+  public get isOpen(): boolean {
+    return this._isOpen;
+  }
 
   overlayRef?: OverlayRef;
 
@@ -34,10 +38,13 @@ export class DialogComponent implements OnInit {
     });
 
     this.overlayRef.attach(new TemplatePortal(this.template as TemplateRef<any>, this.viewContainerRef));
+
+    this._isOpen = true;
   }
 
   close() {
     this.overlayRef?.dispose();
     this.overlayRef = undefined;
+    this._isOpen = false;
   }
 }
