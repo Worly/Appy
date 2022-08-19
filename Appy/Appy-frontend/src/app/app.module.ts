@@ -82,6 +82,8 @@ import duration from "dayjs/plugin/duration";
 import { DayjsDateAdapter, MAT_DAYJS_DATE_ADAPTER_OPTIONS, MAT_DAYJS_DATE_FORMATS } from './utils/material-dayjs-adapter';
 import { ActionBarComponent } from './components/action-bar/action-bar.component';
 import { FlexSplitterDirective } from './components/action-bar/directives/flex-splitter.directive';
+import { faBusinessTime } from '@fortawesome/free-solid-svg-icons';
+import { TimeButtonComponent } from './pages/appointments/appointment-edit/date-time-chooser/time-button/time-button.component';
 
 dayjs.extend(updateLocale);
 dayjs.extend(localeData);
@@ -131,7 +133,8 @@ dayjs.extend(duration);
     WorkingHoursComponent,
     SingleAppointmentComponent,
     ActionBarComponent,
-    FlexSplitterDirective
+    FlexSplitterDirective,
+    TimeButtonComponent
   ],
   imports: [
     BrowserModule,
@@ -181,6 +184,7 @@ export class AppModule {
       faCaretDown, faCaretUp,
       faTrash, faPen,
       faEllipsisV,
+      faBusinessTime
     );
   }
 

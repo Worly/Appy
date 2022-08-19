@@ -148,9 +148,10 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
     let timeToStamp = (timeTo ?? dayjs({ hours: 14 })).unix();
 
     let duration = 300;
-
     this.timeFromTween.tweenTo(timeFromStamp, duration);
     this.timeToTween.tweenTo(timeToStamp, duration);
+    // this.timeFrom = dayjs.unix(timeFromStamp);
+    // this.timeTo = dayjs.unix(timeToStamp);
   }
 
   getHeight(): string {

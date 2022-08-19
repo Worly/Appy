@@ -106,6 +106,7 @@
             "DATE_TIME": "Datum-vrijeme",
             "DURATION": "Trajanje",
             "CHOOSE_DATE_TIME": "Odaberi datum-vrijeme",
+            "CHOOSE_HOUR": "Odaberi sat",
             "CLOSED": "Poslovnica je zatvorena na ovaj dan.",
             "EDIT_WORKING_HOURS": "Uredi radne sate",
             "TIME_NOT_AVAILABLE_PROMPT": "Odabrano vrijeme je već zauzeto drugim terminom, izvan radnog vremena je ili nije dostupno zbog drugih razloga. Jeste li sigurni da ga želite svejedno spremiti?",

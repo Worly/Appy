@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { min, Subscription } from 'rxjs';
 import { Appointment } from 'src/app/models/appointment';
 import { CalendarDay } from 'src/app/models/calendar-day';
@@ -8,15 +8,14 @@ import { AppointmentService } from 'src/app/services/appointment.service.ts';
 import { DateSmartCaching } from 'src/app/utils/smart-caching';
 import { AppointmentsScrollerComponent } from '../../appointments-scroller/appointments-scroller.component';
 import { Router } from '@angular/router';
-import { cropRenderedInterval, getRenderedInterval, layoutRenderedIntervals, RenderedInterval } from 'src/app/utils/rendered-interval';
+import { cropRenderedInterval, getIntervalHeight, getIntervalTop, getRenderedAppointments, RenderedInterval } from 'src/app/utils/rendered-interval';
 import { ServiceColorsService } from 'src/app/services/service-colors.service';
-import { timeOnly } from 'src/app/utils/time-utils';
+import { overlap, timeOnly } from 'src/app/utils/time-utils';
 import dayjs from "dayjs";
-import "dayjs/plugin/isSameOrAfter";
-import "dayjs/plugin/isSameOrBefore";
-import "dayjs/plugin/isBetween";
 import { Dayjs } from "dayjs";
 import { Duration } from "dayjs/plugin/duration";
+import { ContextMenuComponent } from 'src/app/components/context-menu/context-menu.component';
+import { TimeData } from './time-button/time-button.component';
 
 @Component({
   selector: 'app-date-time-chooser',
@@ -26,6 +25,8 @@ import { Duration } from "dayjs/plugin/duration";
 export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @ViewChild(AppointmentsScrollerComponent) appointmentScroller?: AppointmentsScrollerComponent;
+  @ViewChild("hoursContextMenu", { read: ContextMenuComponent }) hoursContextMenu?: ContextMenuComponent;
+  @ViewChildren("hoursContextMenuButtons", { read: ElementRef<HTMLElement> }) hoursButtons?: QueryList<ElementRef<HTMLElement>>;
 
   private _appointment?: Appointment;
   @Input() set appointment(value: Appointment | undefined) {
@@ -86,6 +87,8 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
   displayHoursData: TimeData[] | null = null;
   minutesData: { [time: number]: TimeData[] } | null = null;
 
+  showAnyHour: boolean = false;
+
   calendarDay: CalendarDay | null = null;
 
   shadowAppointments: Appointment[] = [];
@@ -109,9 +112,12 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
     this.load();
 
     this.subs.push(this.freeTimesSmartCaching.onDataLoaded.subscribe(e => {
+      this.tryCalculateTimeData();
+
+      // apply calendar click from AppointmentsComponent
       if (this.time == null && this.clickedTime != null && e.key.isSame(this.date, "date"))
         this.onCalendarClick(this.clickedTime);
-    }))
+    }));
   }
 
   ngAfterViewInit(): void {
@@ -177,8 +183,11 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
     this.hoursData = null;
     this.minutesData = null;
 
-    if (!this.startDate?.isSame(this.date, "date"))
+    if (!this.startDate?.isSame(this.date, "date")) {
       this.time = undefined;
+      this.selectedHours = undefined;
+      this.selectedMinutes = undefined;
+    }
 
     this.tryGetCalendarDay();
   }
@@ -193,11 +202,17 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
     if (calendarDay != null &&
       (this.calendarDay == null || !this.calendarDay.date?.isSame(calendarDay.date, "date"))) {
       this.calendarDay = calendarDay;
-      this.calculateTimeData();
+      this.tryCalculateTimeData();
     }
   }
 
-  private calculateTimeData() {
+  private tryCalculateTimeData() {
+    if (this.calendarDay?.workingHours == null || this.freeTimesSmartCaching.singleData == null)
+      return;
+
+    if (this.hoursData != null && this.minutesData != null && this.displayHoursData != null)
+      return;
+
     this.hoursData = [];
     this.displayHoursData = [];
     this.minutesData = {};
@@ -205,7 +220,7 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
     let dayStart: Dayjs | null = null;
     let dayEnd: Dayjs | null = null;
 
-    if (this.calendarDay?.workingHours) {
+    if (this.calendarDay.workingHours) {
       for (let workingHour of this.calendarDay.workingHours as WorkingHour[]) {
         if (dayStart == null || workingHour.timeFrom?.isBefore(dayStart))
           dayStart = workingHour.timeFrom as Dayjs;
@@ -215,60 +230,62 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
       }
     }
 
-    let appointments = this.calendarDay?.appointments?.filter(a => a.id != this.appointment?.id);
+    let appointments = this.calendarDay.appointments?.filter(a => a.id != this.appointment?.id);
+
+    let renderedAppointments = getRenderedAppointments(this.date, dayjs({ hours: 0 }), dayjs({ hours: 23 }), appointments ?? null, this.serviceColorsService, { layout: true });
 
     for (let h = 0; h < 24; h++) {
       this.minutesData[h] = [];
+      let time = dayjs({ hour: h });
+
+      let isWorkingHour = this.calendarDay.workingHours.some(wh => overlap(time, time.add(1, "hour"), wh.timeFrom as Dayjs, wh.timeTo as Dayjs));
+      let isFreeHour = this.freeTimesSmartCaching.singleData.some(f => overlap(time, time.add(1, "hour"), f.from, f.to, "[)"));
+      let isFreeHourIncluding = this.freeTimesSmartCaching.singleData.some(f => overlap(time, time.add(1, "hour"), f.from, f.toIncludingDuration, "()"));
 
       for (let m = 0; m < 60; m += 5) {
         let time = dayjs({ hour: h, minute: m });
 
-        let isWorkingHour: boolean = false;
+        let isWorkingMinute = isWorkingHour && this.calendarDay.workingHours.some(wh => time.isBetween(wh.timeFrom, wh.timeTo, null, "[)"));
+        let isFreeMinute = isFreeHour && this.freeTimesSmartCaching.singleData.some(f => time.isBetween(f.from, f.to, null, "[]"));
+        let isFreeMinuteIncluding = isFreeHourIncluding && this.freeTimesSmartCaching.singleData.some(f => time.isBetween(f.from, f.toIncludingDuration, null, "[)"));
 
-        for (let wh of this.calendarDay?.workingHours as WorkingHour[]) {
-          if (time.isSameOrAfter(wh.timeFrom) && time.isSameOrBefore(wh.timeTo)) {
-            isWorkingHour = true;
-            break;
-          }
+        let localRenderedAppointments: RenderedInterval<Appointment>[] = [];
+        for (let ap of renderedAppointments) {
+          let ri = { ...ap };
+          ri.top = getIntervalTop(time, time.add(5, "minutes"), ap.source.time as Dayjs);
+          ri.height = getIntervalHeight(time, time.add(5, "minutes"), ap.source.duration as Duration);
+          let cropped = cropRenderedInterval(ri);
+          if (cropped != null)
+            localRenderedAppointments.push(cropped);
         }
-
-        let renderedAppointments: RenderedInterval<Appointment>[] = [];
-        if (appointments) {
-          for (let ap of appointments) {
-            let ri = getRenderedInterval<Appointment>(time, time.add(5, "minutes"), ap, ap.time as Dayjs, ap.duration as Duration, this.serviceColorsService.get(ap.service?.colorId));
-            ri = cropRenderedInterval(ri);
-            if (ri)
-              renderedAppointments.push(ri);
-          }
-        }
-        layoutRenderedIntervals(renderedAppointments);
 
         let minutesData: TimeData = {
           time: m,
-          isWorkingHour: isWorkingHour,
-          renderedAppointments: renderedAppointments
+          isWorkingHour: isWorkingMinute,
+          isFreeTime: isFreeMinute,
+          isFreeTimeIncluding: isFreeMinuteIncluding,
+          renderedAppointments: localRenderedAppointments
         };
 
         this.minutesData[h].push(minutesData);
       }
 
-      let time = dayjs({ hour: h });
-
-      let renderedAppointments: RenderedInterval<Appointment>[] = [];
-      if (appointments) {
-        for (let ap of appointments) {
-          let ri = getRenderedInterval<Appointment>(time, time.add(1, "hour"), ap, ap.time as Dayjs, ap.duration as Duration, this.serviceColorsService.get(ap.service?.colorId));
-          ri = cropRenderedInterval(ri);
-          if (ri)
-            renderedAppointments.push(ri);
-        }
+      let localRenderedAppointments: RenderedInterval<Appointment>[] = [];
+      for (let ap of renderedAppointments) {
+        let ri = { ...ap };
+        ri.top = getIntervalTop(time, time.add(1, "hour"), ap.source.time as Dayjs);
+        ri.height = getIntervalHeight(time, time.add(1, "hour"), ap.source.duration as Duration);
+        let cropped = cropRenderedInterval(ri);
+        if (cropped != null)
+          localRenderedAppointments.push(cropped);
       }
-      layoutRenderedIntervals(renderedAppointments);
 
       let hourData: TimeData = {
         time: h,
-        isWorkingHour: this.minutesData[h].some(p => p.isWorkingHour),
-        renderedAppointments: renderedAppointments
+        isWorkingHour: isWorkingHour,
+        isFreeTime: isFreeHour,
+        isFreeTimeIncluding: isFreeHourIncluding,
+        renderedAppointments: localRenderedAppointments
       };
 
       this.hoursData.push(hourData);
@@ -307,16 +324,49 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
   goToWorkingHours() {
     this.router.navigate(["/working-hours"]);
   }
+
+  toggleShowAnyHour() {
+    this.showAnyHour = !this.showAnyHour;
+
+    // if selected hour from dropdown is not visible in the display list, then unselect it
+    if (!this.showAnyHour && this.selectedHours != null) {
+      if (!this.displayHoursData?.some(d => d.time == this.selectedHours)) {
+        this.time = undefined;
+        this.selectedHours = undefined;
+        this.selectedMinutes = undefined;
+      }
+    }
+  }
+
+  chooseHourClicked() {
+    this.hoursContextMenu?.toggle();
+
+    // scroll selected into view
+    if (this.selectedHours == null)
+      return;
+
+    if (this.hoursContextMenu?.isOpen() && this.hoursButtons != null) {
+      let selectedButton = this.hoursButtons.find(b => b.nativeElement.classList.contains("selected"));
+      if (selectedButton == null)
+        return;
+
+      let buttonElement = selectedButton.nativeElement as HTMLElement;
+      let parentElement = buttonElement.parentElement?.parentElement as HTMLElement;
+
+      let scrollPosition = buttonElement.getBoundingClientRect().top;
+
+      parentElement.scrollTop = scrollPosition - 80;
+
+      parentElement.scrollTo({
+        top: scrollPosition,
+        behavior: "smooth"
+      });
+    }
+  }
 }
 
 export type DateTimeChooserResult = {
   date?: Dayjs;
   time?: Dayjs;
   ok: boolean;
-}
-
-type TimeData = {
-  time: number;
-  isWorkingHour: boolean;
-  renderedAppointments: RenderedInterval<Appointment>[];
 }

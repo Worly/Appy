@@ -4,11 +4,10 @@
     grid-template-columns: minmax(0, 1fr);
     position: relative;
 
-    margin-bottom: 10px;
-
     background-color: var(--input-background-color);
     border-radius: var(--default-border-radius);
     box-shadow: 0 0 4px -1px var(--text);
+    overflow: hidden;
 }
 
 .sticky-header {

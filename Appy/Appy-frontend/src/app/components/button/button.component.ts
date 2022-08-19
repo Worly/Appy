@@ -8,69 +8,49 @@ import { IconName, IconPrefix } from '@fortawesome/fontawesome-svg-core';
 })
 export class ButtonComponent implements OnInit {
 
-  @Input()
-  text: string | null = null;
+  @Input() text: string | null = null;
 
-  @Input()
-  curved: boolean = true;
-
+  @Input() curved: boolean = true;
   @Input() curvedTopLeft: boolean = false;
   @Input() curvedTopRight: boolean = false;
   @Input() curvedBottomLeft: boolean = false;
   @Input() curvedBottomRight: boolean = false;
 
-  @Input()
-  look: "solid" | "outlined" | "normal" | "transparent" | "custom" = "normal";
+  @Input() look: "solid" | "outlined" | "normal" | "transparent" | "custom" = "normal";
+  @Input() color: "success" | "danger" | "normal" = "normal";
 
-  @Input()
-  color: "success" | "danger" | "normal" = "normal";
+  @Input() customColor: string = "#FFFFFF";
+  @Input() customTextColor: string = "black";
+  @Input() customBorderColor: string = "black";
 
-  @Input()
-  customColor: string = "#FFFFFF";
+  @Input() borderStyle: "solid" | "dashed" | "dotted" | "double" = "solid";
+  @Input() borderWidth: string = "2px";
 
-  @Input()
-  customTextColor: string = "black";
+  @Input() alignContent: "left" | "center" | "right" = "left";
+  @Input() textAlign: "left" | "center" | "rigth" = "left";
 
-  @Input()
-  borderStyle: "solid" | "dashed" | "dotted" | "double" = "solid";
-
-  @Input()
-  borderWidth: string = "2px";
-
-  @Input()
-  alignContent: "left" | "center" | "right" = "left";
-
-  @Input()
-  disabled: boolean = false;
+  @Input() disabled: boolean = false;
 
   @Input()
   set width(width: string) {
     this.elementRef.nativeElement.style.width = width;
   }
 
-  @Input()
-  iconPrefix: IconPrefix = "fas";
+  @Input() iconPrefix: IconPrefix = "fas";
 
-  @Input()
-  icon?: IconName;
+  @Input() icon?: IconName;
 
-  @Input()
-  iconPlacement: "left" | "right" = "left";
+  @Input() iconPlacement: "left" | "right" = "left";
 
-  @Input()
-  loadingIcon: IconName = "spinner";
+  @Input() loadingIcon: IconName = "spinner";
 
-  @Input()
-  spinIcon: boolean = false;
+  @Input() spinIcon: boolean = false;
 
-  @Input()
-  isCircle: boolean = true;
+  @Input() isCircle: boolean = true;
 
-  @Input()
-  isLoading: boolean = false;
+  @Input() isLoading: boolean = false;
 
-  @Output()
-  onClick = new EventEmitter();
+  @Output() onClick = new EventEmitter();
 
   constructor(public elementRef: ElementRef) { }
 

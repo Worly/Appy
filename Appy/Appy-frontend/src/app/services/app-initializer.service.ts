@@ -1,6 +1,5 @@
 import { Injectable } from "@angular/core";
 import dayjs from "dayjs";
-import "dayjs/plugin/updateLocale";
 import { combineLatestWith } from "rxjs";
 import { AuthService } from "./auth/auth.service";
 import { TranslateService } from "./translate/translate.service";
