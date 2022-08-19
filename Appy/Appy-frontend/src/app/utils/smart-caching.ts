@@ -62,14 +62,6 @@ export class SmartCaching<keyT, valueT> {
                     key: this.keyTransformFunction(current, 0),
                     data: null,
                 } as Data<keyT, valueT>;
-
-                data.subscription = this.loadFunction(data.key)
-                    .subscribe(c => {
-                        if (data != null) {
-                            data.data = c;
-                            this.onDataLoaded.next(data);
-                        }
-                    });
             }
 
             data.show = this.keyCompareFunction(current, firstVisibleKey) >= 0 && this.keyCompareFunction(current, lastVisibleKey) <= 0;
@@ -87,6 +79,36 @@ export class SmartCaching<keyT, valueT> {
 
         this._data = newData;
         this.loadedKey = key;
+
+        this.callLoad();
+    }
+
+    private callLoad() {
+        // first call load on all showing data, and when they are complete call it on all others
+        let shownNotLoaded = this._data.filter(d => d.show && d.subscription == null);
+        if (shownNotLoaded.length > 0)
+            this.loadInternal(shownNotLoaded);
+        else
+            this.loadInternal(this._data);
+    }
+
+    private loadInternal(list: Data<keyT, valueT>[]) {
+        for (let data of list) {
+            if (data.subscription == null) {
+                data.subscription = this.loadFunction(data.key)
+                    .subscribe(c => {
+                        if (data != null) {
+                            data.data = c;
+                            this.onDataLoadedInternal(data);
+                        }
+                    });
+            }
+        }
+    }
+
+    private onDataLoadedInternal(data: Data<keyT, valueT>) {
+        this.onDataLoaded.next(data);
+        this.callLoad();
     }
 
     public dispose() {
