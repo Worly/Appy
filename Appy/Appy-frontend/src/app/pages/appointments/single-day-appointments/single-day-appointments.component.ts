@@ -172,17 +172,17 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
     if (this.freeTimes != null) {
       for (let freeTime of this.freeTimes) {
         let ri = getRenderedInterval<string>(this.timeFrom, this.timeTo, "free-time", freeTime.from, dayjs.duration(freeTime.toIncludingDuration.diff(freeTime.from)));
-        ri = cropRenderedInterval(ri);
-        if (ri)
-          this.renderedTimeStatuses.push(ri);
+        let cropped = cropRenderedInterval(ri);
+        if (cropped)
+          this.renderedTimeStatuses.push(cropped);
       }
 
       let takenTimes = invertTimesCustom(this.freeTimes, t => t.from, t => t.toIncludingDuration, this.timeFrom, this.timeTo);
       for (let takenTime of takenTimes) {
         let ri = getRenderedInterval<string>(this.timeFrom, this.timeTo, "taken-time", takenTime.from, dayjs.duration(takenTime.to.diff(takenTime.from)));
-        ri = cropRenderedInterval(ri);
-        if (ri)
-          this.renderedTimeStatuses.push(ri);
+        let cropped = cropRenderedInterval(ri);
+        if (cropped)
+          this.renderedTimeStatuses.push(cropped);
       }
     }
 
@@ -190,9 +190,9 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
       let closedTimes = invertTimesCustom(this.workingHours, t => t.timeFrom as Dayjs, t => t.timeTo as Dayjs, this.timeFrom, this.timeTo);
       for (let closedTime of closedTimes) {
         let ri = getRenderedInterval<string>(this.timeFrom, this.timeTo, "closed-time", closedTime.from, dayjs.duration(closedTime.to.diff(closedTime.from)));
-        ri = cropRenderedInterval(ri);
-        if (ri)
-          this.renderedTimeStatuses.push(ri);
+        let cropped = cropRenderedInterval(ri);
+        if (cropped)
+          this.renderedTimeStatuses.push(cropped);
       }
     }
   }

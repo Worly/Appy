@@ -8,7 +8,7 @@ import { AppointmentService } from 'src/app/services/appointment.service.ts';
 import { DateSmartCaching } from 'src/app/utils/smart-caching';
 import { AppointmentsScrollerComponent } from '../../appointments-scroller/appointments-scroller.component';
 import { Router } from '@angular/router';
-import { cropRenderedInterval, getRenderedInterval, layoutRenderedIntervals, RenderedInterval } from 'src/app/utils/rendered-interval';
+import { cropRenderedInterval, getIntervalHeight, getIntervalTop, getRenderedInterval, layoutRenderedIntervals, RenderedInterval } from 'src/app/utils/rendered-interval';
 import { ServiceColorsService } from 'src/app/services/service-colors.service';
 import { timeOnly } from 'src/app/utils/time-utils';
 import dayjs from "dayjs";
@@ -217,6 +217,11 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
 
     let appointments = this.calendarDay?.appointments?.filter(a => a.id != this.appointment?.id);
 
+    let renderedAppointments: RenderedInterval<Appointment>[] = [];
+    if (appointments)
+      renderedAppointments = appointments.map(ap => getRenderedInterval<Appointment>(dayjs({ hours: 0 }), dayjs({ hours: 23 }), ap, ap.time as Dayjs, ap.duration as Duration, this.serviceColorsService.get(ap.service?.colorId)));
+    layoutRenderedIntervals(renderedAppointments);
+
     for (let h = 0; h < 24; h++) {
       this.minutesData[h] = [];
 
@@ -232,21 +237,20 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
           }
         }
 
-        let renderedAppointments: RenderedInterval<Appointment>[] = [];
-        if (appointments) {
-          for (let ap of appointments) {
-            let ri = getRenderedInterval<Appointment>(time, time.add(5, "minutes"), ap, ap.time as Dayjs, ap.duration as Duration, this.serviceColorsService.get(ap.service?.colorId));
-            ri = cropRenderedInterval(ri);
-            if (ri)
-              renderedAppointments.push(ri);
-          }
+        let localRenderedAppointments: RenderedInterval<Appointment>[] = [];
+        for (let ap of renderedAppointments) {
+          let ri = { ...ap };
+          ri.top = getIntervalTop(time, time.add(5, "minutes"), ap.source.time as Dayjs);
+          ri.height = getIntervalHeight(time, time.add(5, "minutes"), ap.source.duration as Duration);
+          let cropped = cropRenderedInterval(ri);
+          if (cropped != null)
+            localRenderedAppointments.push(cropped);
         }
-        layoutRenderedIntervals(renderedAppointments);
 
         let minutesData: TimeData = {
           time: m,
           isWorkingHour: isWorkingHour,
-          renderedAppointments: renderedAppointments
+          renderedAppointments: localRenderedAppointments
         };
 
         this.minutesData[h].push(minutesData);
@@ -254,21 +258,21 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
 
       let time = dayjs({ hour: h });
 
-      let renderedAppointments: RenderedInterval<Appointment>[] = [];
-      if (appointments) {
-        for (let ap of appointments) {
-          let ri = getRenderedInterval<Appointment>(time, time.add(1, "hour"), ap, ap.time as Dayjs, ap.duration as Duration, this.serviceColorsService.get(ap.service?.colorId));
-          ri = cropRenderedInterval(ri);
-          if (ri)
-            renderedAppointments.push(ri);
-        }
+      let localRenderedAppointments: RenderedInterval<Appointment>[] = [];
+      for (let ap of renderedAppointments) {
+        let ri = { ...ap };
+        ri.top = getIntervalTop(time, time.add(1, "hour"), ap.source.time as Dayjs);
+        ri.height = getIntervalHeight(time, time.add(1, "hour"), ap.source.duration as Duration);
+        let cropped = cropRenderedInterval(ri);
+        if (cropped != null)
+          localRenderedAppointments.push(cropped);
       }
-      layoutRenderedIntervals(renderedAppointments);
+
 
       let hourData: TimeData = {
         time: h,
         isWorkingHour: this.minutesData[h].some(p => p.isWorkingHour),
-        renderedAppointments: renderedAppointments
+        renderedAppointments: localRenderedAppointments
       };
 
       this.hoursData.push(hourData);

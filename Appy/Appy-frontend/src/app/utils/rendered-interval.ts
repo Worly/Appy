@@ -11,11 +11,11 @@ export interface RenderedInterval<T> {
     source: T;
 }
 
-export function getRenderedInterval<T>(timeFrom: Dayjs, timeTo: Dayjs, source: T, time: Dayjs, duration: Duration, color?: string): RenderedInterval<T> | null {
+export function getRenderedInterval<T>(timeFrom: Dayjs, timeTo: Dayjs, source: T, time: Dayjs, duration: Duration, color?: string): RenderedInterval<T> {
     let ri: RenderedInterval<T> = {
-        top: (time.diff(timeFrom) / timeTo.diff(timeFrom)) * 100,
+        top: getIntervalTop(timeFrom, timeTo, time),
         left: 0,
-        height: (duration.asMilliseconds() / timeTo.diff(timeFrom)) * 100,
+        height: getIntervalHeight(timeFrom, timeTo, duration),
         width: 100,
         color: color,
         time: `${time.format("HH:mm")} - ${time.add(duration).format("HH:mm")}`,
@@ -23,6 +23,14 @@ export function getRenderedInterval<T>(timeFrom: Dayjs, timeTo: Dayjs, source: T
     };
 
     return ri;
+}
+
+export function getIntervalTop(timeFrom: Dayjs, timeTo: Dayjs, time: Dayjs): number {
+    return (time.diff(timeFrom) / timeTo.diff(timeFrom)) * 100;
+}
+
+export function getIntervalHeight(timeFrom: Dayjs, timeTo: Dayjs, duration: Duration): number { 
+    return (duration.asMilliseconds() / timeTo.diff(timeFrom)) * 100
 }
 
 export function cropRenderedInterval<T>(ri: RenderedInterval<T> | null, removeTopOverflow: boolean = false): RenderedInterval<T> | null {
@@ -86,7 +94,7 @@ function packGroup<T>(group: RenderedInterval<T>[]) {
         bottom: number
     }[] = [];
 
-    
+
     for (let ri of group) {
         let found = false;
         for (let col of columns) {
