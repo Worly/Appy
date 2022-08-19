@@ -294,6 +294,10 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
         && (dayEnd.minute() == 0 && h < dayEnd.hour() || dayEnd.minute() > 0 && h <= dayEnd.hour()))
         this.displayHoursData?.push(hourData);
     }
+
+    // feature: when opening an already selected time which is outside of working hours, automatically switch to showAnyHour
+    if (this.selectedHours != null && !this.displayHoursData.some(h => h.time == this.selectedHours))
+      this.showAnyHour = true;
   }
 
   onCalendarClick(time: Dayjs) {
