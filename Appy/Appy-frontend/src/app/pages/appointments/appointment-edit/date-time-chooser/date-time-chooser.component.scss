@@ -13,8 +13,6 @@
 .action-buttons {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 5px;
 }
 
 .time-chooser-container {
@@ -34,7 +32,7 @@
     gap: 2px;
     padding-right: 8px;
 
-    & div {
+    & app-time-button {
         min-height: 40px;
     }
 }
@@ -55,89 +53,6 @@
     display: grid;
     grid-template-rows: repeat(12, 1fr);
     gap: 2px;
-}
-
-.time-button-container {
-    position: relative;
-    width: 100%;
-    background-color: var(--input-background-color);
-    border-radius: var(--default-border-radius);
-    overflow: hidden;
-
-    .rendered-appointment {
-        position: absolute;
-        width: 100%;
-    }
-
-    .time-button {
-        width: 100%;
-        height: 100%;
-
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        text-align: center;
-
-        border-radius: var(--default-border-radius);
-        font-size: 1rem;
-
-        box-shadow: 0 0 0 1px var(--input-border-color) inset;
-
-        &.contains-selection {
-            box-shadow: 0 0 0 2px var(--text) inset;
-        }
-
-        &.selected {
-            box-shadow: 0 0 0 3px var(--text) inset;
-            font-weight: bold;
-        }
-    }
-}
-
-.time-status {
-    position: absolute;
-    top: 0;
-    width: 100%;
-    height: 100%;
-
-    pointer-events: none;
-
-    border-right: 6px solid var(--status-color);
-
-    &.free-time {
-        --status-color: var(--success);
-        & > div {
-            display: none;
-        }
-    }
-
-    &.taken-time {
-        --status-color: var(--danger);
-    }
-
-    &.closed-time {
-        --status-color: var(--input-border-color);
-    }
-
-    & > div {
-        opacity: 30%;
-        width: 100%;
-        height: 100%;
-
-        background-color: var(--status-color);
-
-        &::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-
-            background: repeating-linear-gradient(45deg, transparent, transparent 10px, white 10px, white 20px);
-            opacity: 30%;
-        }
-    }
 }
 
 .facility-closed {
