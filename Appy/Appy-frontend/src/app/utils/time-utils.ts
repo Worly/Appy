@@ -22,9 +22,22 @@ export function parseDuration(duration: string): Duration {
     });
 }
 
-export function overlap(startA: Dayjs, endA: Dayjs, startB: Dayjs, endB: Dayjs) {
+export function overlap(startA: Dayjs, endA: Dayjs, startB: Dayjs, endB: Dayjs, d: '()' | '[]' | '[)' | '(]' = "()") {
     if (startA.isAfter(endA) || startB.isAfter(endB))
         throw new Error("Start cannot be after end!");
 
-    return startA.isBefore(endB) && endA.isAfter(startB);
+    let left: boolean = false;
+    let right: boolean = false;
+
+    if (d[0] == '(')
+        left = startA.isBefore(endB);
+    else
+        left = startA.isSameOrBefore(endB);
+
+    if (d[1] == ')')
+        right = endA.isAfter(startB);
+    else
+        right = endA.isSameOrAfter(startB);
+
+    return left && right;
 }

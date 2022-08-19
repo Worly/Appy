@@ -2,6 +2,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
+    padding-bottom: 90px;
 }
 
 .right-side {
@@ -22,6 +23,22 @@
     gap: 5px;
 }
 
+.choose-hour-button {
+    position: sticky;
+    top: 100px;
+}
+
+.all-hour-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-right: 8px;
+
+    & div {
+        min-height: 40px;
+    }
+}
+
 .hour-buttons {
     height: 100%;
     display: grid;
@@ -33,7 +50,7 @@
     position: sticky;
     top: 100px;
 
-    height: 70vh;
+    height: 65vh;
 
     display: grid;
     grid-template-rows: repeat(12, 1fr);
@@ -63,7 +80,7 @@
 
         border-radius: var(--default-border-radius);
         font-size: 1rem;
-        
+
         box-shadow: 0 0 0 1px var(--input-border-color) inset;
 
         &.contains-selection {

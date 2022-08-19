@@ -106,6 +106,7 @@
             "DATE_TIME": "Date-time",
             "DURATION": "Duration",
             "CHOOSE_DATE_TIME": "Choose date-time",
+            "CHOOSE_HOUR": "Choose hour",
             "CLOSED": "Facility is closed on this day.",
             "EDIT_WORKING_HOURS": "Edit working hours",
             "TIME_NOT_AVAILABLE_PROMPT": "Selected time is taken by another appointment, outside of working hours or not available for other reasons. Are you sure you want to save it anyway?",

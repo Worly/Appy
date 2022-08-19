@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { min, Subscription } from 'rxjs';
 import { Appointment } from 'src/app/models/appointment';
 import { CalendarDay } from 'src/app/models/calendar-day';
@@ -14,6 +14,7 @@ import { overlap, timeOnly } from 'src/app/utils/time-utils';
 import dayjs from "dayjs";
 import { Dayjs } from "dayjs";
 import { Duration } from "dayjs/plugin/duration";
+import { ContextMenuComponent } from 'src/app/components/context-menu/context-menu.component';
 
 @Component({
   selector: 'app-date-time-chooser',
@@ -23,6 +24,8 @@ import { Duration } from "dayjs/plugin/duration";
 export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @ViewChild(AppointmentsScrollerComponent) appointmentScroller?: AppointmentsScrollerComponent;
+  @ViewChild("hoursContextMenu", { read: ContextMenuComponent }) hoursContextMenu?: ContextMenuComponent;
+  @ViewChildren("hoursContextMenuButtons", { read: ElementRef<HTMLElement> }) hoursButtons?: QueryList<ElementRef<HTMLElement>>;
 
   private _appointment?: Appointment;
   @Input() set appointment(value: Appointment | undefined) {
@@ -82,6 +85,8 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
   hoursData: TimeData[] | null = null;
   displayHoursData: TimeData[] | null = null;
   minutesData: { [time: number]: TimeData[] } | null = null;
+
+  showAnyHour: boolean = false;
 
   calendarDay: CalendarDay | null = null;
 
@@ -233,8 +238,8 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
       let time = dayjs({ hour: h });
 
       let isWorkingHour = this.calendarDay.workingHours.some(wh => overlap(time, time.add(1, "hour"), wh.timeFrom as Dayjs, wh.timeTo as Dayjs));
-      let isFreeHour = this.freeTimesSmartCaching.singleData.some(f => overlap(time, time.add(1, "hour"), f.from, f.to));
-      let isFreeHourIncluding = this.freeTimesSmartCaching.singleData.some(f => overlap(time, time.add(1, "hour"), f.from, f.toIncludingDuration));
+      let isFreeHour = this.freeTimesSmartCaching.singleData.some(f => overlap(time, time.add(1, "hour"), f.from, f.to, "[)"));
+      let isFreeHourIncluding = this.freeTimesSmartCaching.singleData.some(f => overlap(time, time.add(1, "hour"), f.from, f.toIncludingDuration, "()"));
 
       for (let m = 0; m < 60; m += 5) {
         let time = dayjs({ hour: h, minute: m });
@@ -317,6 +322,45 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
 
   goToWorkingHours() {
     this.router.navigate(["/working-hours"]);
+  }
+
+  toggleShowAnyHour() {
+    this.showAnyHour = !this.showAnyHour;
+
+    // if selected hour from dropdown is not visible in the display list, then unselect it
+    if (!this.showAnyHour && this.selectedHours != null) {
+      if (!this.displayHoursData?.some(d => d.time == this.selectedHours)) {
+        this.time = undefined;
+        this.selectedHours = undefined;
+        this.selectedMinutes = undefined;
+      }
+    }
+  }
+
+  chooseHourClicked() {
+    this.hoursContextMenu?.toggle();
+
+    // scroll selected into view
+    if (this.selectedHours == null)
+      return;
+
+    if (this.hoursContextMenu?.isOpen() && this.hoursButtons != null) {
+      let selectedButton = this.hoursButtons.find(b => b.nativeElement.classList.contains("selected"));
+      if (selectedButton == null)
+        return;
+
+      let buttonElement = selectedButton.nativeElement as HTMLElement;
+      let parentElement = buttonElement.parentElement?.parentElement as HTMLElement;
+
+      let scrollPosition = buttonElement.getBoundingClientRect().top;
+
+      parentElement.scrollTop = scrollPosition - 80;
+
+      parentElement.scrollTo({
+        top: scrollPosition,
+        behavior: "smooth"
+      });
+    }
   }
 }
 

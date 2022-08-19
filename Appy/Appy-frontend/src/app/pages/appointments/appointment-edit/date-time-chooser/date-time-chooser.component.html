@@ -5,14 +5,51 @@
     </app-appointments-scroller>
 
     <div class="right-side">
-        <div class="action-buttons">
-            <app-button text="{{'CANCEL' | translate}}" color="danger" look="normal" (onClick)="cancel()"></app-button>
+        <app-action-bar>
+            <app-button icon="business-time" [isCircle]="false" look="custom"
+                [customBorderColor]="showAnyHour ? 'var(--text)' : 'var(--input-background-color)'"
+                (onClick)="toggleShowAnyHour()">
+            </app-button>
+            <app-button flex-splitter text="{{'CANCEL' | translate}}" color="danger" look="normal" (onClick)="cancel()">
+            </app-button>
             <app-button text="{{'OK' | translate}}" color="success" look="solid" (onClick)="ok()"
                 [disabled]="time == null"></app-button>
-        </div>
+        </app-action-bar>
         <div *ngIf="calendarDay?.workingHours?.length != 0 && hoursData != null && displayHoursData != null && minutesData != null"
             class="time-chooser-container">
-            <div class="hour-buttons">
+            <div *ngIf="showAnyHour">
+                <app-button #buttonRef="elementRef" appElementRef class="choose-hour-button" textAlign="center"
+                    alignContent="center" width="100%" (onClick)="chooseHourClicked()"
+                    [text]="selectedHours == null ? ('pages.appointments.CHOOSE_HOUR' | translate) : selectedHours.toString().padStart(2, '0')">
+                </app-button>
+
+                <app-context-menu #hoursContextMenu [relativeTo]="buttonRef.elementRef" [copyOriginWidth]="true">
+                    <div class="all-hour-buttons">
+                        <div #hoursContextMenuButtons *ngFor="let h of hoursData" class="time-button-container"
+                            [ngClass]="{'selected': selectedHours == h.time}"
+                            (click)="selectHours(h.time); hoursContextMenu.close()">
+                            <div *ngFor="let ap of h.renderedAppointments" class="rendered-appointment"
+                                [style.top.%]="ap.top" [style.left.%]="ap.left" [style.height.%]="ap.height"
+                                [style.width.%]="ap.width" [style.backgroundColor]="ap.color">
+                            </div>
+
+                            <div class="time-status" [ngClass]="h.isFreeTime ? 'free-time' : 'taken-time'">
+                                <div *ngIf="!h.isFreeTimeIncluding"></div>
+                            </div>
+                            <div *ngIf="!h.isWorkingHour" class="time-status closed-time">
+                                <div></div>
+                            </div>
+
+                            <div class="time-button w-clickable"
+                                [ngClass]="{'selected': selectedHours == h.time, 'contains-selection': getContainsSelection(h.time, 0)}">
+                                {{h.time.toString().padStart(2, '0')}}
+                                <div class="w-overlay"></div>
+                            </div>
+                        </div>
+                    </div>
+                </app-context-menu>
+            </div>
+            <div *ngIf="!showAnyHour" class="hour-buttons">
                 <div *ngFor="let h of displayHoursData" class="time-button-container" (click)="selectHours(h.time)">
 
                     <div *ngFor="let ap of h.renderedAppointments" class="rendered-appointment" [style.top.%]="ap.top"
