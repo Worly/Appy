@@ -120,7 +120,7 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
       }
 
       if (daysData.data.appointments) {
-        for (let app of daysData.data.appointments) {
+        for (let app of daysData.data.appointments.filter(a => this.notInHiddenFilter(a))) {
           if (app.time == null || app.duration == null)
             continue;
 
