@@ -14,7 +14,6 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   private subs: Subscription[] = [];
 
   public date: Dayjs = dayjs();
-  public calendarTodayHeaderComponent = CalendarTodayHeaderComponent;
 
   constructor(
     private router: Router,

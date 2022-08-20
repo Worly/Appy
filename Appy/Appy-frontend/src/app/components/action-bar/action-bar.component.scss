@@ -5,6 +5,10 @@
     display: flex;
     gap: 10px;
     z-index: 1;
+
+    &.compact {
+        gap: 5px;
+    }
 }
 
 .action-bar-spacer {
@@ -24,6 +28,10 @@
         padding: 10px 15px;
         background-color: var(--input-background-color);
         box-shadow: 0 25px 22px 19px var(--text);
+
+        &.compact {
+            padding: 10px 10px;
+        }
     }
 
     .action-bar-spacer {

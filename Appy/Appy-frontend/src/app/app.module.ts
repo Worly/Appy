@@ -84,6 +84,7 @@ import { ActionBarComponent } from './components/action-bar/action-bar.component
 import { FlexSplitterDirective } from './components/action-bar/directives/flex-splitter.directive';
 import { faBusinessTime } from '@fortawesome/free-solid-svg-icons';
 import { TimeButtonComponent } from './pages/appointments/appointment-edit/date-time-chooser/time-button/time-button.component';
+import { DateSelectorComponent } from './components/date-selector/date-selector.component';
 
 dayjs.extend(updateLocale);
 dayjs.extend(localeData);
@@ -134,7 +135,8 @@ dayjs.extend(duration);
     SingleAppointmentComponent,
     ActionBarComponent,
     FlexSplitterDirective,
-    TimeButtonComponent
+    TimeButtonComponent,
+    DateSelectorComponent
   ],
   imports: [
     BrowserModule,

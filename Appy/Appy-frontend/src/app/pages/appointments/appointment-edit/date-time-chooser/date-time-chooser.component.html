@@ -6,12 +6,14 @@
 
     <div class="right-side">
         <div class="action-buttons">
-            <app-action-bar [style.width.%]="100">
+            <app-action-bar [style.width.%]="100" [compact]="true">
                 <app-button icon="business-time" [isCircle]="false" look="custom"
                     [customBorderColor]="showAnyHour ? 'var(--text)' : 'var(--input-background-color)'"
                     (onClick)="toggleShowAnyHour()">
                 </app-button>
-                <app-button flex-splitter text="{{'CANCEL' | translate}}" color="danger" look="normal" (onClick)="cancel()">
+                <app-date-selector flex-splitter [(date)]="date" [compact]="true"></app-date-selector>
+                <app-button flex-splitter text="{{'CANCEL' | translate}}" color="danger" look="normal"
+                    (onClick)="cancel()">
                 </app-button>
                 <app-button text="{{'OK' | translate}}" color="success" look="solid" (onClick)="ok()"
                     [disabled]="time == null"></app-button>
