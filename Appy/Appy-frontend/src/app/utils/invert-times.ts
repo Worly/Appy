@@ -25,7 +25,7 @@ export function invertTimesCustom<T>(timesT: T[], fromSelector: ((t: T) => Dayjs
     });
 
     // sort them by from time
-    times.sort((a, b) => a.from.diff(b.to))
+    times.sort((a, b) => a.from.valueOf() - b.to.valueOf())
 
     // check if any of them is overlapping
     for (let i = 0; i < times.length - 1; i++) {

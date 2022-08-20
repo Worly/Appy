@@ -162,25 +162,25 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
 
     if (this.freeTimes != null) {
       this.renderedTimeStatuses.push(...getRenderedIntervals(this.timeFrom, this.timeTo, this.freeTimes.map(f => {
-        return { source: "free-time", time: f.from, duration: dayjs.duration(f.toIncludingDuration.diff(f.from)) };
+        return { source: "free-time", time: f.from, duration: dayjs.duration(f.toIncludingDuration.valueOf() - f.from.valueOf()) };
       }), { crop: true }));
 
       let takenTimes = invertTimesCustom(this.freeTimes, t => t.from, t => t.toIncludingDuration, this.timeFrom, this.timeTo);
       this.renderedTimeStatuses.push(...getRenderedIntervals(this.timeFrom, this.timeTo, takenTimes.map(f => {
-        return { source: "taken-time", time: f.from, duration: dayjs.duration(f.to.diff(f.from)) };
+        return { source: "taken-time", time: f.from, duration: dayjs.duration(f.to.valueOf() - f.from.valueOf()) };
       }), { crop: true }));
     }
 
     if (this.workingHours != null) {
       let closedTimes = invertTimesCustom(this.workingHours, t => t.timeFrom as Dayjs, t => t.timeTo as Dayjs, this.timeFrom, this.timeTo);
       this.renderedTimeStatuses.push(...getRenderedIntervals(this.timeFrom, this.timeTo, closedTimes.map(f => {
-        return { source: "closed-time", time: f.from, duration: dayjs.duration(f.to.diff(f.from)) };
+        return { source: "closed-time", time: f.from, duration: dayjs.duration(f.to.valueOf() - f.from.valueOf()) };
       }), { crop: true }));
     }
   }
 
   public renderCurrentTimeIndicator(): void {
-    this.currentTimeIndicatorTop = (dayjs().diff(this.timeFrom) / this.timeTo.diff(this.timeFrom)) * 100;
+    this.currentTimeIndicatorTop = ((dayjs().valueOf() - this.timeFrom.valueOf()) / (this.timeTo.valueOf() - this.timeFrom.valueOf())) * 100;
   }
 
   // returns arrays of numbers where each number represents a cell in table which shows hours
