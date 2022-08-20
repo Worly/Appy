@@ -237,13 +237,15 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
     for (let h = 0; h < 24; h++) {
       this.minutesData[h] = [];
       let time = dayjs({ hour: h });
+      let endTime = time.add(1, "hour");
 
-      let isWorkingHour = this.calendarDay.workingHours.some(wh => overlap(time, time.add(1, "hour"), wh.timeFrom as Dayjs, wh.timeTo as Dayjs));
-      let isFreeHour = this.freeTimesSmartCaching.singleData.some(f => overlap(time, time.add(1, "hour"), f.from, f.to, "[)"));
-      let isFreeHourIncluding = this.freeTimesSmartCaching.singleData.some(f => overlap(time, time.add(1, "hour"), f.from, f.toIncludingDuration, "()"));
+      let isWorkingHour = this.calendarDay.workingHours.some(wh => overlap(time, endTime, wh.timeFrom as Dayjs, wh.timeTo as Dayjs));
+      let isFreeHour = this.freeTimesSmartCaching.singleData.some(f => overlap(time, endTime, f.from, f.to, "[)"));
+      let isFreeHourIncluding = this.freeTimesSmartCaching.singleData.some(f => overlap(time, endTime, f.from, f.toIncludingDuration, "()"));
 
       for (let m = 0; m < 60; m += 5) {
         let time = dayjs({ hour: h, minute: m });
+        let endTime = time.add(5, "minutes");
 
         let isWorkingMinute = isWorkingHour && this.calendarDay.workingHours.some(wh => time.isBetween(wh.timeFrom, wh.timeTo, null, "[)"));
         let isFreeMinute = isFreeHour && this.freeTimesSmartCaching.singleData.some(f => time.isBetween(f.from, f.to, null, "[]"));
@@ -252,8 +254,8 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
         let localRenderedAppointments: RenderedInterval<Appointment>[] = [];
         for (let ap of renderedAppointments) {
           let ri = { ...ap };
-          ri.top = getIntervalTop(time, time.add(5, "minutes"), ap.source.time as Dayjs);
-          ri.height = getIntervalHeight(time, time.add(5, "minutes"), ap.source.duration as Duration);
+          ri.top = getIntervalTop(time, endTime, ap.source.time as Dayjs);
+          ri.height = getIntervalHeight(time, endTime, ap.source.duration as Duration);
           let cropped = cropRenderedInterval(ri);
           if (cropped != null)
             localRenderedAppointments.push(cropped);
