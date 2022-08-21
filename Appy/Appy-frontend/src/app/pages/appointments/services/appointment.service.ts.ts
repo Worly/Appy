@@ -7,7 +7,7 @@ import { Appointment } from "src/app/models/appointment";
 import { FreeTime, FreeTimeDTO } from "src/app/models/free-time";
 import { BaseModelService } from "src/app/shared/services/base-model-service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class AppointmentService extends BaseModelService<Appointment> {
     constructor(injector: Injector) {
         super(injector, "appointment", Appointment);

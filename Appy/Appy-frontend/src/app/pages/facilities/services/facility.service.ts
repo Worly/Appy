@@ -4,9 +4,8 @@ import { forkJoin, Observable } from "rxjs";
 import { map, tap } from "rxjs/operators";
 import { appConfig } from "src/app/app.config";
 import { Facility } from "src/app/models/facility";
-import { FacilitiesModule } from "../facilities.module";
 
-@Injectable({ providedIn: FacilitiesModule })
+@Injectable({ providedIn: "root" })
 export class FacilityService {
 
     public myFacilities: Facility[] = [];

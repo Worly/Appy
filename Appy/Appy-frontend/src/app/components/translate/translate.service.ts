@@ -4,7 +4,7 @@ import { DateAdapter } from "@angular/material/core";
 import { locale } from "dayjs";
 import { Observable } from "rxjs";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class TranslateService {
     readonly SELECTED_LANGUAGE_KEY = "selected-language";
 

@@ -15,8 +15,7 @@ export class ErrorInterceptor implements HttpInterceptor {
     return next.handle(httpRequest).pipe(
       catchError((e: HttpEvent<any>) => {
         if (e instanceof HttpErrorResponse) {
-          if (e.status != 400 && e.status != 401)
-          {
+          if (e.status != 400 && e.status != 401) {
             this.router.navigate(["error"], {
               state: {
                 error: {

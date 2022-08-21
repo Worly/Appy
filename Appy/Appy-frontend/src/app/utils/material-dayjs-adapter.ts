@@ -229,12 +229,12 @@ export class DayjsDateAdapter extends DateAdapter<Dayjs> {
 
 export const MAT_DAYJS_DATE_FORMATS: MatDateFormats = {
     parse: {
-      dateInput: 'l',
+        dateInput: 'l',
     },
     display: {
-      dateInput: 'l',
-      monthYearLabel: 'MMM YYYY',
-      dateA11yLabel: 'LL',
-      monthYearA11yLabel: 'MMMM YYYY',
+        dateInput: 'l',
+        monthYearLabel: 'MMM YYYY',
+        dateA11yLabel: 'LL',
+        monthYearA11yLabel: 'MMMM YYYY',
     },
-  };
+};

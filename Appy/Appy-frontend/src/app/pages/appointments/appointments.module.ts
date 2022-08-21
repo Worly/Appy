@@ -7,6 +7,7 @@ import { DialogModule } from "src/app/components/dialog/dialog.module";
 import { DurationPickerModule } from "src/app/components/duration-picker/duration-picker.module";
 import { SharedModule } from "src/app/shared/shared.module";
 import { ServicesModule } from "../services/services.module";
+import { AppointmentsRoutingModule } from "./appointments-routing.module";
 import { AppointmentEditComponent } from "./components/appointment-edit/appointment-edit.component";
 import { DateTimeChooserComponent } from "./components/appointment-edit/date-time-chooser/date-time-chooser.component";
 import { TimeButtonComponent } from "./components/appointment-edit/date-time-chooser/time-button/time-button.component";
@@ -28,6 +29,7 @@ import { CalendarDayService } from "./services/calendar-day.service";
         SingleAppointmentComponent
     ],
     imports: [
+        AppointmentsRoutingModule,
         SharedModule,
         
         ServicesModule,
@@ -38,10 +40,6 @@ import { CalendarDayService } from "./services/calendar-day.service";
         DurationPickerModule,
         ActionBarModule,
         ContextMenuModule
-    ],
-    providers: [
-        AppointmentService,
-        CalendarDayService
     ],
     exports: [
         

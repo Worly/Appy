@@ -8,6 +8,7 @@ import { ServiceColorPickerComponent } from "./components/service-edit/service-c
 import { ServiceEditComponent } from "./components/service-edit/service-edit.component";
 import { ServiceLookupComponent } from "./components/service-lookup/service-lookup.component";
 import { ServicesComponent } from "./components/services/services.component";
+import { ServicesRoutingModule } from "./services-routing.module";
 import { ServiceColorsService } from "./services/service-colors.service";
 import { ServiceService } from "./services/service.service";
 
@@ -19,16 +20,13 @@ import { ServiceService } from "./services/service.service";
         ServiceLookupComponent
     ],
     imports: [
+        ServicesRoutingModule,
         SharedModule,
         
         ContextMenuModule,
         DurationPickerModule,
         ActionBarModule,
         NotifyDialogModule
-    ],
-    providers: [
-        ServiceService,
-        ServiceColorsService
     ],
     exports: [
         ServiceLookupComponent

@@ -4,7 +4,7 @@ import { appConfig } from "src/app/app.config";
 import { WorkingHour } from "src/app/models/working-hours";
 import { BaseModelService } from "src/app/shared/services/base-model-service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class WorkingHoursService extends BaseModelService<WorkingHour> {
     constructor(injector: Injector) {
         super(injector, "workingHour", WorkingHour);

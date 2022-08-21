@@ -10,9 +10,6 @@ import { TranslateService } from "./translate.service";
     imports: [
         CommonModule
     ],
-    providers: [
-        TranslateService
-    ],
     exports: [
         TranslatePipe
     ]

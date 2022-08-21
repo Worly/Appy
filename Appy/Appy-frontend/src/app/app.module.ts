@@ -11,9 +11,6 @@ import { AppInitializerService } from './services/app-initializer.service';
 import { DayjsDateAdapter, MAT_DAYJS_DATE_ADAPTER_OPTIONS, MAT_DAYJS_DATE_FORMATS } from './utils/material-dayjs-adapter';
 import { faBusinessTime } from '@fortawesome/free-solid-svg-icons';
 import { ButtonModule } from './components/button/button.module';
-import { AppointmentsModule } from './pages/appointments/appointments.module';
-import { ServicesModule } from './pages/services/services.module';
-import { WorkingHoursModule } from './pages/working-hours/working-hours.module';
 import { FacilitiesModule } from './pages/facilities/facilities.module';
 import { TranslateModule } from './components/translate/translate.module';
 import { LanguagePickerModule } from './components/language-picker/language-picker.module';
@@ -77,9 +74,6 @@ dayjs.extend(duration);
     RegisterModule,
     FacilitiesModule,
     HomeModule,
-    AppointmentsModule,
-    ServicesModule,
-    WorkingHoursModule,
 
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: environment.production,

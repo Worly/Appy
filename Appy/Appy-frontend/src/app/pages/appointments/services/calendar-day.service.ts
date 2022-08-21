@@ -8,7 +8,7 @@ import { CalendarDay, CalendarDayDTO } from "src/app/models/calendar-day";
 import { AppointmentService } from "./appointment.service.ts";
 import { onUnsubscribed } from "src/app/utils/smart-subscriber";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class CalendarDayService {
     constructor(
         private httpClient: HttpClient,
