@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { TranslateService } from 'src/app/services/translate/translate.service';
+import { TranslateService } from '../translate/translate.service';
 
 @Component({
   selector: 'app-language-picker',

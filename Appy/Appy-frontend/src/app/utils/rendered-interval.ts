@@ -1,7 +1,7 @@
 import dayjs, { Dayjs } from "dayjs";
 import { Duration } from "dayjs/plugin/duration";
 import { Appointment } from "../models/appointment";
-import { ServiceColorsService } from "../services/service-colors.service";
+import { ServiceColorsService } from "../pages/services/services/service-colors.service";
 
 export interface RenderedInterval<T> {
     top: number;

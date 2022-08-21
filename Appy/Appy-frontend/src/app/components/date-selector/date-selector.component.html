@@ -12,7 +12,4 @@
     </app-button>
 </div>
 
-<app-dialog #calendarDialog>
-    <mat-calendar class="my-calendar" [(selected)]="date" [headerComponent]="calendarTodayHeaderComponent"
-        (selectedChange)="calendarDialog.close()"></mat-calendar>
-</app-dialog>
+<app-calendar-dialog #calendarDialog [(date)]="date"></app-calendar-dialog>

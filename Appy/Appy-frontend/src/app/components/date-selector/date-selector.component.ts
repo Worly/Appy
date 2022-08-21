@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import dayjs, { Dayjs } from 'dayjs';
-import { CalendarTodayHeaderComponent } from '../calendar-today-header/calendar-today-header.component';
 
 @Component({
   selector: 'app-date-selector',
@@ -24,8 +23,6 @@ export class DateSelectorComponent implements OnInit {
   @Input() compact: boolean = false;
 
   @Output() dateChange: EventEmitter<Dayjs> = new EventEmitter();
-
-  public calendarTodayHeaderComponent = CalendarTodayHeaderComponent;
 
   constructor() { }
 

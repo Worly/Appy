@@ -4,14 +4,14 @@ import { ErrorComponent } from './pages/error/error.component';
 import { HomeComponent } from './pages/home/home.component';
 import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
-import { FacilitiesComponent } from './pages/facilities/facilities.component';
-import { LoggedInGuard, NotLoggedInGuard } from './services/auth/auth.guard';
-import { SelectedFacilityGuard } from './services/facilities/facility.guard';
-import { ServicesComponent } from './pages/services/services.component';
-import { ServiceEditComponent } from './pages/services/service-edit/service-edit.component';
-import { AppointmentsComponent } from './pages/appointments/appointments.component';
-import { AppointmentEditComponent } from './pages/appointments/appointment-edit/appointment-edit.component';
-import { WorkingHoursComponent } from './pages/working-hours/working-hours.component';
+import { SelectedFacilityGuard } from './pages/facilities/services/facility.guard';
+import { FacilitiesComponent } from './pages/facilities/components/facilities/facilities.component';
+import { AppointmentsComponent } from './pages/appointments/components/appointments/appointments.component';
+import { AppointmentEditComponent } from './pages/appointments/components/appointment-edit/appointment-edit.component';
+import { ServicesComponent } from './pages/services/components/services/services.component';
+import { ServiceEditComponent } from './pages/services/components/service-edit/service-edit.component';
+import { WorkingHoursComponent } from './pages/working-hours/components/working-hours.component';
+import { LoggedInGuard, NotLoggedInGuard } from './shared/services/auth/auth.guard';
 
 const routes: Routes = [
   { path: "login", component: LoginComponent, canActivate: [NotLoggedInGuard] },
@@ -36,19 +36,19 @@ const routes: Routes = [
   {
     path: "services",
     component: ServicesComponent,
-    canActivate: [LoggedInGuard],
+    canActivate: [LoggedInGuard, SelectedFacilityGuard],
     data: { shouldDetach: true, detachGroup: "services" }
   },
   {
     path: "services/edit/:id",
     component: ServiceEditComponent,
-    canActivate: [LoggedInGuard],
+    canActivate: [LoggedInGuard, SelectedFacilityGuard],
     data: { detachGroup: "services" }
   },
   {
     path: "services/new",
     component: ServiceEditComponent,
-    canActivate: [LoggedInGuard],
+    canActivate: [LoggedInGuard, SelectedFacilityGuard],
     data: { isNew: true, detachGroup: "services" }
   },
   // #endregion
@@ -57,19 +57,19 @@ const routes: Routes = [
   {
     path: "appointments",
     component: AppointmentsComponent,
-    canActivate: [LoggedInGuard],
+    canActivate: [LoggedInGuard, SelectedFacilityGuard],
     data: { shouldDetach: true, detachGroup: "appointments" }
   },
   {
     path: "appointments/edit/:id",
     component: AppointmentEditComponent,
-    canActivate: [LoggedInGuard],
+    canActivate: [LoggedInGuard, SelectedFacilityGuard],
     data: { detachGroup: "appointments" }
   },
   {
     path: "appointments/new",
     component: AppointmentEditComponent,
-    canActivate: [LoggedInGuard],
+    canActivate: [LoggedInGuard, SelectedFacilityGuard],
     data: { isNew: true, detachGroup: "appointments" }
   },
   // #endregion
@@ -78,7 +78,7 @@ const routes: Routes = [
   {
     path: "working-hours",
     component: WorkingHoursComponent,
-    canActivate: [LoggedInGuard],
+    canActivate: [LoggedInGuard, SelectedFacilityGuard],
   },
   // #endregion
 

@@ -1,11 +1,12 @@
 import { Overlay, OverlayRef } from "@angular/cdk/overlay";
 import { ComponentPortal } from "@angular/cdk/portal";
 import { Injectable } from "@angular/core";
-import { Observable, Subject } from "rxjs";
-import { TranslateService } from "src/app/services/translate/translate.service";
+import { Observable } from "rxjs";
+import { TranslateService } from "../translate/translate.service";
 import { NotifyDialogComponent } from "./notify-dialog.component";
+import { NotifyDialogModule } from "./notify-dialog.module";
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: NotifyDialogModule })
 export class NotifyDialogService {
     constructor(private overlay: Overlay, private translateService: TranslateService) {
 
