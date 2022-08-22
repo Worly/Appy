@@ -18,60 +18,56 @@ namespace Appy.Controllers
 
         [HttpPost("addNew")]
         [Authorize]
-        public ActionResult<FacilityDTO> AddNew(FacilityDTO dto)
+        public async Task<ActionResult<FacilityDTO>> AddNew(FacilityDTO dto)
         {
-            var result = this.facilityService.AddNew(dto, HttpContext.CurrentUser().Id);
+            var result = await this.facilityService.AddNew(dto, HttpContext.CurrentUser().Id);
 
             return Ok(result.GetDTO());
         }
 
         [HttpPut("edit/{id}")]
         [Authorize]
-        public ActionResult<FacilityDTO> Edit(int id, FacilityDTO dto)
+        public async Task<ActionResult<FacilityDTO>> Edit(int id, FacilityDTO dto)
         {
-            var result = this.facilityService.Edit(HttpContext.CurrentUser().Id, id, dto);
-            if (result == null)
-                return NotFound();
+            var result = await this.facilityService.Edit(HttpContext.CurrentUser().Id, id, dto);
 
             return Ok(result.GetDTO());
         }
 
         [HttpGet("getMy")]
         [Authorize]
-        public ActionResult<List<FacilityDTO>> GetMy()
+        public async Task<ActionResult<List<FacilityDTO>>> GetMy()
         {
-            var result = this.facilityService.GetMy(HttpContext.CurrentUser().Id);
+            var result = await this.facilityService.GetMy(HttpContext.CurrentUser().Id);
 
             return Ok(result.Select(o => o.GetDTO()));
         }
 
         [HttpDelete("delete/{id}")]
         [Authorize]
-        public IActionResult Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
-            if (this.facilityService.TryDelete(HttpContext.CurrentUser().Id, id))
-                return Ok();
-            else
-                return NotFound();
+            await this.facilityService.Delete(HttpContext.CurrentUser().Id, id);
+
+            return Ok();
         }
 
         [HttpPut("selectFacility")]
         [Authorize]
-        public ActionResult SelectFacility([FromBody] int facilityId)
+        public async Task<ActionResult> SelectFacility([FromBody] int facilityId)
         {
-            var facility = facilityService.GetById(HttpContext.CurrentUser().Id, facilityId);
-            if (facility == null)
-                return BadRequest();
+            await facilityService.SetSelectedFacility(HttpContext.CurrentUser().Id, facilityId);
 
-            facilityService.SetSelectedFacility(HttpContext.CurrentUser().Id, facilityId);
             return Ok();
         }
 
         [HttpGet("getSelectedFacility")]
         [Authorize]
-        public ActionResult<int?> GetSelectedFacility()
+        public async Task<ActionResult<int?>> GetSelectedFacility()
         {
-            return Ok(facilityService.GetSelectedFacility(HttpContext.CurrentUser().Id));
+            var selectedFacilityId = await facilityService.GetSelectedFacility(HttpContext.CurrentUser().Id);
+
+            return Ok(selectedFacilityId);
         }
     }
 }

@@ -22,18 +22,19 @@ namespace Appy.Auth
             var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
 
             if (token != null)
-                AttachUserToContext(context, userService, token);
+                await AttachUserToContext(context, userService, token);
 
             await _next(context);
         }
 
-        private void AttachUserToContext(HttpContext context, IUserService userService, string token)
+        private async Task AttachUserToContext(HttpContext context, IUserService userService, string token)
         {
-            if (jwtService.ValidateToken(token, out JwtSecurityToken jwtToken)) {
+            var (valid, jwtToken) = await jwtService.ValidateToken(token);
+            if (valid && jwtToken != null) {
                 var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
 
                 // attach user to context on successful jwt validation
-                context.Items["User"] = userService.GetById(userId);
+                context.Items["User"] = await userService.GetById(userId);
             }
         }
     }

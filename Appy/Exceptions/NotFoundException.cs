@@ -1,12 +1,14 @@
-﻿namespace Appy.Exceptions
+﻿using System.Net;
+
+namespace Appy.Exceptions
 {
-    public class NotFoundException : Exception
+    public class NotFoundException : HttpException
     {
-        public NotFoundException() : base("Not found")
+        public NotFoundException() : base(HttpStatusCode.NotFound, "Not found")
         {
         }
 
-        public NotFoundException(string message) : base(message)
+        public NotFoundException(string message) : base(HttpStatusCode.NotFound, message)
         {
 
         }

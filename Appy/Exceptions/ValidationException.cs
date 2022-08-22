@@ -1,20 +1,25 @@
-﻿namespace Appy.Exceptions
-{
-    public class ValidationException : Exception
-    {
-        public string PropertyName { get; private set; }
-        public string ErrorCode { get; private set; }
+﻿using Appy.DTOs;
+using System.Net;
+using System.Text.Json;
 
-        public ValidationException(string errorCode) : base($"Validation exception {errorCode}.")
+namespace Appy.Exceptions
+{
+    public class ValidationException : HttpException
+    {
+        public ValidationException(string errorCode)
+            : base(HttpStatusCode.BadRequest, JsonSerializer.Serialize(new ErrorBuilder().Add(errorCode), new JsonSerializerOptions()
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            }))
         {
-            this.PropertyName = "other";
-            this.ErrorCode = errorCode;
         }
 
-        public ValidationException(string propertyName, string errorCode) : base($"Validation exception {errorCode} on property {propertyName}.")
+        public ValidationException(string propertyName, string errorCode)
+            : base(HttpStatusCode.BadRequest, JsonSerializer.Serialize(new ErrorBuilder().Add(propertyName, errorCode), new JsonSerializerOptions()
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            }))
         {
-            this.PropertyName = propertyName;
-            this.ErrorCode = errorCode;
         }
     }
 }

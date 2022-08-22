@@ -9,11 +9,11 @@ namespace Appy.Services
 {
     public interface IServiceService
     {
-        List<Service> GetAll(int facilityId);
-        Service GetById(int id, int facilityId);
-        Service AddNew(ServiceDTO dto, int facilityId);
-        Service Edit(int id, ServiceDTO dto, int facilityId);
-        void Delete(int id, int facilityId);
+        Task<List<Service>> GetAll(int facilityId);
+        Task<Service> GetById(int id, int facilityId);
+        Task<Service> AddNew(ServiceDTO dto, int facilityId);
+        Task<Service> Edit(int id, ServiceDTO dto, int facilityId);
+        Task Delete(int id, int facilityId);
     }
 
     public class ServiceService : IServiceService
@@ -25,23 +25,23 @@ namespace Appy.Services
             this.context = context;
         }
 
-        public List<Service> GetAll(int facilityId)
+        public Task<List<Service>> GetAll(int facilityId)
         {
-            return context.Services.Where(s => s.FacilityId == facilityId).OrderBy(o => o.Name).ToList();
+            return context.Services.Where(s => s.FacilityId == facilityId).OrderBy(o => o.Name).ToListAsync();
         }
 
-        public Service GetById(int id, int facilityId)
+        public async Task<Service> GetById(int id, int facilityId)
         {
-            var service = context.Services.FirstOrDefault(s => s.Id == id && s.FacilityId == facilityId);
+            var service = await context.Services.FirstOrDefaultAsync(s => s.Id == id && s.FacilityId == facilityId);
             if (service == null)
                 throw new NotFoundException();
 
             return service;
         }
 
-        public Service AddNew(ServiceDTO dto, int facilityId)
+        public async Task<Service> AddNew(ServiceDTO dto, int facilityId)
         {
-            var nameTaken = context.Services.Where(o => o.FacilityId == facilityId && o.Name == dto.Name).Any();
+            var nameTaken = await context.Services.Where(o => o.FacilityId == facilityId && o.Name == dto.Name).AnyAsync();
             if (nameTaken)
                 throw new ValidationException(nameof(Service.Name), "pages.services.errors.NAME_TAKEN");
 
@@ -54,37 +54,37 @@ namespace Appy.Services
             };
 
             context.Services.Add(service);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
 
             return service;
         }
 
-        public Service Edit(int id, ServiceDTO dto, int facilityId)
+        public async Task<Service> Edit(int id, ServiceDTO dto, int facilityId)
         {
-            var service = context.Services.FirstOrDefault(s => s.Id == id && s.FacilityId == facilityId);
+            var service = await context.Services.FirstOrDefaultAsync(s => s.Id == id && s.FacilityId == facilityId);
             if (service == null)
                 throw new NotFoundException();
 
-            var nameTaken = context.Services.Where(s => s.Id != id && s.Name == dto.Name && s.FacilityId == facilityId).Any();
+            var nameTaken = await context.Services.Where(s => s.Id != id && s.Name == dto.Name && s.FacilityId == facilityId).AnyAsync();
             if (nameTaken)
                 throw new ValidationException(nameof(Service.Name), "pages.services.errors.NAME_TAKEN");
 
             service.Name = dto.Name;
             service.Duration = dto.Duration;
             service.ColorId = dto.ColorId;
-            context.SaveChanges();
+            await context.SaveChangesAsync();
 
             return service;
         }
 
-        public void Delete(int id, int facilityId)
+        public async Task Delete(int id, int facilityId)
         {
-            var service = context.Services.FirstOrDefault(s => s.Id == id && s.FacilityId == facilityId);
+            var service = await context.Services.FirstOrDefaultAsync(s => s.Id == id && s.FacilityId == facilityId);
             if (service == null)
                 throw new NotFoundException();
 
             context.Services.Remove(service);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
     }
 }

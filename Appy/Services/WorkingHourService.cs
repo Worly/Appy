@@ -1,15 +1,16 @@
 ﻿using Appy.Domain;
 using Appy.DTOs;
 using Appy.Exceptions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Appy.Services
 {
     public interface IWorkingHourService
     {
-        List<WorkingHour> GetAll(int facilityId);
-        List<WorkingHour> GetWorkingHours(DateOnly date, int facilityId);
+        Task<List<WorkingHour>> GetAll(int facilityId);
+        Task<List<WorkingHour>> GetWorkingHours(DateOnly date, int facilityId);
 
-        void SetWorkingHours(List<WorkingHourDTO> workingHours, int facilityId);
+        Task SetWorkingHours(List<WorkingHourDTO> workingHours, int facilityId);
     }
 
     public class WorkingHourService : IWorkingHourService
@@ -21,17 +22,17 @@ namespace Appy.Services
             this.context = context;
         }
 
-        public List<WorkingHour> GetAll(int facilityId)
+        public Task<List<WorkingHour>> GetAll(int facilityId)
         {
-            return context.WorkingHours.Where(w => w.FacilityId == facilityId).ToList();
+            return context.WorkingHours.Where(w => w.FacilityId == facilityId).ToListAsync();
         }
 
-        public List<WorkingHour> GetWorkingHours(DateOnly date, int facilityId)
+        public Task<List<WorkingHour>> GetWorkingHours(DateOnly date, int facilityId)
         {
-            return context.WorkingHours.Where(w => w.FacilityId == facilityId && w.DayOfWeek == date.DayOfWeek).ToList();
+            return context.WorkingHours.Where(w => w.FacilityId == facilityId && w.DayOfWeek == date.DayOfWeek).ToListAsync();
         }
 
-        public void SetWorkingHours(List<WorkingHourDTO> workingHours, int facilityId)
+        public Task SetWorkingHours(List<WorkingHourDTO> workingHours, int facilityId)
         {
             if (workingHours.Any(w => w.TimeFrom >= w.TimeTo))
                 throw new ValidationException("pages.working-hours.errors.TIMES_NOT_IN_ORDER");
@@ -46,9 +47,7 @@ namespace Appy.Services
                         var w1 = dayWorkingHours[i];
                         var w2 = dayWorkingHours[j];
                         if (w1.TimeFrom <= w2.TimeTo && w1.TimeTo >= w2.TimeFrom)
-                        {
                             throw new ValidationException("pages.working-hours.errors.TIMES_OVERLAP");
-                        }
                     }
                 }
             }
@@ -64,7 +63,7 @@ namespace Appy.Services
             context.WorkingHours.RemoveRange(context.WorkingHours.Where(w => w.FacilityId == facilityId));
 
             context.WorkingHours.AddRange(entites);
-            context.SaveChanges();
+            return context.SaveChangesAsync();
         }
     }
 }
