@@ -1,7 +1,7 @@
 import dayjs, { Dayjs } from "dayjs";
 import { Duration } from "dayjs/plugin/duration";
 import { Appointment } from "../models/appointment";
-import { ServiceColorsService } from "../services/service-colors.service";
+import { ServiceColorsService } from "../pages/services/services/service-colors.service";
 
 export interface RenderedInterval<T> {
     top: number;
@@ -74,11 +74,11 @@ export function getRenderedInterval<T>(timeFrom: Dayjs, timeTo: Dayjs, source: T
 }
 
 export function getIntervalTop(timeFrom: Dayjs, timeTo: Dayjs, time: Dayjs): number {
-    return (time.diff(timeFrom) / timeTo.diff(timeFrom)) * 100;
+    return (time.valueOf() - timeFrom.valueOf()) / (timeTo.valueOf() - timeFrom.valueOf()) * 100;
 }
 
 export function getIntervalHeight(timeFrom: Dayjs, timeTo: Dayjs, duration: Duration): number {
-    return (duration.asMilliseconds() / timeTo.diff(timeFrom)) * 100
+    return (duration.asMilliseconds() / (timeTo.valueOf() - timeFrom.valueOf())) * 100
 }
 
 export function cropRenderedInterval<T>(ri: RenderedInterval<T> | null, removeTopOverflow: boolean = false): RenderedInterval<T> | null {

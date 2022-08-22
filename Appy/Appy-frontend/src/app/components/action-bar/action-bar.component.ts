@@ -21,6 +21,7 @@ export class ActionBarComponent implements OnInit {
   }
 
   @Input() leaveSpaceWhenAnchored: boolean = true;
+  @Input() compact: boolean = false;
 
   contentHeight: number = 0;
 

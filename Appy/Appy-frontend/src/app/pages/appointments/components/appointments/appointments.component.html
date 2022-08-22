@@ -1,0 +1,13 @@
+<div class="appointments-container">
+    <app-appointments-scroller [daysToShow]="1" [date]="date" (onCalendarClick)="onCalendarClick($event)">
+    </app-appointments-scroller>
+</div>
+
+<div class="floating-action-bar">
+    <app-button class="button-shadow" icon="plus" color="success" look="solid" alignContent="center"
+        (onClick)="goToNew()">
+    </app-button>
+    <div class="button-shadow button-group">
+        <app-date-selector [(date)]="date"></app-date-selector>
+    </div>
+</div>

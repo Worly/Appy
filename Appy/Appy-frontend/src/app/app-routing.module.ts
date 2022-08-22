@@ -1,17 +1,12 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { ErrorComponent } from './pages/error/error.component';
 import { HomeComponent } from './pages/home/home.component';
 import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
-import { FacilitiesComponent } from './pages/facilities/facilities.component';
-import { LoggedInGuard, NotLoggedInGuard } from './services/auth/auth.guard';
-import { SelectedFacilityGuard } from './services/facilities/facility.guard';
-import { ServicesComponent } from './pages/services/services.component';
-import { ServiceEditComponent } from './pages/services/service-edit/service-edit.component';
-import { AppointmentsComponent } from './pages/appointments/appointments.component';
-import { AppointmentEditComponent } from './pages/appointments/appointment-edit/appointment-edit.component';
-import { WorkingHoursComponent } from './pages/working-hours/working-hours.component';
+import { SelectedFacilityGuard } from './pages/facilities/services/facility.guard';
+import { FacilitiesComponent } from './pages/facilities/components/facilities/facilities.component';
+import { LoggedInGuard, NotLoggedInGuard } from './shared/services/auth/auth.guard';
 
 const routes: Routes = [
   { path: "login", component: LoginComponent, canActivate: [NotLoggedInGuard] },
@@ -32,62 +27,29 @@ const routes: Routes = [
     canActivate: [LoggedInGuard]
   },
 
-  // #region SERVICES
   {
     path: "services",
-    component: ServicesComponent,
-    canActivate: [LoggedInGuard],
-    data: { shouldDetach: true, detachGroup: "services" }
+    canActivate: [LoggedInGuard, SelectedFacilityGuard],
+    loadChildren: () => import('./pages/services/services.module').then(m => m.ServicesModule)
   },
-  {
-    path: "services/edit/:id",
-    component: ServiceEditComponent,
-    canActivate: [LoggedInGuard],
-    data: { detachGroup: "services" }
-  },
-  {
-    path: "services/new",
-    component: ServiceEditComponent,
-    canActivate: [LoggedInGuard],
-    data: { isNew: true, detachGroup: "services" }
-  },
-  // #endregion
-
-  // #region APPOINTMENTS
   {
     path: "appointments",
-    component: AppointmentsComponent,
-    canActivate: [LoggedInGuard],
-    data: { shouldDetach: true, detachGroup: "appointments" }
+    loadChildren: () => import("./pages/appointments/appointments.module").then(m => m.AppointmentsModule),
+    canActivate: [LoggedInGuard, SelectedFacilityGuard],
   },
-  {
-    path: "appointments/edit/:id",
-    component: AppointmentEditComponent,
-    canActivate: [LoggedInGuard],
-    data: { detachGroup: "appointments" }
-  },
-  {
-    path: "appointments/new",
-    component: AppointmentEditComponent,
-    canActivate: [LoggedInGuard],
-    data: { isNew: true, detachGroup: "appointments" }
-  },
-  // #endregion
-
-  // #region WORKING-HOURS
   {
     path: "working-hours",
-    component: WorkingHoursComponent,
-    canActivate: [LoggedInGuard],
+    loadChildren: () => import("./pages/working-hours/working-hours.module").then(m => m.WorkingHoursModule),
+    canActivate: [LoggedInGuard, SelectedFacilityGuard],
   },
-  // #endregion
 
   { path: "**", redirectTo: "/home" }
 ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes, {
-    scrollPositionRestoration: 'enabled'
+    scrollPositionRestoration: 'enabled',
+    preloadingStrategy: PreloadAllModules
   })],
   exports: [RouterModule]
 })

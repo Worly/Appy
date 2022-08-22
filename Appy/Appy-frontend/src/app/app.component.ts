@@ -1,7 +1,7 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { AuthService } from './services/auth/auth.service';
-import { FacilityService } from './services/facilities/facility.service';
+import { FacilityService } from './pages/facilities/services/facility.service';
+import { AuthService } from './shared/services/auth/auth.service';
 
 @Component({
   selector: 'app-root',

@@ -1,0 +1,14 @@
+.my-container {
+    display: flex;
+}
+
+:host::ng-deep {
+    .my-container.compact {
+        .date-button {
+            div {
+                padding-left: 2px;
+                padding-right: 2px;
+            }
+        }
+    }
+}

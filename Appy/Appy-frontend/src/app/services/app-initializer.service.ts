@@ -3,8 +3,8 @@ import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 import dayjs from "dayjs";
 import { combineLatestWith } from "rxjs";
-import { AuthService } from "./auth/auth.service";
-import { TranslateService } from "./translate/translate.service";
+import { AuthService } from "../shared/services/auth/auth.service";
+import { TranslateService } from "../components/translate/translate.service";
 
 @Injectable({ providedIn: "root" })
 export class AppInitializerService {
