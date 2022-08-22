@@ -6,6 +6,7 @@ import { combineLatest, debounceTime, Observable, Subscription } from 'rxjs';
 import { NotifyDialogService } from 'src/app/components/notify-dialog/notify-dialog.service';
 import { ServiceService } from '../../services/service.service';
 import { TranslateService } from 'src/app/components/translate/translate.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-service-edit',
@@ -20,8 +21,9 @@ export class ServiceEditComponent implements OnInit, OnDestroy {
 
   public isLoadingSave: boolean = false;
   public isLoadingDelete: boolean = false;
+  public isLoadingArchive: boolean = false;
   public get isLoading(): boolean {
-    return this.isLoadingSave || this.isLoadingDelete;
+    return this.isLoadingSave || this.isLoadingDelete || this.isLoadingArchive;
   }
 
   private subs: Subscription[] = [];
@@ -65,7 +67,13 @@ export class ServiceEditComponent implements OnInit, OnDestroy {
   }
 
   public save() {
-    if (!this.service?.validate())
+    if (this.service == null)
+      return;
+
+    if (this.service.displayName == null || this.service.displayName == "")
+      this.service.displayName = this.service.name;
+
+    if (!this.service.validate())
       return;
 
     this.isLoadingSave = true;
@@ -91,7 +99,33 @@ export class ServiceEditComponent implements OnInit, OnDestroy {
       this.isLoadingDelete = true;
       this.subs.push(this.serviceService.delete(this.service?.id as number).subscribe({
         next: () => this.goBack(),
-        error: (e: any) => this.isLoadingDelete = false
+        error: (e: HttpErrorResponse) => {
+          this.isLoadingDelete = false;
+
+          if (e.error.error == "Archive")
+            this.setArchivedService("pages.services.DELETE_ARCHIVE_PROMPT", true);
+        }
+      }));
+    }));
+  }
+
+  public archiveService() {
+    this.setArchivedService("pages.services.ARCHIVE_PROMPT", true);
+  }
+
+  public unarchiveService() {
+    this.setArchivedService("pages.services.UNARCHIVE_PROMPT", false);
+  }
+
+  private setArchivedService(dialogPrompt: string, isArchived: boolean) {
+    this.subs.push(this.notifyDialogService.yesNoDialog(this.translateService.translate(dialogPrompt)).subscribe((ok: boolean) => {
+      if (!ok)
+        return;
+
+      this.isLoadingArchive = true;
+      this.subs.push(this.serviceService.setArchived(this.service as Service, isArchived).subscribe({
+        next: () => this.goBack(),
+        error: (e: HttpErrorResponse) => this.isLoadingArchive = false
       }));
     }));
   }

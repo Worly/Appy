@@ -8,6 +8,7 @@
     "EDIT": "Edit",
     "DELETE": "Delete",
     "NAME": "Name",
+    "DISPLAY_NAME": "Display name",
     "NEW_NAME": "New name",
     "SAVE": "Save",
     "CANCEL": "Cancel",
@@ -33,6 +34,9 @@
     "SECOND": "second",
     "SECONDS": "seconds",
     "AND": "and",
+    "ARCHIVE": "Archive",
+    "DO_ARCHIVE": "Archive",
+    "UNARCHIVE": "Unarchive",
 
     "pages": {
         "error": {
@@ -86,12 +90,16 @@
             "NEW_SERVICE": "New service",
             "CHOOSE_COLOR": "Choose color",
             "DELETE_PROMPT": "Are you sure you want to delete this service?",
+            "DELETE_ARCHIVE_PROMPT": "Service couldn't be deleted since it's used somewhere else. Do you want to archive it instead?",
+            "ARCHIVE_PROMPT": "Are you sure you want to archive this service?",
+            "UNARCHIVE_PROMPT": "Are you sure you want to unarchive this service?",
             "CHOOSE_SERVICE": "Choose service",
             "NO_SERVICES_FOUND": "No services found",
             "ADD_SERVICE": "Add a service",
 
             "errors": {
                 "MISSING_NAME": "Please enter a name",
+                "MISSING_DISPLAY_NAME": "Please enter a display name",
                 "MISSING_COLOR": "Please choose a color",
                 "MISSING_DURATION": "Please choose a duration",
                 "NAME_TAKEN": "Service with that name already exists"

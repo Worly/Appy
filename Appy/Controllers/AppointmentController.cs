@@ -24,54 +24,56 @@ namespace Appy.Controllers
 
         [HttpGet("getAll")]
         [Authorize]
-        public ActionResult<List<AppointmentDTO>> GetAll([FromQuery] DateOnly date)
+        public async Task<ActionResult<List<AppointmentDTO>>> GetAll([FromQuery] DateOnly date)
         {
-            var result = this.appointmentService.GetAll(date, HttpContext.SelectedFacility());
+            var result = await this.appointmentService.GetAll(date, HttpContext.SelectedFacility());
 
             return Ok(result.Select(o => o.GetDTO()));
         }
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public ActionResult<AppointmentDTO> Get(int id)
+        public async Task<ActionResult<AppointmentDTO>> Get(int id)
         {
-            var result = this.appointmentService.GetById(id, HttpContext.SelectedFacility());
+            var result = await this.appointmentService.GetById(id, HttpContext.SelectedFacility());
 
             return Ok(result.GetDTO());
         }
 
         [HttpPost("addNew")]
         [Authorize]
-        public ActionResult<AppointmentDTO> AddNew(AppointmentDTO dto, [FromQuery] bool ignoreTimeNotAvailable = false)
+        public async Task<ActionResult<AppointmentDTO>> AddNew(AppointmentDTO dto, [FromQuery] bool ignoreTimeNotAvailable = false)
         {
-            var result = this.appointmentService.AddNew(dto, HttpContext.SelectedFacility(), ignoreTimeNotAvailable);
+            var result = await this.appointmentService.AddNew(dto, HttpContext.SelectedFacility(), ignoreTimeNotAvailable);
 
             return Ok(result.GetDTO());
         }
 
         [HttpPut("edit/{id}")]
         [Authorize]
-        public ActionResult<AppointmentDTO> Edit(int id, AppointmentDTO dto, [FromQuery] bool ignoreTimeNotAvailable = false)
+        public async Task<ActionResult<AppointmentDTO>> Edit(int id, AppointmentDTO dto, [FromQuery] bool ignoreTimeNotAvailable = false)
         {
-            var result = this.appointmentService.Edit(id, dto, HttpContext.SelectedFacility(), ignoreTimeNotAvailable);
+            var result = await this.appointmentService.Edit(id, dto, HttpContext.SelectedFacility(), ignoreTimeNotAvailable);
 
             return Ok(result.GetDTO());
         }
 
         [HttpDelete("delete/{id}")]
         [Authorize]
-        public void Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
-            this.appointmentService.Delete(id, HttpContext.SelectedFacility());
+            await this.appointmentService.Delete(id, HttpContext.SelectedFacility());
+
+            return Ok();
         }
 
         [HttpGet("getFreeTimes")]
         [Authorize]
-        public ActionResult<List<FreeTimeDTO>> GetFreeTimes([FromQuery] DateOnly date, [FromQuery] int serviceId, [FromQuery] TimeSpan duration, [FromQuery] int? ignoreAppointmentId)
+        public async Task<ActionResult<List<FreeTimeDTO>>> GetFreeTimes([FromQuery] DateOnly date, [FromQuery] int serviceId, [FromQuery] TimeSpan duration, [FromQuery] int? ignoreAppointmentId)
         {
-            var service = this.serviceService.GetById(serviceId, HttpContext.SelectedFacility());
-            var appointmentsOfTheDay = this.appointmentService.GetAll(date, HttpContext.SelectedFacility());
-            var workingHours = this.workingHourService.GetWorkingHours(date, HttpContext.SelectedFacility());
+            var service = await this.serviceService.GetById(serviceId, HttpContext.SelectedFacility());
+            var appointmentsOfTheDay = await this.appointmentService.GetAll(date, HttpContext.SelectedFacility());
+            var workingHours = await this.workingHourService.GetWorkingHours(date, HttpContext.SelectedFacility());
 
             if (ignoreAppointmentId.HasValue)
                 appointmentsOfTheDay = appointmentsOfTheDay.Where(o => o.Id != ignoreAppointmentId).ToList();

@@ -1,4 +1,5 @@
 ﻿using Appy.DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace Appy.Domain
 {
@@ -26,6 +27,15 @@ namespace Appy.Domain
                 Duration = Duration,
                 Service = Service.GetDTO()
             };
+        }
+
+        public static void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder
+                .Entity<Appointment>()
+                .HasOne(o => o.Service)
+                .WithMany()
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

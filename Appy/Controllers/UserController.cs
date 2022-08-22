@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Appy.DTOs;
 using Appy.Services;
+using Appy.Exceptions;
 
 namespace Appy.Controllers
 {
@@ -16,23 +17,23 @@ namespace Appy.Controllers
         }
 
         [HttpPost("login")]
-        public IActionResult LogIn(LogInDTO dto)
+        public async Task<ActionResult> LogIn(LogInDTO dto)
         {
-            var response = userService.Authenticate(dto);
-
-            if (response == null)
+            try
+            {
+                var response = await userService.Authenticate(dto);
+                return Ok(response);
+            }
+            catch (HttpException)
+            {
                 return BadRequest(new ErrorBuilder().Add("pages.login-register.errors.WRONG_LOGIN"));
-
-            return Ok(response);
+            }
         }
 
         [HttpPost("register")]
-        public IActionResult Register(RegisterDTO dto)
+        public async Task<ActionResult> Register(RegisterDTO dto)
         {
-            var response = userService.Register(dto);
-
-            if (response == null)
-                return BadRequest(new ErrorBuilder().Add(nameof(RegisterDTO.Email), "pages.login-register.errors.EMAIL_TAKEN"));
+            var response = await userService.Register(dto);
 
             return Ok(response);
         }

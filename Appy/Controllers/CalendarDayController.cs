@@ -22,10 +22,10 @@ namespace Appy.Controllers
 
         [HttpGet("getAll")]
         [Authorize]
-        public ActionResult<CalendarDayDTO> GetAll([FromQuery] DateOnly date)
+        public async Task<ActionResult<CalendarDayDTO>> GetAll([FromQuery] DateOnly date)
         {
-            var appointments = this.appointmentService.GetAll(date, HttpContext.SelectedFacility());
-            var workingHours = this.workingHourService.GetWorkingHours(date, HttpContext.SelectedFacility());
+            var appointments = await this.appointmentService.GetAll(date, HttpContext.SelectedFacility());
+            var workingHours = await this.workingHourService.GetWorkingHours(date, HttpContext.SelectedFacility());
 
             return Ok(new CalendarDayDTO()
             {

@@ -9,7 +9,6 @@ import { AttachDetachHooksService } from './services/attach-detach-hooks.service
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 import { AppInitializerService } from './services/app-initializer.service';
 import { DayjsDateAdapter, MAT_DAYJS_DATE_ADAPTER_OPTIONS, MAT_DAYJS_DATE_FORMATS } from './utils/material-dayjs-adapter';
-import { faBusinessTime } from '@fortawesome/free-solid-svg-icons';
 import { ButtonModule } from './components/button/button.module';
 import { FacilitiesModule } from './pages/facilities/facilities.module';
 import { TranslateModule } from './components/translate/translate.module';
@@ -18,9 +17,10 @@ import { LoginModule } from './pages/login/login.module';
 import { RegisterModule } from './pages/register/register.module';
 import { HomeModule } from './pages/home/home.module';
 import { ErrorModule } from './pages/error/error.module';
-import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
+
+import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
@@ -32,6 +32,8 @@ import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons/faSpinner";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faTrash } from "@fortawesome/free-solid-svg-icons/faTrash";
+import { faBusinessTime } from '@fortawesome/free-solid-svg-icons/faBusinessTime';
+import { faBoxArchive } from '@fortawesome/free-solid-svg-icons/faBoxArchive';
 
 import dayjs from "dayjs";
 import "dayjs/locale/hr";
@@ -108,7 +110,8 @@ export class AppModule {
       faCaretDown, faCaretUp,
       faTrash, faPen,
       faEllipsisV,
-      faBusinessTime
+      faBusinessTime,
+      faBoxArchive
     );
   }
 

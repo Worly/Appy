@@ -20,27 +20,27 @@ namespace Appy.Controllers
 
         [HttpGet("getAll")]
         [Authorize]
-        public ActionResult<List<WorkingHourDTO>> GetAll()
+        public async Task<ActionResult<List<WorkingHourDTO>>> GetAll()
         {
-            var result = this.workingHourService.GetAll(HttpContext.SelectedFacility());
+            var result = await this.workingHourService.GetAll(HttpContext.SelectedFacility());
 
             return Ok(result.Select(o => o.GetDTO()));
         }
 
         [HttpGet("getFor")]
         [Authorize]
-        public ActionResult<List<WorkingHourDTO>> GetFor([FromQuery] DateOnly date)
+        public async Task<ActionResult<List<WorkingHourDTO>>> GetFor([FromQuery] DateOnly date)
         {
-            var result = this.workingHourService.GetWorkingHours(date, HttpContext.SelectedFacility());
+            var result = await this.workingHourService.GetWorkingHours(date, HttpContext.SelectedFacility());
 
             return Ok(result.Select(o => o.GetDTO()));
         }
 
         [HttpPost("set")]
         [Authorize]
-        public ActionResult Set(List<WorkingHourDTO> workingHours)
+        public async Task<ActionResult> Set(List<WorkingHourDTO> workingHours)
         {
-            this.workingHourService.SetWorkingHours(workingHours, HttpContext.SelectedFacility());
+            await this.workingHourService.SetWorkingHours(workingHours, HttpContext.SelectedFacility());
 
             return Ok();
         }

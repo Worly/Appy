@@ -10,6 +10,11 @@ const routes: Routes = [
         data: { shouldDetach: true, detachGroup: "services" }
     },
     {
+        path: "archive",
+        component: ServicesComponent,
+        data: { archive: true, shouldDetach: true, detachGroup: "services" }
+    },
+    {
         path: "edit/:id",
         component: ServiceEditComponent,
         data: { detachGroup: "services" }

@@ -134,6 +134,11 @@
         color: var(--danger);
         border-color: var(--danger);
     }
+    &-warning {
+        background-color: var(--warning);
+        color: var(--warning);
+        border-color: var(--warning);
+    }
     &-normal {
         background-color: var(--normal);
         color: var(--normal);

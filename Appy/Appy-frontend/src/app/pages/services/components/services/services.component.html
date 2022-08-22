@@ -1,9 +1,14 @@
-<div class="w-title">{{"pages.services.SERVICES" | translate}}</div>
+<div class="title">
+    <div class="title-text">{{"pages.services.SERVICES" | translate}}</div>
+    <app-button class="archive-button" text="{{'ARCHIVE' | translate}}" icon="box-archive"
+        color="warning" [look]="isArchive ? 'solid' : 'normal'" (onClick)="toggleArchive()"></app-button>
+</div>
 
 <app-loading *ngIf="services == null"></app-loading>
 <div *ngIf="services != null">
-    <app-button class="mb-3" width="100%" text="{{'pages.services.NEW_SERVICE' | translate}}" icon="plus"
-        color="success" look="outlined" borderStyle="dashed" alignContent="center" (onClick)="goToNew()"></app-button>
+    <app-button *ngIf="!isArchive" class="mb-3" width="100%" text="{{'pages.services.NEW_SERVICE' | translate}}"
+        icon="plus" color="success" look="outlined" borderStyle="dashed" alignContent="center" (onClick)="goToNew()">
+    </app-button>
 
     <div *ngFor="let s of services" class="w-clickable w-card single-service-outer-container" (click)="goToEdit(s.id)">
         <div class="service-color-bar" [ngStyle]="{ 'background-color': serviceColorsService.get(s.colorId) }"></div>

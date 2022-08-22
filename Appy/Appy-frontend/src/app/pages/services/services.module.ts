@@ -1,5 +1,6 @@
 import { NgModule } from "@angular/core";
 import { ActionBarModule } from "src/app/components/action-bar/action-bar.module";
+import { ActionDropdownModule } from "src/app/components/action-dropdown/action-dropdown.module";
 import { ContextMenuModule } from "src/app/components/context-menu/context-menu.module";
 import { DurationPickerModule } from "src/app/components/duration-picker/duration-picker.module";
 import { NotifyDialogModule } from "src/app/components/notify-dialog/notify-dialog.module";
@@ -26,6 +27,7 @@ import { ServiceService } from "./services/service.service";
         ContextMenuModule,
         DurationPickerModule,
         ActionBarModule,
+        ActionDropdownModule,
         NotifyDialogModule
     ],
     exports: [

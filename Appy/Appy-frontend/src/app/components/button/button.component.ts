@@ -17,7 +17,7 @@ export class ButtonComponent implements OnInit {
   @Input() curvedBottomRight: boolean = false;
 
   @Input() look: "solid" | "outlined" | "normal" | "transparent" | "custom" = "normal";
-  @Input() color: "success" | "danger" | "normal" = "normal";
+  @Input() color: "success" | "danger" | "warning" | "normal" = "normal";
 
   @Input() customColor: string = "#FFFFFF";
   @Input() customTextColor: string = "black";

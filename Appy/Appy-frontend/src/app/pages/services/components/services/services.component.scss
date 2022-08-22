@@ -1,3 +1,21 @@
+.title {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.title-text {
+    font-size: 2rem;
+    text-align: center;
+    font-weight: bold;
+}
+
+.archive-button {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
 .single-service-outer-container {
     font-size: 1rem;
     margin-bottom: 10px;

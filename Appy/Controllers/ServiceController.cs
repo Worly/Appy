@@ -20,45 +20,56 @@ namespace Appy.Controllers
 
         [HttpGet("getAll")]
         [Authorize]
-        public ActionResult<List<ServiceDTO>> GetAll()
+        public async Task<ActionResult<List<ServiceDTO>>> GetAll([FromQuery] bool archived)
         {
-            var result = this.serviceService.GetAll(HttpContext.SelectedFacility());
+            var result = await this.serviceService.GetAll(HttpContext.SelectedFacility(), archived);
 
             return Ok(result.Select(o => o.GetDTO()));
         }
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public ActionResult<ServiceDTO> Get(int id)
+        public async Task<ActionResult<ServiceDTO>> Get(int id)
         {
-            var result = this.serviceService.GetById(id, HttpContext.SelectedFacility());
+            var result = await this.serviceService.GetById(id, HttpContext.SelectedFacility());
 
             return Ok(result.GetDTO());
         }
 
         [HttpPost("addNew")]
         [Authorize]
-        public ActionResult<ServiceDTO> AddNew(ServiceDTO dto)
+        public async Task<ActionResult<ServiceDTO>> AddNew(ServiceDTO dto)
         {
-            var result = this.serviceService.AddNew(dto, HttpContext.SelectedFacility());
+            var result = await this.serviceService.AddNew(dto, HttpContext.SelectedFacility());
 
             return Ok(result.GetDTO());
         }
 
         [HttpPut("edit/{id}")]
         [Authorize]
-        public ActionResult<ServiceDTO> Edit(int id, ServiceDTO dto)
+        public async Task<ActionResult<ServiceDTO>> Edit(int id, ServiceDTO dto)
         {
-            var result = this.serviceService.Edit(id, dto, HttpContext.SelectedFacility());
+            var result = await this.serviceService.Edit(id, dto, HttpContext.SelectedFacility());
 
             return Ok(result.GetDTO());
         }
 
         [HttpDelete("delete/{id}")]
         [Authorize]
-        public void Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
-            this.serviceService.Delete(id, HttpContext.SelectedFacility());
+            await this.serviceService.Delete(id, HttpContext.SelectedFacility());
+
+            return Ok();
+        }
+
+        [HttpPost("setArchived/{id}")]
+        [Authorize]
+        public async Task<ActionResult<ServiceDTO>> SetArchived(int id, [FromQuery] bool isArchived)
+        {
+            var service = await this.serviceService.SetArchive(id, HttpContext.SelectedFacility(), isArchived);
+
+            return Ok(service.GetDTO());
         }
     }
 }

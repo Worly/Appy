@@ -11,8 +11,11 @@ namespace Appy.Domain
         public Facility Facility { get; set; }
 
         public string Name { get; set; }
+        public string DisplayName { get; set; }
         public TimeSpan Duration { get; set; }
         public int ColorId { get; set; }
+
+        public bool IsArchived { get; set; }
 
         public ServiceDTO GetDTO()
         {
@@ -20,8 +23,10 @@ namespace Appy.Domain
             {
                 Id = Id,
                 Name = Name,
+                DisplayName = DisplayName,
                 Duration = Duration,
-                ColorId = ColorId
+                ColorId = ColorId,
+                IsArchived = IsArchived
             };
         }
     }

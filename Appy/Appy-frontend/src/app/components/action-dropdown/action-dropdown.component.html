@@ -1,0 +1,20 @@
+<ng-template #template>
+    <ng-content #content></ng-content>
+</ng-template>
+
+<ng-container *ngIf="isDropdown && !isEmpty">
+    <app-button #mainButton="elementRef" appElementRef [isCircle]="false" icon="ellipsis-vertical" look="custom"
+        customBorderColor="rgba(0,0,0,0)" (onClick)="contextMenu.toggle()">
+    </app-button>
+
+    <app-context-menu #contextMenu [relativeTo]="mainButton.elementRef">
+        <div class="my-dropdown-wrapper">
+            <ng-container *ngTemplateOutlet="template"></ng-container>
+        </div>
+    </app-context-menu>
+</ng-container>
+<ng-container *ngIf="!isDropdown">
+    <div class="my-wrapper">
+        <ng-container *ngTemplateOutlet="template"></ng-container>
+    </div>
+</ng-container>

@@ -4,14 +4,15 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using Appy.Domain;
 using Appy.DTOs;
+using Appy.Exceptions;
 
 namespace Appy.Services
 {
     public interface IUserService
     {
-        LogInResponseDTO Authenticate(LogInDTO model);
-        LogInResponseDTO Register(RegisterDTO model);
-        User GetById(int id);
+        Task<LogInResponseDTO> Authenticate(LogInDTO model);
+        Task<LogInResponseDTO> Register(RegisterDTO model);
+        Task<User> GetById(int id);
     }
 
     public class UserService : IUserService
@@ -25,16 +26,16 @@ namespace Appy.Services
             this.jwtService = jwtService;
         }
 
-        public LogInResponseDTO Authenticate(LogInDTO model)
+        public async Task<LogInResponseDTO> Authenticate(LogInDTO model)
         {
-            var user = context.Users.SingleOrDefault(x => x.Email == model.Email);
+            var user = await context.Users.FirstOrDefaultAsync(x => x.Email == model.Email);
             if (user == null)
-                return null;
+                throw new NotFoundException();
 
             var passwordHash = HashPassword(model.Password, user.Salt);
 
             if (passwordHash != user.PasswordHash)
-                return null;
+                throw new BadRequestException();
 
             // authentication successful so generate jwt token
             var token = GenerateJwtToken(user);
@@ -42,11 +43,11 @@ namespace Appy.Services
             return new LogInResponseDTO() { Token = token };
         }
 
-        public LogInResponseDTO Register(RegisterDTO model)
+        public async Task<LogInResponseDTO> Register(RegisterDTO model)
         {
-            var userWithSameEmail = context.Users.SingleOrDefault(x => x.Email == model.Email);
+            var userWithSameEmail = await context.Users.SingleOrDefaultAsync(x => x.Email == model.Email);
             if (userWithSameEmail != null)
-                return null;
+                throw new ValidationException(nameof(RegisterDTO.Email), "pages.login-register.errors.EMAIL_TAKEN");
 
             var salt = GenerateSalt();
             var passwordHash = HashPassword(model.Password, salt);
@@ -61,25 +62,26 @@ namespace Appy.Services
             };
 
             context.Users.Add(user);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
 
             var token = GenerateJwtToken(user);
 
             return new LogInResponseDTO() { Token = token };
         }
 
-        public User GetById(int id)
+        public async Task<User> GetById(int id)
         {
-            return context.Users.Include(o => o.Facilities).FirstOrDefault(x => x.Id == id);
+            var user = await context.Users.Include(o => o.Facilities).FirstOrDefaultAsync(x => x.Id == id);
+            if (user == null)
+                throw new NotFoundException();
+
+            return user;
         }
 
         private byte[] GenerateSalt()
         {
             var salt = new byte[128 / 8];
-            using (var rngCsp = new RNGCryptoServiceProvider())
-            {
-                rngCsp.GetNonZeroBytes(salt);
-            }
+            RandomNumberGenerator.Fill(salt);
 
             return salt;
         }

@@ -1,18 +1,20 @@
 ﻿using Appy.Domain;
 using Appy.DTOs;
+using Appy.Exceptions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Appy.Services.Facilities
 {
     public interface IFacilityService
     {
-        public Facility AddNew(FacilityDTO dto, int ownerId);
-        public Facility Edit(int ownerId, int facilityId, FacilityDTO dto);
-        public List<Facility> GetMy(int ownerId);
-        public Facility GetById(int userId, int facilityId);
-        public bool TryDelete(int userId, int facilityId);
+        Task<Facility> AddNew(FacilityDTO dto, int ownerId);
+        Task<Facility> Edit(int ownerId, int facilityId, FacilityDTO dto);
+        Task<List<Facility>> GetMy(int ownerId);
+        Task<Facility> GetById(int userId, int facilityId);
+        Task Delete(int userId, int facilityId);
 
-        public void SetSelectedFacility(int userId, int facilityId);
-        public int? GetSelectedFacility(int userId);
+        Task SetSelectedFacility(int userId, int facilityId);
+        Task<int?> GetSelectedFacility(int userId);
     }
 
     public class FacilityService : IFacilityService
@@ -24,7 +26,7 @@ namespace Appy.Services.Facilities
             this.context = context;
         }
 
-        public Facility AddNew(FacilityDTO dto, int ownerId)
+        public async Task<Facility> AddNew(FacilityDTO dto, int ownerId)
         {
             var facility = new Facility()
             {
@@ -33,58 +35,74 @@ namespace Appy.Services.Facilities
             };
 
             context.Facilities.Add(facility);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
 
             return facility;
         }
 
-        public Facility Edit(int ownerId, int facilityId, FacilityDTO dto)
+        public async Task<Facility> Edit(int ownerId, int facilityId, FacilityDTO dto)
         {
-            var facility = context.Facilities.FirstOrDefault(o => o.OwnerId == ownerId && o.Id == facilityId);
+            var facility = await context.Facilities.FirstOrDefaultAsync(o => o.OwnerId == ownerId && o.Id == facilityId);
             if (facility == null)
-                return null;
+                throw new NotFoundException();
 
             facility.Name = dto.Name;
-            context.SaveChanges();
+            await context.SaveChangesAsync();
 
             return facility;
         }
 
-        public List<Facility> GetMy(int ownerId)
+        public Task<List<Facility>> GetMy(int ownerId)
         {
-            return context.Facilities.Where(o => o.OwnerId == ownerId).ToList();
+            return context.Facilities.Where(o => o.OwnerId == ownerId).ToListAsync();
         }
 
-        public Facility GetById(int userId, int facilityId)
+        public async Task<Facility> GetById(int userId, int facilityId)
         {
-            return context.Facilities.FirstOrDefault(o => o.OwnerId == userId && o.Id == facilityId);
-        }
-
-        public bool TryDelete(int userId, int facilityId)
-        {
-            var facility = context.Facilities.FirstOrDefault(o => o.OwnerId == userId && o.Id == facilityId);
+            var facility = await context.Facilities.FirstOrDefaultAsync(o => o.OwnerId == userId && o.Id == facilityId);
             if (facility == null)
-                return false;
+                throw new NotFoundException();
 
-            var user = context.Users.FirstOrDefault(o => o.Id == userId);
+            return facility;
+        }
+
+        public async Task Delete(int userId, int facilityId)
+        {
+            var facility = await context.Facilities.FirstOrDefaultAsync(o => o.OwnerId == userId && o.Id == facilityId);
+            if (facility == null)
+                throw new NotFoundException();
+
+            var user = await context.Users.FirstOrDefaultAsync(o => o.Id == userId);
+            if (user == null)
+                throw new NotFoundException();
+
             if (user.SelectedFacilityId == facilityId)
                 user.SelectedFacilityId = null;
 
             context.Facilities.Remove(facility);
-            context.SaveChanges();
-            return true;
+            await context.SaveChangesAsync();
         }
 
-        public void SetSelectedFacility(int userId, int facilityId)
+        public async Task SetSelectedFacility(int userId, int facilityId)
         {
-            var user = context.Users.FirstOrDefault(o => o.Id == userId);
+            var user = await context.Users.FirstOrDefaultAsync(o => o.Id == userId);
+            if (user == null)
+                throw new NotFoundException();
+
+            var facility = await context.Facilities.FirstOrDefaultAsync(o => o.OwnerId == userId && o.Id == facilityId);
+            if (facility == null)
+                throw new NotFoundException();
+
             user.SelectedFacilityId = facilityId;
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
-        public int? GetSelectedFacility(int userId)
+        public async Task<int?> GetSelectedFacility(int userId)
         {
-            var user = context.Users.FirstOrDefault(o => o.Id == userId);
+            var user = await context.Users.FirstOrDefaultAsync(o => o.Id == userId);
+            if (user == null)
+                throw new NotFoundException();
+
             return user.SelectedFacilityId;
         }
     }

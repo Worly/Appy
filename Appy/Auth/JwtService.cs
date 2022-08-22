@@ -7,7 +7,7 @@ namespace Appy.Services
 {
     public interface IJwtService
     {
-        bool ValidateToken(string token, out JwtSecurityToken jwtToken);
+        Task<(bool valid, JwtSecurityToken? token)> ValidateToken(string token);
         string GenerateToken(params Claim[] claims);
     }
 
@@ -20,27 +20,28 @@ namespace Appy.Services
             this.jwtSecret = configuration.GetValue<string>("JWT:Secret");
         }
 
-        public bool ValidateToken(string token, out JwtSecurityToken jwtToken)
+        public async Task<(bool valid, JwtSecurityToken? token)> ValidateToken(string token)
         {
             try
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var key = Encoding.ASCII.GetBytes(jwtSecret);
-                tokenHandler.ValidateToken(token, new TokenValidationParameters
+                var result = await tokenHandler.ValidateTokenAsync(token, new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = false,
                     ValidateAudience = false
-                }, out SecurityToken validatedToken);
+                });
 
-                jwtToken = (JwtSecurityToken)validatedToken;
-                return true;
+                if (!result.IsValid)
+                    return (false, null);
+
+                return (true, result.SecurityToken as JwtSecurityToken);
             }
             catch
             {
-                jwtToken = null;
-                return false;
+                return (false, null);
             }
         }
 
