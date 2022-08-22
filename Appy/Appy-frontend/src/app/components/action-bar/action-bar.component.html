@@ -1,6 +1,6 @@
 <div *ngIf="leaveSpaceWhenAnchored" class="action-bar-spacer" [style]="'--content-height: ' + contentHeight + 'px'">
 </div>
 
-<div #container class="action-bar-container" [ngClass]="{'compact': compact}">
+<div #container class="action-bar-container" [ngClass]="{'compact': compact, 'floating': isFloating}">
     <ng-content></ng-content>
 </div>

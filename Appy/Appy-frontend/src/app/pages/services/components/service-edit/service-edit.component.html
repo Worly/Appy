@@ -11,8 +11,8 @@
     </div>
     <div class="w-input-container">
         <div class="w-label">{{'DISPLAY_NAME' | translate}}</div>
-        <input class="w-input" type="text" [style.width]="'100%'" [placeholder]="service.name ?? ('DISPLAY_NAME' | translate)"
-            [(ngModel)]="service.displayName">
+        <input class="w-input" type="text" [style.width]="'100%'"
+            [placeholder]="service.name ?? ('DISPLAY_NAME' | translate)" [(ngModel)]="service.displayName">
         <div class="w-validation-message">{{ service.getValidationErrors("displayName") | translate }}</div>
     </div>
     <div class="w-input-container">
@@ -27,16 +27,20 @@
         <div class="w-validation-message">{{ service.getValidationErrors("duration") | translate }}</div>
     </div>
 
-    <app-action-bar>
-        <app-button *ngIf="!isNew && !service.isArchived" [text]="'DELETE' | translate" icon="trash" color="danger"
-            look="solid" [disabled]="isLoading" [isLoading]="isLoadingDelete" (onClick)="deleteService()">
-        </app-button>
-        <app-button *ngIf="!isNew && !service.isArchived" [isCircle]="false" icon="box-archive" color="warning"
-            look="solid" [disabled]="isLoading" [isLoading]="isLoadingArchive" (onClick)="archiveService()">
-        </app-button>
-        <app-button *ngIf="!isNew && service.isArchived" [text]="'UNARCHIVE' | translate" icon="box-archive" color="warning"
-            look="solid" [disabled]="isLoading" [isLoading]="isLoadingArchive" (onClick)="unarchiveService()">
-        </app-button>
+    <app-action-bar #actionBar>
+        <app-action-dropdown [isDropdown]="actionBar.isFloating">
+            <app-button *ngIf="!isNew && !service.isArchived" [text]="'DELETE' | translate" icon="trash" color="danger"
+                look="solid" [disabled]="isLoading" [isLoading]="isLoadingDelete" (onClick)="deleteService()">
+            </app-button>
+            <app-button *ngIf="!isNew && !service.isArchived" [text]="'DO_ARCHIVE' | translate" icon="box-archive"
+                color="warning" look="solid" [disabled]="isLoading" [isLoading]="isLoadingArchive"
+                (onClick)="archiveService()">
+            </app-button>
+            <app-button *ngIf="!isNew && service.isArchived" [text]="'UNARCHIVE' | translate" icon="box-archive"
+                color="warning" look="solid" [disabled]="isLoading" [isLoading]="isLoadingArchive"
+                (onClick)="unarchiveService()">
+            </app-button>
+        </app-action-dropdown>
         <app-button flex-splitter [text]="'CANCEL' | translate" color="danger" look="normal" [disabled]="isLoading"
             (onClick)="cancel()"></app-button>
         <app-button [text]="'SAVE' | translate" color="success" look="solid" [disabled]="isLoading"

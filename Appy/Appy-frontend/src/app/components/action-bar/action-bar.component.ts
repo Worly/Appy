@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, Input, OnInit, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-action-bar',
@@ -23,11 +23,20 @@ export class ActionBarComponent implements OnInit {
   @Input() leaveSpaceWhenAnchored: boolean = true;
   @Input() compact: boolean = false;
 
+  private _isFloating: boolean = false;
+  public get isFloating(): boolean {
+    return this._isFloating;
+  }
+  private set isFloating(value: boolean) {
+    this._isFloating = value;
+  }
+
   contentHeight: number = 0;
 
   constructor() { }
 
   ngOnInit(): void {
+    this.recheckFloating();
   }
 
   calculateContentHeight() {
@@ -37,6 +46,15 @@ export class ActionBarComponent implements OnInit {
     }
 
     this.contentHeight = this._container.nativeElement.getBoundingClientRect().height - 10;
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.recheckFloating();
+  }
+
+  private recheckFloating() {
+    this.isFloating = window.innerWidth < 992;
   }
 
 }
