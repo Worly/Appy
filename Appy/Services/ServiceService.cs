@@ -50,6 +50,7 @@ namespace Appy.Services
             {
                 FacilityId = facilityId,
                 Name = dto.Name,
+                DisplayName = dto.DisplayName,
                 Duration = dto.Duration,
                 ColorId = dto.ColorId
             };
@@ -71,6 +72,7 @@ namespace Appy.Services
                 throw new ValidationException(nameof(Service.Name), "pages.services.errors.NAME_TAKEN");
 
             service.Name = dto.Name;
+            service.DisplayName = dto.DisplayName;
             service.Duration = dto.Duration;
             service.ColorId = dto.ColorId;
             await context.SaveChangesAsync();

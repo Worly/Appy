@@ -10,6 +10,12 @@
         <div class="w-validation-message">{{ service.getValidationErrors("name") | translate }}</div>
     </div>
     <div class="w-input-container">
+        <div class="w-label">{{'DISPLAY_NAME' | translate}}</div>
+        <input class="w-input" type="text" [style.width]="'100%'" [placeholder]="service.name ?? ('DISPLAY_NAME' | translate)"
+            [(ngModel)]="service.displayName">
+        <div class="w-validation-message">{{ service.getValidationErrors("displayName") | translate }}</div>
+    </div>
+    <div class="w-input-container">
         <div class="w-label">{{'pages.services.COLOR' | translate}}</div>
         <app-service-color-picker [(colorId)]="service.colorId"></app-service-color-picker>
         <div class="w-validation-message">{{ service.getValidationErrors("colorId") | translate }}</div>

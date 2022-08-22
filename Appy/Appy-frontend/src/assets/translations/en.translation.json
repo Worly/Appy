@@ -8,6 +8,7 @@
     "EDIT": "Edit",
     "DELETE": "Delete",
     "NAME": "Name",
+    "DISPLAY_NAME": "Display name",
     "NEW_NAME": "New name",
     "SAVE": "Save",
     "CANCEL": "Cancel",
@@ -98,6 +99,7 @@
 
             "errors": {
                 "MISSING_NAME": "Please enter a name",
+                "MISSING_DISPLAY_NAME": "Please enter a display name",
                 "MISSING_COLOR": "Please choose a color",
                 "MISSING_DURATION": "Please choose a duration",
                 "NAME_TAKEN": "Service with that name already exists"

@@ -11,6 +11,7 @@ namespace Appy.Domain
         public Facility Facility { get; set; }
 
         public string Name { get; set; }
+        public string DisplayName { get; set; }
         public TimeSpan Duration { get; set; }
         public int ColorId { get; set; }
 
@@ -22,6 +23,7 @@ namespace Appy.Domain
             {
                 Id = Id,
                 Name = Name,
+                DisplayName = DisplayName,
                 Duration = Duration,
                 ColorId = ColorId,
                 IsArchived = IsArchived

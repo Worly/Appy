@@ -8,6 +8,7 @@
     "EDIT": "Uredi",
     "DELETE": "Obriši",
     "NAME": "Naziv",
+    "DISPLAY_NAME": "Ime za prikaz",
     "NEW_NAME": "Novi naziv",
     "SAVE": "Spremi",
     "CANCEL": "Odustani",
@@ -98,6 +99,7 @@
 
             "errors": {
                 "MISSING_NAME": "Molim upišite naziv",
+                "MISSING_DISPLAY_NAME": "Molim upišite ime za prikaz",
                 "MISSING_COLOR": "Molim odaberite boju",
                 "MISSING_DURATION": "Molim odaberite trajanje",
                 "NAME_TAKEN": "Usluga s tim imenom već postoji"

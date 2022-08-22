@@ -67,7 +67,13 @@ export class ServiceEditComponent implements OnInit, OnDestroy {
   }
 
   public save() {
-    if (!this.service?.validate())
+    if (this.service == null)
+      return;
+
+    if (this.service.displayName == null || this.service.displayName == "")
+      this.service.displayName = this.service.name;
+
+    if (!this.service.validate())
       return;
 
     this.isLoadingSave = true;
