@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Data, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { Service } from 'src/app/models/service';
 import { ServiceColorsService } from '../../services/service-colors.service';
@@ -13,6 +13,7 @@ import { ServiceService } from '../../services/service.service';
 export class ServicesComponent implements OnInit, OnDestroy {
 
   services?: Service[] = undefined;
+  isArchive: boolean = false;
 
   private subs: Subscription[] = [];
 
@@ -24,7 +25,13 @@ export class ServicesComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
-    this.load();
+
+    this.activatedRoute.data.subscribe((data: Data) => {
+      if (data["archive"])
+        this.isArchive = true;
+
+      this.load();
+    });
   }
 
   ngOnDestroy(): void {
@@ -32,14 +39,29 @@ export class ServicesComponent implements OnInit, OnDestroy {
   }
 
   private load() {
-    this.subs.push(this.serviceService.getAll().subscribe((s: Service[]) => this.services = s));
+    this.subs.push(this.serviceService.getAll(this.isArchive).subscribe((s: Service[]) => this.services = s));
   }
 
   public goToNew() {
-    this.router.navigate(["new"], { relativeTo: this.activatedRoute });
+    let relativeTo = this.activatedRoute;
+    if (this.isArchive)
+      relativeTo = relativeTo.parent as ActivatedRoute;
+
+    this.router.navigate(["new"], { relativeTo: relativeTo });
   }
 
   public goToEdit(id: number) {
-    this.router.navigate(["edit", id], { relativeTo: this.activatedRoute });
+    let relativeTo = this.activatedRoute;
+    if (this.isArchive)
+      relativeTo = relativeTo.parent as ActivatedRoute;
+
+    this.router.navigate(["edit", id], { relativeTo: relativeTo });
+  }
+
+  public toggleArchive() {
+    if (this.isArchive)
+      this.router.navigate([".."], { relativeTo: this.activatedRoute });
+    else
+      this.router.navigate(["archive"], { relativeTo: this.activatedRoute });
   }
 }

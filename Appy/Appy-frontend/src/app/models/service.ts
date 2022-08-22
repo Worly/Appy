@@ -1,5 +1,4 @@
 import { BaseModel, REQUIRED_VALIDATION, Validation } from "./base-model";
-import dayjs from "dayjs";
 import { Duration } from "dayjs/plugin/duration";
 import { parseDuration } from "../utils/time-utils";
 
@@ -8,6 +7,7 @@ export class ServiceDTO {
     public name?: string;
     public duration?: string;
     public colorId?: number;
+    public isArchived?: boolean;
 }
 
 export class Service extends BaseModel {
@@ -15,6 +15,7 @@ export class Service extends BaseModel {
     public name?: string;
     public duration?: Duration;
     public colorId?: number;
+    public isArchived?: boolean;
 
     override validations: Validation[] = [
         {
@@ -41,6 +42,7 @@ export class Service extends BaseModel {
         this.name = dto.name;
         this.duration = dto.duration ? parseDuration(dto.duration) : undefined;
         this.colorId = dto.colorId;
+        this.isArchived = dto.isArchived;
 
         this.initProperties();
     }
@@ -51,6 +53,7 @@ export class Service extends BaseModel {
         dto.name = this.name;
         dto.duration = this.duration ? this.duration.format("HH:mm:ss") : undefined;
         dto.colorId = this.colorId;
+        dto.isArchived = this.isArchived;
 
         return dto;
     }

@@ -22,8 +22,14 @@
     </div>
 
     <app-action-bar>
-        <app-button *ngIf="!isNew" [text]="'DELETE' | translate" icon="trash" color="danger" look="solid"
-            [isCircle]="false" [disabled]="isLoading" [isLoading]="isLoadingDelete" (onClick)="deleteService()">
+        <app-button *ngIf="!isNew && !service.isArchived" [text]="'DELETE' | translate" icon="trash" color="danger"
+            look="solid" [disabled]="isLoading" [isLoading]="isLoadingDelete" (onClick)="deleteService()">
+        </app-button>
+        <app-button *ngIf="!isNew && !service.isArchived" [isCircle]="false" icon="box-archive" color="warning"
+            look="solid" [disabled]="isLoading" [isLoading]="isLoadingArchive" (onClick)="archiveService()">
+        </app-button>
+        <app-button *ngIf="!isNew && service.isArchived" [text]="'UNARCHIVE' | translate" icon="box-archive" color="warning"
+            look="solid" [disabled]="isLoading" [isLoading]="isLoadingArchive" (onClick)="unarchiveService()">
         </app-button>
         <app-button flex-splitter [text]="'CANCEL' | translate" color="danger" look="normal" [disabled]="isLoading"
             (onClick)="cancel()"></app-button>

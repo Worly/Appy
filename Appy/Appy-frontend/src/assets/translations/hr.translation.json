@@ -33,6 +33,9 @@
     "SECOND": "sekunda",
     "SECONDS": "sekundi",
     "AND": "i",
+    "ARCHIVE": "Arhiva",
+    "DO_ARCHIVE": "Arhiviraj",
+    "UNARCHIVE": "Dearhiviraj",
 
     "pages": {
         "error": {
@@ -86,6 +89,9 @@
             "NEW_SERVICE": "Nova usluga",
             "CHOOSE_COLOR": "Odaberi boju",
             "DELETE_PROMPT": "Jeste li sigurni da želite obrisati ovu uslugu?",
+            "DELETE_ARCHIVE_PROMPT": "Usluga ne može biti obrisana jer se koristi negdje drugdje. Želite li je arhivirati umjesto toga?",
+            "ARCHIVE_PROMPT": "Jeste li sigurni da želite arhivirati ovu uslugu?",
+            "UNARCHIVE_PROMPT": "Jeste li sigurni da želite dearhivirati ovu uslugu?",
             "CHOOSE_SERVICE": "Odaberi uslugu",
             "NO_SERVICES_FOUND": "Nije pronađena nijedna usluga",
             "ADD_SERVICE": "Dodaj uslugu",

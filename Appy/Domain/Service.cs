@@ -14,6 +14,8 @@ namespace Appy.Domain
         public TimeSpan Duration { get; set; }
         public int ColorId { get; set; }
 
+        public bool IsArchived { get; set; }
+
         public ServiceDTO GetDTO()
         {
             return new ServiceDTO()
@@ -21,7 +23,8 @@ namespace Appy.Domain
                 Id = Id,
                 Name = Name,
                 Duration = Duration,
-                ColorId = ColorId
+                ColorId = ColorId,
+                IsArchived = IsArchived
             };
         }
     }

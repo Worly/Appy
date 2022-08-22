@@ -20,9 +20,9 @@ namespace Appy.Controllers
 
         [HttpGet("getAll")]
         [Authorize]
-        public async Task<ActionResult<List<ServiceDTO>>> GetAll()
+        public async Task<ActionResult<List<ServiceDTO>>> GetAll([FromQuery] bool archived)
         {
-            var result = await this.serviceService.GetAll(HttpContext.SelectedFacility());
+            var result = await this.serviceService.GetAll(HttpContext.SelectedFacility(), archived);
 
             return Ok(result.Select(o => o.GetDTO()));
         }
@@ -61,6 +61,15 @@ namespace Appy.Controllers
             await this.serviceService.Delete(id, HttpContext.SelectedFacility());
 
             return Ok();
+        }
+
+        [HttpPost("setArchived/{id}")]
+        [Authorize]
+        public async Task<ActionResult<ServiceDTO>> SetArchived(int id, [FromQuery] bool isArchived)
+        {
+            var service = await this.serviceService.SetArchive(id, HttpContext.SelectedFacility(), isArchived);
+
+            return Ok(service.GetDTO());
         }
     }
 }

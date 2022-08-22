@@ -7,5 +7,6 @@
         public string Name { get; set; }
         public TimeSpan Duration { get; set; }
         public int ColorId { get; set; }
+        public bool IsArchived { get; set; }
     }
 }

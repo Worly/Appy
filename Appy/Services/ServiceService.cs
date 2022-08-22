@@ -9,11 +9,12 @@ namespace Appy.Services
 {
     public interface IServiceService
     {
-        Task<List<Service>> GetAll(int facilityId);
+        Task<List<Service>> GetAll(int facilityId, bool archived);
         Task<Service> GetById(int id, int facilityId);
         Task<Service> AddNew(ServiceDTO dto, int facilityId);
         Task<Service> Edit(int id, ServiceDTO dto, int facilityId);
         Task Delete(int id, int facilityId);
+        Task<Service> SetArchive(int id, int facilityId, bool isArchived);
     }
 
     public class ServiceService : IServiceService
@@ -25,9 +26,9 @@ namespace Appy.Services
             this.context = context;
         }
 
-        public Task<List<Service>> GetAll(int facilityId)
+        public Task<List<Service>> GetAll(int facilityId, bool archived)
         {
-            return context.Services.Where(s => s.FacilityId == facilityId).OrderBy(o => o.Name).ToListAsync();
+            return context.Services.Where(s => s.FacilityId == facilityId && s.IsArchived == archived).OrderBy(o => o.Name).ToListAsync();
         }
 
         public async Task<Service> GetById(int id, int facilityId)
@@ -83,8 +84,28 @@ namespace Appy.Services
             if (service == null)
                 throw new NotFoundException();
 
-            context.Services.Remove(service);
+            try
+            {
+                context.Services.Remove(service);
+                await context.SaveChangesAsync();
+            }
+            catch (ReferenceConstraintException)
+            {
+                throw new BadRequestException("Archive");
+            }
+        }
+
+        public async Task<Service> SetArchive(int id, int facilityId, bool isArchived)
+        {
+            var service = await context.Services.FirstOrDefaultAsync(s => s.Id == id && s.FacilityId == facilityId);
+            if (service == null)
+                throw new NotFoundException();
+
+            service.IsArchived = isArchived;
+
             await context.SaveChangesAsync();
+
+            return service;
         }
     }
 }
