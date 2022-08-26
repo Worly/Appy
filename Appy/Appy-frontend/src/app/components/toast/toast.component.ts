@@ -1,24 +1,35 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit } from '@angular/core';
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
+import { Observable, of, delay } from 'rxjs';
 
 @Component({
   selector: 'app-toast',
   templateUrl: './toast.component.html',
-  styleUrls: ['./toast.component.css']
+  styleUrls: ['./toast.component.scss']
 })
 export class ToastComponent implements OnInit {
-
-  showing: boolean = false;
   text: string = "";
+  icon?: IconProp;
+  iconColor?: "success" | "danger" | "warning" | "normal" | "custom";
+  customIconColor?: string;
+  actions?: {
+    text: string;
+    onClick: (() => void);
+  }[];
 
-  constructor() { }
+  constructor(private elementRef: ElementRef) { }
 
   ngOnInit(): void {
   }
 
-  public show(text: string): void {
-    this.text = text;
-    this.showing = true;
-    setTimeout(() => this.showing = false, 2000);
+  show() {
+    setTimeout(() => this.elementRef.nativeElement.classList.add("visible"));
+  }
+
+  hide(): Observable<void> {
+    setTimeout(() => this.elementRef.nativeElement.classList.remove("visible"));
+
+    return <any>of(0).pipe(delay(300));
   }
 
 }
