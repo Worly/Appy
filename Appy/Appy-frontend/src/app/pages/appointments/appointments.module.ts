@@ -6,6 +6,7 @@ import { DateSelectorModule } from "src/app/components/date-selector/date-select
 import { DialogModule } from "src/app/components/dialog/dialog.module";
 import { DurationPickerModule } from "src/app/components/duration-picker/duration-picker.module";
 import { SharedModule } from "src/app/shared/shared.module";
+import { ClientsModule } from "../clients/clients.module";
 import { ServicesModule } from "../services/services.module";
 import { AppointmentsRoutingModule } from "./appointments-routing.module";
 import { AppointmentEditComponent } from "./components/appointment-edit/appointment-edit.component";
@@ -15,8 +16,6 @@ import { AppointmentsScrollerComponent } from "./components/appointments-scrolle
 import { AppointmentsComponent } from "./components/appointments/appointments.component";
 import { SingleAppointmentComponent } from "./components/single-day-appointments/single-appointment/single-appointment.component";
 import { SingleDayAppointmentsComponent } from "./components/single-day-appointments/single-day-appointments.component";
-import { AppointmentService } from "./services/appointment.service.ts";
-import { CalendarDayService } from "./services/calendar-day.service";
 
 @NgModule({
     declarations: [
@@ -32,6 +31,7 @@ import { CalendarDayService } from "./services/calendar-day.service";
         AppointmentsRoutingModule,
         SharedModule,
         
+        ClientsModule,
         ServicesModule,
         
         DialogModule,

@@ -15,16 +15,45 @@
     display: flex;
     gap: 10px;
     margin-bottom: 10px;
+
+    .service-name {
+        font-weight: bold;
+    }
 }
 
 .date-time {
-    font-size: 1rem;
+    font-size: 1.1rem;
     display: flex;
     gap: 10px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.client {
+    font-size: 1rem;
+    margin-bottom: 15px;
+
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+
+    .client-column {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+
+        .nickname {
+            font-weight: bold;
+        }
+
+        .phone-number, .email {
+            text-align: end;
+        }
+    }
 }
 
 .action-bar {
     display: flex;
     gap: 5px;
-    margin-top: 15px;
+    margin-top: 10px;
 }

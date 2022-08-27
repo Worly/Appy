@@ -18,7 +18,8 @@
             </app-button>
         </div>
 
-        <app-calendar-dialog #calendarDialog [date]="$any(date)" (dateChange)="dateControlSelect.emit($event)"></app-calendar-dialog>
+        <app-calendar-dialog #calendarDialog [date]="$any(date)" (dateChange)="dateControlSelect.emit($event)">
+        </app-calendar-dialog>
     </div>
 </div>
 <div class="body-container">
@@ -40,7 +41,7 @@
                 {{ap.time}}
             </div>
             <div class="appointment-service-name">
-                {{ap.source.service?.displayName}}
+                {{ap.source.service?.displayName}} - {{ap.source.client?.nickname}}
             </div>
         </div>
     </div>

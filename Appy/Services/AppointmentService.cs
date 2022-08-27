@@ -31,12 +31,20 @@ namespace Appy.Services
 
         public Task<List<Appointment>> GetAll(DateOnly date, int facilityId)
         {
-            return context.Appointments.Include(a => a.Service).Where(s => s.FacilityId == facilityId && s.Date == date).ToListAsync();
+            return context.Appointments
+                .Include(a => a.Service)
+                .Include(a => a.Client)
+                .Where(s => s.FacilityId == facilityId && s.Date == date)
+                .ToListAsync();
         }
 
         public async Task<Appointment> GetById(int id, int facilityId)
         {
-            var appointment = await context.Appointments.Include(a => a.Service).FirstOrDefaultAsync(s => s.Id == id && s.FacilityId == facilityId);
+            var appointment = await context.Appointments
+                .Include(a => a.Service)
+                .Include(a => a.Client)
+                .FirstOrDefaultAsync(s => s.Id == id && s.FacilityId == facilityId);
+
             if (appointment == null)
                 throw new NotFoundException();
 
@@ -49,13 +57,18 @@ namespace Appy.Services
             if (service == null)
                 throw new NotFoundException("Unknown service");
 
+            var client = await context.Clients.FirstOrDefaultAsync(s => s.Id == dto.Client.Id && s.FacilityId == facilityId);
+            if (client == null)
+                throw new NotFoundException("Unknown client");
+
             var appointment = new Appointment()
             {
                 FacilityId = facilityId,
                 Date = dto.Date,
                 Time = dto.Time,
                 Duration = dto.Duration,
-                Service = service
+                Service = service,
+                Client = client
             };
 
             var sameDayAppointments = await GetAll(dto.Date, facilityId);
@@ -79,10 +92,15 @@ namespace Appy.Services
             if (service == null)
                 throw new NotFoundException("Unknown service");
 
+            var client = await context.Clients.FirstOrDefaultAsync(s => s.Id == dto.Client.Id && s.FacilityId == facilityId);
+            if (client == null)
+                throw new NotFoundException("Unknown client");
+
             appointment.Date = dto.Date;
             appointment.Time = dto.Time;
             appointment.Duration = dto.Duration;
             appointment.ServiceId = service.Id;
+            appointment.ClientId = client.Id;
 
             var sameDayAppointments = (await GetAll(dto.Date, facilityId)).Where(a => a.Id != appointment.Id).ToList();
             var workingHours = await workingHourService.GetWorkingHours(dto.Date, facilityId);

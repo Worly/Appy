@@ -9,6 +9,7 @@
         public TimeSpan Duration { get; set; }
 
         public ServiceDTO Service { get; set; }
+        public ClientDTO Client { get; set; }
     }
 
     public class FreeTimeDTO

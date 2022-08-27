@@ -12,6 +12,7 @@ import { parseDuration } from 'src/app/utils/time-utils';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AppointmentService } from '../../services/appointment.service.ts';
 import { TranslateService } from 'src/app/components/translate/translate.service';
+import { ClientDTO } from 'src/app/models/client';
 
 @Component({
   selector: 'app-appointment-edit',
@@ -58,16 +59,23 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
           let date = queryParamMap.get("date") ?? undefined;
           let time = queryParamMap.get("time") ?? undefined;
           let duration = queryParamMap.get("duration") ?? undefined;
+
           let serviceJSON = queryParamMap.get("service");
           let service: ServiceDTO | undefined;
           if (serviceJSON != null)
             service = JSON.parse(serviceJSON);
+
+          let clientJSON = queryParamMap.get("client");
+          let client: ClientDTO | undefined;
+          if (clientJSON != null)
+            client = JSON.parse(clientJSON);
 
           this.appointment = new Appointment({
             id: 0,
             date: date,
             time: time,
             service: service,
+            client: client,
             duration: duration ?? service?.duration
           });
 
@@ -151,9 +159,10 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
       let time = this.appointment?.time ? this.appointment.time.format("HH:mm:ss") : null;
       let duration = this.appointment?.duration ? this.appointment.duration.format("HH:mm:ss") : null;
       let service = this.appointment?.service ? JSON.stringify(this.appointment.service) : null;
+      let client = this.appointment?.client ? JSON.stringify(this.appointment.client) : null;
 
       setUrlParams(this.router, this.activatedRoute, this.location, {
-        date, time, duration, service
+        date, time, duration, service, client
       });
     }));
   }
