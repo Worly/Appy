@@ -37,6 +37,8 @@
     "ARCHIVE": "Arhiva",
     "DO_ARCHIVE": "Arhiviraj",
     "UNARCHIVE": "Dearhiviraj",
+    "NEW": "Novi",
+    "UNDO": "Poništi",
 
     "pages": {
         "error": {
@@ -106,6 +108,30 @@
             }
         },
 
+        "clients": {
+            "CLIENTS": "Klijenti",
+            "CLIENT": "Klijent",
+            "NAME": "Ime",
+            "SURNAME": "Prezime",
+            "NICKNAME": "Nadimak",
+            "PHONE_NUMBER": "Broj mobitela",
+            "EMAIL": "Email",
+            "NEW_CLIENT": "Novi klijent",
+            "CHOOSE_CLIENT": "Odaberi klijenta",
+            "DELETE_PROMPT": "Jeste li sigurni da želite obrisati ovog klijenta?",
+            "DELETE_ARCHIVE_PROMPT": "Klijent ne može biti obrisan jer se koristi negdje drugdje. Želite li ga arhivirati umjesto toga?",
+            "ARCHIVE_PROMPT": "Jeste li sigurni da želite arhivirati ovog klijenta?",
+            "UNARCHIVE_PROMPT": "Jeste li sigurni da želite dearhivirati ovog klijenta?",
+            "ADDED_SUCCESSFULY": "Novi klijent je uspješno dodan",
+            "NO_CLIENTS_FOUND": "Nije pronađen nijedan klijent",
+            "ADD_CLIENT": "Dodaj klijenta",
+
+            "errors": {
+                "MISSING_NICKNAME": "Molim upišite nadimak",
+                "NICKNAME_TAKEN": "Klijent s tim nadimkom već postoji"
+            }
+        },
+
         "appointments": {
             "APPOINTMENTS": "Termini",
             "APPOINTMENT": "Termin",
@@ -121,6 +147,7 @@
             
             "errors": {
                 "MISSING_SERVICE": "Molim odaberite uslugu",
+                "MISSING_CLIENT": "Molim odaberite klijenta",
                 "MISSING_DURATION": "Molim odaberite trajanje",
                 "MISSING_DATE": "Molim odaberite datum",
                 "MISSING_TIME": "Molim odaberite vrijeme",

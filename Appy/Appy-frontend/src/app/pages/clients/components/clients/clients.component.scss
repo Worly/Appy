@@ -1,0 +1,53 @@
+.title {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.search {
+    margin-bottom: 10px;
+}
+
+.title-text {
+    font-size: 2rem;
+    text-align: center;
+    font-weight: bold;
+}
+
+.archive-button {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.single-client-outer-container {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    padding: 20px;
+}
+
+.single-client-container {
+    display: grid;
+
+    grid-template-areas:
+        "nickname phone-number"
+        "full-name email";
+
+    .nickname {
+        grid-area: nickname;
+    }
+
+    .phone-number {
+        grid-area: phone-number;
+        text-align: end;
+    }
+
+    .full-name {
+        grid-area: full-name;
+    }
+
+    .email {
+        grid-area: email;
+        text-align: end;
+    }
+}

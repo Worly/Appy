@@ -1,0 +1,64 @@
+:host {
+    display: block;
+    border-width: 1px;
+    border-style: solid;
+    border-color: var(--input-border-color);
+    border-radius: var(--default-border-radius);
+}
+
+.search-input-container {
+    margin: 5px;
+    display: grid;
+    grid-template-columns: 1fr max-content;
+    gap: 5px;
+}
+
+.validation-error {
+    margin: 0 10px;
+    margin-bottom: 5px;
+}
+
+.no-clients-found {
+    margin: 20px 0;
+
+    font-size: 1.5rem;
+
+    display: flex;
+    text-align: center;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+
+.single-client-button {
+    border-top: solid 1px var(--input-border-color);
+}
+
+.single-client-container {
+    width: 100%;
+
+    display: grid;
+    grid-template-areas:
+        "nickname full-name"
+        "nickname phone-number";
+
+    &.selected {
+        font-weight: bold;
+    }
+
+    .nickname {
+        grid-area: nickname;
+    }
+
+    .full-name {
+        grid-area: full-name;
+        text-align: end;
+    }
+
+    .phone-number {
+        grid-area: phone-number;
+        text-align: end;
+    }
+}

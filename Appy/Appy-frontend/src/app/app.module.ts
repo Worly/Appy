@@ -34,6 +34,8 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faTrash } from "@fortawesome/free-solid-svg-icons/faTrash";
 import { faBusinessTime } from '@fortawesome/free-solid-svg-icons/faBusinessTime';
 import { faBoxArchive } from '@fortawesome/free-solid-svg-icons/faBoxArchive';
+import { faCircleCheck } from '@fortawesome/free-solid-svg-icons/faCircleCheck';
+import { faCircleCheck as farCircleCheck} from '@fortawesome/free-regular-svg-icons/faCircleCheck'
 
 import dayjs from "dayjs";
 import "dayjs/locale/hr";
@@ -111,7 +113,8 @@ export class AppModule {
       faTrash, faPen,
       faEllipsisV,
       faBusinessTime,
-      faBoxArchive
+      faBoxArchive,
+      faCircleCheck, farCircleCheck
     );
   }
 

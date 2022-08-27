@@ -33,6 +33,11 @@ const routes: Routes = [
     loadChildren: () => import('./pages/services/services.module').then(m => m.ServicesModule)
   },
   {
+    path: "clients",
+    canActivate: [LoggedInGuard, SelectedFacilityGuard],
+    loadChildren: () => import('./pages/clients/clients.module').then(m => m.ClientsModule)
+  },
+  {
     path: "appointments",
     loadChildren: () => import("./pages/appointments/appointments.module").then(m => m.AppointmentsModule),
     canActivate: [LoggedInGuard, SelectedFacilityGuard],
