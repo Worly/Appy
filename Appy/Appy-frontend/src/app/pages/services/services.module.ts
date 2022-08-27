@@ -10,8 +10,6 @@ import { ServiceEditComponent } from "./components/service-edit/service-edit.com
 import { ServiceLookupComponent } from "./components/service-lookup/service-lookup.component";
 import { ServicesComponent } from "./components/services/services.component";
 import { ServicesRoutingModule } from "./services-routing.module";
-import { ServiceColorsService } from "./services/service-colors.service";
-import { ServiceService } from "./services/service.service";
 
 @NgModule({
     declarations: [
