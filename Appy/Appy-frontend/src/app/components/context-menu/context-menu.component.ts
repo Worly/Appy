@@ -12,6 +12,7 @@ import { ButtonComponent } from '../button/button.component';
 export class ContextMenuComponent implements OnInit, OnDestroy {
 
   @ViewChild("template") template?: TemplateRef<any>;
+  @ViewChild("container") container?: ElementRef<HTMLElement>;
   @ContentChildren(ButtonComponent) set buttons(buttons: QueryList<ButtonComponent>) {
     setTimeout(() => {
       if (buttons) {
