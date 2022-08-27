@@ -20,6 +20,10 @@ export class ToastService {
                 .bottom("40px")
         });
 
+        let wrapper = overlayRef.overlayElement.parentElement;
+        if (wrapper != null)
+            wrapper.style.zIndex = "99999";
+
         return [overlayRef, overlayRef.attach(new ComponentPortal(ToastComponent)).instance];
     }
 
