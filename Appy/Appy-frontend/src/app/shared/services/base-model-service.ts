@@ -157,6 +157,7 @@ export interface IEntityTracker<T extends BaseModel> {
 abstract class Datasource<T extends BaseModel> {
     data: T[];
     filterPredicate?: (entity: T) => boolean;
+    isLoaded: boolean = false;
 
     constructor(data: T[], filterPredicate?: (entity: T) => boolean) {
         this.data = data;
@@ -164,6 +165,14 @@ abstract class Datasource<T extends BaseModel> {
     }
 
     add(entities: T[]) {
+        if (!this.isLoaded && entities.length == 0) {
+            this.notifySubscriber();
+            this.isLoaded = true;
+            return;
+        }
+
+        this.isLoaded = true;
+
         let newEntities: T[] = [];
         for (let newItem of entities) {
             let oldEntity = this.data.find(o => isEqual(o.getId(), newItem.getId()));
@@ -184,6 +193,9 @@ abstract class Datasource<T extends BaseModel> {
     }
 
     update(entity: T) {
+        if (!this.isLoaded)
+            return;
+
         let oldEntity = this.data.find(o => isEqual(o.getId(), entity.getId()));
 
         if (oldEntity == null) {
@@ -215,6 +227,9 @@ abstract class Datasource<T extends BaseModel> {
     }
 
     delete(id: any) {
+        if (!this.isLoaded)
+            return;
+
         let index = this.data.findIndex(o => isEqual(o.getId(), id));
 
         if (index == -1)
