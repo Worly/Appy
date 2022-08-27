@@ -1,6 +1,8 @@
 ﻿using Appy.DTOs;
 using Microsoft.EntityFrameworkCore;
 
+#nullable disable
+
 namespace Appy.Domain
 {
     public class Appointment
@@ -17,6 +19,9 @@ namespace Appy.Domain
         public int ServiceId { get; set; }
         public Service Service { get; set; }
 
+        public int ClientId { get; set; }
+        public Client Client { get; set; }
+
         public AppointmentDTO GetDTO()
         {
             return new AppointmentDTO()
@@ -25,7 +30,8 @@ namespace Appy.Domain
                 Date = Date,
                 Time = Time,
                 Duration = Duration,
-                Service = Service.GetDTO()
+                Service = Service.GetDTO(),
+                Client = Client.GetDTO()
             };
         }
 
@@ -34,6 +40,12 @@ namespace Appy.Domain
             modelBuilder
                 .Entity<Appointment>()
                 .HasOne(o => o.Service)
+                .WithMany()
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder
+                .Entity<Appointment>()
+                .HasOne(o => o.Client)
                 .WithMany()
                 .OnDelete(DeleteBehavior.NoAction);
         }

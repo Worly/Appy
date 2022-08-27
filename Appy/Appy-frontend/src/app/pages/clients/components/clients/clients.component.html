@@ -1,0 +1,25 @@
+<div class="title">
+    <div class="title-text">{{"pages.clients.CLIENTS" | translate}}</div>
+    <app-button class="archive-button" text="{{'ARCHIVE' | translate}}" icon="box-archive" color="warning"
+        [look]="isArchive ? 'solid' : 'normal'" (onClick)="toggleArchive()"></app-button>
+</div>
+
+<app-loading *ngIf="clients == null"></app-loading>
+<div *ngIf="clients != null">
+    <app-search class="search" [source]="clients" (onSearch)="this.filteredClients = $event.filteredSource"></app-search>
+    <app-button *ngIf="!isArchive" class="mb-3" width="100%" text="{{'pages.clients.NEW_CLIENT' | translate}}"
+        icon="plus" color="success" look="outlined" borderStyle="dashed" alignContent="center" (onClick)="goToNew()">
+    </app-button>
+
+    <div *ngFor="let s of filteredClients" class="w-clickable w-card single-client-outer-container"
+        (click)="goToEdit(s.id)">
+        <div class="single-client-container">
+            <div class="nickname">{{s.nickname}}</div>
+            <div class="full-name">{{s.name}} {{s.surname}}</div>
+            <div class="phone-number">{{s.phoneNumber}}</div>
+            <div class="email">{{s.email}}</div>
+        </div>
+
+        <div class="w-overlay"></div>
+    </div>
+</div>

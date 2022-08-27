@@ -1,0 +1,66 @@
+:host {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+
+  margin: 0 20px;
+  padding: 15px 20px;
+
+  font-size: 1rem;
+  text-align: center;
+
+  color: var(--anti-text);
+  background-color: var(--toast-background-color);
+  border-radius: 15px;
+  box-shadow: 0 0 20px -4px var(--text);
+
+  opacity: 0;
+  transform: translateY(100%);
+  transition: all 0.3s ease-in-out;
+
+  &.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.toast-icon {
+  &.color {
+    &-success {
+      color: var(--success);
+    }
+    &-danger {
+      color: var(--danger);
+    }
+    &-warning {
+      color: var(--warning);
+    }
+    &-normal {
+      color: var(--anti-text);
+    }
+    &-custom {
+      color: var(--custom-icon-color);
+    }
+  }
+}
+
+:host::ng-deep {
+  .actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    height: 100%;
+    align-items: center;
+    gap: 5px;
+
+    app-button {
+      div.my-button {
+        color: var(--anti-text);
+        font-weight: bold;
+
+        padding: 6px 6px;
+      }
+    }
+  }
+}

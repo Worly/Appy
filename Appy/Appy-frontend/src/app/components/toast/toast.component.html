@@ -1,1 +1,9 @@
-<div id="snackbar" [class]="showing ? 'show' : ''">{{text}}</div>
+<fa-icon *ngIf="icon != null" class="toast-icon" [ngClass]="'color-' + (iconColor ?? 'normal')"
+    [style]="'--custom-icon-color: ' + customIconColor" [icon]="$any(icon)" [fixedWidth]="true"></fa-icon>
+
+{{text}}
+
+<div *ngIf="actions != null" class="actions">
+    <app-button *ngFor="let action of actions" [text]="action.text" (onClick)="action.onClick()" look="transparent">
+    </app-button>
+</div>

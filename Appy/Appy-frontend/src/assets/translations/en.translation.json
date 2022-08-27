@@ -37,6 +37,8 @@
     "ARCHIVE": "Archive",
     "DO_ARCHIVE": "Archive",
     "UNARCHIVE": "Unarchive",
+    "NEW": "New",
+    "UNDO": "Undo",
 
     "pages": {
         "error": {
@@ -106,6 +108,30 @@
             }
         },
 
+        "clients": {
+            "CLIENTS": "Clients",
+            "CLIENT": "Client",
+            "NAME": "Name",
+            "SURNAME": "Surname",
+            "NICKNAME": "Nickname",
+            "PHONE_NUMBER": "Phone number",
+            "EMAIL": "Email",
+            "NEW_CLIENT": "New client",
+            "CHOOSE_CLIENT": "Choose client",
+            "DELETE_PROMPT": "Are you sure you want to delete this client?",
+            "DELETE_ARCHIVE_PROMPT": "Client couldn't be deleted since it's used somewhere else. Do you want to archive it instead?",
+            "ARCHIVE_PROMPT": "Are you sure you want to archive this client?",
+            "UNARCHIVE_PROMPT": "Are you sure you want to unarchive this client?",
+            "ADDED_SUCCESSFULY": "New client was added successfully",
+            "NO_CLIENTS_FOUND": "No clients found",
+            "ADD_CLIENT": "Add a client",
+
+            "errors": {
+                "MISSING_NICKNAME": "Please enter a nickname",
+                "NICKNAME_TAKEN": "Client with that nickname already exists"
+            }
+        },
+
         "appointments": {
             "APPOINTMENTS": "Appointments",
             "APPOINTMENT": "Appointment",
@@ -121,6 +147,7 @@
             
             "errors": {
                 "MISSING_SERVICE": "Please choose a service",
+                "MISSING_CLIENT": "Please choose a client",
                 "MISSING_DURATION": "Please choose a duration",
                 "MISSING_DATE": "Please choose a date",
                 "MISSING_TIME": "Please choose a time",

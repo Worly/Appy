@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 import { Dayjs } from "dayjs";
 import { Duration } from "dayjs/plugin/duration";
 import { parseDuration } from "../utils/time-utils";
+import { ClientDTO } from "./client";
 
 export class AppointmentDTO {
     public id: number = 0;
@@ -12,6 +13,7 @@ export class AppointmentDTO {
     public duration?: string;
 
     public service?: ServiceDTO;
+    public client?: ClientDTO;
 }
 
 export class Appointment extends BaseModel {
@@ -21,6 +23,7 @@ export class Appointment extends BaseModel {
     public duration?: Duration;
 
     public service?: ServiceDTO;
+    public client?: ClientDTO;
 
     override validations: Validation[] = [
         {
@@ -42,6 +45,11 @@ export class Appointment extends BaseModel {
             isValid: () => REQUIRED_VALIDATION(this.service),
             propertyName: "service",
             errorCode: "pages.appointments.errors.MISSING_SERVICE"
+        },
+        {
+            isValid: () => REQUIRED_VALIDATION(this.client),
+            propertyName: "client",
+            errorCode: "pages.appointments.errors.MISSING_CLIENT"
         }
     ]
 
@@ -53,6 +61,7 @@ export class Appointment extends BaseModel {
         this.time = dto.time ? dayjs(dto.time, "HH:mm:ss") : undefined;
         this.duration = dto.duration ? parseDuration(dto.duration) : undefined;
         this.service = dto.service;
+        this.client = dto.client;
 
         this.initProperties();
     }
@@ -64,6 +73,7 @@ export class Appointment extends BaseModel {
         dto.time = this.time ? this.time.format("HH:mm:ss") : undefined;
         dto.duration = this.duration ? this.duration.format("HH:mm:ss") : undefined;
         dto.service = this.service;
+        dto.client = this.client;
 
         return dto;
     }
