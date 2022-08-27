@@ -1,9 +1,10 @@
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpContext, HttpErrorResponse } from "@angular/common/http";
 import { Injector } from "@angular/core";
 import { catchError, map, Observable, Subscriber, throwError } from "rxjs";
 import { appConfig } from "../../app.config";
 import { BaseModel } from "../../models/base-model";
 import { isEqual } from "lodash-es";
+import { IGNORE_NOT_FOUND } from "./errors/error-interceptor.service";
 
 export class BaseModelService<T extends BaseModel> implements IEntityTracker<T> {
 
@@ -20,7 +21,14 @@ export class BaseModelService<T extends BaseModel> implements IEntityTracker<T> 
     }
 
     private createDatasourceInternal(sub: Subscriber<T[]>, datasourceFilterPredicate?: (entity: T) => boolean): Datasource<T> {
-        let dc = new Datasource<T>([], sub, datasourceFilterPredicate);
+        let dc = new ListDatasource<T>([], sub, datasourceFilterPredicate);
+        this.datasources.push(dc);
+
+        return dc;
+    }
+
+    private createSingleDatasourceInternal(sub: Subscriber<T>, id: any) {
+        let dc = new SingleDatasource<T>([], sub, e => e.getId() == id);
         this.datasources.push(dc);
 
         return dc;
@@ -45,7 +53,7 @@ export class BaseModelService<T extends BaseModel> implements IEntityTracker<T> 
                 params: params
             }).subscribe({
                 next: (r: any[]) => datasource.add(r.map(o => new this.typeFactory(o))),
-                error: (e: any) => s.error(s)
+                error: (e: any) => s.error(e)
             });
         });
     }
@@ -98,8 +106,27 @@ export class BaseModelService<T extends BaseModel> implements IEntityTracker<T> 
             .pipe(map(s => new this.typeFactory(s)));
     }
 
+    public getWithDatasource(id: any): Observable<T | undefined> {
+        return new Observable<T>(s => {
+            let datasource = this.createSingleDatasourceInternal(s, id);
+
+            let context = new HttpContext().set(IGNORE_NOT_FOUND, true);
+            this.httpClient.get<any>(`${appConfig.apiUrl}${this.controllerName}/get/${id}`, { context })
+                .pipe(map(s => new this.typeFactory(s)))
+                .subscribe({
+                    next: (r: T) => datasource.add([r]),
+                    error: (e: any) => {
+                        if (e instanceof HttpErrorResponse && e.status == 404)
+                            datasource.empty();
+                        else
+                            s.error(e);
+                    }
+                });
+        });
+    }
+
     private getDatasourceContexts(): Datasource<T>[] {
-        let contexts = this.datasources.filter(c => !c.subscriber.closed);
+        let contexts = this.datasources.filter(c => !c.isUnsubscribed());
 
         this.datasources = contexts;
         return contexts;
@@ -127,14 +154,12 @@ export interface IEntityTracker<T extends BaseModel> {
     notifyUpdated(entity: T): void;
 }
 
-class Datasource<T extends BaseModel> {
+abstract class Datasource<T extends BaseModel> {
     data: T[];
-    subscriber: Subscriber<T[]>;
     filterPredicate?: (entity: T) => boolean;
 
-    constructor(data: T[], subscriber: Subscriber<T[]>, filterPredicate?: (entity: T) => boolean) {
+    constructor(data: T[], filterPredicate?: (entity: T) => boolean) {
         this.data = data;
-        this.subscriber = subscriber;
         this.filterPredicate = filterPredicate;
     }
 
@@ -154,7 +179,8 @@ class Datasource<T extends BaseModel> {
 
         this.data.splice(0, 0, ...newEntities);
 
-        this.subscriber.next([...this.data]);
+        if (newEntities.length > 0)
+            this.notifySubscriber();
     }
 
     update(entity: T) {
@@ -185,7 +211,7 @@ class Datasource<T extends BaseModel> {
         if (this.filterPredicate && !this.filterPredicate(oldEntity))
             this.data.splice(this.data.indexOf(oldEntity), 1);
 
-        this.subscriber.next([...this.data]);
+        this.notifySubscriber();
     }
 
     delete(id: any) {
@@ -196,6 +222,56 @@ class Datasource<T extends BaseModel> {
 
         this.data.splice(index, 1);
 
+        this.notifySubscriber();
+    }
+
+    empty() {
+        this.data.splice(0, this.data.length);
+
+        this.notifySubscriber();
+    }
+
+    abstract notifySubscriber(): void;
+    abstract isUnsubscribed(): boolean;
+}
+
+class ListDatasource<T extends BaseModel> extends Datasource<T> {
+    subscriber: Subscriber<T[]>;
+
+    constructor(data: T[], sub: Subscriber<T[]>, filterPredicate?: (entity: T) => boolean) {
+        super(data, filterPredicate);
+
+        this.subscriber = sub;
+    }
+
+    notifySubscriber(): void {
         this.subscriber.next([...this.data]);
+    }
+
+    isUnsubscribed(): boolean {
+        return this.subscriber.closed;
+    }
+}
+
+class SingleDatasource<T extends BaseModel> extends Datasource<T> {
+    subscriber: Subscriber<T>;
+
+    constructor(data: T[], sub: Subscriber<T>, filterPredicate?: (entity: T) => boolean) {
+        super(data, filterPredicate);
+
+        this.subscriber = sub;
+    }
+
+    notifySubscriber(): void {
+        if (this.data.length == 0)
+            this.subscriber.next(undefined);
+        else if (this.data.length == 1)
+            this.subscriber.next(this.data[0]);
+        else
+            throw new Error("SingleDatasource received more than one element! You have duplicate Ids or wrongly implemented getId() method");
+    }
+
+    isUnsubscribed(): boolean {
+        return this.subscriber.closed;
     }
 }
