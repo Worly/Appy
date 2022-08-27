@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { Search } from 'src/app/utils/search';
 
 @Component({
@@ -7,6 +7,8 @@ import { Search } from 'src/app/utils/search';
   styleUrls: ['./search.component.scss']
 })
 export class SearchComponent implements OnInit {
+
+  @ViewChild("searchInput") searchInput?: ElementRef<HTMLElement>;
 
   private _source?: any[];
   @Input() set source(value: any[] | undefined) {
@@ -50,6 +52,10 @@ export class SearchComponent implements OnInit {
     });
   }
 
+  public clearAndFocus() {
+    this.search = "";
+    this.searchInput?.nativeElement.focus();
+  }
 }
 
 export type SearchResult = {
