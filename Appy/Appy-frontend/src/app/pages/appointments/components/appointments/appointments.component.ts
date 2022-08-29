@@ -1,7 +1,9 @@
+import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import dayjs, { Dayjs } from 'dayjs';
 import { Subscription } from 'rxjs';
+import { setUrlParams } from 'src/app/utils/dynamic-url-params';
 
 @Component({
   selector: 'app-appointments',
@@ -12,18 +14,41 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
 
   private subs: Subscription[] = [];
 
-  public date: Dayjs = dayjs();
+  private _date: Dayjs = dayjs();
+  public set date(value: Dayjs) {
+    if (this._date.isSame(value, "date"))
+      return;
+
+    this._date = value;
+
+    this.updateUrl();
+  }
+  public get date(): Dayjs {
+    return this._date;
+  }
 
   constructor(
     private router: Router,
+    private location: Location,
     private activatedRoute: ActivatedRoute,
   ) { }
 
   ngOnInit(): void {
+    this.subs.push(this.activatedRoute.queryParamMap.subscribe(params => {
+      let dateStr = params.get("date");
+      if (dateStr != null)
+        this.date = dayjs(dateStr, "YYYY-MM-DD");
+    }));
   }
 
   ngOnDestroy(): void {
     this.subs.forEach(s => s.unsubscribe());
+  }
+
+  private updateUrl() {
+    setUrlParams(this.router, this.activatedRoute, this.location, {
+      date: this.date.format("YYYY-MM-DD")
+    });
   }
 
   goToNew(date?: Dayjs, clickedTime?: Dayjs) {
