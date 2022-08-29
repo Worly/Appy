@@ -9,9 +9,22 @@ import { ButtonComponent } from '../button/button.component';
 export class ActionDropdownComponent {
   @Input() isDropdown: boolean = true;
 
-  @ContentChildren(ButtonComponent, { descendants: true }) set contentChildren(buttons: QueryList<ButtonComponent>) {
-    this.isEmpty = buttons.length == 0;
+  private _buttons: QueryList<ButtonComponent> | undefined;
+  @ContentChildren(ButtonComponent, { descendants: true }) set buttons(value: QueryList<ButtonComponent> | undefined) {
+    if (this._buttons == value)
+      return;
+
+    this._buttons = value;
+
+    this.isEmpty = value == null || value.length == 0;
+  }
+  get buttons(): QueryList<ButtonComponent> | undefined {
+    return this._buttons;
   }
 
   isEmpty: boolean = false;
+
+  get isLoading(): boolean {
+    return this.buttons?.some(b => b.isLoading) ?? false;
+  }
 }
