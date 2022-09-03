@@ -75,7 +75,7 @@
         box-shadow: 0 3px 15px 0 black;
     }
 
-    @media (max-height: 700px) {
+    @media (max-height: 500px) {
         * {
             --navigation-bar-bottom-offset: 0px;
         }
