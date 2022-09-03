@@ -1,4 +1,5 @@
-import { Component, ElementRef, HostListener, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ContentChild, ElementRef, HostListener, Input, OnInit, ViewChild } from '@angular/core';
+import { ActionDropdownComponent } from '../action-dropdown/action-dropdown.component';
 
 @Component({
   selector: 'app-action-bar',
@@ -18,6 +19,16 @@ export class ActionBarComponent implements OnInit {
   }
   get container(): ElementRef<HTMLElement> | undefined {
     return this._container;
+  }
+
+  @ContentChild(ActionDropdownComponent) set actionDropdown(value: ActionDropdownComponent) {
+    console.log(value);
+    let element = value.elementRef.nativeElement;
+
+    element.style.marginTop = "-10px";
+    element.style.marginBottom = "-10px";
+    element.style.marginLeft = "-15px";
+    element.style.width = "55px";
   }
 
   @Input() floatAlways: boolean = false;

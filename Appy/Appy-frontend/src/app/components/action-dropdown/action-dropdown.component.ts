@@ -27,4 +27,6 @@ export class ActionDropdownComponent {
   get isLoading(): boolean {
     return this.buttons?.some(b => b.isLoading) ?? false;
   }
+
+  constructor(public elementRef: ElementRef<HTMLElement>) { }
 }
