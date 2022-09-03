@@ -3,8 +3,9 @@
 </ng-template>
 
 <ng-container *ngIf="isDropdown && !isEmpty">
-    <app-button #mainButton="elementRef" appElementRef [isCircle]="false" icon="ellipsis-vertical" look="custom" [isLoading]="isLoading"
-        customBorderColor="rgba(0,0,0,0)" (onClick)="contextMenu.toggle()">
+    <app-button #mainButton="elementRef" appElementRef [isCircle]="false" icon="ellipsis-vertical" look="custom"
+        [style.height.%]="100" [style.width.%]="100" [isLoading]="isLoading" customBorderColor="rgba(0,0,0,0)" alignContent="center"
+        (onClick)="contextMenu.toggle()">
     </app-button>
 
     <app-context-menu #contextMenu [relativeTo]="mainButton.elementRef">

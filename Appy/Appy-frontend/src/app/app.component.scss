@@ -75,6 +75,20 @@
         box-shadow: 0 3px 15px 0 black;
     }
 
+    @media (max-height: 500px) {
+        * {
+            --navigation-bar-bottom-offset: 0px;
+        }
+
+        .navigation-bar {
+            bottom: calc(-1 * var(--navigation-bar-height));
+        }
+
+        .navigation-bar-shadow {
+            bottom: calc(-1 * var(--navigation-bar-height));
+        }
+    }
+
     .bottom-spacer {
         height: calc(var(--navigation-bar-height) + 5px);
     }
