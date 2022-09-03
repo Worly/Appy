@@ -29,9 +29,14 @@
     font-weight: bold;
 }
 
+.client-button {
+    margin-bottom: 15px;
+    width: 100%;
+}
+
 .client {
     font-size: 1rem;
-    margin-bottom: 15px;
+    width: 100%;
 
     display: flex;
     justify-content: space-between;

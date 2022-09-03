@@ -12,7 +12,7 @@
 
     &.floating {
         position: fixed;
-        bottom: 0px;
+        bottom: var(--navigation-bar-bottom-offset);
         left: 0px;
         right: 0px;
 

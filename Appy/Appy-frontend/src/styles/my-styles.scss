@@ -10,7 +10,9 @@
 
     --text: black;
     --anti-text: white;
+
     --toast-background-color: rgb(50, 50, 50);
+    --selected-navigation-background-color: rgba(255, 255, 255, 0.2);
 
     --success: #5dc073;
     --danger: #d35f5f;
@@ -19,6 +21,7 @@
     --disabled: rgb(177, 177, 177);
 
     --default-border-radius: 4px;
+    --navigation-bar-height: 64px;
 }
 
 body {
@@ -146,25 +149,13 @@ body {
     }
 }
 
-.overflow-visible {
-    overflow: visible !important;
-}
-
-.overflow-auto-flex-direction-column {
-    overflow: auto;
-    flex-direction: column;
-}
-
-@media (min-width: 992px) {
-    .navbar-expand-lg .navbar-nav {
-        align-items: center;
-        gap: 10px;
-    }
-}
-
 .w-title {
     font-size: 2rem;
     text-align: center;
     margin-bottom: 20px;
     font-weight: bold;
+}
+
+.display-none {
+    display: none !important;
 }

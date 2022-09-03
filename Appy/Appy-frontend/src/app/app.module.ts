@@ -19,8 +19,10 @@ import { HomeModule } from './pages/home/home.module';
 import { ErrorModule } from './pages/error/error.module';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
+import { ContextMenuModule } from './components/context-menu/context-menu.module';
+import { SharedModule } from './shared/shared.module';
 
-import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
+import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
@@ -35,7 +37,12 @@ import { faTrash } from "@fortawesome/free-solid-svg-icons/faTrash";
 import { faBusinessTime } from '@fortawesome/free-solid-svg-icons/faBusinessTime';
 import { faBoxArchive } from '@fortawesome/free-solid-svg-icons/faBoxArchive';
 import { faCircleCheck } from '@fortawesome/free-solid-svg-icons/faCircleCheck';
-import { faCircleCheck as farCircleCheck} from '@fortawesome/free-regular-svg-icons/faCircleCheck'
+import { faCircleCheck as farCircleCheck } from '@fortawesome/free-regular-svg-icons/faCircleCheck'
+import { faHouse } from '@fortawesome/free-solid-svg-icons/faHouse';
+import { faHandHoldingHeart } from '@fortawesome/free-solid-svg-icons/faHandHoldingHeart';
+import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
+import { faCalendarWeek } from '@fortawesome/free-solid-svg-icons/faCalendarWeek';
+import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons/faRightFromBracket';
 
 import dayjs from "dayjs";
 import "dayjs/locale/hr";
@@ -68,10 +75,13 @@ dayjs.extend(duration);
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
+    FontAwesomeModule,
 
+    SharedModule,
     ButtonModule,
     TranslateModule,
     LanguagePickerModule,
+    ContextMenuModule,
 
     ErrorModule,
     LoginModule,
@@ -114,7 +124,8 @@ export class AppModule {
       faEllipsisV,
       faBusinessTime,
       faBoxArchive,
-      faCircleCheck, farCircleCheck
+      faCircleCheck, farCircleCheck,
+      faHouse, faHandHoldingHeart, faUsers, faCalendarWeek, faRightFromBracket
     );
   }
 

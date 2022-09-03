@@ -92,4 +92,8 @@ export class SingleAppointmentComponent implements OnInit, OnDestroy {
     this.onDone.next();
   }
 
+  goToClient(clientId: number) {
+    this.router.navigate(["clients", "edit", clientId]);
+    this.onDone.next();
+  }
 }

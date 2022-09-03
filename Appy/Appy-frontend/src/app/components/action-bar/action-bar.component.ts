@@ -20,15 +20,15 @@ export class ActionBarComponent implements OnInit {
     return this._container;
   }
 
+  @Input() floatAlways: boolean = false;
+
   @Input() leaveSpaceWhenAnchored: boolean = true;
   @Input() compact: boolean = false;
 
-  private _isFloating: boolean = false;
+  private shouldFloat: boolean = false;
+
   public get isFloating(): boolean {
-    return this._isFloating;
-  }
-  private set isFloating(value: boolean) {
-    this._isFloating = value;
+    return this.floatAlways || this.shouldFloat;
   }
 
   contentHeight: number = 0;
@@ -54,7 +54,7 @@ export class ActionBarComponent implements OnInit {
   }
 
   private recheckFloating() {
-    this.isFloating = window.innerWidth < 992;
+    this.shouldFloat = window.innerWidth < 992;
   }
 
 }

@@ -3,11 +3,9 @@
     </app-appointments-scroller>
 </div>
 
-<div class="floating-action-bar">
-    <app-button class="button-shadow" icon="plus" color="success" look="solid" alignContent="center"
+<app-action-bar #actionBar [floatAlways]="true">
+    <app-button class="new-button" icon="plus" color="success" look="solid" alignContent="center"
         (onClick)="goToNew()">
     </app-button>
-    <div class="button-shadow button-group">
-        <app-date-selector [(date)]="date"></app-date-selector>
-    </div>
-</div>
+    <app-date-selector flex-splitter [(date)]="date" [compact]="true"></app-date-selector>
+</app-action-bar>
