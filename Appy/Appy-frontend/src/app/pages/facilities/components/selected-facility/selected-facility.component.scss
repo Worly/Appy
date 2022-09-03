@@ -1,5 +1,5 @@
 :host {
-    margin: -0.5rem 0;
+    display: block;
 }
 
 .my-button {
@@ -7,6 +7,14 @@
 
     &.link-active {
         background-color: rgba(255, 255, 255, 0.2);
+    }
+}
+
+:host::ng-deep {
+    app-button.my-button {
+        div.my-button {
+            padding: 12px 15px;
+        }
     }
 }
 

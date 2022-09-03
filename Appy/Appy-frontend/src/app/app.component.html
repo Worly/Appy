@@ -1,40 +1,58 @@
 <!-- Navigation -->
 <div>
-  <nav class="navbar navbar-expand-lg my-navbar static-top">
-    <div class="container">
-      <a class="navbar-brand" href="home">Appy</a>
-      <app-button class="my-navbar-toggler" (onClick)="toggleNavbar()" icon="bars" [isCircle]="false" look="transparent"></app-button>
-      <div #navbarCollapse class="collapse navbar-collapse" id="navbarResponsive">
-        <ul class="navbar-nav ml-auto">
-          <li class="nav-item" *ngIf="authService.isLoggedIn() && facilityService.getSelected()">
-            <a [routerLink]="'/home'" class="nav-link" [routerLinkActive]="'active'" href="#">{{'HOME' | translate}}</a>
-          </li>
-          <li class="nav-item" *ngIf="authService.isLoggedIn() && facilityService.getSelected()">
-            <a [routerLink]="'/services'" class="nav-link" [routerLinkActive]="'active'" href="#">{{'pages.services.SERVICES' | translate}}</a>
-          </li>
-          <li class="nav-item" *ngIf="authService.isLoggedIn() && facilityService.getSelected()">
-            <a [routerLink]="'/clients'" class="nav-link" [routerLinkActive]="'active'" href="#">{{'pages.clients.CLIENTS' | translate}}</a>
-          </li>
-          <li class="nav-item" *ngIf="authService.isLoggedIn() && facilityService.getSelected()">
-            <a [routerLink]="'/appointments'" class="nav-link" [routerLinkActive]="'active'" href="#">{{'pages.appointments.APPOINTMENTS' | translate}}</a>
-          </li>
-          <li class="nav-item" *ngIf="authService.isLoggedIn() && facilityService.getSelected()">
-            <a [routerLink]="'/working-hours'" class="nav-link" [routerLinkActive]="'active'" href="#">{{'pages.working-hours.WORKING_HOURS' | translate}}</a>
-          </li>
-          <div class="splitter"></div>
-          <span class="navbar-text welcome-text" *ngIf="authService.isLoggedIn()">
-            {{('WELCOME' | translate) + ", " + authService.getName()?.name}}
-          </span>
-          <app-selected-facility *ngIf="authService.isLoggedIn() && facilityService.getSelected()">
-          </app-selected-facility>
-          <li class="nav-item" *ngIf="authService.isLoggedIn()">
-            <a class="nav-link" (click)="logOut()">{{'LOGOUT' | translate}}</a>
-          </li>
-          <app-language-picker></app-language-picker>
-        </ul>
+  <div class="navigation-bar">
+    <div class="navigation-bar-content"
+      [style]="'--nvaigation-bar-item-count: ' + navigations.filter(visibleNavigation).length">
+      <div *ngFor="let item of navigations.filter(visibleNavigation)" class="navigation-button w-clickable"
+        [routerLink]="item.link" [routerLinkActive]="'active'">
+        <div class="icon">
+          <fa-icon [icon]="item.icon"></fa-icon>
+        </div>
+        <div class="name">{{item.name | translate}}</div>
+
+        <div class="w-overlay-dark"></div>
+      </div>
+
+      <div #dropdownButton="elementRef" appElementRef class="navigation-button w-clickable bars"
+        [ngClass]="{'display-none': dropdownNavigations.filter(visibleNavigation).length == 0}"
+        (click)="navigationDropdown.toggle()">
+        <div class="icon">
+          <fa-icon icon="bars"></fa-icon>
+        </div>
+        <div class="w-overlay-dark"></div>
       </div>
     </div>
-  </nav>
+    <app-language-picker *ngIf="dropdownNavigations.filter(visibleNavigation).length == 0" class="language-picker">
+    </app-language-picker>
+  </div>
+  <app-context-menu #navigationDropdown [relativeTo]="dropdownButton.elementRef" [viewportMargin]="0">
+    <div class="navigation-dropdown">
+      <app-selected-facility *ngIf="this.authService.isLoggedIn() && this.facilityService.getSelected()">
+      </app-selected-facility>
+
+      <div *ngFor="let item of dropdownNavigations.filter(visibleNavigation)" class="navigation-button w-clickable"
+        [routerLink]="item.link" [routerLinkActive]="'active'">
+        <div class="icon">
+          <fa-icon [icon]="item.icon" [fixedWidth]="true"></fa-icon>
+        </div>
+        <div class="name">{{item.name | translate}}</div>
+
+        <div class="w-overlay-dark"></div>
+      </div>
+
+      <div *ngIf="authService.isLoggedIn()" class="navigation-button w-clickable" (click)="logOut()">
+        <div class="icon">
+          <fa-icon icon="right-from-bracket" [fixedWidth]="true"></fa-icon>
+        </div>
+        <div class="name">{{"LOGOUT" | translate}}</div>
+
+        <div class="w-overlay-dark"></div>
+      </div>
+
+      <app-language-picker class="language-picker"></app-language-picker>
+    </div>
+  </app-context-menu>
+  <div class="navigation-bar-shadow"></div>
 
   <!-- Page Content -->
   <div class="container">
@@ -46,3 +64,6 @@
       </div>
     </div>
   </div>
+
+  <div class="bottom-spacer"></div>
+</div>
