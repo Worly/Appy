@@ -22,7 +22,9 @@ export class ActionBarComponent implements OnInit {
   }
 
   @ContentChild(ActionDropdownComponent) set actionDropdown(value: ActionDropdownComponent) {
-    console.log(value);
+    if (value == null)
+      return;
+      
     let element = value.elementRef.nativeElement;
 
     element.style.marginTop = "-10px";
