@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import { NotifyDialogService } from 'src/app/components/notify-dialog/notify-dialog.service';
 import { TranslateService } from 'src/app/components/translate/translate.service';
 import { Appointment } from 'src/app/models/appointment';
-import { AppointmentService } from '../../../services/appointment.service.ts';
+import { AppointmentService } from '../../services/appointment.service.ts';
 
 @Component({
   selector: 'app-single-appointment',

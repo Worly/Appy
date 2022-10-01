@@ -144,6 +144,9 @@
             "CLOSED": "Facility is closed on this day.",
             "EDIT_WORKING_HOURS": "Edit working hours",
             "TIME_NOT_AVAILABLE_PROMPT": "Selected time is taken by another appointment, outside of working hours or not available for other reasons. Are you sure you want to save it anyway?",
+            "NO_APPOINTMENTS_BEFORE": "There are no more appointments before this date",
+            "NO_APPOINTMENTS_AFTER": "There are no more appointments after this date",
+            "NO_APPOINTMENTS": "No appointments found",
             
             "errors": {
                 "MISSING_SERVICE": "Please choose a service",

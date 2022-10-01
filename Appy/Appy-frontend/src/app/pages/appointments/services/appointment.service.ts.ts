@@ -5,7 +5,7 @@ import { map, Observable } from "rxjs";
 import { appConfig } from "src/app/app.config";
 import { Appointment } from "src/app/models/appointment";
 import { FreeTime, FreeTimeDTO } from "src/app/models/free-time";
-import { BaseModelService } from "src/app/shared/services/base-model-service";
+import { BaseModelService, PageableListDatasource } from "src/app/shared/services/base-model-service";
 
 @Injectable({ providedIn: "root" })
 export class AppointmentService extends BaseModelService<Appointment> {
@@ -20,6 +20,12 @@ export class AppointmentService extends BaseModelService<Appointment> {
         return this.getAllAdvanced({
             date: date.format("YYYY-MM-DD")
         }, e => e.date?.isSame(date, "date") == true);
+    }
+
+    public getList(date: Dayjs, sortPredicate: (a: Appointment, b: Appointment) => number): PageableListDatasource<Appointment> {
+        return this.getListAdvanced({
+            date: date.format("YYYY-MM-DD")
+        }, sortPredicate);
     }
 
     public getFreeTimes(date: Dayjs, serviceId: number, duration: Duration, ignoreAppointmentId?: number): Observable<FreeTime[]> {

@@ -1,0 +1,68 @@
+.current-date {
+    position: sticky;
+    top: 0;
+
+    z-index: 1;
+
+    margin-top: -0.5rem;
+    margin-bottom: 10px;
+
+    font-size: 1.3rem;
+    font-weight: bold;
+    padding-left: 20px;
+    padding-top: 10px;
+    padding-bottom: 5px;
+
+    border-bottom-left-radius: var(--default-border-radius);
+    border-bottom-right-radius: var(--default-border-radius);
+    background-color: var(--input-background-color);
+    box-shadow: 0 4px 9px 0px var(--shadow);
+}
+
+.date {
+    font-size: 1.3rem;
+    font-weight: bold;
+    padding-top: 15px;
+    padding-bottom: 10px;
+    margin-left: 20px;
+
+    &.empty-date {
+        font-size: 1.1rem;
+        padding-top: 30px;
+        padding-bottom: 30px;
+        opacity: 0.4;
+    }
+}
+
+.appointment {
+    font-size: 1rem;
+
+    margin-bottom: 10px;
+    padding: 10px 15px;
+
+    background-color: var(--input-background-color);
+    border-radius: var(--default-border-radius);
+
+    display: flex;
+    gap: 15px;
+
+    .color {
+        width: 10px;
+    }
+
+    .time {
+        font-size: 0.9rem;
+    }
+}
+
+.no-appointments {
+    text-align: center;
+    font-size: 1.5rem;
+    opacity: 0.4;
+
+    padding: 30px 30px;
+
+    &.big {
+        height: calc(100vh - var(--navigation-bar-bottom-offset) - 64px - 90px - 75px);
+    }
+}

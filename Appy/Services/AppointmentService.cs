@@ -8,6 +8,7 @@ namespace Appy.Services
     public interface IAppointmentService
     {
         Task<List<Appointment>> GetAll(DateOnly date, int facilityId);
+        Task<List<Appointment>> GetList(DateOnly date, Direction direction, int skip, int take, int facilityId);
         Task<Appointment> GetById(int id, int facilityId);
         Task<Appointment> AddNew(AppointmentDTO dto, int facilityId, bool ignoreTimeNotAvailable);
         Task<Appointment> Edit(int id, AppointmentDTO dto, int facilityId, bool ignoreTimeNotAvailable);
@@ -36,6 +37,21 @@ namespace Appy.Services
                 .Include(a => a.Client)
                 .Where(s => s.FacilityId == facilityId && s.Date == date)
                 .ToListAsync();
+        }
+
+        public Task<List<Appointment>> GetList(DateOnly date, Direction direction, int skip, int take, int facilityId)
+        {
+            var appointments = context.Appointments
+                .Include(a => a.Service)
+                .Include(a => a.Client)
+                .Where(s => s.FacilityId == facilityId);
+
+            if (direction == Direction.Forwards)
+                appointments = appointments.Where(s => s.Date >= date).OrderBy(s => s.Date).ThenBy(s => s.Time).ThenBy(s => s.Duration);
+            else
+                appointments = appointments.Where(s => s.Date < date).OrderByDescending(s => s.Date).ThenByDescending(s => s.Time).ThenByDescending(s => s.Duration);
+
+            return appointments.Skip(skip).Take(take).ToListAsync();
         }
 
         public async Task<Appointment> GetById(int id, int facilityId)

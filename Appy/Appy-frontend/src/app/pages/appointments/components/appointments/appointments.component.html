@@ -1,11 +1,16 @@
-<div class="appointments-container">
-    <app-appointments-scroller [daysToShow]="1" [date]="date" (onCalendarClick)="onCalendarClick($event)">
+<div>
+    <app-appointments-scroller *ngIf="type == 'scroller'" [daysToShow]="1" [date]="date"
+        (onCalendarClick)="onCalendarClick($event)">
     </app-appointments-scroller>
+
+    <app-appointments-list *ngIf="type == 'list'" [date]="date">
+    </app-appointments-list>
 </div>
 
 <app-action-bar #actionBar [floatAlways]="true">
-    <app-button class="new-button" icon="plus" color="success" look="solid" alignContent="center"
-        (onClick)="goToNew()">
+    <app-button [iconPrefix]="type == 'scroller' ? 'far' : 'fas'"
+        [icon]="type == 'scroller' ? 'calendar-days' : 'table-list'" [isCircle]="false" (onClick)="type = (type == 'scroller' ? 'list' : 'scroller')"></app-button>
+    <app-button class="new-button" icon="plus" color="success" look="solid" alignContent="center" (onClick)="goToNew()">
     </app-button>
     <app-date-selector flex-splitter [(date)]="date" [compact]="true"></app-date-selector>
 </app-action-bar>

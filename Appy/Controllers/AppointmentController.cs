@@ -31,6 +31,15 @@ namespace Appy.Controllers
             return Ok(result.Select(o => o.GetDTO()));
         }
 
+        [HttpGet("getList")]
+        [Authorize]
+        public async Task<ActionResult<List<AppointmentDTO>>> GetList([FromQuery] DateOnly date, [FromQuery] Direction direction, [FromQuery] int skip, [FromQuery] int take)
+        {
+            var result = await this.appointmentService.GetList(date, direction, skip, take, HttpContext.SelectedFacility());
+
+            return Ok(result.Select(o => o.GetDTO()));
+        }
+
         [HttpGet("get/{id}")]
         [Authorize]
         public async Task<ActionResult<AppointmentDTO>> Get(int id)

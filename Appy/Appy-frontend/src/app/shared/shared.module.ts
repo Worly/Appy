@@ -6,7 +6,6 @@ import { ButtonModule } from "../components/button/button.module";
 import { LoadingModule } from "../components/loading/loading.module";
 import { TranslateModule } from "../components/translate/translate.module";
 import { InvokeDirective } from "./directives/invoke-directive/invoke.directive";
-import { StuckAttrDirective } from "./directives/stuck-attr-directive/stuck-attr.directive";
 import { FilterPipe } from "./pipes/filter.pipe";
 import { FormatDurationPipe } from "./pipes/format-duration.pipe";
 import { AuthHttpInterceptor } from "./services/auth/auth-http-interceptor.service";
@@ -17,8 +16,7 @@ import { ErrorTranslateInterceptor } from "./services/errors/error-translate.ser
     declarations: [
         FilterPipe,
         FormatDurationPipe,
-        InvokeDirective,
-        StuckAttrDirective
+        InvokeDirective
     ],
     imports: [
 
@@ -33,8 +31,7 @@ import { ErrorTranslateInterceptor } from "./services/errors/error-translate.ser
 
         FilterPipe,
         FormatDurationPipe,
-        InvokeDirective,
-        StuckAttrDirective
+        InvokeDirective
     ],
     providers: [
         { provide: HTTP_INTERCEPTORS, useClass: AuthHttpInterceptor, multi: true },
