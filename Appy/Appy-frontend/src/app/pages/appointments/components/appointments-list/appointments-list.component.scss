@@ -70,3 +70,8 @@
         height: calc(100vh - var(--navigation-bar-bottom-offset) - 64px - 90px - 95px);
     }
 }
+
+.loading-more {
+    height: 150px;
+    position: relative;
+}

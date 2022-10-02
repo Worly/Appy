@@ -53,6 +53,8 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
+    if (this.date.isSame(dayjs(), "date"))
+      this.load();
   }
 
   ngOnDestroy(): void {
@@ -81,13 +83,21 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
   private checkShouldLoad() {
     const scrollOffset = 100;
 
-    if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight - scrollOffset)
+    if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight - scrollOffset && !this.datasource?.isReachedEndForwards()) {
+      this.keepScroll();
       this.datasource?.loadNextPage();
+      this.changeDetector.detectChanges();
+      this.restoreScroll();
+    }
 
-    if (window.scrollY <= scrollOffset)
+    if (window.scrollY <= scrollOffset && !this.datasource?.isReachedEndBackwards()) {
+      this.keepScroll();
       this.datasource?.loadPreviousPage();
+      this.changeDetector.detectChanges();
+      this.restoreScroll();
+    }
   }
-  
+
   @HostListener('window:scroll', ['$event']) // for window scroll events
   onScroll() {
     this.checkShouldLoad();
@@ -95,6 +105,7 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
   }
 
   private keepScroll() {
+    this.changeDetector.detectChanges();
     let firstVisibleApp = this.getFirstVisibleAppointmentElement();
     if (firstVisibleApp != null) {
       this.keptScrollPosition = firstVisibleApp.getBoundingClientRect().top;
@@ -160,7 +171,7 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
 
     var sortedAppointments = this.appointments.sort(appointmentSort)
 
-    for (let i = 0; i < sortedAppointments.length; i++){
+    for (let i = 0; i < sortedAppointments.length; i++) {
       let ap = sortedAppointments[i];
 
       if (!ap.date?.isSame(currentDate)) {
@@ -204,6 +215,14 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
 
   isReachedTop(): boolean {
     return this.datasource?.isReachedEndBackwards() == true;
+  }
+
+  isLoadingNext(): boolean {
+    return this.datasource?.isLoadingNext() == true;
+  }
+
+  isLoadingPrevious(): boolean {
+    return this.datasource?.isLoadingPrevious() == true;
   }
 
   //#region AppointmentElements

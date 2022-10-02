@@ -1,9 +1,14 @@
+<app-loading *ngIf="appointments == null" [style.height.vh]="100"></app-loading>
+
 <div class="current-date">
     {{getCurrentDate()?.format("DD.MM.YYYY")}}
 </div>
 <div>
     <div *ngIf="isReachedTop() && appointments?.length != 0" class="no-appointments">
         {{"pages.appointments.NO_APPOINTMENTS_BEFORE" | translate}}
+    </div>
+    <div class="loading-more" *ngIf="appointments != null && isLoadingPrevious()">
+        <app-loading></app-loading>
     </div>
 
     <div *ngFor="let i of renderedItems; let index = index" class="item">
@@ -25,9 +30,12 @@
     <div *ngIf="isReachedBottom() && appointments?.length != 0" class="no-appointments big">
         {{"pages.appointments.NO_APPOINTMENTS_AFTER" | translate}}
     </div>
+    <div class="loading-more" *ngIf="appointments != null && isLoadingNext()">
+        <app-loading></app-loading>
+    </div>
 </div>
 
-<div *ngIf="appointments?.length == 0" class="no-appointments big">
+<div *ngIf="appointments?.length == 0 && !isLoadingNext() && !isLoadingPrevious()" class="no-appointments big">
     {{"pages.appointments.NO_APPOINTMENTS" | translate}}
 </div>
 
