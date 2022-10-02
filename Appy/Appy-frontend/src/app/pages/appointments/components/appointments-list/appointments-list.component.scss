@@ -53,6 +53,10 @@
     .time {
         font-size: 0.9rem;
     }
+
+    &.last {
+        margin-bottom: 40px;
+    }
 }
 
 .no-appointments {
@@ -63,6 +67,6 @@
     padding: 30px 30px;
 
     &.big {
-        height: calc(100vh - var(--navigation-bar-bottom-offset) - 64px - 90px - 75px);
+        height: calc(100vh - var(--navigation-bar-bottom-offset) - 64px - 90px - 95px);
     }
 }

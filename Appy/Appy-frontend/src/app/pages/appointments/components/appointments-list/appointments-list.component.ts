@@ -78,11 +78,6 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
     })
   }
 
-  @HostListener('window:scroll', ['$event']) // for window scroll events
-  onScroll() {
-    this.checkShouldLoad();
-  }
-
   private checkShouldLoad() {
     const scrollOffset = 100;
 
@@ -92,17 +87,23 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
     if (window.scrollY <= scrollOffset)
       this.datasource?.loadPreviousPage();
   }
+  
+  @HostListener('window:scroll', ['$event']) // for window scroll events
+  onScroll() {
+    this.checkShouldLoad();
+    this.updateDate();
+  }
 
   private keepScroll() {
-    let firstVisibleApp = this.getFirstVisibleAppointment();
+    let firstVisibleApp = this.getFirstVisibleAppointmentElement();
     if (firstVisibleApp != null) {
       this.keptScrollPosition = firstVisibleApp.getBoundingClientRect().top;
-      let id = this.getAppointmentId(firstVisibleApp) as number;
-      this.keptScrollElement = () => this.getAppointmentWithId(id);
+      let id = this.getAppointmentElementId(firstVisibleApp) as number;
+      this.keptScrollElement = () => this.getAppointmentElementWithId(id);
       return;
     }
 
-    let firstVisibleDate = this.getFirstVisibleDate();
+    let firstVisibleDate = this.getFirstVisibleDateElement();
     if (firstVisibleDate != null) {
       this.keptScrollPosition = firstVisibleDate.getBoundingClientRect().top;
       let date = this.getDateElementDate(firstVisibleDate) as string;
@@ -130,6 +131,14 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
     this.keptScrollElement = this.keptScrollPosition = null;
   }
 
+  private updateDate() {
+    let date = this.getCurrentDate();
+    if (date != null) {
+      this._date = date;
+      this.dateChange.next(date);
+    }
+  }
+
   private renderAppointments() {
     this.keepScroll();
 
@@ -151,7 +160,9 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
 
     var sortedAppointments = this.appointments.sort(appointmentSort)
 
-    for (let ap of sortedAppointments) {
+    for (let i = 0; i < sortedAppointments.length; i++){
+      let ap = sortedAppointments[i];
+
       if (!ap.date?.isSame(currentDate)) {
         if (currentDate?.isBefore(this.startDate, "date") && ap.date?.isAfter(this.startDate, "date"))
           this.renderedItems.push(startDateItem);
@@ -174,23 +185,14 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
         serviceColor: this.serviceColorsService.get(ap.service?.colorId),
         client: ap.client?.nickname as string,
         dateISO: ap.date?.format("YYYY-MM-DD") ?? "",
-      })
+        isLast: i == sortedAppointments.length - 1
+      });
     }
 
-    let startDateAddIndex: number | null = null;
-    if (sortedAppointments.length == 0)
-      startDateAddIndex = 0;
-    else if (sortedAppointments[0].date?.isAfter(this.startDate, "date"))
-      startDateAddIndex = 0;
+    if (sortedAppointments.length == 0 || sortedAppointments[0].date?.isAfter(this.startDate, "date"))
+      this.renderedItems.splice(0, 0, startDateItem);
     else if (sortedAppointments[sortedAppointments.length - 1].date?.isBefore(this.startDate, "date"))
-      startDateAddIndex = this.renderedItems.length;
-
-    if (startDateAddIndex != null)
-      this.renderedItems.splice(startDateAddIndex, 0, startDateItem);
-
-    // remove first element which is date, because it's duplicate because of sticky current date element
-    if (startDateAddIndex != 0)
-      this.renderedItems.splice(0, 1);
+      this.renderedItems.splice(this.renderedItems.length, 0, startDateItem);
 
     this.changeDetector.detectChanges();
     this.restoreScroll();
@@ -204,7 +206,8 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
     return this.datasource?.isReachedEndBackwards() == true;
   }
 
-  getFirstVisibleAppointment(): HTMLElement | undefined {
+  //#region AppointmentElements
+  getFirstVisibleAppointmentElement(): HTMLElement | undefined {
     if (this.appointmentElements == null || this.appointmentElements.length == 0)
       return undefined;
 
@@ -220,7 +223,33 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
     return undefined;
   }
 
-  getFirstVisibleDate(): HTMLElement | undefined {
+  getAppointmentElementWithId(id: number): HTMLElement | undefined {
+    if (this.appointmentElements == null || this.appointmentElements.length == 0)
+      return undefined;
+
+    for (let i = 0; i < this.appointmentElements.length; i++) {
+      let element = this.appointmentElements.get(i)?.nativeElement;
+      if (element == null)
+        continue;
+
+      if (this.getAppointmentElementId(element) == id)
+        return element;
+    }
+
+    return undefined;
+  }
+
+  getAppointmentElementId(element: HTMLElement): number | undefined {
+    let elId = element.getAttribute("data-appId");
+    if (elId != null)
+      return parseInt(elId, 10);
+    else
+      return undefined;
+  }
+  //#endregion
+
+  //#region DateElements
+  getFirstVisibleDateElement(): HTMLElement | undefined {
     if (this.dateElements == null || this.dateElements.length == 0)
       return undefined;
 
@@ -229,7 +258,7 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
       if (element == null)
         continue;
 
-      if (element.getBoundingClientRect().bottom > 0)
+      if (element.getBoundingClientRect().bottom - 50 > 0)
         return element;
     }
 
@@ -259,37 +288,24 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
     else
       return undefined;
   }
-
-  getAppointmentWithId(id: number): HTMLElement | undefined {
-    if (this.appointmentElements == null || this.appointmentElements.length == 0)
-      return undefined;
-
-    for (let i = 0; i < this.appointmentElements.length; i++) {
-      let element = this.appointmentElements.get(i)?.nativeElement;
-      if (element == null)
-        continue;
-
-      if (this.getAppointmentId(element) == id)
-        return element;
-    }
-
-    return undefined;
-  }
-
-  getAppointmentId(element: HTMLElement): number | undefined {
-    let elId = element.getAttribute("data-appId");
-    if (elId != null)
-      return parseInt(elId, 10);
-    else
-      return undefined;
-  }
+  //#endregion
 
   getCurrentDate(): Dayjs | undefined {
-    let firstVisibleAppointment = this.getFirstVisibleAppointment();
-    if (firstVisibleAppointment == null)
+    let firstVisibleAppointment = this.getFirstVisibleAppointmentElement();
+    let firstVisibleDate = this.getFirstVisibleDateElement();
+    if (firstVisibleAppointment == null && firstVisibleDate == null)
       return undefined;
 
-    return dayjs(firstVisibleAppointment.getAttribute("data-date"));
+    let date: string = "";
+
+    if (firstVisibleAppointment == null)
+      date = firstVisibleDate?.getAttribute("data-date") as string;
+    else if (firstVisibleDate == null || firstVisibleAppointment.offsetTop < firstVisibleDate.offsetTop)
+      date = firstVisibleAppointment.getAttribute("data-date") as string;
+    else
+      date = firstVisibleDate?.getAttribute("data-date") as string;
+
+    return dayjs(date);
   }
 
   onAppointmentClick(apId: number) {
@@ -328,6 +344,7 @@ export type RenderedAppointment = {
   serviceColor: string;
   client: string;
   dateISO: string;
+  isLast: boolean;
 }
 
 type RenderedDate = {

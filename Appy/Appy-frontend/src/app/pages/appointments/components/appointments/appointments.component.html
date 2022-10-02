@@ -3,7 +3,7 @@
         (onCalendarClick)="onCalendarClick($event)">
     </app-appointments-scroller>
 
-    <app-appointments-list *ngIf="type == 'list'" [date]="date">
+    <app-appointments-list *ngIf="type == 'list'" [(date)]="date">
     </app-appointments-list>
 </div>
 
