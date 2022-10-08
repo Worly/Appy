@@ -1,3 +1,4 @@
+import { CommonModule } from "@angular/common";
 import { NgModule } from "@angular/core";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { TranslateModule } from "../translate/translate.module";
@@ -8,6 +9,8 @@ import { LoadingComponent } from "./loading.component";
         LoadingComponent
     ],
     imports: [
+        CommonModule,
+
         FontAwesomeModule,
         TranslateModule
     ],

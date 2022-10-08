@@ -8,7 +8,7 @@
         {{"pages.appointments.NO_APPOINTMENTS_BEFORE" | translate}}
     </div>
     <div class="loading-more" *ngIf="appointments != null && isLoadingPrevious()">
-        <app-loading></app-loading>
+        <app-loading [hasShadow]="false"></app-loading>
     </div>
 
     <div *ngFor="let i of renderedItems; let index = index" class="item">
@@ -31,7 +31,7 @@
         {{"pages.appointments.NO_APPOINTMENTS_AFTER" | translate}}
     </div>
     <div class="loading-more" *ngIf="appointments != null && isLoadingNext()">
-        <app-loading></app-loading>
+        <app-loading [hasShadow]="false"></app-loading>
     </div>
 </div>
 
