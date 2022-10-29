@@ -1,7 +1,7 @@
 <app-loading *ngIf="appointments == null" [style.height.vh]="100"></app-loading>
 
 <div class="current-date">
-    {{getCurrentDate()?.format("DD.MM.YYYY")}}
+    {{getCurrentDate()?.format("DD.MM.YYYY - dddd")}}
 </div>
 <div>
     <div *ngIf="isReachedTop() && appointments?.length != 0" class="no-appointments">
