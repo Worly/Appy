@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using Appy.Domain;
 using Appy.DTOs;
 using Appy.Exceptions;
+using System.Text;
 
 namespace Appy.Services
 {
@@ -12,6 +13,7 @@ namespace Appy.Services
     {
         Task<LogInResponseDTO> Authenticate(LogInDTO model);
         Task<LogInResponseDTO> Register(RegisterDTO model);
+        Task<LogInResponseDTO> RefreshTokens(string refreshToken);
         Task<User> GetById(int id);
     }
 
@@ -37,10 +39,17 @@ namespace Appy.Services
             if (passwordHash != user.PasswordHash)
                 throw new BadRequestException();
 
-            // authentication successful so generate jwt token
-            var token = GenerateJwtToken(user);
+            var accessToken = GenerateAccessJwtToken(user);
+            var refreshToken = GenerateRefreshJwtToken(user.Id, GenerateFamily());
 
-            return new LogInResponseDTO() { Token = token };
+            user.RefreshToken = refreshToken;
+            await context.SaveChangesAsync();
+
+            return new LogInResponseDTO()
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken
+            };
         }
 
         public async Task<LogInResponseDTO> Register(RegisterDTO model)
@@ -64,9 +73,78 @@ namespace Appy.Services
             context.Users.Add(user);
             await context.SaveChangesAsync();
 
-            var token = GenerateJwtToken(user);
+            var accessToken = GenerateAccessJwtToken(user);
+            var refreshToken = GenerateRefreshJwtToken(user.Id, GenerateFamily());
 
-            return new LogInResponseDTO() { Token = token };
+            user.RefreshToken = refreshToken;
+            await context.SaveChangesAsync();
+
+            return new LogInResponseDTO()
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken
+            };
+        }
+
+        // Refresh token rotation -> every time refresh token is used, generate a new one
+        // Reuse protection -> using old but valid refresh token invalidates whole family
+        public async Task<LogInResponseDTO> RefreshTokens(string refreshToken)
+        {
+            // get userId claim
+            var (valid, token) = await jwtService.ValidateToken(refreshToken, validateLifetime: false);
+            if (!valid || token == null)
+                throw new BadRequestException();
+
+            if (!int.TryParse(token.Claims.FirstOrDefault(c => c.Type == "id")?.Value, out int userId))
+                throw new BadRequestException();
+
+            var user = await context.Users.FirstOrDefaultAsync(x => x.Id == userId);
+            if (user == null)
+                throw new BadRequestException();
+
+            string? currentFamily = user.RefreshToken == null ? null : jwtService.ParseToken(user.RefreshToken)?.Claims.FirstOrDefault(c => c.Type == "family")?.Value;
+
+            // check families
+            {
+                string? receivedFamily = token.Claims.FirstOrDefault(c => c.Type == "family")?.Value;
+                if (receivedFamily == null)
+                    throw new BadRequestException();
+
+                if (user.RefreshToken != refreshToken)
+                {
+                    // if we received a valid token with the same family someone stole the refresh token!
+                    if (currentFamily == receivedFamily)
+                    {
+                        user.RefreshToken = null;
+                        await context.SaveChangesAsync();
+                    }
+
+                    throw new BadRequestException();
+                }
+            }
+
+            // check lifetime
+            {
+                var (validLifetime, tokenLifetime) = await jwtService.ValidateToken(refreshToken, validateLifetime: true);
+                if (!validLifetime || tokenLifetime == null)
+                    throw new BadRequestException();
+            }
+
+            // generate new
+            if (currentFamily == null)
+                currentFamily = GenerateFamily();
+
+            var newRefreshToken = GenerateRefreshJwtToken(userId, currentFamily);
+            var newAccesToken = GenerateAccessJwtToken(user);
+
+            user.RefreshToken = newRefreshToken;
+            await context.SaveChangesAsync();
+
+            return new LogInResponseDTO()
+            {
+                RefreshToken = newRefreshToken,
+                AccessToken = newAccesToken
+            };
         }
 
         public async Task<User> GetById(int id)
@@ -99,14 +177,30 @@ namespace Appy.Services
             return hashed;
         }
 
-        private string GenerateJwtToken(User user)
+        private string GenerateFamily()
+        {
+            return Encoding.ASCII.GetString(RandomNumberGenerator.GetBytes(64));
+        }
+
+        private string GenerateAccessJwtToken(User user)
         {
             return jwtService.GenerateToken(
+                //new TimeSpan(hours: 3, minutes: 0, seconds: 0),
+                new TimeSpan(hours: 0, minutes: 0, seconds: 10),
                 new Claim("id", user.Id.ToString()),
                 new Claim("name", user.Name),
                 new Claim("surname", user.Surname),
                 new Claim("email", user.Email),
                 new Claim("roles", Newtonsoft.Json.JsonConvert.SerializeObject(user.GetRoles().Select(o => o.ToString())))
+            );
+        }
+
+        private string GenerateRefreshJwtToken(int userId, string family)
+        {
+            return jwtService.GenerateToken(
+                new TimeSpan(days: 7, hours: 0, minutes: 0, seconds: 0),
+                new Claim("id", userId.ToString()),
+                new Claim("family", family)
             );
         }
     }

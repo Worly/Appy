@@ -8,22 +8,27 @@ import { FacilityService } from "src/app/pages/facilities/services/facility.serv
 
 @Injectable({ providedIn: "root" })
 export class AuthService {
-    private readonly TOKEN_KEY = "JWT_TOKEN";
+    private readonly ACCESS_TOKEN_KEY = "ACCESS_TOKEN";
+    private readonly REFRESH_TOKEN_KEY = "REFRESH_TOKEN";
 
-    private token: string | null = null;
+    private accessToken: string | null = null;
+    private refreshToken: string | null = null;
 
     constructor(private router: Router, private httpClient: HttpClient, private facilityService: FacilityService) {
     }
 
     public loadFromLocalStorage(): Observable<void> {
         return new Observable<void>(s => {
-            var obs = this.setToken(localStorage.getItem(this.TOKEN_KEY) as string);
+            var accessToken = localStorage.getItem(this.ACCESS_TOKEN_KEY) as string;
+            var refreshToken = localStorage.getItem(this.REFRESH_TOKEN_KEY) as string;
+
+            var obs = this.setTokens(accessToken, refreshToken);
             if (!obs)
                 s.next();
 
             obs?.subscribe({
                 next: () => s.next(),
-                error: e => s.error(e)
+                error: (e: any) => s.error(e)
             });
         });
     }
@@ -35,7 +40,7 @@ export class AuthService {
                 password: password,
             }).subscribe({
                 next: (o: any) => {
-                    this.setToken(o.token)?.subscribe({
+                    this.setTokens(o.accessToken, o.refreshToken)?.subscribe({
                         next: () => s.next(),
                         error: (o: any) => {
                             this.logOut();
@@ -57,7 +62,7 @@ export class AuthService {
                 password: password
             }).subscribe({
                 next: (o: any) => {
-                    this.setToken(o.token)?.subscribe({
+                    this.setTokens(o.accessToken, o.refreshToken)?.subscribe({
                         next: () => s.next(),
                         error: (o: any) => {
                             this.logOut();
@@ -70,29 +75,53 @@ export class AuthService {
         });
     }
 
-    private setToken(token: string): Observable<void> | null {
-        if (token == null) {
+    public refreshTokens(): Observable<string> {
+        return new Observable<string>(s => {
+            this.httpClient.post<any>(appConfig.apiUrl + "user/refresh", {
+                refreshToken: this.refreshToken
+            }).subscribe({
+                next: (o: any) => {
+                    this.setTokens(o.accessToken, o.refreshToken, false);
+                    s.next(o.accessToken);
+                },
+                error: (o: any) => s.error(o)
+            });
+        });
+    }
+
+    private setTokens(accessToken: string, refreshToken: string, loadFacilities: boolean = true): Observable<void> | null {
+        if (accessToken == null) {
             this.logOut();
             return null;
         }
 
-        this.token = token;
-        localStorage.setItem(this.TOKEN_KEY, token);
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+        localStorage.setItem(this.ACCESS_TOKEN_KEY, accessToken);
+        localStorage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
 
-        return <any>this.facilityService.loadMy();
+        if (loadFacilities)
+            return <any>this.facilityService.loadMy();
+        return null;
     }
 
-    public getToken(): string | null {
-        return this.token;
+    public getAccessToken(): string | null {
+        return this.accessToken;
+    }
+
+    public getRefreshToken(): string | null {
+        return this.refreshToken;
     }
 
     public isLoggedIn(): boolean {
-        return this.token != null;
+        return this.accessToken != null;
     }
 
     public logOut(): void {
-        this.token = null;
-        localStorage.removeItem(this.TOKEN_KEY);
+        this.accessToken = null;
+        this.refreshToken = null;
+        localStorage.removeItem(this.ACCESS_TOKEN_KEY);
+        localStorage.removeItem(this.REFRESH_TOKEN_KEY);
         this.facilityService.clear();
         this.router.navigate(["login"]);
     }
@@ -101,7 +130,7 @@ export class AuthService {
         if (!this.isLoggedIn())
             return null;
 
-        var decoded = <any>jwt_decode(this.token as string);
+        var decoded = <any>jwt_decode(this.accessToken as string);
         return { name: decoded.name, surname: decoded.surname };
     }
 }

@@ -12,8 +12,6 @@ import { setUrlParams } from 'src/app/utils/dynamic-url-params';
 })
 export class AppointmentsComponent implements OnInit, OnDestroy {
 
-  private subs: Subscription[] = [];
-
   private _date: Dayjs = dayjs();
   public set date(value: Dayjs) {
     if (this._date.isSame(value, "date"))
@@ -27,6 +25,23 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
     return this._date;
   }
 
+  private _type: AppointmentsDisplayType = "scroller";
+  public set type(value: AppointmentsDisplayType) {
+    if (this._type == value)
+      return;
+
+    this._type = value;
+
+    this.updateLocalStorage();
+  }
+  public get type(): AppointmentsDisplayType {
+    return this._type;
+  }
+
+  private readonly TYPE_KEY = "APPOINTMENTS_TYPE";
+
+  private subs: Subscription[] = [];
+
   constructor(
     private router: Router,
     private location: Location,
@@ -39,6 +54,12 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
       if (dateStr != null)
         this.date = dayjs(dateStr, "YYYY-MM-DD");
     }));
+
+    let type = localStorage.getItem(this.TYPE_KEY);
+    if (type == "scroller" || type == "list")
+      this.type = type;
+    else
+      this.type = "scroller";
   }
 
   ngOnDestroy(): void {
@@ -47,8 +68,13 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
 
   private updateUrl() {
     setUrlParams(this.router, this.activatedRoute, this.location, {
-      date: this.date.format("YYYY-MM-DD")
+      date: this.date.format("YYYY-MM-DD"),
+      type: this.type
     });
+  }
+
+  private updateLocalStorage() {
+    localStorage.setItem(this.TYPE_KEY, this.type);
   }
 
   goToNew(date?: Dayjs, clickedTime?: Dayjs) {
@@ -68,3 +94,5 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
     this.goToNew(time, time);
   }
 }
+
+export type AppointmentsDisplayType = "scroller" | "list";

@@ -43,6 +43,8 @@ import { faHandHoldingHeart } from '@fortawesome/free-solid-svg-icons/faHandHold
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faCalendarWeek } from '@fortawesome/free-solid-svg-icons/faCalendarWeek';
 import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons/faRightFromBracket';
+import { faCalendarDays } from "@fortawesome/free-regular-svg-icons/faCalendarDays";
+import { faTableList } from "@fortawesome/free-solid-svg-icons/faTableList";
 
 import dayjs from "dayjs";
 import "dayjs/locale/hr";
@@ -125,7 +127,8 @@ export class AppModule {
       faBusinessTime,
       faBoxArchive,
       faCircleCheck, farCircleCheck,
-      faHouse, faHandHoldingHeart, faUsers, faCalendarWeek, faRightFromBracket
+      faHouse, faHandHoldingHeart, faUsers, faCalendarWeek, faRightFromBracket,
+      faCalendarDays, faTableList
     );
   }
 

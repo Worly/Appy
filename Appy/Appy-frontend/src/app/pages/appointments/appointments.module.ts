@@ -12,10 +12,11 @@ import { AppointmentsRoutingModule } from "./appointments-routing.module";
 import { AppointmentEditComponent } from "./components/appointment-edit/appointment-edit.component";
 import { DateTimeChooserComponent } from "./components/appointment-edit/date-time-chooser/date-time-chooser.component";
 import { TimeButtonComponent } from "./components/appointment-edit/date-time-chooser/time-button/time-button.component";
+import { AppointmentsListComponent } from "./components/appointments-list/appointments-list.component";
 import { AppointmentsScrollerComponent } from "./components/appointments-scroller/appointments-scroller.component";
 import { AppointmentsComponent } from "./components/appointments/appointments.component";
-import { SingleAppointmentComponent } from "./components/single-day-appointments/single-appointment/single-appointment.component";
-import { SingleDayAppointmentsComponent } from "./components/single-day-appointments/single-day-appointments.component";
+import { SingleAppointmentComponent } from "./components/single-appointment/single-appointment.component";
+import { SingleDayAppointmentsComponent } from "./components/appointments-scroller/single-day-appointments/single-day-appointments.component";
 
 @NgModule({
     declarations: [
@@ -25,7 +26,8 @@ import { SingleDayAppointmentsComponent } from "./components/single-day-appointm
         TimeButtonComponent,
         AppointmentsScrollerComponent,
         SingleDayAppointmentsComponent,
-        SingleAppointmentComponent
+        SingleAppointmentComponent,
+        AppointmentsListComponent
     ],
     imports: [
         AppointmentsRoutingModule,

@@ -2,6 +2,7 @@
 using Appy.DTOs;
 using Appy.Services;
 using Appy.Exceptions;
+using Appy.Auth;
 
 namespace Appy.Controllers
 {
@@ -34,6 +35,14 @@ namespace Appy.Controllers
         public async Task<ActionResult> Register(RegisterDTO dto)
         {
             var response = await userService.Register(dto);
+
+            return Ok(response);
+        }
+
+        [HttpPost("refresh")]
+        public async Task<ActionResult> RefreshTokens([FromBody] RefreshTokensDTO dto)
+        {
+            var response = await userService.RefreshTokens(dto.RefreshToken);
 
             return Ok(response);
         }

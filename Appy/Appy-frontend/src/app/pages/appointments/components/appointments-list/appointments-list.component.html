@@ -1,0 +1,45 @@
+<app-loading *ngIf="appointments == null" [style.height.vh]="100"></app-loading>
+
+<div class="current-date">
+    {{getCurrentDate()?.format("DD.MM.YYYY")}}
+</div>
+<div>
+    <div *ngIf="isReachedTop() && appointments?.length != 0" class="no-appointments">
+        {{"pages.appointments.NO_APPOINTMENTS_BEFORE" | translate}}
+    </div>
+    <div class="loading-more" *ngIf="appointments != null && isLoadingPrevious()">
+        <app-loading [hasShadow]="false"></app-loading>
+    </div>
+
+    <div *ngFor="let i of renderedItems; let index = index" class="item">
+        <div #dateElement *ngIf="i.type == 'date'" class="date" [attr.data-date]="i.dateISO" [ngClass]="{'empty-date': i.isEmptyDate}">
+            {{i.dateFormatted}} {{i.isEmptyDate ? " - " + ("pages.appointments.NO_APPOINTMENTS" | translate) : ""}}
+        </div>
+
+        <div #appointmentElement *ngIf="i.type == 'appointment'" class="appointment" [attr.data-date]="i.dateISO" [ngClass]="{'last': i.isLast}"
+            [attr.data-appId]="i.id" (click)="onAppointmentClick(i.id)">
+            <div class="color" [style.backgroundColor]="i.serviceColor"></div>
+            <div class="info-container">
+                <div class="time">{{i.time}}</div>
+                <div class="service">{{i.service}}</div>
+                <div class="client">{{i.client}}</div>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="isReachedBottom() && appointments?.length != 0" class="no-appointments big">
+        {{"pages.appointments.NO_APPOINTMENTS_AFTER" | translate}}
+    </div>
+    <div class="loading-more" *ngIf="appointments != null && isLoadingNext()">
+        <app-loading [hasShadow]="false"></app-loading>
+    </div>
+</div>
+
+<div *ngIf="appointments?.length == 0 && !isLoadingNext() && !isLoadingPrevious()" class="no-appointments big">
+    {{"pages.appointments.NO_APPOINTMENTS" | translate}}
+</div>
+
+<app-dialog #appointmentDialog>
+    <app-single-appointment *ngIf="appointmentDialog.isOpen" [id]="viewAppointmentId"
+        (onDone)="closeAppointmentDialog()"></app-single-appointment>
+</app-dialog>

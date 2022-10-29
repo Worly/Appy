@@ -7,8 +7,9 @@ namespace Appy.Services
 {
     public interface IJwtService
     {
-        Task<(bool valid, JwtSecurityToken? token)> ValidateToken(string token);
-        string GenerateToken(params Claim[] claims);
+        Task<(bool valid, JwtSecurityToken? token)> ValidateToken(string token, bool validateLifetime = true);
+        JwtSecurityToken? ParseToken(string token);
+        string GenerateToken(TimeSpan lifespan, params Claim[] claims);
     }
 
     public class JwtService : IJwtService
@@ -20,7 +21,7 @@ namespace Appy.Services
             this.jwtSecret = configuration.GetValue<string>("JWT:Secret");
         }
 
-        public async Task<(bool valid, JwtSecurityToken? token)> ValidateToken(string token)
+        public async Task<(bool valid, JwtSecurityToken? token)> ValidateToken(string token, bool validateLifetime = true)
         {
             try
             {
@@ -31,7 +32,9 @@ namespace Appy.Services
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = false,
-                    ValidateAudience = false
+                    ValidateAudience = false,
+                    ValidateLifetime = validateLifetime,
+                    ClockSkew = TimeSpan.Zero,
                 });
 
                 if (!result.IsValid)
@@ -45,7 +48,20 @@ namespace Appy.Services
             }
         }
 
-        public string GenerateToken(params Claim[] claims)
+        public JwtSecurityToken? ParseToken(string token)
+        {
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                return tokenHandler.ReadJwtToken(token);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        public string GenerateToken(TimeSpan lifespan, params Claim[] claims)
         {
             // generate token that is valid for 7 days
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -53,7 +69,7 @@ namespace Appy.Services
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddDays(7),
+                Expires = DateTime.UtcNow.Add(lifespan),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);

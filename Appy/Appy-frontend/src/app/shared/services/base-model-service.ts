@@ -1,16 +1,17 @@
 import { HttpClient, HttpContext, HttpErrorResponse } from "@angular/common/http";
 import { Injector } from "@angular/core";
-import { catchError, map, Observable, Subscriber, throwError } from "rxjs";
+import { catchError, map, Observable, Observer, Subscriber, Subscription, throwError } from "rxjs";
 import { appConfig } from "../../app.config";
 import { BaseModel } from "../../models/base-model";
-import { isEqual } from "lodash-es";
+import { isEqual, reduceRight } from "lodash-es";
 import { IGNORE_NOT_FOUND } from "./errors/error-interceptor.service";
+import { getInsertIndex, isSorted } from "src/app/utils/array-utils";
 
 export class BaseModelService<T extends BaseModel> implements IEntityTracker<T> {
 
     protected httpClient: HttpClient;
 
-    private datasources: Datasource<T>[] = [];
+    private datasources: IDatasource<T>[] = [];
 
     constructor(
         protected injector: Injector,
@@ -20,7 +21,7 @@ export class BaseModelService<T extends BaseModel> implements IEntityTracker<T> 
         this.httpClient = this.injector.get(HttpClient);
     }
 
-    private createDatasourceInternal(sub: Subscriber<T[]>, datasourceFilterPredicate?: (entity: T) => boolean): Datasource<T> {
+    private createListDatasourceInternal(sub: Subscriber<T[]>, datasourceFilterPredicate?: (entity: T) => boolean): Datasource<T> {
         let dc = new ListDatasource<T>([], sub, datasourceFilterPredicate);
         this.datasources.push(dc);
 
@@ -34,9 +35,20 @@ export class BaseModelService<T extends BaseModel> implements IEntityTracker<T> 
         return dc;
     }
 
+    private createPageableDatasourceInternal(
+        loadFunction: (dir: "forwards" | "backwards", skip: number, take: number) => Observable<T[]>,
+        sortPredicate: (a: T, b: T) => number,
+        filterPredicate?: (e: T) => boolean): PageableListDatasource<T> {
+
+        let dc = new PageableListDatasource<T>(loadFunction, sortPredicate, filterPredicate);
+        this.datasources.push(dc);
+
+        return dc;
+    }
+
     public createDatasource(initialData: T[], datasourceFilterPredicate?: (entity: T) => boolean): Observable<T[]> {
         return new Observable<T[]>(s => {
-            let ds = this.createDatasourceInternal(s, datasourceFilterPredicate);
+            let ds = this.createListDatasourceInternal(s, datasourceFilterPredicate);
             ds.add(initialData);
         });
     }
@@ -47,7 +59,7 @@ export class BaseModelService<T extends BaseModel> implements IEntityTracker<T> 
 
     public getAllAdvanced(params: any, datasourceFilterPredicate?: (entity: T) => boolean): Observable<T[]> {
         return new Observable<T[]>(s => {
-            let datasource = this.createDatasourceInternal(s, datasourceFilterPredicate);
+            let datasource = this.createListDatasourceInternal(s, datasourceFilterPredicate);
 
             this.httpClient.get<any[]>(`${appConfig.apiUrl}${this.controllerName}/getAll`, {
                 params: params
@@ -56,6 +68,26 @@ export class BaseModelService<T extends BaseModel> implements IEntityTracker<T> 
                 error: (e: any) => s.error(e)
             });
         });
+    }
+
+    public getListAdvanced(params: any, sortPredicate: (a: T, b: T) => number, filterPredicate?: (e: T) => boolean): PageableListDatasource<T> {
+        let loadFunction = (dir: "forwards" | "backwards", skip: number, take: number): Observable<T[]> => {
+            let p = {
+                ...params,
+                direction: dir,
+                skip: skip,
+                take: take
+            };
+
+            return this.httpClient.get<T[]>(`${appConfig.apiUrl}${this.controllerName}/getList`, {
+                params: p
+            }).pipe(map(r => r.map(o => new this.typeFactory(o))));
+        };
+
+        let datasource = this.createPageableDatasourceInternal(loadFunction, sortPredicate, filterPredicate);
+        datasource.load();
+
+        return datasource;
     }
 
     public save(entity: T, params?: any): Observable<T> {
@@ -125,7 +157,7 @@ export class BaseModelService<T extends BaseModel> implements IEntityTracker<T> 
         });
     }
 
-    private getDatasourceContexts(): Datasource<T>[] {
+    private getDatasourceContexts(): IDatasource<T>[] {
         let contexts = this.datasources.filter(c => !c.isUnsubscribed());
 
         this.datasources = contexts;
@@ -154,7 +186,15 @@ export interface IEntityTracker<T extends BaseModel> {
     notifyUpdated(entity: T): void;
 }
 
-abstract class Datasource<T extends BaseModel> {
+export interface IDatasource<T extends BaseModel> {
+    add(entities: T[]): void;
+    update(entity: T): void;
+    delete(id: any): void;
+
+    isUnsubscribed(): boolean;
+}
+
+abstract class Datasource<T extends BaseModel> implements IDatasource<T> {
     data: T[];
     filterPredicate?: (entity: T) => boolean;
     isLoaded: boolean = false;
@@ -203,22 +243,7 @@ abstract class Datasource<T extends BaseModel> {
             return;
         }
 
-        let newSymbols = Object.getOwnPropertySymbols(entity);
-        let oldSymbols = Object.getOwnPropertySymbols(oldEntity);
-
-        for (let newSymbol of newSymbols) {
-            for (let oldSymbol of oldSymbols) {
-                if (newSymbol.description == null)
-                    continue;
-
-                if (newSymbol.description.startsWith("#S"))
-                    continue;
-
-                if (newSymbol.description == oldSymbol.description) {
-                    (oldEntity as any)[oldSymbol] = (entity as any)[newSymbol];
-                }
-            }
-        }
+        updateEntity(oldEntity, entity);
 
         if (this.filterPredicate && !this.filterPredicate(oldEntity))
             this.data.splice(this.data.indexOf(oldEntity), 1);
@@ -288,5 +313,217 @@ class SingleDatasource<T extends BaseModel> extends Datasource<T> {
 
     isUnsubscribed(): boolean {
         return this.subscriber.closed;
+    }
+}
+
+export class PageableListDatasource<T extends BaseModel> implements IDatasource<T> {
+    private itemsPerPage = 20;
+
+    private data: T[] = [];
+
+    private reachedEndBackwards = false;
+    private reachedEndForwards = false;
+
+    private forwardsSkip = 0;
+    private backwardsSkip = 0;
+
+    private nextPageSub: Subscription | null = null;
+    private previousPageSub: Subscription | null = null;
+
+    private isFirstLoading: boolean = false;
+
+    private subscribers: Subscriber<T[]>[] = [];
+
+    constructor(
+        private loadFunction: (dir: "forwards" | "backwards", skip: number, take: number) => Observable<T[]>,
+        private sortPredicate: (a: T, b: T) => number,
+        private filterPredicate?: (e: T) => boolean) {
+
+    }
+
+    add(entities: T[], forceNotifySubscribers: boolean = false): void {
+        if (!isSorted(entities, this.sortPredicate))
+            throw new Error("Received entities are not correctly sorted. Check if backend sort matches frontends sort!");
+
+        let changed = false;
+
+        for (let newEntity of entities) {
+            let oldEntity = this.data.find(o => isEqual(o.getId(), newEntity.getId()));
+            if (oldEntity == null)
+                changed = this.tryAddSingle(newEntity) || changed;
+            else
+                changed = this.tryUpdate(newEntity) || changed;
+        }
+
+        if (forceNotifySubscribers || changed)
+            this.notifySubscribers();
+    }
+
+    private tryAddSingle(entity: T): boolean {
+        if (this.filterPredicate && !this.filterPredicate(entity))
+            return false;
+
+        let addIndex = getInsertIndex(this.data, entity, this.sortPredicate);
+
+        this.data.splice(addIndex, 0, entity);
+
+        return true;
+    }
+
+    update(entity: T): void {
+        if (this.tryUpdate(entity))
+            this.notifySubscribers();
+    }
+
+    private tryUpdate(entity: T): boolean {
+        let oldEntity = this.data.find(o => isEqual(o.getId(), entity.getId()));
+
+        if (oldEntity == null)
+            return this.tryAddSingle(entity);
+
+        this.data.splice(this.data.indexOf(oldEntity), 1);
+
+        updateEntity(oldEntity, entity);
+
+        return this.tryAddSingle(entity);
+    }
+
+    delete(id: any): void {
+        let index = this.data.findIndex(o => isEqual(o.getId(), id));
+
+        if (index == -1)
+            return;
+
+        this.data.splice(index, 1);
+
+        this.notifySubscribers();
+    }
+
+    notifySubscribers() {
+        for (let s of this.subscribers) {
+            if (!s.closed)
+                s.next([...this.data]);
+        }
+    }
+
+    notifyErrorSubscribers(error: any) {
+        for (let s of this.subscribers) {
+            if (!s.closed)
+                s.error(error);
+        }
+    }
+
+    load(): void {
+        this.data = [];
+        this.loadNextPage(true);
+        this.isFirstLoading = true;
+    }
+
+    loadNextPage(forceNotifySubscribers: boolean = false): void {
+        if (this.isFirstLoading)
+            return;
+
+        if (this.reachedEndForwards)
+            return;
+
+        if (this.nextPageSub != null)
+            return;
+
+        this.nextPageSub = this.loadFunction("forwards", this.forwardsSkip, this.itemsPerPage).subscribe({
+            next: items => {
+                this.isFirstLoading = false;
+
+                this.forwardsSkip += items.length;
+                if (items.length < this.itemsPerPage)
+                    this.reachedEndForwards = true;
+
+                this.nextPageSub = null;
+
+                this.add(items, forceNotifySubscribers);
+            },
+            error: e => this.notifyErrorSubscribers(e)
+        });
+
+    }
+
+    loadPreviousPage(): void {
+        if (this.isFirstLoading)
+            return;
+
+        if (this.reachedEndBackwards)
+            return;
+
+        if (this.previousPageSub != null)
+            return;
+
+        this.previousPageSub = this.loadFunction("backwards", this.backwardsSkip, this.itemsPerPage).subscribe({
+            next: items => {
+                this.backwardsSkip += items.length;
+                if (items.length < this.itemsPerPage)
+                    this.reachedEndBackwards = true;
+
+                this.previousPageSub = null;
+
+                this.add(items.reverse());
+            },
+            error: e => this.notifyErrorSubscribers(e)
+        });
+    }
+
+    isUnsubscribed(): boolean {
+        return this.subscribers.length == 0 || this.subscribers.every(s => s.closed);
+    }
+
+    subscribe(observer: Partial<Observer<T[]>>): Subscription {
+        return new Observable<T[]>(s => {
+            this.subscribers.push(s);
+            
+            if (!this.isFirstLoading)
+                s.next([...this.data]);
+        }).subscribe(observer);
+    }
+
+    dispose() {
+        this.nextPageSub?.unsubscribe();
+        this.previousPageSub?.unsubscribe();
+
+        for (let s of this.subscribers) {
+            s.unsubscribe();
+        }
+    }
+
+    isLoadingNext() {
+        return this.nextPageSub != null;
+    }
+
+    isLoadingPrevious() {
+        return this.previousPageSub != null;
+    }
+
+    isReachedEndBackwards(): boolean {
+        return this.reachedEndBackwards;
+    }
+
+    isReachedEndForwards(): boolean {
+        return this.reachedEndForwards;
+    }
+}
+
+function updateEntity<T extends BaseModel>(oldEntity: T, newEntity: T) {
+    let newSymbols = Object.getOwnPropertySymbols(newEntity);
+    let oldSymbols = Object.getOwnPropertySymbols(oldEntity);
+
+    for (let newSymbol of newSymbols) {
+        for (let oldSymbol of oldSymbols) {
+            if (newSymbol.description == null)
+                continue;
+
+            if (newSymbol.description.startsWith("#S"))
+                continue;
+
+            if (newSymbol.description == oldSymbol.description) {
+                (oldEntity as any)[oldSymbol] = (newEntity as any)[newSymbol];
+            }
+        }
     }
 }

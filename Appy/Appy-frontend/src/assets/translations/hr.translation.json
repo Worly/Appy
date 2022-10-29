@@ -144,6 +144,9 @@
             "CLOSED": "Poslovnica je zatvorena na ovaj dan.",
             "EDIT_WORKING_HOURS": "Uredi radne sate",
             "TIME_NOT_AVAILABLE_PROMPT": "Odabrano vrijeme je već zauzeto drugim terminom, izvan radnog vremena je ili nije dostupno zbog drugih razloga. Jeste li sigurni da ga želite svejedno spremiti?",
+            "NO_APPOINTMENTS_BEFORE": "Nema više termina prije ovog datuma",
+            "NO_APPOINTMENTS_AFTER": "Nema više termina nakon ovog datuma",
+            "NO_APPOINTMENTS": "Nema pronađenih termina",
             
             "errors": {
                 "MISSING_SERVICE": "Molim odaberite uslugu",
