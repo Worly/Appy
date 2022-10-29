@@ -13,6 +13,7 @@ namespace Appy.Domain
         public byte[] Salt { get; set; }
 
         public int? SelectedFacilityId { get; set; }
+        public string? RefreshToken { get; set; }
 
         public ICollection<Facility> Facilities { get; set; }
 
