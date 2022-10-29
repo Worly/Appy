@@ -185,8 +185,7 @@ namespace Appy.Services
         private string GenerateAccessJwtToken(User user)
         {
             return jwtService.GenerateToken(
-                //new TimeSpan(hours: 3, minutes: 0, seconds: 0),
-                new TimeSpan(hours: 0, minutes: 0, seconds: 10),
+                new TimeSpan(hours: 3, minutes: 0, seconds: 0),
                 new Claim("id", user.Id.ToString()),
                 new Claim("name", user.Name),
                 new Claim("surname", user.Surname),
