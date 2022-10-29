@@ -162,7 +162,7 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
 
     let startDateItem: RenderedDate = {
       type: "date",
-      dateFormatted: this.startDate.format("DD.MM.YYYY"),
+      dateFormatted: this.startDate.format("DD.MM.YYYY - dddd"),
       dateISO: this.startDate.format("YYYY-MM-DD"),
       isEmptyDate: true
     };
@@ -182,7 +182,7 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
 
         this.renderedItems.push({
           type: "date",
-          dateFormatted: currentDate.format("DD.MM.YYYY"),
+          dateFormatted: currentDate.format("DD.MM.YYYY - dddd"),
           dateISO: currentDate.format("YYYY-MM-DD"),
           isEmptyDate: false
         });
