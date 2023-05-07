@@ -22,6 +22,8 @@ namespace Appy.Domain
         public int ClientId { get; set; }
         public Client Client { get; set; }
 
+        public string Notes { get; set; }
+
         public AppointmentDTO GetDTO()
         {
             return new AppointmentDTO()

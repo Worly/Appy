@@ -17,6 +17,8 @@ namespace Appy.Domain
 
         public bool IsArchived { get; set; }
 
+        public string? Notes { get; set; }
+
         public ClientDTO GetDTO()
         {
             return new ClientDTO()
