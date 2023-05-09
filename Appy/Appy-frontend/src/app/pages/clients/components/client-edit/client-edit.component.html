@@ -34,6 +34,12 @@
             [(ngModel)]="client.email">
         <div class="w-validation-message">{{ client.getValidationErrors("email") | translate }}</div>
     </div>
+    <div class="w-input-container">
+        <div class="w-label">{{'pages.clients.NOTES' | translate}}</div>
+        <textarea class="w-input notes-text-area" type="text" [style.width]="'100%'" placeholder="{{'pages.clients.NOTES' | translate}}"
+            [(ngModel)]="client.notes"></textarea>
+        <div class="w-validation-message">{{ client.getValidationErrors("notes") | translate }}</div>
+    </div>
 
     <app-action-bar #actionBar>
         <app-action-dropdown [isDropdown]="actionBar.isFloating">

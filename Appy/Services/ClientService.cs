@@ -54,6 +54,7 @@ namespace Appy.Services
                 Surname = dto.Surname,
                 PhoneNumber = dto.PhoneNumber,
                 Email = dto.Email,
+                Notes = dto.Notes,
                 IsArchived = dto.IsArchived
             };
 
@@ -79,6 +80,7 @@ namespace Appy.Services
             client.Surname = dto.Surname;
             client.PhoneNumber = dto.PhoneNumber;
             client.Email = dto.Email;
+            client.Notes = dto.Notes;
             client.IsArchived = dto.IsArchived;
             await context.SaveChangesAsync();
 

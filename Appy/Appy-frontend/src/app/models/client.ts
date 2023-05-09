@@ -7,6 +7,7 @@ export class ClientDTO {
     public surname?: string;
     public phoneNumber?: string;
     public email?: string;
+    public notes?: string;
     public isArchived?: boolean;
 }
 
@@ -17,6 +18,7 @@ export class Client extends BaseModel {
     public surname?: string;
     public phoneNumber?: string;
     public email?: string;
+    public notes?: string;
     public isArchived?: boolean;
 
     override validations: Validation[] = [
@@ -36,6 +38,7 @@ export class Client extends BaseModel {
         this.surname = dto.surname;
         this.phoneNumber = dto.phoneNumber;
         this.email = dto.email;
+        this.notes = dto.notes;
         this.isArchived = dto.isArchived;
 
         this.initProperties();
@@ -49,6 +52,7 @@ export class Client extends BaseModel {
         dto.surname = this.surname;
         dto.phoneNumber = this.phoneNumber;
         dto.email = this.email;
+        dto.notes = this.notes;
         dto.isArchived = this.isArchived;
 
         return dto;
