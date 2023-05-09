@@ -7,6 +7,7 @@ import { RegisterComponent } from './pages/register/register.component';
 import { SelectedFacilityGuard } from './pages/facilities/services/facility.guard';
 import { FacilitiesComponent } from './pages/facilities/components/facilities/facilities.component';
 import { LoggedInGuard, NotLoggedInGuard } from './shared/services/auth/auth.guard';
+import { appConfig } from './app.config';
 
 const routes: Routes = [
   { path: "login", component: LoginComponent, canActivate: [NotLoggedInGuard] },
@@ -48,7 +49,7 @@ const routes: Routes = [
     canActivate: [LoggedInGuard, SelectedFacilityGuard],
   },
 
-  { path: "**", redirectTo: "/home" }
+  { path: "**", redirectTo: appConfig.homePage }
 ];
 
 @NgModule({

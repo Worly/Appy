@@ -1,6 +1,7 @@
 import { Component, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { appConfig } from 'src/app/app.config';
 import { DialogComponent } from 'src/app/components/dialog/dialog.component';
 import { Facility } from 'src/app/models/facility';
 import { FacilityService } from '../../services/facility.service';
@@ -34,7 +35,7 @@ export class SingleFacilityComponent implements OnInit, OnDestroy {
   }
 
   selectFacility() {
-    this.subs.push(this.facilityService.selectFacility(this.facility as Facility).subscribe(() => this.router.navigate(["home"])));
+    this.subs.push(this.facilityService.selectFacility(this.facility as Facility).subscribe(() => this.router.navigate([appConfig.homePage])));
   }
 
   openDeleteDialog() {

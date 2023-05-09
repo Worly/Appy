@@ -2,6 +2,7 @@ import { ViewportRuler } from '@angular/cdk/scrolling';
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { appConfig } from 'src/app/app.config';
 import { AuthService } from 'src/app/shared/services/auth/auth.service';
 import { FacilityService } from '../facilities/services/facility.service';
 
@@ -74,7 +75,7 @@ export class LoginComponent implements OnInit, OnDestroy {
           if (this.facilityService.getSelected() == null)
             this.router.navigate(["facilities"]);
           else
-            this.router.navigate(["home"]);
+            this.router.navigate([appConfig.homePage]);
         },
         error: (e: any) => {
           this.isLoading = false;

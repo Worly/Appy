@@ -7,4 +7,8 @@ export var appConfig = {
         else
             return "/";
     },
+
+    get homePage(): string {
+        return "appointments"
+    }
 };
