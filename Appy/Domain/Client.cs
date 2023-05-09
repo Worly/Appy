@@ -14,6 +14,7 @@ namespace Appy.Domain
         public string? Surname { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Email { get; set; }
+        public string? Notes { get; set; }
 
         public bool IsArchived { get; set; }
 
@@ -27,6 +28,7 @@ namespace Appy.Domain
                 Surname = Surname,
                 PhoneNumber = PhoneNumber,
                 Email = Email,
+                Notes = Notes,
                 IsArchived = IsArchived
             };
         }

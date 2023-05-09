@@ -116,6 +116,7 @@
             "NICKNAME": "Nadimak",
             "PHONE_NUMBER": "Broj mobitela",
             "EMAIL": "Email",
+            "NOTES": "Bilješke",
             "NEW_CLIENT": "Novi klijent",
             "CHOOSE_CLIENT": "Odaberi klijenta",
             "DELETE_PROMPT": "Jeste li sigurni da želite obrisati ovog klijenta?",
