@@ -8,6 +8,7 @@
         public TimeOnly Time { get; set; }
         public TimeSpan Duration { get; set; }
 
+        public string? Notes { get; set; }
         public ServiceDTO Service { get; set; }
         public ClientDTO Client { get; set; }
     }

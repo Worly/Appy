@@ -83,6 +83,7 @@ namespace Appy.Services
                 Date = dto.Date,
                 Time = dto.Time,
                 Duration = dto.Duration,
+                Notes = dto.Notes,
                 Service = service,
                 Client = client
             };
@@ -115,6 +116,7 @@ namespace Appy.Services
             appointment.Date = dto.Date;
             appointment.Time = dto.Time;
             appointment.Duration = dto.Duration;
+            appointment.Notes = dto.Notes;
             appointment.ServiceId = service.Id;
             appointment.ClientId = client.Id;
 

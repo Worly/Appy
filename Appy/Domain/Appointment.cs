@@ -16,6 +16,7 @@ namespace Appy.Domain
         public TimeOnly Time { get; set; }
         public TimeSpan Duration { get; set; }
 
+        public string Notes { get; set; }
         public int ServiceId { get; set; }
         public Service Service { get; set; }
 
@@ -30,6 +31,7 @@ namespace Appy.Domain
                 Date = Date,
                 Time = Time,
                 Duration = Duration,
+                Notes = Notes,
                 Service = Service.GetDTO(),
                 Client = Client.GetDTO()
             };

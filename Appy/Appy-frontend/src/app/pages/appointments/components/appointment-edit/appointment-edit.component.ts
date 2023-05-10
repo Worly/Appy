@@ -59,6 +59,7 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
           let date = queryParamMap.get("date") ?? undefined;
           let time = queryParamMap.get("time") ?? undefined;
           let duration = queryParamMap.get("duration") ?? undefined;
+          let notes = queryParamMap.get("notes") ?? undefined;
 
           let serviceJSON = queryParamMap.get("service");
           let service: ServiceDTO | undefined;
@@ -76,7 +77,8 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
             time: time,
             service: service,
             client: client,
-            duration: duration ?? service?.duration
+            duration: duration ?? service?.duration,
+            notes: notes
           });
 
           this.registerPropertyChanged();
@@ -158,11 +160,12 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
       let date = this.appointment?.date ? this.appointment.date.format("YYYY-MM-DD") : null;
       let time = this.appointment?.time ? this.appointment.time.format("HH:mm:ss") : null;
       let duration = this.appointment?.duration ? this.appointment.duration.format("HH:mm:ss") : null;
+      let notes = this.appointment?.notes ? this.appointment.notes : null;
       let service = this.appointment?.service ? JSON.stringify(this.appointment.service) : null;
       let client = this.appointment?.client ? JSON.stringify(this.appointment.client) : null;
 
       setUrlParams(this.router, this.activatedRoute, this.location, {
-        date, time, duration, service, client
+        date, time, duration, service, client, notes
       });
     }));
   }

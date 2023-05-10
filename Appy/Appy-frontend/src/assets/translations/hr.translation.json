@@ -133,31 +133,32 @@
             }
         },
 
-        "appointments": {
-            "APPOINTMENTS": "Termini",
-            "APPOINTMENT": "Termin",
-            "NEW_APPOINTMENT": "Novi termin",
-            "DELETE_PROMPT": "Jeste li sigurni da želite obrisati ovaj termin?",
-            "DATE_TIME": "Datum-vrijeme",
-            "DURATION": "Trajanje",
-            "CHOOSE_DATE_TIME": "Odaberi datum-vrijeme",
-            "CHOOSE_HOUR": "Odaberi sat",
-            "CLOSED": "Poslovnica je zatvorena na ovaj dan.",
-            "EDIT_WORKING_HOURS": "Uredi radne sate",
-            "TIME_NOT_AVAILABLE_PROMPT": "Odabrano vrijeme je već zauzeto drugim terminom, izvan radnog vremena je ili nije dostupno zbog drugih razloga. Jeste li sigurni da ga želite svejedno spremiti?",
-            "NO_APPOINTMENTS_BEFORE": "Nema više termina prije ovog datuma",
-            "NO_APPOINTMENTS_AFTER": "Nema više termina nakon ovog datuma",
-            "NO_APPOINTMENTS": "Nema pronađenih termina",
-            
-            "errors": {
-                "MISSING_SERVICE": "Molim odaberite uslugu",
-                "MISSING_CLIENT": "Molim odaberite klijenta",
-                "MISSING_DURATION": "Molim odaberite trajanje",
-                "MISSING_DATE": "Molim odaberite datum",
-                "MISSING_TIME": "Molim odaberite vrijeme",
-                "TIME_NOT_AVAILABLE": "Odabrano vrijeme nije dostupno"
-            }
-        },
+      "appointments": {
+        "APPOINTMENTS": "Termini",
+        "APPOINTMENT": "Termin",
+        "NEW_APPOINTMENT": "Novi termin",
+        "DELETE_PROMPT": "Jeste li sigurni da želite obrisati ovaj termin?",
+        "DATE_TIME": "Datum-vrijeme",
+        "DURATION": "Trajanje",
+        "NOTES": "Bilješke",
+        "CHOOSE_DATE_TIME": "Odaberi datum-vrijeme",
+        "CHOOSE_HOUR": "Odaberi sat",
+        "CLOSED": "Poslovnica je zatvorena na ovaj dan.",
+        "EDIT_WORKING_HOURS": "Uredi radne sate",
+        "TIME_NOT_AVAILABLE_PROMPT": "Odabrano vrijeme je već zauzeto drugim terminom, izvan radnog vremena je ili nije dostupno zbog drugih razloga. Jeste li sigurni da ga želite svejedno spremiti?",
+        "NO_APPOINTMENTS_BEFORE": "Nema više termina prije ovog datuma",
+        "NO_APPOINTMENTS_AFTER": "Nema više termina nakon ovog datuma",
+        "NO_APPOINTMENTS": "Nema pronađenih termina",
+
+        "errors": {
+          "MISSING_SERVICE": "Molim odaberite uslugu",
+          "MISSING_CLIENT": "Molim odaberite klijenta",
+          "MISSING_DURATION": "Molim odaberite trajanje",
+          "MISSING_DATE": "Molim odaberite datum",
+          "MISSING_TIME": "Molim odaberite vrijeme",
+          "TIME_NOT_AVAILABLE": "Odabrano vrijeme nije dostupno"
+        }
+      },
 
         "working-hours": {
             "WORKING_HOURS": "Radni sati",

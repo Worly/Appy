@@ -11,7 +11,7 @@ export class AppointmentDTO {
     public date?: string;
     public time?: string;
     public duration?: string;
-
+    public notes?: string;
     public service?: ServiceDTO;
     public client?: ClientDTO;
 }
@@ -21,7 +21,7 @@ export class Appointment extends BaseModel {
     public date?: Dayjs;
     public time?: Dayjs;
     public duration?: Duration;
-
+    public notes?: string;
     public service?: ServiceDTO;
     public client?: ClientDTO;
 
@@ -50,6 +50,11 @@ export class Appointment extends BaseModel {
             isValid: () => REQUIRED_VALIDATION(this.client),
             propertyName: "client",
             errorCode: "pages.appointments.errors.MISSING_CLIENT"
+        },
+        {
+          isValid: () => REQUIRED_VALIDATION(this.notes),
+          propertyName: "notes",
+          errorCode: "pages.appointments.errors.MISSING_NOTES"
         }
     ]
 
@@ -60,6 +65,7 @@ export class Appointment extends BaseModel {
         this.date = dto.date ? dayjs(dto.date) : undefined;
         this.time = dto.time ? dayjs(dto.time, "HH:mm:ss") : undefined;
         this.duration = dto.duration ? parseDuration(dto.duration) : undefined;
+        this.notes = dto.notes;
         this.service = dto.service;
         this.client = dto.client;
 
@@ -72,6 +78,7 @@ export class Appointment extends BaseModel {
         dto.date = this.date ? this.date.format("YYYY-MM-DD") : undefined;
         dto.time = this.time ? this.time.format("HH:mm:ss") : undefined;
         dto.duration = this.duration ? this.duration.format("HH:mm:ss") : undefined;
+        dto.notes = this.notes;
         dto.service = this.service;
         dto.client = this.client;
 

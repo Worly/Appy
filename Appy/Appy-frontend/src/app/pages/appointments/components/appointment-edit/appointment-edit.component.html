@@ -1,47 +1,54 @@
 <app-loading *ngIf="appointment == null"></app-loading>
 <div *ngIf="appointment != null">
-    <div [ngClass]="{'display-none': isDateTimeEditing}">
-        <div class="w-title" *ngIf="isNew">{{"pages.appointments.NEW_APPOINTMENT" | translate}}</div>
-        <div class="w-title" *ngIf="!isNew">{{"pages.appointments.APPOINTMENT" | translate}}</div>
+  <div [ngClass]="{'display-none': isDateTimeEditing}">
+    <div class="w-title" *ngIf="isNew">{{"pages.appointments.NEW_APPOINTMENT" | translate}}</div>
+    <div class="w-title" *ngIf="!isNew">{{"pages.appointments.APPOINTMENT" | translate}}</div>
 
-        <div class="w-input-container">
-            <div class="w-label">{{'pages.clients.CLIENT' | translate}}</div>
-            <app-client-lookup [(value)]="appointment.client">
-            </app-client-lookup>
-            <div class="w-validation-message">{{ appointment.getValidationErrors("client") | translate }}</div>
-        </div>
-
-        <div class="w-input-container">
-            <div class="w-label">{{'pages.services.SERVICE' | translate}}</div>
-            <app-service-lookup [(value)]="appointment.service" (serviceSelected)="selectedService($event)">
-            </app-service-lookup>
-            <div class="w-validation-message">{{ appointment.getValidationErrors("service") | translate }}</div>
-        </div>
-
-        <div class="w-input-container">
-            <div class="w-label">{{'pages.appointments.DURATION' | translate}}</div>
-            <app-duration-picker [includeZero]="false" [numberOfChoices]="36" [(value)]="appointment.duration">
-            </app-duration-picker>
-            <div class="w-validation-message">{{ appointment.getValidationErrors("duration") | translate }}</div>
-        </div>
-
-        <div class="w-input-container">
-            <div class="w-label">{{'pages.appointments.DATE_TIME' | translate}}</div>
-            <app-button width="100%" [text]="formatDateTime()" (onClick)="editDateTime()"></app-button>
-            <div class="w-validation-message">{{ appointment.getValidationErrors("date") | translate }}</div>
-            <div class="w-validation-message">{{ appointment.getValidationErrors("time") | translate }}</div>
-        </div>
-
-        <app-action-bar>
-            <app-button *ngIf="!isNew" [text]="'DELETE' | translate" icon="trash" color="danger" look="solid"
-                [isCircle]="false" [disabled]="isLoading" [isLoading]="isLoadingDelete" (onClick)="deleteAppointment()">
-            </app-button>
-            <app-button flex-splitter [text]="'CANCEL' | translate" color="danger" look="normal"
-                [disabled]="isLoading" (onClick)="cancel()"></app-button>
-            <app-button [text]="'SAVE' | translate" color="success" look="solid" [disabled]="isLoading"
-                [isLoading]="isLoadingSave" (onClick)="save(false)"></app-button>
-        </app-action-bar>
+    <div class="w-input-container">
+      <div class="w-label">{{'pages.clients.CLIENT' | translate}}</div>
+      <app-client-lookup [(value)]="appointment.client">
+      </app-client-lookup>
+      <div class="w-validation-message">{{ appointment.getValidationErrors("client") | translate }}</div>
     </div>
+
+    <div class="w-input-container">
+      <div class="w-label">{{'pages.services.SERVICE' | translate}}</div>
+      <app-service-lookup [(value)]="appointment.service" (serviceSelected)="selectedService($event)">
+      </app-service-lookup>
+      <div class="w-validation-message">{{ appointment.getValidationErrors("service") | translate }}</div>
+    </div>
+
+    <div class="w-input-container">
+      <div class="w-label">{{'pages.appointments.DURATION' | translate}}</div>
+      <app-duration-picker [includeZero]="false" [numberOfChoices]="36" [(value)]="appointment.duration">
+      </app-duration-picker>
+      <div class="w-validation-message">{{ appointment.getValidationErrors("duration") | translate }}</div>
+    </div>
+
+    <div class="w-input-container">
+      <div class="w-label">{{'pages.appointments.DATE_TIME' | translate}}</div>
+      <app-button width="100%" [text]="formatDateTime()" (onClick)="editDateTime()"></app-button>
+      <div class="w-validation-message">{{ appointment.getValidationErrors("date") | translate }}</div>
+      <div class="w-validation-message">{{ appointment.getValidationErrors("time") | translate }}</div>
+    </div>
+
+    <div class="w-input-container">
+      <div class="w-label">{{'pages.appointments.NOTES' | translate}}</div>
+      <textarea class="w-input notes-text-area" type="text" [style.width]="'100%'" placeholder="{{'pages.appointments.NOTES' | translate}}"
+                [(ngModel)]="appointment.notes"></textarea>
+      <div class="w-validation-message">{{ appointment.getValidationErrors("notes") | translate }}</div>
+    </div>
+
+    <app-action-bar>
+      <app-button *ngIf="!isNew" [text]="'DELETE' | translate" icon="trash" color="danger" look="solid"
+                  [isCircle]="false" [disabled]="isLoading" [isLoading]="isLoadingDelete" (onClick)="deleteAppointment()">
+      </app-button>
+      <app-button flex-splitter [text]="'CANCEL' | translate" color="danger" look="normal"
+                  [disabled]="isLoading" (onClick)="cancel()"></app-button>
+      <app-button [text]="'SAVE' | translate" color="success" look="solid" [disabled]="isLoading"
+                  [isLoading]="isLoadingSave" (onClick)="save(false)"></app-button>
+    </app-action-bar>
+  </div>
     <div *ngIf="isDateTimeEditing">
         <div class="w-title">{{"pages.appointments.CHOOSE_DATE_TIME" | translate}}</div>
 

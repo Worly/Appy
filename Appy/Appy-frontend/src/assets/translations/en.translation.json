@@ -133,31 +133,32 @@
             }
         },
 
-        "appointments": {
-            "APPOINTMENTS": "Appointments",
-            "APPOINTMENT": "Appointment",
-            "NEW_APPOINTMENT": "New appointment",
-            "DELETE_PROMPT": "Are you sure you want to delete this appointment?",
-            "DATE_TIME": "Date-time",
-            "DURATION": "Duration",
-            "CHOOSE_DATE_TIME": "Choose date-time",
-            "CHOOSE_HOUR": "Choose hour",
-            "CLOSED": "Facility is closed on this day.",
-            "EDIT_WORKING_HOURS": "Edit working hours",
-            "TIME_NOT_AVAILABLE_PROMPT": "Selected time is taken by another appointment, outside of working hours or not available for other reasons. Are you sure you want to save it anyway?",
-            "NO_APPOINTMENTS_BEFORE": "There are no more appointments before this date",
-            "NO_APPOINTMENTS_AFTER": "There are no more appointments after this date",
-            "NO_APPOINTMENTS": "No appointments found",
-            
-            "errors": {
-                "MISSING_SERVICE": "Please choose a service",
-                "MISSING_CLIENT": "Please choose a client",
-                "MISSING_DURATION": "Please choose a duration",
-                "MISSING_DATE": "Please choose a date",
-                "MISSING_TIME": "Please choose a time",
-                "TIME_NOT_AVAILABLE": "Selected time is not available"
-            }
-        },
+      "appointments": {
+        "APPOINTMENTS": "Appointments",
+        "APPOINTMENT": "Appointment",
+        "NEW_APPOINTMENT": "New appointment",
+        "DELETE_PROMPT": "Are you sure you want to delete this appointment?",
+        "DATE_TIME": "Date-time",
+        "DURATION": "Duration",
+        "NOTES": "Notes",
+        "CHOOSE_DATE_TIME": "Choose date-time",
+        "CHOOSE_HOUR": "Choose hour",
+        "CLOSED": "Facility is closed on this day.",
+        "EDIT_WORKING_HOURS": "Edit working hours",
+        "TIME_NOT_AVAILABLE_PROMPT": "Selected time is taken by another appointment, outside of working hours or not available for other reasons. Are you sure you want to save it anyway?",
+        "NO_APPOINTMENTS_BEFORE": "There are no more appointments before this date",
+        "NO_APPOINTMENTS_AFTER": "There are no more appointments after this date",
+        "NO_APPOINTMENTS": "No appointments found",
+
+        "errors": {
+          "MISSING_SERVICE": "Please choose a service",
+          "MISSING_CLIENT": "Please choose a client",
+          "MISSING_DURATION": "Please choose a duration",
+          "MISSING_DATE": "Please choose a date",
+          "MISSING_TIME": "Please choose a time",
+          "TIME_NOT_AVAILABLE": "Selected time is not available"
+        }
+      },
 
         "working-hours": {
             "WORKING_HOURS": "Working hours",
