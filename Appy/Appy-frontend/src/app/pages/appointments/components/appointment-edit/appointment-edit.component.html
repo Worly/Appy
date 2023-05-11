@@ -32,6 +32,13 @@
             <div class="w-validation-message">{{ appointment.getValidationErrors("time") | translate }}</div>
         </div>
 
+        <div class="w-input-container">
+            <div class="w-label">{{'pages.appointments.NOTES' | translate}}</div>
+            <textarea class="w-input notes-text-area" type="text" [style.width]="'100%'" placeholder="{{'pages.appointments.NOTES' | translate}}"
+                [(ngModel)]="appointment.notes"></textarea>
+            <div class="w-validation-message">{{ appointment.getValidationErrors("notes") | translate }}</div>
+        </div>
+
         <app-action-bar>
             <app-button *ngIf="!isNew" [text]="'DELETE' | translate" icon="trash" color="danger" look="solid"
                 [isCircle]="false" [disabled]="isLoading" [isLoading]="isLoadingDelete" (onClick)="deleteAppointment()">

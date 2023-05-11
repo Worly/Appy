@@ -140,6 +140,7 @@
             "DELETE_PROMPT": "Jeste li sigurni da želite obrisati ovaj termin?",
             "DATE_TIME": "Datum-vrijeme",
             "DURATION": "Trajanje",
+            "NOTES": "Bilješke",
             "CHOOSE_DATE_TIME": "Odaberi datum-vrijeme",
             "CHOOSE_HOUR": "Odaberi sat",
             "CLOSED": "Poslovnica je zatvorena na ovaj dan.",

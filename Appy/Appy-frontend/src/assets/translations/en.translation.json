@@ -140,6 +140,7 @@
             "DELETE_PROMPT": "Are you sure you want to delete this appointment?",
             "DATE_TIME": "Date-time",
             "DURATION": "Duration",
+            "NOTES": "Notes",
             "CHOOSE_DATE_TIME": "Choose date-time",
             "CHOOSE_HOUR": "Choose hour",
             "CLOSED": "Facility is closed on this day.",
