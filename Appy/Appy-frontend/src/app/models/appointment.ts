@@ -14,6 +14,8 @@ export class AppointmentDTO {
 
     public service?: ServiceDTO;
     public client?: ClientDTO;
+
+    public notes?: string;
 }
 
 export class Appointment extends BaseModel {
@@ -24,6 +26,8 @@ export class Appointment extends BaseModel {
 
     public service?: ServiceDTO;
     public client?: ClientDTO;
+
+    public notes?: string;
 
     override validations: Validation[] = [
         {
@@ -62,6 +66,7 @@ export class Appointment extends BaseModel {
         this.duration = dto.duration ? parseDuration(dto.duration) : undefined;
         this.service = dto.service;
         this.client = dto.client;
+        this.notes = dto.notes;
 
         this.initProperties();
     }
@@ -74,6 +79,7 @@ export class Appointment extends BaseModel {
         dto.duration = this.duration ? this.duration.format("HH:mm:ss") : undefined;
         dto.service = this.service;
         dto.client = this.client;
+        dto.notes = this.notes;
 
         return dto;
     }

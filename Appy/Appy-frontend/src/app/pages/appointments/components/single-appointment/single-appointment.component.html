@@ -26,6 +26,10 @@
             </div>
         </div>
     </app-button>
+    <div class="notes" *ngIf="appointment.notes != null && appointment.notes != ''">
+        <div class="notes-title">{{'pages.appointments.NOTES' | translate}}:</div>
+        <div class="notes-body">{{appointment.notes}}</div>
+    </div>
     <div *ngIf="editable" class="action-bar">
         <app-button icon="trash" color="danger" look="solid" text="{{'DELETE' | translate}}"
             [disabled]="isLoadingDelete" [isLoading]="isLoadingDelete" (onClick)="onDelete()">

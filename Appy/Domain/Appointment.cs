@@ -22,6 +22,8 @@ namespace Appy.Domain
         public int ClientId { get; set; }
         public Client Client { get; set; }
 
+        public string? Notes { get; set; }
+
         public AppointmentDTO GetDTO()
         {
             return new AppointmentDTO()
@@ -31,7 +33,8 @@ namespace Appy.Domain
                 Time = Time,
                 Duration = Duration,
                 Service = Service.GetDTO(),
-                Client = Client.GetDTO()
+                Client = Client.GetDTO(),
+                Notes = Notes
             };
         }
 
