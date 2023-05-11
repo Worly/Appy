@@ -1,9 +1,8 @@
 name: build_and_push_image
 
 on:
-  push:
-    branches:
-      - 'main'
+  release:
+    types: [published]
 
 jobs:
   docker:
