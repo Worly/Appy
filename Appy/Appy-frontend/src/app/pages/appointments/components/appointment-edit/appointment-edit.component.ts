@@ -24,8 +24,6 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
   public isNew: boolean = false;
   public appointment?: Appointment = undefined;
 
-  public clickedTime?: Dayjs;
-
   public isLoadingSave: boolean = false;
   public isLoadingDelete: boolean = false;
   public get isLoading(): boolean {
@@ -47,9 +45,6 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     let queryParamMap = this.activatedRoute.snapshot.queryParamMap;
-
-    let clickedTimeParam = queryParamMap.get("clickedTime");
-    this.clickedTime = clickedTimeParam ? dayjs(clickedTimeParam, "HH:mm:ss") : undefined;
 
     this.subs.push(combineLatest([this.activatedRoute.data, this.activatedRoute.paramMap, this.activatedRoute.queryParamMap])
       .pipe(debounceTime(0)).subscribe(([data, paramMap, queryParamMap]: [Data, ParamMap, ParamMap]) => {

@@ -74,8 +74,6 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
     return this._time;
   }
 
-  @Input() clickedTime?: Dayjs;
-
   @Output() finished: EventEmitter<DateTimeChooserResult> = new EventEmitter();
 
   private startDate?: Dayjs;
@@ -113,10 +111,6 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
 
     this.subs.push(this.freeTimesSmartCaching.onDataLoaded.subscribe(e => {
       this.tryCalculateTimeData();
-
-      // apply calendar click from AppointmentsComponent
-      if (this.time == null && this.clickedTime != null && e.key.isSame(this.date, "date"))
-        this.onCalendarClick(this.clickedTime);
     }));
   }
 
