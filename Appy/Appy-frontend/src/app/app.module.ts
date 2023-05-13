@@ -108,7 +108,7 @@ dayjs.extend(duration);
       deps: [Router, RouteReuseStrategy], multi: true
     },
     { provide: APP_INITIALIZER, useFactory: appInitializerFactory, deps: [AppInitializerService], multi: true },
-    { provide: MAT_DAYJS_DATE_ADAPTER_OPTIONS, useValue: { useUtc: true } },
+    { provide: MAT_DAYJS_DATE_ADAPTER_OPTIONS, useValue: { useUtc: false } },
     { provide: DateAdapter, useClass: DayjsDateAdapter, deps: [MAT_DATE_LOCALE, MAT_DAYJS_DATE_ADAPTER_OPTIONS], },
     { provide: MAT_DATE_FORMATS, useValue: MAT_DAYJS_DATE_FORMATS }
   ],
