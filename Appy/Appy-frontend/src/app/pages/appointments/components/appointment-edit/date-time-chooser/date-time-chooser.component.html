@@ -23,8 +23,13 @@
             class="time-chooser-container">
             <div *ngIf="showAnyHour">
                 <app-button #buttonRef="elementRef" appElementRef class="choose-hour-button" textAlign="center"
-                    alignContent="center" width="100%" (onClick)="chooseHourClicked()"
-                    [text]="selectedHours == null ? ('pages.appointments.CHOOSE_HOUR' | translate) : selectedHours.toString().padStart(2, '0')">
+                    alignContent="center" width="100%" (onClick)="chooseHourClicked()">
+
+                    <!-- This hidden icon is used for flex spacing, so that selectedHours text is centered and dropdown icon is aligned right -->
+                    <fa-icon style="visibility: hidden;" [icon]="['fas', 'caret-down']" [fixedWidth]="true"></fa-icon>
+
+                    <div>{{selectedHours == null ? ('pages.appointments.CHOOSE_HOUR' | translate) : selectedHours.toString().padStart(2, '0')}}</div>
+                    <fa-icon [icon]="['fas', 'caret-down']" [fixedWidth]="true"></fa-icon>
                 </app-button>
 
                 <app-context-menu #hoursContextMenu [relativeTo]="buttonRef.elementRef" [copyOriginWidth]="true">
