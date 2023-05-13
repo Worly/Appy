@@ -17,6 +17,7 @@ import { AppointmentsScrollerComponent } from "./components/appointments-scrolle
 import { AppointmentsComponent } from "./components/appointments/appointments.component";
 import { SingleAppointmentComponent } from "./components/single-appointment/single-appointment.component";
 import { SingleDayAppointmentsComponent } from "./components/appointments-scroller/single-day-appointments/single-day-appointments.component";
+import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 
 @NgModule({
     declarations: [
@@ -32,6 +33,8 @@ import { SingleDayAppointmentsComponent } from "./components/appointments-scroll
     imports: [
         AppointmentsRoutingModule,
         SharedModule,
+        
+        FontAwesomeModule,
         
         ClientsModule,
         ServicesModule,
