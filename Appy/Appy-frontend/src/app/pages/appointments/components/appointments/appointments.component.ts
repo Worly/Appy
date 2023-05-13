@@ -84,7 +84,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
     this.router.navigate(["new"], {
       queryParams: {
         date: date.format("YYYY-MM-DD"),
-        clickedTime: clickedTime ? clickedTime.format("HH:mm:ss") : null
+        time: clickedTime ? clickedTime.format("HH:00:00") : null
       },
       relativeTo: this.activatedRoute
     });
