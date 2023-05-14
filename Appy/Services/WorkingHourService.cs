@@ -1,68 +1,72 @@
-﻿using Appy.Domain;
+﻿using Appy.Contracts;
+using Appy.Domain;
 using Appy.DTOs;
 using Appy.Exceptions;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 
 namespace Appy.Services
 {
-    public interface IWorkingHourService
-    {
-        Task<List<WorkingHour>> GetAll(int facilityId);
-        Task<List<WorkingHour>> GetWorkingHours(DateOnly date, int facilityId);
-
-        Task SetWorkingHours(List<WorkingHourDTO> workingHours, int facilityId);
-    }
-
     public class WorkingHourService : IWorkingHourService
     {
         private MainDbContext context;
+        private readonly IMapper _mapper;
 
-        public WorkingHourService(MainDbContext context)
+        public WorkingHourService(MainDbContext context, IMapper mapper)
         {
             this.context = context;
+            _mapper = mapper;
         }
 
-        public Task<List<WorkingHour>> GetAll(int facilityId)
+        public async Task<IEnumerable<WorkingHourDTO>> GetAll(int facilityId)
         {
-            return context.WorkingHours.Where(w => w.FacilityId == facilityId).ToListAsync();
+            var workingHours = await context.WorkingHours.Where(w => w.FacilityId == facilityId).ToListAsync();
+
+            return workingHours.Select(x => new WorkingHourDTO
+            {
+                DayOfWeek = x.DayOfWeek,
+                TimeFrom = x.TimeFrom,
+                TimeTo = x.TimeTo
+            });
         }
 
-        public Task<List<WorkingHour>> GetWorkingHours(DateOnly date, int facilityId)
+        public async Task<IEnumerable<WorkingHourDTO>> GetWorkingHours(DateOnly date, int facilityId)
         {
-            return context.WorkingHours.Where(w => w.FacilityId == facilityId && w.DayOfWeek == date.DayOfWeek).ToListAsync();
+            var workingHours = await context.WorkingHours.Where(w => w.FacilityId == facilityId && w.DayOfWeek == date.DayOfWeek).ToListAsync();
+            return workingHours.Select(x=> new WorkingHourDTO { 
+                    DayOfWeek = x.DayOfWeek,
+                    TimeFrom = x.TimeFrom,
+                    TimeTo = x.TimeTo
+            });
         }
 
-        public Task SetWorkingHours(List<WorkingHourDTO> workingHours, int facilityId)
+        public Task SetWorkingHours(IEnumerable<WorkingHourDTO> workingHourDtos, int facilityId)
         {
-            if (workingHours.Any(w => w.TimeFrom >= w.TimeTo))
+            if (workingHourDtos.Any(w => w.TimeFrom >= w.TimeTo))
+            {
                 throw new ValidationException("pages.working-hours.errors.TIMES_NOT_IN_ORDER");
+            }
 
             for (int day = 0; day < 7; day++)
             {
-                var dayWorkingHours = workingHours.Where(d => (int)d.DayOfWeek == day).ToList();
+                var dayWorkingHours = workingHourDtos.Where(d => (int)d.DayOfWeek == day).ToList();
                 for (int i = 0; i < dayWorkingHours.Count; i++)
                 {
                     for (int j = i + 1; j < dayWorkingHours.Count; j++)
                     {
-                        var w1 = dayWorkingHours[i];
-                        var w2 = dayWorkingHours[j];
-                        if (w1.TimeFrom <= w2.TimeTo && w1.TimeTo >= w2.TimeFrom)
+                        var workingHour1 = dayWorkingHours[i];
+                        var workingHour2 = dayWorkingHours[j];
+                        if (workingHour1.TimeFrom <= workingHour2.TimeTo && workingHour1.TimeTo >= workingHour2.TimeFrom)
+                        {
                             throw new ValidationException("pages.working-hours.errors.TIMES_OVERLAP");
+                        }
                     }
                 }
             }
 
-            var entites = workingHours.Select(w => new WorkingHour()
-            {
-                FacilityId = facilityId,
-                DayOfWeek = w.DayOfWeek,
-                TimeFrom = w.TimeFrom,
-                TimeTo = w.TimeTo
-            });
-
+            var workingHours = workingHourDtos.Select(w => WorkingHour.Create(facilityId, w.DayOfWeek, w.TimeFrom, w.TimeTo));
             context.WorkingHours.RemoveRange(context.WorkingHours.Where(w => w.FacilityId == facilityId));
-
-            context.WorkingHours.AddRange(entites);
+            context.WorkingHours.AddRange(workingHours);
             return context.SaveChangesAsync();
         }
     }

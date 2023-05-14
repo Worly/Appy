@@ -2,7 +2,7 @@
 using Appy.Auth;
 using Appy.Services.Facilities;
 using Appy.DTOs;
-using Appy.Services;
+using Appy.Contracts;
 
 namespace Appy.Controllers
 {
@@ -31,7 +31,7 @@ namespace Appy.Controllers
             {
                 Date = date,
                 Appointments = appointments.Select(a => a.GetDTO()).ToList(),
-                WorkingHours = workingHours.Select(w => w.GetDTO()).ToList()
+                WorkingHours = workingHours.ToList()
             });
         }
     }

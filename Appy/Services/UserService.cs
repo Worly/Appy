@@ -6,17 +6,10 @@ using Appy.Domain;
 using Appy.DTOs;
 using Appy.Exceptions;
 using System.Text;
+using Appy.Contracts;
 
 namespace Appy.Services
 {
-    public interface IUserService
-    {
-        Task<LogInResponseDTO> Authenticate(LogInDTO model);
-        Task<LogInResponseDTO> Register(RegisterDTO model);
-        Task<LogInResponseDTO> RefreshTokens(string refreshToken);
-        Task<User> GetById(int id);
-    }
-
     public class UserService : IUserService
     {
         private MainDbContext context;

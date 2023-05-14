@@ -2,7 +2,7 @@
 using Appy.Auth;
 using Appy.Services.Facilities;
 using Appy.DTOs;
-using Appy.Services;
+using Appy.Contracts;
 
 namespace Appy.Controllers
 {

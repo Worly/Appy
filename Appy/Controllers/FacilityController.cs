@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Appy.Auth;
-using Appy.Services.Facilities;
 using Appy.DTOs;
+using Appy.Contracts;
 
 namespace Appy.Controllers
 {
