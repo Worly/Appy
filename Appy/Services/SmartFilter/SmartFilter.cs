@@ -1,9 +1,11 @@
 ﻿using Appy.Utils;
+using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Appy.Services.SmartFilter
+namespace Appy.Services.SmartFiltering
 {
+    [TypeConverter(typeof(SmartFilterConverter))]
     public class SmartFilter
     {
         public enum SmartFilterType
@@ -107,6 +109,11 @@ namespace Appy.Services.SmartFilter
                 this.Left == other.Left &&
                 this.Right == other.Right &&
                 this.FieldFilter == other.FieldFilter;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Type, Left, Right, FieldFilter);
         }
 
         public static bool operator ==(SmartFilter? lhs, SmartFilter? rhs)
@@ -247,6 +254,11 @@ namespace Appy.Services.SmartFilter
                 this.Type == other.Type &&
                 this.StringValue == other.StringValue &&
                 this.NumberValue == other.NumberValue;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(PropertyName, Comparator, Type, StringValue, NumberValue);
         }
 
         public static bool operator ==(FieldFilter? lhs, FieldFilter? rhs)

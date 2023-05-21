@@ -1,7 +1,6 @@
-﻿using Newtonsoft.Json.Linq;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
-namespace Appy.Services.SmartFilter
+namespace Appy.Services.SmartFiltering
 {
     public class SmartFilterParserTests
     {

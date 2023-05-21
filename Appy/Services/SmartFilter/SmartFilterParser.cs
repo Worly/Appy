@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Appy.Services.SmartFilter
+namespace Appy.Services.SmartFiltering
 {
     public class SmartFilterParser
     {
