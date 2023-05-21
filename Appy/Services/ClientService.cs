@@ -1,6 +1,7 @@
 ﻿using Appy.Domain;
 using Appy.DTOs;
 using Appy.Exceptions;
+using Appy.Services.SmartFilter;
 using EntityFramework.Exceptions.Common;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
