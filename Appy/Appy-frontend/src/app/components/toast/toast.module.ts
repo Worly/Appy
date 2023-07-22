@@ -4,6 +4,7 @@ import { NgModule } from "@angular/core";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { ButtonModule } from "../button/button.module";
 import { ToastComponent } from "./toast.component";
+import { ToastService } from "./toast.service";
 
 @NgModule({
     declarations: [
@@ -17,6 +18,9 @@ import { ToastComponent } from "./toast.component";
     ],
     exports: [
         ToastComponent
+    ],
+    providers: [
+        ToastService
     ]
 })
 export class ToastModule {

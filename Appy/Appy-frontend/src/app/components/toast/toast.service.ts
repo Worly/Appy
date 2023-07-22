@@ -4,9 +4,8 @@ import { Injectable } from "@angular/core";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { TranslateService } from "../translate/translate.service";
 import { ToastComponent } from "./toast.component";
-import { ToastModule } from "./toast.module";
 
-@Injectable({ providedIn: ToastModule })
+@Injectable()
 export class ToastService {
     constructor(private overlay: Overlay, private translateService: TranslateService) {
 
