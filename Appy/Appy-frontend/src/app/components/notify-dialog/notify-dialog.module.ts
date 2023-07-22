@@ -3,6 +3,7 @@ import { CommonModule } from "@angular/common";
 import { NgModule } from "@angular/core";
 import { ButtonModule } from "../button/button.module";
 import { NotifyDialogComponent } from "./notify-dialog.component";
+import { NotifyDialogService } from "./notify-dialog.service";
 
 @NgModule({
     declarations: [
@@ -15,6 +16,9 @@ import { NotifyDialogComponent } from "./notify-dialog.component";
     ],
     exports: [
         NotifyDialogComponent
+    ],
+    providers: [
+        NotifyDialogService
     ]
 })
 export class NotifyDialogModule {

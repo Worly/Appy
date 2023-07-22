@@ -4,9 +4,8 @@ import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { TranslateService } from "../translate/translate.service";
 import { NotifyDialogComponent } from "./notify-dialog.component";
-import { NotifyDialogModule } from "./notify-dialog.module";
 
-@Injectable({ providedIn: NotifyDialogModule })
+@Injectable()
 export class NotifyDialogService {
     constructor(private overlay: Overlay, private translateService: TranslateService) {
 
