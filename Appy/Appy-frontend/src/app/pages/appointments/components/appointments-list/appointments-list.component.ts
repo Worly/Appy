@@ -4,6 +4,7 @@ import { Duration } from 'dayjs/plugin/duration';
 import { DialogComponent } from 'src/app/components/dialog/dialog.component';
 import { Appointment } from 'src/app/models/appointment';
 import { ServiceColorsService } from 'src/app/pages/services/services/service-colors.service';
+import { BeforeAttach, BeforeDetach } from 'src/app/services/attach-detach-hooks.service';
 import { PageableListDatasource } from 'src/app/shared/services/base-model-service';
 import { AppointmentService } from '../../services/appointment.service.ts';
 
@@ -12,7 +13,7 @@ import { AppointmentService } from '../../services/appointment.service.ts';
   templateUrl: './appointments-list.component.html',
   styleUrls: ['./appointments-list.component.scss']
 })
-export class AppointmentsListComponent implements OnInit, OnDestroy {
+export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetach, BeforeAttach {
 
   @ViewChild("appointmentDialog", { read: DialogComponent }) appointmentDialog?: DialogComponent;
   @ViewChildren("appointmentElement") appointmentElements?: QueryList<ElementRef<HTMLElement>>;
@@ -46,6 +47,8 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
   keptScrollPosition: number | null = null;
   keptScrollElement: (() => HTMLElement | undefined) | null = null;
 
+  private detaching: boolean = false;
+
   constructor(
     private changeDetector: ChangeDetectorRef,
     private appointmentService: AppointmentService,
@@ -59,6 +62,14 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.datasource?.dispose();
+  }
+
+  ngBeforeDetach(): void {
+    this.detaching = true;
+  }
+
+  ngBeforeAttach(): void {
+    this.detaching = false;
   }
 
   load() {
@@ -100,6 +111,9 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
 
   @HostListener('window:scroll', ['$event']) // for window scroll events
   onScroll() {
+    if (this.detaching)
+      return;
+
     this.checkShouldLoad();
     this.updateDate();
   }
