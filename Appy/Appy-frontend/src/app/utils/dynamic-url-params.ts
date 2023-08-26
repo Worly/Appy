@@ -9,6 +9,8 @@ function URLParamsToObject(activatedRoute: ActivatedRoute): any {
 }
 
 export function setUrlParams(router: Router, activatedRoute: ActivatedRoute, location: Location, params: any) {
+    let currentState = location.getState();
+
     let url = router.createUrlTree([], {
         relativeTo: activatedRoute,
         queryParams: {
@@ -16,5 +18,5 @@ export function setUrlParams(router: Router, activatedRoute: ActivatedRoute, loc
             ...params
         }
     }).toString();
-    location.replaceState(url);
+    location.replaceState(url, undefined, currentState);
 }
