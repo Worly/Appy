@@ -2,12 +2,12 @@ import { HttpClient, HttpContext, HttpErrorResponse } from "@angular/common/http
 import { Injector } from "@angular/core";
 import { catchError, map, Observable, Observer, Subscriber, Subscription, throwError } from "rxjs";
 import { appConfig } from "../../app.config";
-import { BaseModel } from "../../models/base-model";
+import { Model } from "../../models/base-model";
 import { isEqual, reduceRight } from "lodash-es";
 import { IGNORE_NOT_FOUND } from "./errors/error-interceptor.service";
 import { getInsertIndex, isSorted } from "src/app/utils/array-utils";
 
-export class BaseModelService<T extends BaseModel> implements IEntityTracker<T> {
+export class BaseModelService<T extends Model<T>> implements IEntityTracker<T> {
 
     protected httpClient: HttpClient;
 
@@ -180,13 +180,13 @@ export class BaseModelService<T extends BaseModel> implements IEntityTracker<T> 
     }
 }
 
-export interface IEntityTracker<T extends BaseModel> {
+export interface IEntityTracker<T extends Model<T>> {
     notifyAdded(entity: T): void;
     notifyDeleted(id: any): void;
     notifyUpdated(entity: T): void;
 }
 
-export interface IDatasource<T extends BaseModel> {
+export interface IDatasource<T extends Model<T>> {
     add(entities: T[]): void;
     update(entity: T): void;
     delete(id: any): void;
@@ -194,7 +194,7 @@ export interface IDatasource<T extends BaseModel> {
     isUnsubscribed(): boolean;
 }
 
-abstract class Datasource<T extends BaseModel> implements IDatasource<T> {
+abstract class Datasource<T extends Model<T>> implements IDatasource<T> {
     data: T[];
     filterPredicate?: (entity: T) => boolean;
     isLoaded: boolean = false;
@@ -275,7 +275,7 @@ abstract class Datasource<T extends BaseModel> implements IDatasource<T> {
     abstract isUnsubscribed(): boolean;
 }
 
-class ListDatasource<T extends BaseModel> extends Datasource<T> {
+class ListDatasource<T extends Model<T>> extends Datasource<T> {
     subscriber: Subscriber<T[]>;
 
     constructor(data: T[], sub: Subscriber<T[]>, filterPredicate?: (entity: T) => boolean) {
@@ -293,7 +293,7 @@ class ListDatasource<T extends BaseModel> extends Datasource<T> {
     }
 }
 
-class SingleDatasource<T extends BaseModel> extends Datasource<T> {
+class SingleDatasource<T extends Model<T>> extends Datasource<T> {
     subscriber: Subscriber<T>;
 
     constructor(data: T[], sub: Subscriber<T>, filterPredicate?: (entity: T) => boolean) {
@@ -316,7 +316,7 @@ class SingleDatasource<T extends BaseModel> extends Datasource<T> {
     }
 }
 
-export class PageableListDatasource<T extends BaseModel> implements IDatasource<T> {
+export class PageableListDatasource<T extends Model<T>> implements IDatasource<T> {
     private itemsPerPage = 20;
 
     private data: T[] = [];
@@ -509,7 +509,7 @@ export class PageableListDatasource<T extends BaseModel> implements IDatasource<
     }
 }
 
-function updateEntity<T extends BaseModel>(oldEntity: T, newEntity: T) {
+function updateEntity<T extends Model<T>>(oldEntity: T, newEntity: T) {
     let newSymbols = Object.getOwnPropertySymbols(newEntity);
     let oldSymbols = Object.getOwnPropertySymbols(oldEntity);
 

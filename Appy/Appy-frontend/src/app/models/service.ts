@@ -1,4 +1,4 @@
-import { BaseModel, REQUIRED_VALIDATION, Validation } from "./base-model";
+import { Model, REQUIRED_VALIDATION, Validation } from "./base-model";
 import { Duration } from "dayjs/plugin/duration";
 import { parseDuration } from "../utils/time-utils";
 
@@ -11,7 +11,7 @@ export class ServiceDTO {
     public isArchived?: boolean;
 }
 
-export class Service extends BaseModel {
+export class Service extends Model<Service> {
     public id: number;
     public name?: string;
     public displayName?: string;
@@ -19,7 +19,7 @@ export class Service extends BaseModel {
     public colorId?: number;
     public isArchived?: boolean;
 
-    override validations: Validation[] = [
+    override validations: Validation<Service>[] = [
         {
             isValid: () => REQUIRED_VALIDATION(this.name),
             propertyName: "name",

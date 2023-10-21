@@ -1,4 +1,4 @@
-import { BaseModel, REQUIRED_VALIDATION, Validation } from "./base-model";
+import { Model, REQUIRED_VALIDATION, Validation } from "./base-model";
 
 export class ClientDTO {
     public id: number = 0;
@@ -11,7 +11,7 @@ export class ClientDTO {
     public isArchived?: boolean;
 }
 
-export class Client extends BaseModel {
+export class Client extends Model<Client> {
     public id: number;
     public nickname?: string;
     public name?: string;
@@ -21,7 +21,7 @@ export class Client extends BaseModel {
     public notes?: string;
     public isArchived?: boolean;
 
-    override validations: Validation[] = [
+    override validations: Validation<Client>[] = [
         {
             isValid: () => REQUIRED_VALIDATION(this.nickname),
             propertyName: "nickname",
