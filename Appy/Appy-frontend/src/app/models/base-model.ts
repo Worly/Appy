@@ -29,12 +29,12 @@ abstract class BaseModel {
                 set(value) {
                     if (isChildren) {
                         this.assertChildrenType(value);
-                        
+
                         value = this.initChildren(value);
                     }
 
                     this[symbol] = value;
-                    
+
                     this.propertyChanged(p);
                 },
                 get() {
@@ -105,6 +105,7 @@ abstract class BaseModel {
 
     public abstract validateProperty(propertyName: string): void;
     public abstract validate(): boolean;
+    public abstract applyServerValidationErrors(errors: ServerValidationErrors): void;
 }
 
 export abstract class Model<ModelT> extends BaseModel {
@@ -155,22 +156,64 @@ export abstract class Model<ModelT> extends BaseModel {
             return null;
     }
 
-    public applyServerValidationErrors(errors: { [propertyName: string]: string }): void {
-        for (let propertyName in errors) {
-            if (this[brokenValidationsSymbol][propertyName] == null)
-                this[brokenValidationsSymbol][propertyName] = [];
+    public applyServerValidationErrors(errors: ServerValidationErrors): void {
+        if (typeof errors != "object") {
+            throw new Error("Server validation errors must be of type object, got " + typeof errors);
+        }
 
-            this[brokenValidationsSymbol][propertyName].push(errors[propertyName]);
+        if (Array.isArray(errors)) {
+            throw new Error("Server validation errors must be of type object, got array");
+        }
+
+        for (let propertyName in errors) {
+            if (!(propertyName in this)) {
+                throw new Error(`Got server validation error for non-existing property ${propertyName}`)
+            }
+
+            let isChildren = this[childrensKeysSymbol]?.includes(propertyName);
+
+            if (isChildren) {
+                if (!Array.isArray(errors[propertyName])) {
+                    throw new Error("Server validation errors for children must be an array, got " + typeof errors[propertyName]);
+                }
+
+                let children = (this as any)[propertyName] as BaseModel[];
+                let childrenErrors = errors[propertyName] as ServerValidationErrors[];
+
+                if (childrenErrors.length > children.length) {
+                    throw new Error(`Server validation errors for children at ${propertyName} has more ` +
+                        `items (${childrenErrors.length}) than children count (${children.length})`);
+                }
+
+                for (let i = 0; i < childrenErrors.length; i++) {
+                    children[i].applyServerValidationErrors(childrenErrors[i]);
+                }
+            }
+            else {
+                if (typeof errors[propertyName] == "string") {
+                    this.addBrokenValidation(propertyName, errors[propertyName] as string);
+                }
+                else if (Array.isArray(errors[propertyName])) {
+                    let errorArray = errors[propertyName] as string[];
+
+                    for (let err of errorArray) {
+                        if (typeof err != "string") {
+                            throw new Error(`Server validation error array for property ${propertyName} contains non string elements: ${JSON.stringify(errorArray)}`);
+                        }
+
+                        this.addBrokenValidation(propertyName, err);
+                    }
+                }
+                else {
+                    throw new Error("Unknown server validation error value " + errors[propertyName] + " on property " + propertyName);
+                }
+            }
         }
     }
 
     private validateValidation(validation: Validation<ModelT>): boolean {
         if (!validation.isValid(this as unknown as ModelT)) {
-            if (this[brokenValidationsSymbol][validation.propertyName] == null)
-                this[brokenValidationsSymbol][validation.propertyName] = [];
-
-            if (!this[brokenValidationsSymbol][validation.propertyName].includes(validation.errorCode))
-                this[brokenValidationsSymbol][validation.propertyName].push(validation.errorCode);
+            this.addBrokenValidation(validation.propertyName, validation.errorCode);
 
             return false;
         }
@@ -182,6 +225,14 @@ export abstract class Model<ModelT> extends BaseModel {
 
         return true;
     }
+
+    private addBrokenValidation(propertyName: string, errorCode: string) {
+        if (this[brokenValidationsSymbol][propertyName] == null)
+            this[brokenValidationsSymbol][propertyName] = [];
+
+        if (!this[brokenValidationsSymbol][propertyName].includes(errorCode))
+            this[brokenValidationsSymbol][propertyName].push(errorCode);
+    }
 }
 
 export type Validation<ModelT> = {
@@ -189,6 +240,11 @@ export type Validation<ModelT> = {
     propertyName: string;
     responsibleProperties?: string[];
     errorCode: string;
+}
+
+export type ServerValidationErrors = {
+    [property: string]: string | string[]
+    | ServerValidationErrors[] // children validation errors
 }
 
 export let REQUIRED_VALIDATION = (value: any) => {
