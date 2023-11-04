@@ -1,4 +1,4 @@
-import { BaseModel, REQUIRED_VALIDATION, Validation } from "./base-model";
+import { Model, REQUIRED_VALIDATION, Validation } from "./base-model";
 import dayjs from "dayjs";
 import { Dayjs } from "dayjs";
 
@@ -8,12 +8,12 @@ export class WorkingHourDTO {
     public timeTo?: string;
 }
 
-export class WorkingHour extends BaseModel {
+export class WorkingHour extends Model<WorkingHour> {
     public dayOfWeek?: DayOfWeek;
     public timeFrom?: Dayjs;
     public timeTo?: Dayjs;
 
-    override validations: Validation[] = [
+    override validations: Validation<WorkingHour>[] = [
         {
             isValid: () => REQUIRED_VALIDATION(this.timeFrom),
             propertyName: "timeFrom",
