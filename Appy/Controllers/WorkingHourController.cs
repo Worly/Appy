@@ -2,7 +2,7 @@
 using Appy.Auth;
 using Appy.Services.Facilities;
 using Appy.DTOs;
-using Appy.Services;
+using Appy.Contracts;
 
 namespace Appy.Controllers
 {
@@ -24,7 +24,7 @@ namespace Appy.Controllers
         {
             var result = await this.workingHourService.GetAll(HttpContext.SelectedFacility());
 
-            return Ok(result.Select(o => o.GetDTO()));
+            return Ok(result);
         }
 
         [HttpGet("getFor")]
@@ -33,7 +33,7 @@ namespace Appy.Controllers
         {
             var result = await this.workingHourService.GetWorkingHours(date, HttpContext.SelectedFacility());
 
-            return Ok(result.Select(o => o.GetDTO()));
+            return Ok(result);
         }
 
         [HttpPost("set")]

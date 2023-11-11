@@ -1,38 +1,26 @@
-﻿using Appy.Domain;
+﻿using Appy.Contracts;
+using Appy.Domain;
 using Appy.DTOs;
 using Appy.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Appy.Services
 {
-    public interface IAppointmentService
-    {
-        Task<List<Appointment>> GetAll(DateOnly date, int facilityId);
-        Task<List<Appointment>> GetList(DateOnly date, Direction direction, int skip, int take, int facilityId);
-        Task<Appointment> GetById(int id, int facilityId);
-        Task<Appointment> AddNew(AppointmentDTO dto, int facilityId, bool ignoreTimeNotAvailable);
-        Task<Appointment> Edit(int id, AppointmentDTO dto, int facilityId, bool ignoreTimeNotAvailable);
-        Task Delete(int id, int facilityId);
-
-        List<FreeTimeDTO> GetFreeTimes(List<Appointment> appointmentsOfTheDay, List<WorkingHour> workingHours, Service service, TimeSpan duration);
-        bool IsAppointmentTimeOk(List<Appointment> appointmentsOfTheDay, List<WorkingHour> workingHours, Appointment appointment);
-    }
-
     public class AppointmentService : IAppointmentService
     {
-        private MainDbContext context;
+        private readonly MainDbContext _context;
 
-        private IWorkingHourService workingHourService;
+        private readonly IWorkingHourService _workingHourService;
 
         public AppointmentService(MainDbContext context, IWorkingHourService workingHourService)
         {
-            this.context = context;
-            this.workingHourService = workingHourService;
+            this._context = context;
+            this._workingHourService = workingHourService;
         }
 
         public Task<List<Appointment>> GetAll(DateOnly date, int facilityId)
         {
-            return context.Appointments
+            return _context.Appointments
                 .Include(a => a.Service)
                 .Include(a => a.Client)
                 .Where(s => s.FacilityId == facilityId && s.Date == date)
@@ -41,7 +29,7 @@ namespace Appy.Services
 
         public Task<List<Appointment>> GetList(DateOnly date, Direction direction, int skip, int take, int facilityId)
         {
-            var appointments = context.Appointments
+            var appointments = _context.Appointments
                 .Include(a => a.Service)
                 .Include(a => a.Client)
                 .Where(s => s.FacilityId == facilityId);
@@ -56,7 +44,7 @@ namespace Appy.Services
 
         public async Task<Appointment> GetById(int id, int facilityId)
         {
-            var appointment = await context.Appointments
+            var appointment = await _context.Appointments
                 .Include(a => a.Service)
                 .Include(a => a.Client)
                 .FirstOrDefaultAsync(s => s.Id == id && s.FacilityId == facilityId);
@@ -69,11 +57,11 @@ namespace Appy.Services
 
         public async Task<Appointment> AddNew(AppointmentDTO dto, int facilityId, bool ignoreTimeNotAvailable)
         {
-            var service = await context.Services.FirstOrDefaultAsync(s => s.Id == dto.Service.Id && s.FacilityId == facilityId);
+            var service = await _context.Services.FirstOrDefaultAsync(s => s.Id == dto.Service.Id && s.FacilityId == facilityId);
             if (service == null)
                 throw new NotFoundException("Unknown service");
 
-            var client = await context.Clients.FirstOrDefaultAsync(s => s.Id == dto.Client.Id && s.FacilityId == facilityId);
+            var client = await _context.Clients.FirstOrDefaultAsync(s => s.Id == dto.Client.Id && s.FacilityId == facilityId);
             if (client == null)
                 throw new NotFoundException("Unknown client");
 
@@ -89,27 +77,27 @@ namespace Appy.Services
             };
 
             var sameDayAppointments = await GetAll(dto.Date, facilityId);
-            var workingHours = await workingHourService.GetWorkingHours(dto.Date, facilityId);
+            var workingHours = await _workingHourService.GetWorkingHours(dto.Date, facilityId);
             if (!ignoreTimeNotAvailable && !IsAppointmentTimeOk(sameDayAppointments, workingHours, appointment))
                 throw new ValidationException(nameof(AppointmentDTO.Time), "pages.appointments.errors.TIME_NOT_AVAILABLE");
 
-            context.Appointments.Add(appointment);
-            await context.SaveChangesAsync();
+            _context.Appointments.Add(appointment);
+            await _context.SaveChangesAsync();
 
             return appointment;
         }
 
         public async Task<Appointment> Edit(int id, AppointmentDTO dto, int facilityId, bool ignoreTimeNotAvailable)
         {
-            var appointment = await context.Appointments.FirstOrDefaultAsync(s => s.Id == id && s.FacilityId == facilityId);
+            var appointment = await _context.Appointments.FirstOrDefaultAsync(s => s.Id == id && s.FacilityId == facilityId);
             if (appointment == null)
                 throw new NotFoundException();
 
-            var service = await context.Services.FirstOrDefaultAsync(s => s.Id == dto.Service.Id && s.FacilityId == facilityId);
+            var service = await _context.Services.FirstOrDefaultAsync(s => s.Id == dto.Service.Id && s.FacilityId == facilityId);
             if (service == null)
                 throw new NotFoundException("Unknown service");
 
-            var client = await context.Clients.FirstOrDefaultAsync(s => s.Id == dto.Client.Id && s.FacilityId == facilityId);
+            var client = await _context.Clients.FirstOrDefaultAsync(s => s.Id == dto.Client.Id && s.FacilityId == facilityId);
             if (client == null)
                 throw new NotFoundException("Unknown client");
 
@@ -121,26 +109,26 @@ namespace Appy.Services
             appointment.Notes = dto.Notes;
 
             var sameDayAppointments = (await GetAll(dto.Date, facilityId)).Where(a => a.Id != appointment.Id).ToList();
-            var workingHours = await workingHourService.GetWorkingHours(dto.Date, facilityId);
+            var workingHours = await _workingHourService.GetWorkingHours(dto.Date, facilityId);
             if (!ignoreTimeNotAvailable && !IsAppointmentTimeOk(sameDayAppointments, workingHours, appointment))
                 throw new ValidationException(nameof(AppointmentDTO.Time), "pages.appointments.errors.TIME_NOT_AVAILABLE");
 
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
             return appointment;
         }
 
         public async Task Delete(int id, int facilityId)
         {
-            var appointments = await context.Appointments.FirstOrDefaultAsync(s => s.Id == id && s.FacilityId == facilityId);
+            var appointments = await _context.Appointments.FirstOrDefaultAsync(s => s.Id == id && s.FacilityId == facilityId);
             if (appointments == null)
                 throw new NotFoundException();
 
-            context.Appointments.Remove(appointments);
-            await context.SaveChangesAsync();
+            _context.Appointments.Remove(appointments);
+            await _context.SaveChangesAsync();
         }
 
-        public List<FreeTimeDTO> GetFreeTimes(List<Appointment> appointmentsOfTheDay, List<WorkingHour> workingHours, Service service, TimeSpan duration)
+        public List<FreeTimeDTO> GetFreeTimes(List<Appointment> appointmentsOfTheDay, IEnumerable<WorkingHourDTO> workingHours, Service service, TimeSpan duration)
         {
             var result = new List<FreeTimeDTO>();
 
@@ -195,7 +183,7 @@ namespace Appy.Services
             return result;
         }
 
-        public bool IsAppointmentTimeOk(List<Appointment> appointmentsOfTheDay, List<WorkingHour> workingHours, Appointment appointment)
+        public bool IsAppointmentTimeOk(List<Appointment> appointmentsOfTheDay, IEnumerable<WorkingHourDTO> workingHours, Appointment appointment)
         {
             var freeTimes = GetFreeTimes(appointmentsOfTheDay, workingHours, appointment.Service, appointment.Duration);
 

@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using Appy.Services;
+using Appy.Contracts;
 
 namespace Appy.Auth
 {

@@ -1,4 +1,5 @@
-﻿using Appy.Domain;
+﻿using Appy.Contracts;
+using Appy.Domain;
 using Appy.DTOs;
 using Appy.Exceptions;
 using EntityFramework.Exceptions.Common;
@@ -7,16 +8,6 @@ using Npgsql;
 
 namespace Appy.Services
 {
-    public interface IServiceService
-    {
-        Task<List<Service>> GetAll(int facilityId, bool archived);
-        Task<Service> GetById(int id, int facilityId);
-        Task<Service> AddNew(ServiceDTO dto, int facilityId);
-        Task<Service> Edit(int id, ServiceDTO dto, int facilityId);
-        Task Delete(int id, int facilityId);
-        Task<Service> SetArchive(int id, int facilityId, bool isArchived);
-    }
-
     public class ServiceService : IServiceService
     {
         private MainDbContext context;

@@ -7,10 +7,10 @@ namespace Appy.Domain
     {
         public DbSet<User> Users { get; set; }
         public DbSet<Facility> Facilities { get; set; }
-        public DbSet<Service> Services { get; set; }
-        public DbSet<Appointment> Appointments { get; set; }
+        public virtual DbSet<Service> Services { get; set; }
+        public virtual DbSet<Appointment> Appointments { get; set; }
         public DbSet<WorkingHour> WorkingHours { get; set; }
-        public DbSet<Client> Clients { get; set; }
+        public virtual DbSet<Client> Clients { get; set; }
 
         public MainDbContext(DbContextOptions<MainDbContext> options) : base(options)
         {
