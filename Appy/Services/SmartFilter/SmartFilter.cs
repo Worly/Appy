@@ -182,13 +182,7 @@ namespace Appy.Services.SmartFiltering
 
         public Expression ToExpression<T>(ParameterExpression parameter)
         {
-            var property = typeof(T).GetProperty(PropertyName.FirstCharToUpper(), BindingFlags.Public | BindingFlags.Instance);
-            if (property == null)
-            {
-                throw new ArgumentException($"Cannot find property with name {PropertyName} on type {typeof(T)}");
-            }
-
-            var propertyGetter = Expression.Property(parameter, property);
+            var propertyGetter = GetPropertyGetter(parameter, typeof(T), PropertyName);
             var value = Expression.Constant(Type switch
             {
                 FieldFilterType.Number => NumberValue,
@@ -197,17 +191,51 @@ namespace Appy.Services.SmartFiltering
                 _ => throw new NotImplementedException()
             });
 
+            var castedValue = Expression.Convert(value, propertyGetter.Type);
+
             return Comparator switch
             {
-                Comparator.Equal => Expression.Equal(propertyGetter, value),
-                Comparator.GreaterThan => Expression.GreaterThan(propertyGetter, value),
-                Comparator.LessThan => Expression.LessThan(propertyGetter, value),
-                Comparator.GreaterThanOrEqual => Expression.GreaterThanOrEqual(propertyGetter, value),
-                Comparator.LessThanOrEqual => Expression.LessThanOrEqual(propertyGetter, value),
-                Comparator.NotEquals => Expression.NotEqual(propertyGetter, value),
-                Comparator.Contains => BuildContainsExpression(propertyGetter, value),
+                Comparator.Equal => Expression.Equal(propertyGetter, castedValue),
+                Comparator.GreaterThan => Expression.GreaterThan(propertyGetter, castedValue),
+                Comparator.LessThan => Expression.LessThan(propertyGetter, castedValue),
+                Comparator.GreaterThanOrEqual => Expression.GreaterThanOrEqual(propertyGetter, castedValue),
+                Comparator.LessThanOrEqual => Expression.LessThanOrEqual(propertyGetter, castedValue),
+                Comparator.NotEquals => Expression.NotEqual(propertyGetter, castedValue),
+                Comparator.Contains => BuildContainsExpression(propertyGetter, castedValue),
                 _ => throw new NotImplementedException()
             };
+        }
+
+        private static MemberExpression GetPropertyGetter(Expression target, Type targetType, string propertyName)
+        {
+            if (propertyName.Contains('.'))
+            {
+                var split = propertyName.Split('.', 2);
+                var nextPropertyName = split[0];
+                var restPropertyName = split[1];
+
+                var getter = GetEndPropertyGetter(target, targetType, nextPropertyName, out var propertyType);
+
+                return GetPropertyGetter(getter, propertyType, restPropertyName);
+            }
+
+            return GetEndPropertyGetter(target, targetType, propertyName, out var _);
+        }
+
+        private static MemberExpression GetEndPropertyGetter(Expression target, Type targetType, string propertyName, out Type propertyType)
+        {
+            if (propertyName.Contains('.'))
+                throw new ArgumentException("This method shouldn't be called with propretyName containing '.'", nameof(propertyName));
+
+            var property = targetType.GetProperty(propertyName.FirstCharToUpper(), BindingFlags.Public | BindingFlags.Instance);
+            if (property == null)
+            {
+                throw new ArgumentException($"Cannot find property with name {propertyName} on type {targetType}");
+            }
+
+            propertyType = property.PropertyType;
+
+            return Expression.Property(target, property);
         }
 
         private static Expression BuildContainsExpression(Expression propertyGetter, Expression value)
