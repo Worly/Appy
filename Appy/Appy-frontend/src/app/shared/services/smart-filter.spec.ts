@@ -5,7 +5,13 @@ let object = {
     ten: 10,
     null: null,
     string: "string",
-    dialect: "Vukelić"
+    dialect: "Vukelić",
+    child: {
+        eight: 8,
+        child: {
+            string: "string"
+        }
+    }
 };
 
 describe("SmartFilter", () => {
@@ -84,6 +90,38 @@ describe("FieldFilter", () => {
     it("should throw on missing property", () => {
         let filter = <SmartFilter>["missing", "==", 3];
         expect(() => applySmartFilter(object, filter)).toThrowError();
+    })
+
+    describe("deep filtering", () => {
+        it("should throw on missing one deep property", () => {
+            let filter = <SmartFilter>["child.missing", "==", 3];
+            expect(() => applySmartFilter(object, filter)).toThrowError();
+        })
+
+        it("should throw on missing two deep property", () => {
+            let filter = <SmartFilter>["child.child.missing", "==", 3];
+            expect(() => applySmartFilter(object, filter)).toThrowError();
+        })
+
+        it("should return true on true one deep check", () => {
+            let filter: SmartFilter = ["child.eight", "==", 8];
+            expect(applySmartFilter(object, filter)).toBeTrue();
+        })
+
+        it("should return false on false one deep check", () => {
+            let filter: SmartFilter = ["child.eight", "<", 2];
+            expect(applySmartFilter(object, filter)).toBeFalse();
+        })
+
+        it("should return true on true two deep check", () => {
+            let filter: SmartFilter = ["child.child.string", "==", "string"];
+            expect(applySmartFilter(object, filter)).toBeTrue();
+        })
+
+        it("should return false on false two deep check", () => {
+            let filter: SmartFilter = ["child.child.string", "contains", "tino"];
+            expect(applySmartFilter(object, filter)).toBeFalse();
+        })
     })
 
     describe("number and number comparison", () => {

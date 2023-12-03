@@ -1,8 +1,10 @@
 export type SmartFilter = FieldFilter | ["not", SmartFilter] | [SmartFilter, "and" | "or", SmartFilter]
 
-export type FieldFilter = [string, FieldComparer, string | number | null]
+export type FieldFilter = [string, FieldComparer, Value]
 
 export type FieldComparer = "==" | "<" | ">" | ">=" | "<=" | "!=" | "contains";
+
+export type Value = string | number | null;
 
 export function applySmartFilter(object: { [key: string]: any }, filter: SmartFilter): boolean {
     // ["not", SmartFilter]
@@ -33,6 +35,22 @@ function applyFieldFilter(object: { [key: string]: any }, filter: FieldFilter): 
     let propertyName = filter[0];
     let comparer = filter[1];
     let value = filter[2];
+
+    return applyFieldFilterInternal(object, propertyName, comparer, value);
+}
+
+function applyFieldFilterInternal(object: { [key: string]: any }, propertyName: string, comparer: FieldComparer, value: Value): boolean {
+    if (propertyName.includes(".")) {
+        let index = propertyName.indexOf(".");
+        let nextPropertyName = propertyName.substring(0, index);
+        let restPropertyName = propertyName.substring(index + 1);
+
+        if (!(nextPropertyName in object)) {
+            throw new Error(`Object does not contain a property with name ${nextPropertyName}`);
+        }
+
+        return applyFieldFilterInternal(object[nextPropertyName], restPropertyName, comparer, value);
+    }
 
     if (!(propertyName in object)) {
         throw new Error(`Object does not contain a property with name ${propertyName}`);
