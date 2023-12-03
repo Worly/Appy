@@ -5,8 +5,9 @@ import { Observable, takeUntil } from "rxjs";
 import { appConfig } from "src/app/app.config";
 import { Appointment } from "src/app/models/appointment";
 import { CalendarDay, CalendarDayDTO } from "src/app/models/calendar-day";
-import { AppointmentService } from "./appointment.service.ts";
+import { AppointmentService } from "./appointment.service";
 import { onUnsubscribed } from "src/app/utils/smart-subscriber";
+import { applySmartFilter, SmartFilter } from "src/app/shared/services/smart-filter";
 
 @Injectable({ providedIn: "root" })
 export class CalendarDayService {
@@ -15,18 +16,26 @@ export class CalendarDayService {
         private appointmentService: AppointmentService
     ) { }
 
-    public getAll(date: Dayjs): Observable<CalendarDay> {
+    public getAll(date: Dayjs, filter: SmartFilter | undefined): Observable<CalendarDay> {
         return new Observable<CalendarDay>(s => {
+            let p: any = {
+                date: date.format("YYYY-MM-DD")
+            }
+
+            if (filter != null)
+                p.filter = JSON.stringify(filter);
+
+
+            let filterFunc = (e: Appointment) => e.date?.isSame(date, "date") == true && (filter == null || applySmartFilter(e, filter));
+
             this.httpClient.get<CalendarDayDTO>(appConfig.apiUrl + "CalendarDay/getAll", {
-                params: {
-                    date: date.format("YYYY-MM-DD")
-                }
+                params: p
             }).pipe(takeUntil(onUnsubscribed(s)))
                 .subscribe({
                     next: c => {
                         let calendarDay = new CalendarDay(c);
 
-                        this.appointmentService.createDatasource(calendarDay.appointments as Appointment[], e => e.date?.isSame(date, "date") == true)
+                        this.appointmentService.createDatasource(calendarDay.appointments as Appointment[], filterFunc)
                             .pipe(takeUntil(onUnsubscribed(s)))
                             .subscribe(n => {
                                 calendarDay.appointments = n;

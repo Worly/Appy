@@ -3,6 +3,7 @@ using Appy.Auth;
 using Appy.Services.Facilities;
 using Appy.DTOs;
 using Appy.Services;
+using Appy.Services.SmartFiltering;
 
 namespace Appy.Controllers
 {
@@ -22,9 +23,9 @@ namespace Appy.Controllers
 
         [HttpGet("getAll")]
         [Authorize]
-        public async Task<ActionResult<CalendarDayDTO>> GetAll([FromQuery] DateOnly date)
+        public async Task<ActionResult<CalendarDayDTO>> GetAll([FromQuery] DateOnly date, [FromQuery] SmartFilter? filter)
         {
-            var appointments = await this.appointmentService.GetAll(date, HttpContext.SelectedFacility());
+            var appointments = await this.appointmentService.GetAll(date, HttpContext.SelectedFacility(), filter);
             var workingHours = await this.workingHourService.GetWorkingHours(date, HttpContext.SelectedFacility());
 
             return Ok(new CalendarDayDTO()

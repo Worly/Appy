@@ -1,5 +1,5 @@
 <div>
-    <app-appointments-scroller *ngIf="type == 'scroller'" [daysToShow]="1" [date]="date"
+    <app-appointments-scroller *ngIf="type == 'scroller'" [daysToShow]="1" [date]="date" [filter]="filter"
         (onCalendarClick)="onCalendarClick($event)">
     </app-appointments-scroller>
 

@@ -7,7 +7,7 @@ import { Appointment } from 'src/app/models/appointment';
 import { ServiceColorsService } from 'src/app/pages/services/services/service-colors.service';
 import { BeforeAttach, BeforeDetach } from 'src/app/services/attach-detach-hooks.service';
 import { PageableListDatasource } from 'src/app/shared/services/base-model-service';
-import { AppointmentService } from '../../services/appointment.service.ts';
+import { AppointmentService } from '../../services/appointment.service';
 import { appFilterToSmartFilter, AppointmentsFilter } from '../appointments/appointments.component';
 
 @Component({

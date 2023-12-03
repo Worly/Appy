@@ -8,7 +8,7 @@ namespace Appy.Services
 {
     public interface IAppointmentService
     {
-        Task<List<Appointment>> GetAll(DateOnly date, int facilityId);
+        Task<List<Appointment>> GetAll(DateOnly date, int facilityId, SmartFilter? filter);
         Task<List<Appointment>> GetList(DateOnly date, Direction direction, int skip, int take, SmartFilter? filter, int facilityId);
         Task<Appointment> GetById(int id, int facilityId);
         Task<Appointment> AddNew(AppointmentDTO dto, int facilityId, bool ignoreTimeNotAvailable);
@@ -31,12 +31,13 @@ namespace Appy.Services
             this.workingHourService = workingHourService;
         }
 
-        public Task<List<Appointment>> GetAll(DateOnly date, int facilityId)
+        public Task<List<Appointment>> GetAll(DateOnly date, int facilityId, SmartFilter? filter)
         {
             return context.Appointments
                 .Include(a => a.Service)
                 .Include(a => a.Client)
                 .Where(s => s.FacilityId == facilityId && s.Date == date)
+                .ApplySmartFilter(filter)
                 .ToListAsync();
         }
 
@@ -90,7 +91,7 @@ namespace Appy.Services
                 Notes = dto.Notes
             };
 
-            var sameDayAppointments = await GetAll(dto.Date, facilityId);
+            var sameDayAppointments = await GetAll(dto.Date, facilityId, null);
             var workingHours = await workingHourService.GetWorkingHours(dto.Date, facilityId);
             if (!ignoreTimeNotAvailable && !IsAppointmentTimeOk(sameDayAppointments, workingHours, appointment))
                 throw new ValidationException(nameof(AppointmentDTO.Time), "pages.appointments.errors.TIME_NOT_AVAILABLE");
@@ -122,7 +123,7 @@ namespace Appy.Services
             appointment.ClientId = client.Id;
             appointment.Notes = dto.Notes;
 
-            var sameDayAppointments = (await GetAll(dto.Date, facilityId)).Where(a => a.Id != appointment.Id).ToList();
+            var sameDayAppointments = (await GetAll(dto.Date, facilityId, null)).Where(a => a.Id != appointment.Id).ToList();
             var workingHours = await workingHourService.GetWorkingHours(dto.Date, facilityId);
             if (!ignoreTimeNotAvailable && !IsAppointmentTimeOk(sameDayAppointments, workingHours, appointment))
                 throw new ValidationException(nameof(AppointmentDTO.Time), "pages.appointments.errors.TIME_NOT_AVAILABLE");

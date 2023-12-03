@@ -14,7 +14,7 @@ import { Dayjs } from "dayjs";
 import { Duration } from "dayjs/plugin/duration";
 import { ContextMenuComponent } from 'src/app/components/context-menu/context-menu.component';
 import { TimeData } from './time-button/time-button.component';
-import { AppointmentService } from '../../../services/appointment.service.ts';
+import { AppointmentService } from '../../../services/appointment.service';
 import { ServiceColorsService } from 'src/app/pages/services/services/service-colors.service';
 
 @Component({

@@ -25,9 +25,9 @@ namespace Appy.Controllers
 
         [HttpGet("getAll")]
         [Authorize]
-        public async Task<ActionResult<List<AppointmentDTO>>> GetAll([FromQuery] DateOnly date)
+        public async Task<ActionResult<List<AppointmentDTO>>> GetAll([FromQuery] DateOnly date, [FromQuery] SmartFilter? filter)
         {
-            var result = await this.appointmentService.GetAll(date, HttpContext.SelectedFacility());
+            var result = await this.appointmentService.GetAll(date, HttpContext.SelectedFacility(), filter);
 
             return Ok(result.Select(o => o.GetDTO()));
         }
@@ -83,7 +83,7 @@ namespace Appy.Controllers
         public async Task<ActionResult<List<FreeTimeDTO>>> GetFreeTimes([FromQuery] DateOnly date, [FromQuery] int serviceId, [FromQuery] TimeSpan duration, [FromQuery] int? ignoreAppointmentId)
         {
             var service = await this.serviceService.GetById(serviceId, HttpContext.SelectedFacility());
-            var appointmentsOfTheDay = await this.appointmentService.GetAll(date, HttpContext.SelectedFacility());
+            var appointmentsOfTheDay = await this.appointmentService.GetAll(date, HttpContext.SelectedFacility(), null);
             var workingHours = await this.workingHourService.GetWorkingHours(date, HttpContext.SelectedFacility());
 
             if (ignoreAppointmentId.HasValue)
