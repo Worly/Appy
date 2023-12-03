@@ -158,6 +158,10 @@ export class AppointmentsComponent implements OnInit, OnDestroy, BeforeDetach, B
     this.goToNew(time, time);
   }
 
+  hasFilters(): boolean {
+    return !_.isEqual(this.filter, {});
+  }
+
   applyFilter(filter: AppointmentsFilter) {
     this.filterDialog?.close();
 

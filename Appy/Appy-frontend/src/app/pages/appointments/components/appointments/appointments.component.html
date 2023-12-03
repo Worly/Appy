@@ -11,7 +11,8 @@
     <app-button [iconPrefix]="type == 'scroller' ? 'far' : 'fas'"
         [icon]="type == 'scroller' ? 'calendar-days' : 'table-list'" [isCircle]="false"
         (onClick)="type = (type == 'scroller' ? 'list' : 'scroller')"></app-button>
-    <app-button icon="filter" [isCircle]="false" (onClick)="filterDialog.open()"></app-button>
+    <app-button icon="filter" [isCircle]="false" look="custom" [customBorderColor]="hasFilters() ? 'var(--danger)' : 'var(--input-background-color)'"
+        (onClick)="filterDialog.open()"></app-button>
     <app-button class="new-button" icon="plus" color="success" look="solid" alignContent="center" (onClick)="goToNew()">
     </app-button>
     <app-date-selector flex-splitter [(date)]="date" [compact]="true"></app-date-selector>
