@@ -14,6 +14,8 @@ export class ServiceLookupComponent implements OnInit {
   @Input() value?: ServiceDTO;
   @Output() valueChange: EventEmitter<ServiceDTO> = new EventEmitter();
 
+  @Input() showNewButton: boolean = true;
+
   @Output() serviceSelected: EventEmitter<{ oldService?: ServiceDTO, newService: ServiceDTO }> = new EventEmitter();
 
   services?: Service[];

@@ -5,7 +5,7 @@
 <app-context-menu #contextMenu [relativeTo]="buttonRef.elementRef" [copyOriginWidth]="true">
     <div class="search-input-container">
         <app-search [source]="clients" (onSearch)="filteredClients = $event.filteredSource"></app-search>
-        <app-button icon="plus" color="success" look="outlined" borderStyle="dashed" [isLoading]="isLoadingNew"
+        <app-button *ngIf="showNewButton" icon="plus" color="success" look="outlined" borderStyle="dashed" [isLoading]="isLoadingNew"
             [disabled]="isLoadingNew" text="{{'NEW' | translate}}" (onClick)="addNew()"></app-button>
     </div>
     <div class="w-validation-message validation-error">{{ validationError | translate }}</div>
@@ -23,7 +23,7 @@
 
     <div *ngIf="clients != null && filteredClients.length == 0" class="no-clients-found">
         {{ "pages.clients.NO_CLIENTS_FOUND" | translate }}
-        <app-button icon="plus" text="{{'pages.clients.ADD_CLIENT' | translate}}" color="success"
+        <app-button *ngIf="showNewButton" icon="plus" text="{{'pages.clients.ADD_CLIENT' | translate}}" color="success"
             (onClick)="goToClients()"></app-button>
     </div>
 </app-context-menu>

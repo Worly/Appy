@@ -32,6 +32,8 @@ export class ClientLookupComponent implements OnInit, OnDestroy {
     return this._value;
   }
 
+  @Input() showNewButton: boolean = true;
+
   @Output() valueChange: EventEmitter<ClientDTO> = new EventEmitter();
 
   @Output() clientSelected: EventEmitter<{ oldClient?: ClientDTO, newClient?: ClientDTO }> = new EventEmitter();
