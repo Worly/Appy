@@ -38,7 +38,7 @@ export class ContextMenuComponent implements OnInit, OnDestroy {
 
   @Input() relativeTo?: ElementRef;
   @Input() copyOriginWidth: boolean = false;
-  @Input() viewportMargin: number = 10;
+  @Input() viewportMargin: number = 0;
 
   overlayRef?: OverlayRef;
   keepOpen: boolean = false;
@@ -78,15 +78,13 @@ export class ContextMenuComponent implements OnInit, OnDestroy {
             originX: "end",
             originY: "bottom",
             overlayX: "end",
-            overlayY: "top",
-            offsetX: -this.viewportMargin
+            overlayY: "top"
           },
           {
             originX: "end",
             originY: "top",
             overlayX: "end",
-            overlayY: "bottom",
-            offsetX: -this.viewportMargin
+            overlayY: "bottom"
           }
         ]),
       scrollStrategy: this.overlay.scrollStrategies.reposition(),
