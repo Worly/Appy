@@ -45,7 +45,7 @@ import { faCalendarWeek } from '@fortawesome/free-solid-svg-icons/faCalendarWeek
 import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons/faRightFromBracket';
 import { faCalendarDays } from "@fortawesome/free-regular-svg-icons/faCalendarDays";
 import { faTableList } from "@fortawesome/free-solid-svg-icons/faTableList";
-import { faFilter } from "@Fortawesome/free-solid-svg-icons/faFilter";
+import { faFilter } from "@fortawesome/free-solid-svg-icons/faFilter";
 
 import dayjs from "dayjs";
 import "dayjs/locale/hr";
