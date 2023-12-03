@@ -3,6 +3,7 @@ using Appy.Auth;
 using Appy.Services.Facilities;
 using Appy.DTOs;
 using Appy.Services;
+using Appy.Services.SmartFiltering;
 
 namespace Appy.Controllers
 {
@@ -33,9 +34,10 @@ namespace Appy.Controllers
 
         [HttpGet("getList")]
         [Authorize]
-        public async Task<ActionResult<List<AppointmentDTO>>> GetList([FromQuery] DateOnly date, [FromQuery] Direction direction, [FromQuery] int skip, [FromQuery] int take)
+        public async Task<ActionResult<List<AppointmentDTO>>> GetList(
+            [FromQuery] DateOnly date, [FromQuery] Direction direction, [FromQuery] int skip, [FromQuery] int take, [FromQuery] SmartFilter? filter)
         {
-            var result = await this.appointmentService.GetList(date, direction, skip, take, HttpContext.SelectedFacility());
+            var result = await this.appointmentService.GetList(date, direction, skip, take, filter, HttpContext.SelectedFacility());
 
             return Ok(result.Select(o => o.GetDTO()));
         }
