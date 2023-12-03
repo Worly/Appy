@@ -6,6 +6,7 @@ import { appConfig } from "src/app/app.config";
 import { Appointment } from "src/app/models/appointment";
 import { FreeTime, FreeTimeDTO } from "src/app/models/free-time";
 import { BaseModelService, PageableListDatasource } from "src/app/shared/services/base-model-service";
+import { SmartFilter } from "src/app/shared/services/smart-filter";
 
 @Injectable({ providedIn: "root" })
 export class AppointmentService extends BaseModelService<Appointment> {
@@ -22,10 +23,10 @@ export class AppointmentService extends BaseModelService<Appointment> {
         }, e => e.date?.isSame(date, "date") == true);
     }
 
-    public getList(date: Dayjs, sortPredicate: (a: Appointment, b: Appointment) => number): PageableListDatasource<Appointment> {
+    public getList(date: Dayjs, filter: SmartFilter | undefined, sortPredicate: (a: Appointment, b: Appointment) => number): PageableListDatasource<Appointment> {
         return this.getListAdvanced({
             date: date.format("YYYY-MM-DD")
-        }, sortPredicate);
+        }, sortPredicate, filter);
     }
 
     public getFreeTimes(date: Dayjs, serviceId: number, duration: Duration, ignoreAppointmentId?: number): Observable<FreeTime[]> {

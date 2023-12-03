@@ -2,18 +2,23 @@
     [text]="value && value.nickname ? value.nickname : ('pages.clients.CHOOSE_CLIENT' | translate)"
     (onClick)="openContextMenu()"></app-button>
 
+<app-button *ngIf="showClearButton && value != null" class="clear-button" look="transparent" icon="times"
+    (onClick)="clear()"></app-button>
+
 <app-context-menu #contextMenu [relativeTo]="buttonRef.elementRef" [copyOriginWidth]="true">
     <div class="search-input-container">
         <app-search [source]="clients" (onSearch)="filteredClients = $event.filteredSource"></app-search>
-        <app-button icon="plus" color="success" look="outlined" borderStyle="dashed" [isLoading]="isLoadingNew"
-            [disabled]="isLoadingNew" text="{{'NEW' | translate}}" (onClick)="addNew()"></app-button>
+        <app-button *ngIf="showNewButton" icon="plus" color="success" look="outlined" borderStyle="dashed"
+            [isLoading]="isLoadingNew" [disabled]="isLoadingNew" text="{{'NEW' | translate}}"
+            (onClick)="addNew()"></app-button>
     </div>
     <div class="w-validation-message validation-error">{{ validationError | translate }}</div>
 
     <div *ngIf="clients == null" style="height: 200px;">
         <app-loading></app-loading>
     </div>
-    <app-button class="single-client-button" *ngFor="let client of filteredClients" width="100%" (onClick)="selectClient(client)">
+    <app-button class="single-client-button" *ngFor="let client of filteredClients" width="100%"
+        (onClick)="selectClient(client)">
         <div class="single-client-container" [ngClass]="{'selected': client.id == value?.id}">
             <div class="nickname">{{client.nickname}}</div>
             <div class="full-name">{{client.name}} {{client.surname}}</div>
@@ -23,7 +28,7 @@
 
     <div *ngIf="clients != null && filteredClients.length == 0" class="no-clients-found">
         {{ "pages.clients.NO_CLIENTS_FOUND" | translate }}
-        <app-button icon="plus" text="{{'pages.clients.ADD_CLIENT' | translate}}" color="success"
+        <app-button *ngIf="showNewButton" icon="plus" text="{{'pages.clients.ADD_CLIENT' | translate}}" color="success"
             (onClick)="goToClients()"></app-button>
     </div>
 </app-context-menu>

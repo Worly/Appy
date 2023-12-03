@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import dayjs, { Dayjs, unix } from 'dayjs';
+import _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { Appointment } from 'src/app/models/appointment';
 import { CalendarDay } from 'src/app/models/calendar-day';
@@ -7,6 +8,7 @@ import { FreeTime } from 'src/app/models/free-time';
 import { Data, DateSmartCaching } from 'src/app/utils/smart-caching';
 import { Tween, TweenManager } from 'src/app/utils/tween';
 import { CalendarDayService } from '../../services/calendar-day.service';
+import { appFilterToSmartFilter, AppointmentsFilter } from '../appointments/appointments.component';
 
 @Component({
   selector: 'app-appointments-scroller',
@@ -42,6 +44,15 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
   }
   @Output() dateChange: EventEmitter<Dayjs> = new EventEmitter();
 
+  private _filter: AppointmentsFilter = {};
+  @Input() set filter(value: AppointmentsFilter) {
+    if (_.isEqual(this._filter, value))
+      return;
+
+    this._filter = value;
+    this.reload();
+  }
+
   @Input() showDateControls: boolean = false;
   @Input() appointmentsEditable: boolean = true;
   @Input() hiddenAppointmentIds?: number[]
@@ -62,7 +73,8 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
 
   @Output() onCalendarClick: EventEmitter<Dayjs> = new EventEmitter();
 
-  public calendarDaySmartCaching: DateSmartCaching<CalendarDay> = new DateSmartCaching(d => this.calendarDayService.getAll(d), this.daysToShow);
+  public calendarDaySmartCaching: DateSmartCaching<CalendarDay>
+    = new DateSmartCaching(d => this.calendarDayService.getAll(d, appFilterToSmartFilter(this._filter)), this.daysToShow);
 
   public timeFrom: Dayjs = dayjs({ hours: 8 });
   public timeTo: Dayjs = dayjs({ hours: 20 });
@@ -90,6 +102,11 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
     this.subs.forEach(s => s.unsubscribe());
 
     this.calendarDaySmartCaching.dispose();
+  }
+
+  reload() {
+    this.calendarDaySmartCaching.reloadAll();
+    this.refreshFromToTime();
   }
 
   load() {

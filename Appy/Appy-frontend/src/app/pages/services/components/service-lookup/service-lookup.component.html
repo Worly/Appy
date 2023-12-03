@@ -1,7 +1,10 @@
 <app-button #buttonRef="elementRef" appElementRef width="100%"
-    [text]="value && value.name ? value.name : ('pages.services.CHOOSE_SERVICE' | translate)" look="custom" borderWidth="0"
-    [customColor]="serviceColorsService.get(value?.colorId)"
+    [text]="value && value.name ? value.name : ('pages.services.CHOOSE_SERVICE' | translate)" look="custom"
+    borderWidth="0" [customColor]="serviceColorsService.get(value?.colorId)"
     (onClick)="contextMenu.toggle(); search = ''; searchInput.focus()"></app-button>
+
+<app-button *ngIf="showClearButton && value != null" class="clear-button" look="transparent" icon="times"
+    (onClick)="clear()"></app-button>
 
 <app-context-menu #contextMenu [relativeTo]="buttonRef.elementRef" [copyOriginWidth]="true">
     <input #searchInput class="w-input search-input" type="text" placeholder="{{'SEARCH' | translate}}"
@@ -10,14 +13,14 @@
     <div *ngIf="services == null" style="height: 200px;">
         <app-loading></app-loading>
     </div>
-    <app-button *ngFor="let service of filteredServices" width="100%" [text]="service.name ?? ''" look="custom" borderWidth="0"
-        [customColor]="serviceColorsService.get(service.colorId)" (onClick)="selectService(service)">
+    <app-button *ngFor="let service of filteredServices" width="100%" [text]="service.name ?? ''" look="custom"
+        borderWidth="0" [customColor]="serviceColorsService.get(service.colorId)" (onClick)="selectService(service)">
         <div style="margin-left: auto;">[{{service.duration && service.duration.format("HH:mm")}}]</div>
     </app-button>
 
     <div *ngIf="services != null && filteredServices.length == 0" class="no-services-found">
         {{ "pages.services.NO_SERVICES_FOUND" | translate }}
-        <app-button icon="plus" text="{{'pages.services.ADD_SERVICE' | translate}}" color="success"
-            (onClick)="goToServices()"></app-button>
+        <app-button *ngIf="showNewButton" icon="plus" text="{{'pages.services.ADD_SERVICE' | translate}}"
+            color="success" (onClick)="goToServices()"></app-button>
     </div>
 </app-context-menu>

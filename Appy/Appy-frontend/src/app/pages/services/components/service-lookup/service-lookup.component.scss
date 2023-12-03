@@ -1,9 +1,16 @@
 :host {
     display: block;
+    position: relative;
     border-width: 1px;
     border-style: solid;
     border-color: var(--input-border-color);
     border-radius: var(--default-border-radius);
+}
+
+.clear-button {
+    position: absolute;
+    right: 2px;
+    top: 2px
 }
 
 .search-input {

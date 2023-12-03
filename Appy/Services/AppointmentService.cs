@@ -1,14 +1,15 @@
 ﻿using Appy.Domain;
 using Appy.DTOs;
 using Appy.Exceptions;
+using Appy.Services.SmartFiltering;
 using Microsoft.EntityFrameworkCore;
 
 namespace Appy.Services
 {
     public interface IAppointmentService
     {
-        Task<List<Appointment>> GetAll(DateOnly date, int facilityId);
-        Task<List<Appointment>> GetList(DateOnly date, Direction direction, int skip, int take, int facilityId);
+        Task<List<Appointment>> GetAll(DateOnly date, int facilityId, SmartFilter? filter);
+        Task<List<Appointment>> GetList(DateOnly date, Direction direction, int skip, int take, SmartFilter? filter, int facilityId);
         Task<Appointment> GetById(int id, int facilityId);
         Task<Appointment> AddNew(AppointmentDTO dto, int facilityId, bool ignoreTimeNotAvailable);
         Task<Appointment> Edit(int id, AppointmentDTO dto, int facilityId, bool ignoreTimeNotAvailable);
@@ -30,21 +31,23 @@ namespace Appy.Services
             this.workingHourService = workingHourService;
         }
 
-        public Task<List<Appointment>> GetAll(DateOnly date, int facilityId)
+        public Task<List<Appointment>> GetAll(DateOnly date, int facilityId, SmartFilter? filter)
         {
             return context.Appointments
                 .Include(a => a.Service)
                 .Include(a => a.Client)
                 .Where(s => s.FacilityId == facilityId && s.Date == date)
+                .ApplySmartFilter(filter)
                 .ToListAsync();
         }
 
-        public Task<List<Appointment>> GetList(DateOnly date, Direction direction, int skip, int take, int facilityId)
+        public Task<List<Appointment>> GetList(DateOnly date, Direction direction, int skip, int take, SmartFilter? filter, int facilityId)
         {
             var appointments = context.Appointments
                 .Include(a => a.Service)
                 .Include(a => a.Client)
-                .Where(s => s.FacilityId == facilityId);
+                .Where(s => s.FacilityId == facilityId)
+                .ApplySmartFilter(filter);
 
             if (direction == Direction.Forwards)
                 appointments = appointments.Where(s => s.Date >= date).OrderBy(s => s.Date).ThenBy(s => s.Time).ThenBy(s => s.Duration);
@@ -88,7 +91,7 @@ namespace Appy.Services
                 Notes = dto.Notes
             };
 
-            var sameDayAppointments = await GetAll(dto.Date, facilityId);
+            var sameDayAppointments = await GetAll(dto.Date, facilityId, null);
             var workingHours = await workingHourService.GetWorkingHours(dto.Date, facilityId);
             if (!ignoreTimeNotAvailable && !IsAppointmentTimeOk(sameDayAppointments, workingHours, appointment))
                 throw new ValidationException(nameof(AppointmentDTO.Time), "pages.appointments.errors.TIME_NOT_AVAILABLE");
@@ -120,7 +123,7 @@ namespace Appy.Services
             appointment.ClientId = client.Id;
             appointment.Notes = dto.Notes;
 
-            var sameDayAppointments = (await GetAll(dto.Date, facilityId)).Where(a => a.Id != appointment.Id).ToList();
+            var sameDayAppointments = (await GetAll(dto.Date, facilityId, null)).Where(a => a.Id != appointment.Id).ToList();
             var workingHours = await workingHourService.GetWorkingHours(dto.Date, facilityId);
             if (!ignoreTimeNotAvailable && !IsAppointmentTimeOk(sameDayAppointments, workingHours, appointment))
                 throw new ValidationException(nameof(AppointmentDTO.Time), "pages.appointments.errors.TIME_NOT_AVAILABLE");

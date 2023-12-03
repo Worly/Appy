@@ -32,6 +32,9 @@ export class ClientLookupComponent implements OnInit, OnDestroy {
     return this._value;
   }
 
+  @Input() showNewButton: boolean = true;
+  @Input() showClearButton: boolean = false;
+
   @Output() valueChange: EventEmitter<ClientDTO> = new EventEmitter();
 
   @Output() clientSelected: EventEmitter<{ oldClient?: ClientDTO, newClient?: ClientDTO }> = new EventEmitter();
@@ -158,6 +161,9 @@ export class ClientLookupComponent implements OnInit, OnDestroy {
     this.contextMenu?.toggle();
       this.search?.clearAndFocus();
     setTimeout(() => this.contextMenu?.container?.nativeElement.scrollTo({ top: 0 }));
+  }
 
+  clear() {
+    this.value = undefined;
   }
 }

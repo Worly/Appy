@@ -3,7 +3,6 @@ using Appy.DTOs;
 using Appy.Exceptions;
 using EntityFramework.Exceptions.Common;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
 
 namespace Appy.Services
 {

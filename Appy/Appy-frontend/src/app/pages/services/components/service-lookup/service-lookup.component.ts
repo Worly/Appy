@@ -14,6 +14,9 @@ export class ServiceLookupComponent implements OnInit {
   @Input() value?: ServiceDTO;
   @Output() valueChange: EventEmitter<ServiceDTO> = new EventEmitter();
 
+  @Input() showNewButton: boolean = true;
+  @Input() showClearButton: boolean = false;
+
   @Output() serviceSelected: EventEmitter<{ oldService?: ServiceDTO, newService: ServiceDTO }> = new EventEmitter();
 
   services?: Service[];
@@ -85,5 +88,9 @@ export class ServiceLookupComponent implements OnInit {
 
   goToServices() {
     this.router.navigate(["services"]);
+  }
+
+  clear() {
+    this.value = undefined;
   }
 }

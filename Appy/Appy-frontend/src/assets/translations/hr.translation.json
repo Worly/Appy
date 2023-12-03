@@ -39,6 +39,9 @@
     "UNARCHIVE": "Dearhiviraj",
     "NEW": "Novi",
     "UNDO": "Poništi",
+    "FILTER": "Filter",
+    "APPLY": "Primijeni",
+    "CLEAR": "Očisti",
 
     "pages": {
         "error": {

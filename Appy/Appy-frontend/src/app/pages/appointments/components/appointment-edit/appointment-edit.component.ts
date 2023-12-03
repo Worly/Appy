@@ -10,7 +10,7 @@ import { setUrlParams } from 'src/app/utils/dynamic-url-params';
 import dayjs, { Dayjs } from 'dayjs';
 import { parseDuration } from 'src/app/utils/time-utils';
 import { HttpErrorResponse } from '@angular/common/http';
-import { AppointmentService } from '../../services/appointment.service.ts';
+import { AppointmentService } from '../../services/appointment.service';
 import { TranslateService } from 'src/app/components/translate/translate.service';
 import { ClientDTO } from 'src/app/models/client';
 

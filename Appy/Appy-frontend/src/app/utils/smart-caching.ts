@@ -43,6 +43,18 @@ export class SmartCaching<keyT, valueT> {
         return d.data;
     }
 
+    public reloadAll() {
+        for (let data of this._data) {
+            data.subscription?.unsubscribe();
+            data.subscription = null;
+
+            data.hasData = false;
+            data.data = null;
+        }
+
+        this.callLoad();
+    }
+
     public load(key: keyT) {
         let newData: Data<keyT, valueT>[] = [];
 
@@ -147,5 +159,5 @@ export type Data<keyT, valueT> = {
     data: valueT | null;
     hasData: boolean;
     show: boolean;
-    subscription: Subscription;
+    subscription: Subscription | null;
 };
