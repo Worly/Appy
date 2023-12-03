@@ -3,14 +3,42 @@
         (onCalendarClick)="onCalendarClick($event)">
     </app-appointments-scroller>
 
-    <app-appointments-list *ngIf="type == 'list'" [(date)]="date">
+    <app-appointments-list *ngIf="type == 'list'" [(date)]="date" [filter]="filter">
     </app-appointments-list>
 </div>
 
 <app-action-bar #actionBar [floatAlways]="true">
     <app-button [iconPrefix]="type == 'scroller' ? 'far' : 'fas'"
-        [icon]="type == 'scroller' ? 'calendar-days' : 'table-list'" [isCircle]="false" (onClick)="type = (type == 'scroller' ? 'list' : 'scroller')"></app-button>
+        [icon]="type == 'scroller' ? 'calendar-days' : 'table-list'" [isCircle]="false"
+        (onClick)="type = (type == 'scroller' ? 'list' : 'scroller')"></app-button>
+    <app-button icon="filter" [isCircle]="false" (onClick)="filterDialog.open()"></app-button>
     <app-button class="new-button" icon="plus" color="success" look="solid" alignContent="center" (onClick)="goToNew()">
     </app-button>
     <app-date-selector flex-splitter [(date)]="date" [compact]="true"></app-date-selector>
 </app-action-bar>
+
+<app-dialog #filterDialog>
+    <div *ngIf="filterDialog.isOpen">
+        <div class="filter-title">{{'FILTER' | translate}}</div>
+        <div class="w-input-container">
+            <div class="w-label">{{'pages.clients.CLIENT' | translate}}</div>
+            <app-client-lookup #clientFilter [value]="filter.client" [showNewButton]="false">
+            </app-client-lookup>
+        </div>
+
+        <div class="w-input-container">
+            <div class="w-label">{{'pages.services.SERVICE' | translate}}</div>
+            <app-service-lookup #serviceFilter [value]="filter.service" [showNewButton]="false">
+            </app-service-lookup>
+        </div>
+
+        <div class="filter-action-bar">
+            <app-button [text]="'CLEAR' | translate" color="danger" look="solid"
+                (onClick)="applyFilter({})"></app-button>
+            <app-button style="margin-left: auto" [text]="'CANCEL' | translate" color="danger" look="normal"
+                (onClick)="filterDialog.close()"></app-button>
+            <app-button [text]="'APPLY' | translate" color="success" look="solid"
+                (onClick)="applyFilter({client: clientFilter.value, service: serviceFilter.value})"></app-button>
+        </div>
+    </div>
+</app-dialog>

@@ -4,8 +4,33 @@ import { ActivatedRoute, Router } from '@angular/router';
 import dayjs, { Dayjs } from 'dayjs';
 import { Subscription } from 'rxjs';
 import { BeforeAttach, BeforeDetach } from 'src/app/services/attach-detach-hooks.service';
+import { ClientDTO } from 'src/app/models/client';
+import { ServiceDTO } from 'src/app/models/service';
 import { setUrlParams } from 'src/app/utils/dynamic-url-params';
 import { AppointmentsListComponent } from '../appointments-list/appointments-list.component';
+import { DialogComponent } from 'src/app/components/dialog/dialog.component';
+import { FieldFilter, SmartFilter } from 'src/app/shared/services/smart-filter';
+
+export type AppointmentsFilter = {
+  client?: ClientDTO
+  service?: ServiceDTO
+};
+
+export function appFilterToSmartFilter(filter: AppointmentsFilter): SmartFilter | undefined {
+  let fieldFilters: SmartFilter[] = [];
+
+  if (filter.client != null)
+    fieldFilters.push(["client.id", "==", filter.client.id])
+
+  if (filter.service != null)
+    fieldFilters.push(["service.id", "==", filter.service?.id])
+
+  if (fieldFilters.length == 0) {
+    return undefined;
+  }
+
+  return fieldFilters.reduce((a, b) => [a, "and", b]);
+}
 
 @Component({
   selector: 'app-appointments',
@@ -14,6 +39,8 @@ import { AppointmentsListComponent } from '../appointments-list/appointments-lis
 })
 export class AppointmentsComponent implements OnInit, OnDestroy, BeforeDetach, BeforeAttach {
   @ViewChild(AppointmentsListComponent) appointmentListComponent?: AppointmentsListComponent;
+
+  @ViewChild("filterDialog") filterDialog?: DialogComponent;
 
   private _date: Dayjs = dayjs();
   public set date(value: Dayjs) {
@@ -40,6 +67,8 @@ export class AppointmentsComponent implements OnInit, OnDestroy, BeforeDetach, B
   public get type(): AppointmentsDisplayType {
     return this._type;
   }
+
+  filter: AppointmentsFilter = {}
 
   private readonly TYPE_KEY = "APPOINTMENTS_TYPE";
 
@@ -103,6 +132,12 @@ export class AppointmentsComponent implements OnInit, OnDestroy, BeforeDetach, B
 
   onCalendarClick(time: Dayjs) {
     this.goToNew(time, time);
+  }
+
+  applyFilter(filter: AppointmentsFilter) {
+    this.filterDialog?.close();
+
+    this.filter = filter;
   }
 }
 

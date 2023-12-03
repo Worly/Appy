@@ -1,12 +1,14 @@
 import { ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import dayjs, { Dayjs } from 'dayjs';
 import { Duration } from 'dayjs/plugin/duration';
+import _ from 'lodash';
 import { DialogComponent } from 'src/app/components/dialog/dialog.component';
 import { Appointment } from 'src/app/models/appointment';
 import { ServiceColorsService } from 'src/app/pages/services/services/service-colors.service';
 import { BeforeAttach, BeforeDetach } from 'src/app/services/attach-detach-hooks.service';
 import { PageableListDatasource } from 'src/app/shared/services/base-model-service';
 import { AppointmentService } from '../../services/appointment.service.ts';
+import { appFilterToSmartFilter, AppointmentsFilter } from '../appointments/appointments.component';
 
 @Component({
   selector: 'app-appointments-list',
@@ -34,6 +36,15 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
     return this._date;
   }
   @Output() dateChange: EventEmitter<Dayjs> = new EventEmitter();
+
+  private _filter: AppointmentsFilter = {};
+  @Input() set filter(value: AppointmentsFilter) {
+    if (_.isEqual(this._filter, value))
+      return;
+
+    this._filter = value;
+    this.load();
+  }
 
   private startDate: Dayjs = dayjs();
 
@@ -80,7 +91,7 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
     this.appointments = null;
     this.renderAppointments();
 
-    this.datasource = this.appointmentService.getList(this.date, appointmentSort);
+    this.datasource = this.appointmentService.getList(this.date, appFilterToSmartFilter(this._filter), appointmentSort);
     this.datasource.subscribe({
       next: a => {
         this.appointments = a;
