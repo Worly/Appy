@@ -39,6 +39,9 @@
     "UNARCHIVE": "Unarchive",
     "NEW": "New",
     "UNDO": "Undo",
+    "FILTER": "Filter",
+    "APPLY": "Apply",
+    "CLEAR": "Clear",
 
     "pages": {
         "error": {
