@@ -9,10 +9,11 @@ import { ServiceDTO } from 'src/app/models/service';
 import { setUrlParams } from 'src/app/utils/dynamic-url-params';
 import { AppointmentsListComponent } from '../appointments-list/appointments-list.component';
 import { DialogComponent } from 'src/app/components/dialog/dialog.component';
-import { FieldFilter, SmartFilter } from 'src/app/shared/services/smart-filter';
+import { SmartFilter } from 'src/app/shared/services/smart-filter';
+import _ from 'lodash';
 
 export type AppointmentsFilter = {
-  client?: ClientDTO
+  client?: ClientDTO,
   service?: ServiceDTO
 };
 
@@ -23,7 +24,7 @@ export function appFilterToSmartFilter(filter: AppointmentsFilter): SmartFilter 
     fieldFilters.push(["client.id", "==", filter.client.id])
 
   if (filter.service != null)
-    fieldFilters.push(["service.id", "==", filter.service?.id])
+    fieldFilters.push(["service.id", "==", filter.service.id])
 
   if (fieldFilters.length == 0) {
     return undefined;
@@ -68,7 +69,18 @@ export class AppointmentsComponent implements OnInit, OnDestroy, BeforeDetach, B
     return this._type;
   }
 
-  filter: AppointmentsFilter = {}
+  private _filter: AppointmentsFilter = {}
+  public set filter(value: AppointmentsFilter) {
+    if (_.isEqual(this._filter, value))
+      return;
+
+    this._filter = value;
+
+    this.updateUrl();
+  }
+  public get filter(): AppointmentsFilter {
+    return this._filter;
+  }
 
   private readonly TYPE_KEY = "APPOINTMENTS_TYPE";
 
@@ -85,6 +97,10 @@ export class AppointmentsComponent implements OnInit, OnDestroy, BeforeDetach, B
       let dateStr = params.get("date");
       if (dateStr != null)
         this.date = dayjs(dateStr, "YYYY-MM-DD");
+
+      let filterStr = params.get("filter");
+      if (filterStr != null)
+        this.filter = JSON.parse(filterStr);
     }));
 
     let type = localStorage.getItem(this.TYPE_KEY);
@@ -107,10 +123,18 @@ export class AppointmentsComponent implements OnInit, OnDestroy, BeforeDetach, B
   }
 
   private updateUrl() {
-    setUrlParams(this.router, this.activatedRoute, this.location, {
-      date: this.date.format("YYYY-MM-DD"),
-      type: this.type
-    });
+    let params: any = {
+      date: this.date.format("YYYY-MM-DD")
+    }
+
+    if (_.isEqual(this.filter, {})) {
+      params.filter = undefined;
+    }
+    else {
+      params.filter = JSON.stringify(this.filter);
+    }
+
+    setUrlParams(this.router, this.activatedRoute, this.location, params);
   }
 
   private updateLocalStorage() {
