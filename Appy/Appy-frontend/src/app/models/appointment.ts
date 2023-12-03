@@ -1,4 +1,4 @@
-import { BaseModel, REQUIRED_VALIDATION, Validation } from "./base-model";
+import { Model, REQUIRED_VALIDATION, Validation } from "./base-model";
 import { ServiceDTO } from "./service";
 import dayjs from "dayjs";
 import { Dayjs } from "dayjs";
@@ -18,7 +18,7 @@ export class AppointmentDTO {
     public notes?: string;
 }
 
-export class Appointment extends BaseModel {
+export class Appointment extends Model<Appointment> {
     public id: number;
     public date?: Dayjs;
     public time?: Dayjs;
@@ -29,7 +29,7 @@ export class Appointment extends BaseModel {
 
     public notes?: string;
 
-    override validations: Validation[] = [
+    override validations: Validation<Appointment>[] = [
         {
             isValid: () => REQUIRED_VALIDATION(this.date),
             propertyName: "date",

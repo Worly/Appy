@@ -1,16 +1,19 @@
 import { Location } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import dayjs, { Dayjs } from 'dayjs';
 import { Subscription } from 'rxjs';
+import { BeforeAttach, BeforeDetach } from 'src/app/services/attach-detach-hooks.service';
 import { setUrlParams } from 'src/app/utils/dynamic-url-params';
+import { AppointmentsListComponent } from '../appointments-list/appointments-list.component';
 
 @Component({
   selector: 'app-appointments',
   templateUrl: './appointments.component.html',
   styleUrls: ['./appointments.component.scss']
 })
-export class AppointmentsComponent implements OnInit, OnDestroy {
+export class AppointmentsComponent implements OnInit, OnDestroy, BeforeDetach, BeforeAttach {
+  @ViewChild(AppointmentsListComponent) appointmentListComponent?: AppointmentsListComponent;
 
   private _date: Dayjs = dayjs();
   public set date(value: Dayjs) {
@@ -64,6 +67,14 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subs.forEach(s => s.unsubscribe());
+  }
+
+  ngBeforeDetach(): void {
+    this.appointmentListComponent?.ngBeforeDetach();
+  }
+
+  ngBeforeAttach(): void {
+    this.appointmentListComponent?.ngBeforeAttach();
   }
 
   private updateUrl() {
