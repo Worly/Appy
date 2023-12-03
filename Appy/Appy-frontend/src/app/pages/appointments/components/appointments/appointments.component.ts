@@ -127,7 +127,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy, BeforeDetach, B
       date: this.date.format("YYYY-MM-DD")
     }
 
-    if (_.isEqual(this.filter, {})) {
+    if (!this.hasFilters()) {
       params.filter = undefined;
     }
     else {
@@ -159,7 +159,11 @@ export class AppointmentsComponent implements OnInit, OnDestroy, BeforeDetach, B
   }
 
   hasFilters(): boolean {
-    return !_.isEqual(this.filter, {});
+    for (let p in this.filter) {
+      if ((<any>this.filter)[p] != null)
+        return true;
+    }
+    return false;
   }
 
   applyFilter(filter: AppointmentsFilter) {
