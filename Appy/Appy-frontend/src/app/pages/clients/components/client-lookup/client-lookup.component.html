@@ -2,6 +2,8 @@
     [text]="value && value.nickname ? value.nickname : ('pages.clients.CHOOSE_CLIENT' | translate)"
     (onClick)="openContextMenu()"></app-button>
 
+<app-button *ngIf="showClearButton && value != null" class="clear-button" look="transparent" icon="times" (onClick)="clear()"></app-button>
+
 <app-context-menu #contextMenu [relativeTo]="buttonRef.elementRef" [copyOriginWidth]="true">
     <div class="search-input-container">
         <app-search [source]="clients" (onSearch)="filteredClients = $event.filteredSource"></app-search>

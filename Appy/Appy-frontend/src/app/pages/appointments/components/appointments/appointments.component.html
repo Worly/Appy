@@ -23,7 +23,7 @@
         <div class="filter-title">{{'FILTER' | translate}}</div>
         <div class="w-input-container">
             <div class="w-label">{{'pages.clients.CLIENT' | translate}}</div>
-            <app-client-lookup #clientFilter [value]="filter.client" [showNewButton]="false">
+            <app-client-lookup #clientFilter [value]="filter.client" [showNewButton]="false" [showClearButton]="true">
             </app-client-lookup>
         </div>
 
