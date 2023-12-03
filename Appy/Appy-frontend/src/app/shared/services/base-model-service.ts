@@ -6,6 +6,7 @@ import { Model } from "../../models/base-model";
 import { isEqual, reduceRight } from "lodash-es";
 import { IGNORE_NOT_FOUND } from "./errors/error-interceptor.service";
 import { getInsertIndex, isSorted } from "src/app/utils/array-utils";
+import { applySmartFilter, SmartFilter } from "./smart-filter";
 
 export class BaseModelService<T extends Model<T>> implements IEntityTracker<T> {
 
@@ -70,7 +71,7 @@ export class BaseModelService<T extends Model<T>> implements IEntityTracker<T> {
         });
     }
 
-    public getListAdvanced(params: any, sortPredicate: (a: T, b: T) => number, filterPredicate?: (e: T) => boolean): PageableListDatasource<T> {
+    public getListAdvanced(params: any, sortPredicate: (a: T, b: T) => number, filter?: SmartFilter, filterPredicate?: (e: T) => boolean): PageableListDatasource<T> {
         let loadFunction = (dir: "forwards" | "backwards", skip: number, take: number): Observable<T[]> => {
             let p = {
                 ...params,
@@ -79,12 +80,17 @@ export class BaseModelService<T extends Model<T>> implements IEntityTracker<T> {
                 take: take
             };
 
+            if (filter != null)
+                p.filter = JSON.stringify(filter);
+
             return this.httpClient.get<T[]>(`${appConfig.apiUrl}${this.controllerName}/getList`, {
                 params: p
             }).pipe(map(r => r.map(o => new this.typeFactory(o))));
         };
 
-        let datasource = this.createPageableDatasourceInternal(loadFunction, sortPredicate, filterPredicate);
+        let filterFunc = (e: T) => (filter == null || applySmartFilter(e, filter)) && (filterPredicate == null || filterPredicate(e));
+
+        let datasource = this.createPageableDatasourceInternal(loadFunction, sortPredicate, filterFunc);
         datasource.load();
 
         return datasource;
@@ -477,7 +483,7 @@ export class PageableListDatasource<T extends Model<T>> implements IDatasource<T
     subscribe(observer: Partial<Observer<T[]>>): Subscription {
         return new Observable<T[]>(s => {
             this.subscribers.push(s);
-            
+
             if (!this.isFirstLoading)
                 s.next([...this.data]);
         }).subscribe(observer);
