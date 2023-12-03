@@ -145,11 +145,21 @@ export class AppointmentsComponent implements OnInit, OnDestroy, BeforeDetach, B
     if (date == null)
       date = this.date;
 
+    let params: any = {
+      date: date.format("YYYY-MM-DD")
+    }
+
+    if (clickedTime)
+      params.time = clickedTime.format("HH:00:00")
+
+    if (this.filter.client != null)
+      params.client = JSON.stringify(this.filter.client);
+
+    if (this.filter.service != null)
+      params.service = JSON.stringify(this.filter.service);
+
     this.router.navigate(["new"], {
-      queryParams: {
-        date: date.format("YYYY-MM-DD"),
-        time: clickedTime ? clickedTime.format("HH:00:00") : null
-      },
+      queryParams: params,
       relativeTo: this.activatedRoute
     });
   }
