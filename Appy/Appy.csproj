@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <SpaRoot>Appy-frontend\</SpaRoot>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
+    <ServerGarbageCollection>false</ServerGarbageCollection>
   </PropertyGroup>
 
   <ItemGroup>
