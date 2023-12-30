@@ -46,7 +46,7 @@ export class ButtonComponent implements OnInit {
 
   @Input() spinIcon: boolean = false;
 
-  @Input() isCircle: boolean = true;
+  @Input() isCircle: boolean = false;
 
   @Input() isLoading: boolean = false;
 
