@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, Data, ParamMap } from '@angular/router';
+import { ActivatedRoute, Data, ParamMap, Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { combineLatest, debounceTime, Observable, Subscription } from 'rxjs';
 import { NotifyDialogService } from 'src/app/components/notify-dialog/notify-dialog.service';
@@ -31,6 +31,7 @@ export class ClientEditComponent implements OnInit, OnDestroy {
   constructor(
     private location: Location,
     private activatedRoute: ActivatedRoute,
+    private router: Router,
     private clientService: ClientService,
     private notifyDialogService: NotifyDialogService,
     private translateService: TranslateService
@@ -151,5 +152,17 @@ export class ClientEditComponent implements OnInit, OnDestroy {
       return this.client.surname as string;
 
     return undefined;
+  }
+
+  public goToFilteredAppointments() {
+    let filter = {
+      client: this.client?.getDTO()
+    }
+    
+    this.router.navigate(["appointments"], {
+      queryParams: {
+        filter: JSON.stringify(filter)
+      }
+    })
   }
 }
