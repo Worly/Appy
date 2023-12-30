@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { IconName, IconPrefix } from '@fortawesome/fontawesome-svg-core';
 
 @Component({
@@ -7,6 +7,7 @@ import { IconName, IconPrefix } from '@fortawesome/fontawesome-svg-core';
   styleUrls: ['./button.component.scss']
 })
 export class ButtonComponent implements OnInit {
+  @ViewChild("myButton") myButton?: ElementRef<HTMLElement>;
 
   @Input() text: string | null = null;
 
@@ -64,6 +65,8 @@ export class ButtonComponent implements OnInit {
     event.stopPropagation();
 
     this.onClick.emit();
+
+    setTimeout(() => this.myButton?.nativeElement.blur(), 100);
   }
 
 }
