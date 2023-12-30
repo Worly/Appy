@@ -168,18 +168,19 @@ export class AppointmentsComponent implements OnInit, OnDestroy, BeforeDetach, B
     return !this.date.isSame(dayjs(), "date");
   }
 
+  lastDirection: "up" | "down" | "left" | "right" = "up";
   getTodayDirection(): "up" | "down" | "left" | "right" {
     let today = dayjs();
     if (this.date.isBefore(today, "date")) {
-      if (this.type == "list") return "down";
-      if (this.type == "scroller") return "right";
+      if (this.type == "list") return this.lastDirection = "down";
+      if (this.type == "scroller") return this.lastDirection = "right";
     }
-    else {
-      if (this.type == "list") return "up";
-      if (this.type == "scroller") return "left";
+    else if (this.date.isAfter(today, "date")) {
+      if (this.type == "list") return this.lastDirection = "up";
+      if (this.type == "scroller") return this.lastDirection = "left";
     }
 
-    return "up";
+    return this.lastDirection;
   }
 
   goToToday() {

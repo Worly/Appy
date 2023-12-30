@@ -23,9 +23,14 @@
     position: fixed;
     bottom: 135px;
 
+    transition: opacity 0.2s;
+
     div.my-button {
         box-shadow: 0 2px 8px -2px var(--text);
     }
+}
+::ng-deep .back-to-today-button.hidden {
+    opacity: 0;
 }
 
 .filter-title {
