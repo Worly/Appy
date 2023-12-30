@@ -4,7 +4,7 @@
     (onClick)="contextMenu.toggle(); search = ''; searchInput.focus()"></app-button>
 
 <app-button *ngIf="showClearButton && value != null" class="clear-button" look="transparent" icon="times"
-    (onClick)="clear()"></app-button>
+    [isCircle]="true" (onClick)="clear()"></app-button>
 
 <app-context-menu #contextMenu [relativeTo]="buttonRef.elementRef" [copyOriginWidth]="true">
     <input #searchInput class="w-input search-input" type="text" placeholder="{{'SEARCH' | translate}}"

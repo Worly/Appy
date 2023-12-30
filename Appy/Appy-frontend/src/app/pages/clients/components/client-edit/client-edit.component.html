@@ -55,7 +55,7 @@
                 (onClick)="unarchiveClient()">
             </app-button>
         </app-action-dropdown>
-        <app-button *ngIf="!isNew" icon="calendar-week" [isCircle]="false" (onClick)="goToFilteredAppointments()"></app-button>
+        <app-button *ngIf="!isNew" icon="calendar-week" (onClick)="goToFilteredAppointments()"></app-button>
         <app-button flex-splitter [text]="'CANCEL' | translate" color="danger" look="normal" [disabled]="isLoading"
             (onClick)="cancel()"></app-button>
         <app-button [text]="'SAVE' | translate" color="success" look="solid" [disabled]="isLoading"

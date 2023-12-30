@@ -1,6 +1,6 @@
 <ng-template #template>
     <div class="w-card dialog-container">
-        <app-button *ngIf="showCloseButton" class="close-button" look="transparent" icon="times" (onClick)="close()"></app-button>
+        <app-button *ngIf="showCloseButton" class="close-button" look="transparent" icon="times" [isCircle]="true" (onClick)="close()"></app-button>
         <ng-content></ng-content>
     </div>
 </ng-template>

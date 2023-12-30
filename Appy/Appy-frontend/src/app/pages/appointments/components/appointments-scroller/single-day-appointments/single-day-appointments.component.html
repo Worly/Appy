@@ -5,14 +5,14 @@
     </div>
     <div *ngIf="showDateControls" [style.height]="'100%'">
         <div class="date-controls">
-            <app-button class="arrow-button" icon="angle-left" alignContent="center" [isCircle]="false" [curved]="false"
+            <app-button class="arrow-button" icon="angle-left" alignContent="center" [curved]="false"
                 look="transparent" [curvedBottomLeft]="true" [curvedTopLeft]="true" [curvedBottomRight]="false"
                 [curvedTopRight]="false" (onClick)="dateControlPrevious.emit()">
             </app-button>
             <app-button class="date-button" [text]="date?.format('ddd DD.MM.YY') ?? ''" alignContent="center"
                 look="transparent" [curved]="false" (onClick)="calendarDialog.open()">
             </app-button>
-            <app-button class="arrow-button" icon="angle-right" alignContent="center" [isCircle]="false"
+            <app-button class="arrow-button" icon="angle-right" alignContent="center" 
                 [curved]="false" look="transparent" [curvedBottomLeft]="false" [curvedTopLeft]="false"
                 [curvedBottomRight]="true" [curvedTopRight]="true" (onClick)="dateControlNext.emit()">
             </app-button>

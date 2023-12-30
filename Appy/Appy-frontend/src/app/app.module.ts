@@ -23,11 +23,13 @@ import { ContextMenuModule } from './components/context-menu/context-menu.module
 import { SharedModule } from './shared/shared.module';
 
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
-import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 import { faCaretDown } from "@fortawesome/free-solid-svg-icons/faCaretDown";
 import { faCaretUp } from "@fortawesome/free-solid-svg-icons/faCaretUp";
+import { faAngleUp } from "@fortawesome/free-solid-svg-icons/faAngleUp";
+import { faAngleDown } from "@fortawesome/free-solid-svg-icons/faAngleDown";
+import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
+import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 import { faEllipsisV } from "@fortawesome/free-solid-svg-icons/faEllipsisV";
 import { faPen } from "@fortawesome/free-solid-svg-icons/faPen";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
@@ -120,7 +122,7 @@ export class AppModule {
     library.addIcons(
       faBars,
       faSpinner,
-      faAngleLeft, faAngleRight,
+      faAngleUp, faAngleDown, faAngleLeft, faAngleRight,
       faTimes, faPlus,
       faCaretDown, faCaretUp,
       faTrash, faPen,

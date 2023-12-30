@@ -2,4 +2,5 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(1px, 1fr));
     gap: 10px;
+    margin-bottom: 60px; // make space for 'back-to-today' button
 }

@@ -63,7 +63,7 @@
     --inside-border-radius: calc(var(--default-border-radius) - var(--border-width));
 }
 
-.curved.icon-only.circle {
+.curved.circle {
     --border-radius: 1000px;
     --inside-border-radius: 1000px;
 }

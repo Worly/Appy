@@ -1,3 +1,3 @@
 <input #searchInput class="w-input search-input" type="search" placeholder="🔍&#xFE0E; {{'SEARCH' | translate}}"
     [(ngModel)]="search">
-<app-button class="clear-button" icon="times" look="transparent" (onClick)="search = ''"></app-button>
+<app-button class="clear-button" icon="times" look="transparent" [isCircle]="true" (onClick)="search = ''"></app-button>
