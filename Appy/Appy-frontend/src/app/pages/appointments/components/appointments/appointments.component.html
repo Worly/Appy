@@ -9,11 +9,13 @@
 
 <app-action-bar #actionBar [floatAlways]="true">
     <app-button [iconPrefix]="type == 'scroller' ? 'far' : 'fas'"
-        [icon]="type == 'scroller' ? 'calendar-days' : 'table-list'" [isCircle]="false"
+        [icon]="type == 'scroller' ? 'calendar-days' : 'table-list'"
         (onClick)="type = (type == 'scroller' ? 'list' : 'scroller')"></app-button>
-    <app-button icon="filter" [isCircle]="false" look="custom" [customBorderColor]="hasFilters() ? 'var(--danger)' : 'var(--input-background-color)'"
+    <app-button icon="filter" look="custom"
+        [customBorderColor]="hasFilters() ? 'var(--danger)' : 'var(--input-background-color)'"
         (onClick)="filterDialog.open()"></app-button>
-    <app-button class="new-button" icon="plus" color="success" look="solid" alignContent="center" (onClick)="goToNew()">
+    <app-button class="new-button" icon="plus" [isCircle]="true" color="success" look="solid" alignContent="center"
+        (onClick)="goToNew()">
     </app-button>
     <app-date-selector flex-splitter [(date)]="date" [compact]="true"></app-date-selector>
 </app-action-bar>
@@ -29,7 +31,8 @@
 
         <div class="w-input-container">
             <div class="w-label">{{'pages.services.SERVICE' | translate}}</div>
-            <app-service-lookup #serviceFilter [value]="filter.service" [showNewButton]="false" [showClearButton]="true">
+            <app-service-lookup #serviceFilter [value]="filter.service" [showNewButton]="false"
+                [showClearButton]="true">
             </app-service-lookup>
         </div>
 
