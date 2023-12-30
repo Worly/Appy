@@ -7,6 +7,9 @@
     </app-appointments-list>
 </div>
 
+<app-button *ngIf="shouldShowTodayButton()" class="back-to-today-button" [text]="'TODAY' | translate" [look]="'outlined'" [borderWidth]="'1px'"
+    [isCircle]="true" [icon]="$any('angle-' + getTodayDirection())" (onClick)="goToToday()"></app-button>
+
 <app-action-bar #actionBar [floatAlways]="true">
     <app-button [iconPrefix]="type == 'scroller' ? 'far' : 'fas'"
         [icon]="type == 'scroller' ? 'calendar-days' : 'table-list'"

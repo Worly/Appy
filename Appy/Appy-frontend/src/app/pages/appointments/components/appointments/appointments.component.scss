@@ -19,6 +19,15 @@
     }
 }
 
+::ng-deep .back-to-today-button {
+    position: fixed;
+    bottom: 135px;
+
+    div.my-button {
+        box-shadow: 0 2px 8px -2px var(--text);
+    }
+}
+
 .filter-title {
     font-size: 1.6rem;
     font-weight: bold;

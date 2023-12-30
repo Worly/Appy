@@ -164,6 +164,28 @@ export class AppointmentsComponent implements OnInit, OnDestroy, BeforeDetach, B
     });
   }
 
+  shouldShowTodayButton() {
+    return !this.date.isSame(dayjs(), "date");
+  }
+
+  getTodayDirection(): "up" | "down" | "left" | "right" {
+    let today = dayjs();
+    if (this.date.isBefore(today, "date")) {
+      if (this.type == "list") return "down";
+      if (this.type == "scroller") return "right";
+    }
+    else {
+      if (this.type == "list") return "up";
+      if (this.type == "scroller") return "left";
+    }
+
+    return "up";
+  }
+
+  goToToday() {
+    this.date = dayjs();
+  }
+
   onCalendarClick(time: Dayjs) {
     this.goToNew(time, time);
   }
