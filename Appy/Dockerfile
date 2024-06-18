@@ -18,5 +18,10 @@ RUN dotnet publish -c Release -o out
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
 WORKDIR /app
+RUN apt-get update -yq \
+    && apt-get install curl -yq
+
 COPY --from=build-env /app/out .
 ENTRYPOINT ["dotnet", "Appy.dll"]
+
+HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=2 CMD curl --fail http://localhost:80/health || exit 1

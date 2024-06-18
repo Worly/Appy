@@ -4,6 +4,7 @@ using Appy.Services;
 using Appy.Services.Facilities;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +51,8 @@ builder.Services.AddSpaStaticFiles(configuration =>
     configuration.RootPath = "Appy-frontend/build";
 });
 
+builder.Services.AddHealthChecks().AddCheck("self", () => HealthCheckResult.Healthy());
+
 var app = builder.Build();
 
 app.UseHttpsRedirection();
@@ -77,6 +80,7 @@ app.UseAuthorization();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
+    endpoints.MapHealthChecks("/health");
 });
 
 app.UseSpa(spa =>
