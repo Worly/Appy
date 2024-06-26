@@ -49,6 +49,7 @@ import { faCalendarDays } from "@fortawesome/free-regular-svg-icons/faCalendarDa
 import { faTableList } from "@fortawesome/free-solid-svg-icons/faTableList";
 import { faFilter } from "@fortawesome/free-solid-svg-icons/faFilter";
 import { faFileLines } from "@fortawesome/free-regular-svg-icons/faFileLines";
+import { faWhatsapp } from "@fortawesome/free-brands-svg-icons/faWhatsapp"
 
 import dayjs from "dayjs";
 import "dayjs/locale/hr";
@@ -132,7 +133,8 @@ export class AppModule {
       faBoxArchive,
       faCircleCheck, farCircleCheck,
       faHouse, faHandHoldingHeart, faUsers, faCalendarWeek, faRightFromBracket,
-      faCalendarDays, faTableList, faFilter, faFileLines
+      faCalendarDays, faTableList, faFilter, faFileLines,
+      faWhatsapp
     );
   }
 

@@ -1,3 +1,17 @@
 .notes-text-area {
     height: 10rem;
 }
+
+.input-with-buttons {
+    position: relative;
+
+    .w-input {
+        padding-right: 40px;
+    }
+
+    app-button {
+        position: absolute;
+        top: 3px;
+        right: 3px;
+    }
+}

@@ -7,6 +7,7 @@ import { TranslateService } from 'src/app/components/translate/translate.service
 import { HttpErrorResponse } from '@angular/common/http';
 import { Client } from 'src/app/models/client';
 import { ClientService } from '../../services/client.service';
+import { parsePhoneNumber } from 'libphonenumber-js';
 
 @Component({
   selector: 'app-client-edit',
@@ -164,5 +165,20 @@ export class ClientEditComponent implements OnInit, OnDestroy {
         filter: JSON.stringify(filter)
       }
     })
+  }
+
+  public openWapp() {
+    if (!this.client?.phoneNumber) {
+      return
+    }
+
+    let phoneNumber = parsePhoneNumber(this.client.phoneNumber, "HR")
+    if (!phoneNumber.isValid()) {
+      console.log("Invalid phone number!");
+    }
+
+    // substr removes '+' sign at the begging
+    let normalized = phoneNumber.format("E.164").substring(1);
+    window.open(`whatsapp://send?phone=${normalized}`)
   }
 }

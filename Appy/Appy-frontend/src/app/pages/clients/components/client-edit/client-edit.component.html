@@ -24,8 +24,11 @@
     </div>
     <div class="w-input-container">
         <div class="w-label">{{'pages.clients.PHONE_NUMBER' | translate}}</div>
-        <input class="w-input" type="text" [style.width]="'100%'"
-            placeholder="{{'pages.clients.PHONE_NUMBER' | translate}}" [(ngModel)]="client.phoneNumber">
+        <div class="input-with-buttons">
+            <input class="w-input" type="text" [style.width]="'100%'"
+                placeholder="{{'pages.clients.PHONE_NUMBER' | translate}}" [(ngModel)]="client.phoneNumber">
+            <app-button *ngIf="client.phoneNumber" iconPrefix="fab" icon="whatsapp" (onClick)="openWapp()"></app-button>
+        </div>
         <div class="w-validation-message">{{ client.getValidationErrors("phoneNumber") | translate }}</div>
     </div>
     <div class="w-input-container">
