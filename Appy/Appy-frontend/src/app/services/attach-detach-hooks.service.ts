@@ -50,9 +50,9 @@ export class AttachDetachHooksService {
     }
 
     private triggerHooksFromRouterEvents(event: Event) {
-
         if (event instanceof NavigationEnd && this.currentHandle) {
             this.callHook(this.currentHandle, 'ngAfterAttach');
+            this.currentHandle = undefined;
         }
     }
 
