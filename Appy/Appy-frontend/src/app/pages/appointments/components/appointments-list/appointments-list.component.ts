@@ -219,6 +219,7 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
         time: `${ap.time?.format("HH:mm")} - ${ap.time?.add(ap.duration as Duration).format("HH:mm")}`,
         service: ap.service?.displayName as string,
         serviceColor: this.serviceColorsService.get(ap.service?.colorId),
+        isUnconfirmed: ap.status == "Unconfirmed",
         hasNotes: ap.notes != null && ap.notes != "",
         client: ap.client?.nickname as string,
         dateISO: ap.date?.format("YYYY-MM-DD") ?? "",
@@ -387,6 +388,7 @@ export type RenderedAppointment = {
   time: string;
   service: string;
   serviceColor: string;
+  isUnconfirmed: boolean;
   hasNotes: boolean;
   client: string;
   dateISO: string;

@@ -6,6 +6,8 @@ import { Duration } from "dayjs/plugin/duration";
 import { parseDuration } from "../utils/time-utils";
 import { ClientDTO } from "./client";
 
+export type AppointmentStatus = "Confirmed" | "Unconfirmed";
+
 export class AppointmentDTO {
     public id: number = 0;
     public date?: string;
@@ -14,6 +16,8 @@ export class AppointmentDTO {
 
     public service?: ServiceDTO;
     public client?: ClientDTO;
+
+    public status?: AppointmentStatus;
 
     public notes?: string;
 }
@@ -26,6 +30,8 @@ export class Appointment extends Model<Appointment> {
 
     public service?: ServiceDTO;
     public client?: ClientDTO;
+
+    public status?: AppointmentStatus;
 
     public notes?: string;
 
@@ -66,6 +72,7 @@ export class Appointment extends Model<Appointment> {
         this.duration = dto.duration ? parseDuration(dto.duration) : undefined;
         this.service = dto.service;
         this.client = dto.client;
+        this.status = dto.status;
         this.notes = dto.notes;
 
         this.initProperties();
@@ -79,6 +86,7 @@ export class Appointment extends Model<Appointment> {
         dto.duration = this.duration ? this.duration.format("HH:mm:ss") : undefined;
         dto.service = this.service;
         dto.client = this.client;
+        dto.status = this.status;
         dto.notes = this.notes;
 
         return dto;

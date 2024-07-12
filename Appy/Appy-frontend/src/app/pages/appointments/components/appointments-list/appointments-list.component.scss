@@ -58,10 +58,21 @@
         margin-bottom: 40px;
     }
 
-    .note-icon {
+    .status-icon-container {
         margin-left: auto;
         margin-top: auto;
-        opacity: 50%;
+
+        display: flex;
+        gap: 10px;
+
+        fa-icon {
+            opacity: 50%;
+        }
+
+        fa-icon.warn {
+            opacity: 100%;
+            color: var(--warning)
+        }
     }
 }
 

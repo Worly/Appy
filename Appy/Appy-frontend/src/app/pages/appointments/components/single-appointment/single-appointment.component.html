@@ -26,6 +26,16 @@
             </div>
         </div>
     </app-button>
+    <div class="status">
+        <div class="status-title">{{'STATUS' | translate}}:</div>
+        <div class="status-content">
+            <div class="status-text">{{appointment.status | uppercase | translate}}</div>
+            <app-button *ngIf="appointment.status == 'Unconfirmed'" (onClick)="onChangeStatus('Confirmed')"
+                [text]="'CONFIRM' | translate" color="success" look="normal" icon="check" [isLoading]="isLoadingStatusChange"></app-button>
+            <app-button *ngIf="appointment.status == 'Confirmed'" (onClick)="onChangeStatus('Unconfirmed')"
+                [text]="'UNCONFIRM' | translate" color="warning" look="normal" icon="question" [isLoading]="isLoadingStatusChange"></app-button>
+        </div>
+    </div>
     <div class="notes" *ngIf="appointment.notes != null && appointment.notes != ''">
         <div class="notes-title">{{'pages.appointments.NOTES' | translate}}:</div>
         <div class="notes-body">{{appointment.notes}}</div>

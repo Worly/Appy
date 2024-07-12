@@ -42,6 +42,12 @@
     "FILTER": "Filter",
     "APPLY": "Primijeni",
     "CLEAR": "Očisti",
+    "STATUS": "Status",
+
+    "UNCONFIRMED": "Nepotvrđeno",
+    "UNCONFIRM": "Nepotvrdi",
+    "CONFIRMED": "Potvrđeno",
+    "CONFIRM": "Potvrdi",
 
     "pages": {
         "error": {

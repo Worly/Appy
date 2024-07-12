@@ -42,6 +42,12 @@
     "FILTER": "Filter",
     "APPLY": "Apply",
     "CLEAR": "Clear",
+    "STATUS": "Status",
+
+    "UNCONFIRMED": "Unconfirmed",
+    "UNCONFIRM": "Unconfirm",
+    "CONFIRMED": "Confirmed",
+    "CONFIRM": "Confirm",
 
     "pages": {
         "error": {

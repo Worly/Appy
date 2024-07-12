@@ -88,6 +88,7 @@ namespace Appy.Services
                 Duration = dto.Duration,
                 Service = service,
                 Client = client,
+                Status = dto.Status,
                 Notes = dto.Notes
             };
 
@@ -121,6 +122,7 @@ namespace Appy.Services
             appointment.Duration = dto.Duration;
             appointment.ServiceId = service.Id;
             appointment.ClientId = client.Id;
+            appointment.Status = dto.Status;
             appointment.Notes = dto.Notes;
 
             var sameDayAppointments = (await GetAll(dto.Date, facilityId, null)).Where(a => a.Id != appointment.Id).ToList();

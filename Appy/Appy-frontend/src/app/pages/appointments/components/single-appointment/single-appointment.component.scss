@@ -55,6 +55,25 @@
     }
 }
 
+.status {
+    .status-title {
+        font-size: 1.1rem;
+        font-weight: bold;
+    }
+
+    .status-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .status-text {
+            font-size: 1rem;
+            margin-left: 5px;
+        }
+    }
+    margin-bottom: 15px;
+}
+
 .notes {
     .notes-title {
         font-size: 1.1rem;

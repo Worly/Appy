@@ -25,7 +25,10 @@
                 <div class="service">{{i.service}}</div>
                 <div class="client">{{i.client}}</div>
             </div>
-            <fa-icon *ngIf="i.hasNotes" class="note-icon" [icon]="['far', 'file-lines']"></fa-icon>
+            <div class="status-icon-container">
+                <fa-icon *ngIf="i.isUnconfirmed" class="warn" [icon]="['fas', 'question']" ></fa-icon>
+                <fa-icon *ngIf="i.hasNotes" [icon]="['far', 'file-lines']"></fa-icon>
+            </div>
         </div>
     </div>
 

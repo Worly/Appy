@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { NotifyDialogService } from 'src/app/components/notify-dialog/notify-dialog.service';
 import { TranslateService } from 'src/app/components/translate/translate.service';
-import { Appointment } from 'src/app/models/appointment';
+import { Appointment, AppointmentStatus } from 'src/app/models/appointment';
 import { AppointmentService } from '../../services/appointment.service';
 
 @Component({
@@ -12,7 +12,6 @@ import { AppointmentService } from '../../services/appointment.service';
   styleUrls: ['./single-appointment.component.scss']
 })
 export class SingleAppointmentComponent implements OnInit, OnDestroy {
-
   private _id?: number;
   @Input() set id(value: number | undefined) {
     if (this._id == value)
@@ -20,7 +19,8 @@ export class SingleAppointmentComponent implements OnInit, OnDestroy {
 
     this._id = value;
 
-    this.load();
+    if (this.datasourceId != this._id)
+      this.setDatasource(this._id);
   }
   get id(): number | undefined {
     return this._id;
@@ -34,9 +34,12 @@ export class SingleAppointmentComponent implements OnInit, OnDestroy {
 
   isLoading: boolean = false;
   isLoadingDelete: boolean = false;
+  isLoadingStatusChange: boolean = false;
 
   private subs: Subscription[] = [];
-  private loadSub?: Subscription;
+
+  datasourceId?: number;
+  datasourceSub?: Subscription;
 
   constructor(
     private router: Router,
@@ -53,23 +56,24 @@ export class SingleAppointmentComponent implements OnInit, OnDestroy {
     this.subs.forEach(s => s.unsubscribe());
   }
 
-  load() {
-    this.appointment = undefined;
-
-    if (this.loadSub) {
-      this.loadSub.unsubscribe();
-      this.loadSub = undefined;
+  private setDatasource(id: number | undefined) {
+    if (this.datasourceSub != null) {
+      this.datasourceSub.unsubscribe();
+      this.datasourceSub = undefined;
     }
 
-    if (this.id == null)
+    this.datasourceId = id;
+    this.appointment = undefined;
+
+    if (id == null)
       return;
 
     this.isLoading = true;
 
-    this.subs.push(this.loadSub = this.appointmentService.get(this.id).subscribe(a => {
+    this.datasourceSub = this.appointmentService.getWithDatasource(id).subscribe(a => {
       this.appointment = a;
       this.isLoading = false;
-    }));
+    });
   }
 
   onDelete() {
@@ -83,6 +87,14 @@ export class SingleAppointmentComponent implements OnInit, OnDestroy {
         error: (e: any) => this.isLoadingDelete = false
       }));
     }));
+  }
+
+  onChangeStatus(newStatus: AppointmentStatus) {
+    let newAppointment = new Appointment(this.appointment?.getDTO());
+    newAppointment.status = newStatus;
+
+    this.isLoadingStatusChange = true;
+    this.subs.push(this.appointmentService.save(newAppointment).subscribe(() => this.isLoadingStatusChange = false))
   }
 
   goToEdit() {

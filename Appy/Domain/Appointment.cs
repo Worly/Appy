@@ -1,10 +1,18 @@
 ﻿using Appy.DTOs;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 #nullable disable
 
 namespace Appy.Domain
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum AppointmentStatus
+    {
+        Unconfirmed,
+        Confirmed
+    }
+
     public class Appointment
     {
         public int Id { get; set; }
@@ -22,6 +30,8 @@ namespace Appy.Domain
         public int ClientId { get; set; }
         public Client Client { get; set; }
 
+        public AppointmentStatus Status { get; set; } = AppointmentStatus.Unconfirmed;
+
         public string? Notes { get; set; }
 
         public AppointmentDTO GetDTO()
@@ -34,6 +44,7 @@ namespace Appy.Domain
                 Duration = Duration,
                 Service = Service.GetDTO(),
                 Client = Client.GetDTO(),
+                Status = Status,
                 Notes = Notes
             };
         }

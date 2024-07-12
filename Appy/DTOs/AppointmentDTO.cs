@@ -1,4 +1,6 @@
-﻿namespace Appy.DTOs
+﻿using Appy.Domain;
+
+namespace Appy.DTOs
 {
     public class AppointmentDTO
     {
@@ -10,6 +12,8 @@
 
         public ServiceDTO Service { get; set; }
         public ClientDTO Client { get; set; }
+
+        public AppointmentStatus Status { get; set; }
 
         public string? Notes { get; set; }
     }
