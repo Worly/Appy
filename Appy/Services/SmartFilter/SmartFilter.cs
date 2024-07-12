@@ -191,7 +191,7 @@ namespace Appy.Services.SmartFiltering
                 _ => throw new NotImplementedException()
             });
 
-            var castedValue = Expression.Convert(value, propertyGetter.Type);
+            var castedValue = CastToType(value, propertyGetter.Type);
 
             return Comparator switch
             {
@@ -204,6 +204,16 @@ namespace Appy.Services.SmartFiltering
                 Comparator.Contains => BuildContainsExpression(propertyGetter, castedValue),
                 _ => throw new NotImplementedException()
             };
+        }
+
+        private static Expression CastToType(Expression expression, Type type)
+        {
+            if (type.IsEnum)
+            {
+                return Expression.Call(typeof(Enum), "Parse", new Type[] { type }, expression, Expression.Constant(true));
+            }
+
+            return Expression.Convert(expression, type);
         }
 
         private static MemberExpression GetPropertyGetter(Expression target, Type targetType, string propertyName)
@@ -240,13 +250,13 @@ namespace Appy.Services.SmartFiltering
 
         private static Expression BuildContainsExpression(Expression propertyGetter, Expression value)
         {
-            var toLowerMethod = typeof(string).GetMethod("ToLower", BindingFlags.Public | BindingFlags.Instance, new Type[] {});
+            var toLowerMethod = typeof(string).GetMethod("ToLower", BindingFlags.Public | BindingFlags.Instance, new Type[] { });
             if (toLowerMethod == null)
             {
                 throw new Exception("Cannot find string.ToLower() method. Maybe it changed names??");
             }
 
-            var containsMethod = typeof(string).GetMethod("Contains", BindingFlags.Public | BindingFlags.Instance, new Type[] {typeof(string)});
+            var containsMethod = typeof(string).GetMethod("Contains", BindingFlags.Public | BindingFlags.Instance, new Type[] { typeof(string) });
             if (containsMethod == null)
             {
                 throw new Exception("Cannot find string.Contains() method. Maybe it changed names??");
