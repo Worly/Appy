@@ -391,7 +391,9 @@ export class PageableListDatasource<T extends Model<T>> implements IDatasource<T
 
         updateEntity(oldEntity, entity);
 
-        return this.tryAddSingle(entity);
+        this.tryAddSingle(entity);
+
+        return true;
     }
 
     delete(id: any): void {
