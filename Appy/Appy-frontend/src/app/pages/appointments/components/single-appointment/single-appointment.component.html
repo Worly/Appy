@@ -31,9 +31,11 @@
         <div class="status-content">
             <div class="status-text">{{appointment.status | uppercase | translate}}</div>
             <app-button *ngIf="appointment.status == 'Unconfirmed'" (onClick)="onChangeStatus('Confirmed')"
-                [text]="'CONFIRM' | translate" color="success" look="normal" icon="check" [isLoading]="isLoadingStatusChange"></app-button>
+                [text]="'CONFIRM' | translate" color="success" look="normal" icon="check"
+                [disabled]="isLoadingStatusChange" [isLoading]="isLoadingStatusChange"></app-button>
             <app-button *ngIf="appointment.status == 'Confirmed'" (onClick)="onChangeStatus('Unconfirmed')"
-                [text]="'UNCONFIRM' | translate" color="warning" look="normal" icon="question" [isLoading]="isLoadingStatusChange"></app-button>
+                [text]="'UNCONFIRM' | translate" color="warning" look="normal" icon="question"
+                [disabled]="isLoadingStatusChange" [isLoading]="isLoadingStatusChange"></app-button>
         </div>
     </div>
     <div class="notes" *ngIf="appointment.notes != null && appointment.notes != ''">
