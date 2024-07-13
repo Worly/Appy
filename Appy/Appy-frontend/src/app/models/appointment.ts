@@ -5,8 +5,32 @@ import { Dayjs } from "dayjs";
 import { Duration } from "dayjs/plugin/duration";
 import { parseDuration } from "../utils/time-utils";
 import { ClientDTO } from "./client";
+import { IconName, IconPrefix } from "@fortawesome/fontawesome-svg-core";
+import { Color } from "../components/button/button.component";
 
 export type AppointmentStatus = "Confirmed" | "Unconfirmed";
+
+export type AppointmentStatusInfo = {
+    value: AppointmentStatus,
+    color: Color,
+    iconPrefix: IconPrefix,
+    iconName: IconName,
+};
+
+export const AppointmentStatusMap: { [key: string]: AppointmentStatusInfo } = {
+    "Unconfirmed": {
+        value: "Unconfirmed",
+        color: "warning",
+        iconPrefix: "fas",
+        iconName: "question"
+    },
+    "Confirmed": {
+        value: "Confirmed",
+        color: "success",
+        iconPrefix: "fas",
+        iconName: "check"
+    }
+}
 
 export class AppointmentDTO {
     public id: number = 0;

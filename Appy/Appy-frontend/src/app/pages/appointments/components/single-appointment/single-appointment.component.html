@@ -29,7 +29,11 @@
     <div class="status">
         <div class="status-title">{{'STATUS' | translate}}:</div>
         <div class="status-content">
-            <div class="status-text">{{appointment.status | uppercase | translate}}</div>
+            <div class="status-display" [ngStyle]="{'color': 'var(--' + (appointment.status | appointmentStatusInfo)?.color + ')'}">
+                <fa-icon
+                    [icon]="[(appointment.status | appointmentStatusInfo)?.iconPrefix ?? 'fas', $any((appointment.status | appointmentStatusInfo)?.iconName)]"></fa-icon>
+                {{appointment.status | uppercase | translate}}
+            </div>
             <app-button *ngIf="appointment.status == 'Unconfirmed'" (onClick)="onChangeStatus('Confirmed')"
                 [text]="'CONFIRM' | translate" color="success" look="normal" icon="check"
                 [disabled]="isLoadingStatusChange" [isLoading]="isLoadingStatusChange"></app-button>

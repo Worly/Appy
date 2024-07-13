@@ -66,10 +66,13 @@
         align-items: center;
         justify-content: space-between;
 
-        .status-text {
+        .status-display {
+            display: flex;
+            align-items: center;
             font-size: 1rem;
-            margin-left: 5px;
+            gap: 5px;
         }
+
     }
     margin-bottom: 15px;
 }

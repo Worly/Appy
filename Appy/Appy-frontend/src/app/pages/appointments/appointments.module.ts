@@ -18,6 +18,7 @@ import { AppointmentsComponent } from "./components/appointments/appointments.co
 import { SingleAppointmentComponent } from "./components/single-appointment/single-appointment.component";
 import { SingleDayAppointmentsComponent } from "./components/appointments-scroller/single-day-appointments/single-day-appointments.component";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
+import { AppointmentStatusInfoPipe } from "./services/appointment-status-info.pipe";
 
 @NgModule({
     declarations: [
@@ -28,7 +29,8 @@ import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
         AppointmentsScrollerComponent,
         SingleDayAppointmentsComponent,
         SingleAppointmentComponent,
-        AppointmentsListComponent
+        AppointmentsListComponent,
+        AppointmentStatusInfoPipe
     ],
     imports: [
         AppointmentsRoutingModule,
