@@ -1,6 +1,8 @@
 import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { IconName, IconPrefix } from '@fortawesome/fontawesome-svg-core';
 
+export type Color = "success" | "danger" | "warning" | "normal";
+
 @Component({
   selector: 'app-button',
   templateUrl: './button.component.html',
@@ -18,7 +20,7 @@ export class ButtonComponent implements OnInit {
   @Input() curvedBottomRight: boolean = false;
 
   @Input() look: "solid" | "outlined" | "normal" | "transparent" | "custom" = "normal";
-  @Input() color: "success" | "danger" | "warning" | "normal" = "normal";
+  @Input() color: Color = "normal";
 
   @Input() customColor: string = "#FFFFFF";
   @Input() customTextColor: string = "black";
