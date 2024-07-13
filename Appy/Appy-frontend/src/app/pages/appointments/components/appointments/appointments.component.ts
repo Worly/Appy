@@ -11,10 +11,12 @@ import { AppointmentsListComponent } from '../appointments-list/appointments-lis
 import { DialogComponent } from 'src/app/components/dialog/dialog.component';
 import { SmartFilter } from 'src/app/shared/services/smart-filter';
 import _ from 'lodash';
+import { AppointmentStatus } from 'src/app/models/appointment';
 
 export type AppointmentsFilter = {
   client?: ClientDTO,
-  service?: ServiceDTO
+  service?: ServiceDTO,
+  status?: AppointmentStatus
 };
 
 export function appFilterToSmartFilter(filter: AppointmentsFilter): SmartFilter | undefined {
@@ -25,6 +27,9 @@ export function appFilterToSmartFilter(filter: AppointmentsFilter): SmartFilter 
 
   if (filter.service != null)
     fieldFilters.push(["service.id", "==", filter.service.id])
+
+  if (filter.status != null)
+    fieldFilters.push(["status", "==", filter.status])
 
   if (fieldFilters.length == 0) {
     return undefined;

@@ -1,0 +1,15 @@
+<app-button #buttonRef="elementRef" appElementRef width="100%"
+    [text]="value ? (value | uppercase | translate) : ('CHOOSE_STATUS' | translate)"
+    [iconPrefix]="(value | appointmentStatusInfo)?.iconPrefix ?? 'fas'" [icon]="(value | appointmentStatusInfo)?.iconName"
+    [color]="(value | appointmentStatusInfo)?.color ?? 'normal'" (onClick)="openContextMenu()"></app-button>
+
+<app-button *ngIf="showClearButton && value != null" class="clear-button" look="transparent" icon="times"
+    [isCircle]="true" (onClick)="clear()"></app-button>
+
+<app-context-menu #contextMenu [relativeTo]="buttonRef.elementRef" [copyOriginWidth]="true">
+    <app-button *ngFor="let status of statuses" class="single-status-button"
+        [text]="status.value | uppercase | translate" [iconPrefix]="status.iconPrefix" [icon]="status.iconName"
+        [color]="status.color" [ngClass]="{'selected': status.value == value}" (onClick)="selectStatus(status.value)"
+        width="100%">
+    </app-button>
+</app-context-menu>

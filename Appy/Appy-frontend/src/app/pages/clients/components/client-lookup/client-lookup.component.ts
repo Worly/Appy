@@ -159,7 +159,7 @@ export class ClientLookupComponent implements OnInit, OnDestroy {
 
   openContextMenu() {
     this.contextMenu?.toggle();
-      this.search?.clearAndFocus();
+    this.search?.clearAndFocus();
     setTimeout(() => this.contextMenu?.container?.nativeElement.scrollTo({ top: 0 }));
   }
 

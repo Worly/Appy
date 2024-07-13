@@ -40,13 +40,18 @@
             </app-service-lookup>
         </div>
 
+        <div class="w-input-container">
+            <div class="w-label">{{'STATUS' | translate}}</div>
+            <app-appointment-status-lookup #statusFilter [value]="filter.status" [showClearButton]="true"></app-appointment-status-lookup>
+        </div>
+
         <div class="filter-action-bar">
             <app-button [text]="'CLEAR' | translate" color="danger" look="solid"
                 (onClick)="applyFilter({})"></app-button>
             <app-button style="margin-left: auto" [text]="'CANCEL' | translate" color="danger" look="normal"
                 (onClick)="filterDialog.close()"></app-button>
             <app-button [text]="'APPLY' | translate" color="success" look="solid"
-                (onClick)="applyFilter({client: clientFilter.value, service: serviceFilter.value})"></app-button>
+                (onClick)="applyFilter({client: clientFilter.value, service: serviceFilter.value, status: statusFilter.value})"></app-button>
         </div>
     </div>
 </app-dialog>
