@@ -1,1 +1,9 @@
-<h1>Hello</h1>
+<div class="w-title">{{'HOME' | translate}}</div>
+
+<app-loading *ngIf="stats == null"></app-loading>
+<div *ngIf="stats != null">
+    <div class="stat w-card">
+        <div>{{'pages.home.NUMBER_OF_APPOINMENTS_CREATED_TODAY' | translate}}</div>
+        <div>{{stats.numberOfAppointmentsCreatedToday}}</div>
+    </div>
+</div>

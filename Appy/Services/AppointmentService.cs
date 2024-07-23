@@ -17,6 +17,8 @@ namespace Appy.Services
 
         List<FreeTimeDTO> GetFreeTimes(List<Appointment> appointmentsOfTheDay, List<WorkingHour> workingHours, Service service, TimeSpan duration);
         bool IsAppointmentTimeOk(List<Appointment> appointmentsOfTheDay, List<WorkingHour> workingHours, Appointment appointment);
+
+        Task<int> GetNumberOfAppointmentsCreatedToday(int facilityId);
     }
 
     public class AppointmentService : IAppointmentService
@@ -214,6 +216,11 @@ namespace Appy.Services
             }
 
             return false;
+        }
+
+        public async Task<int> GetNumberOfAppointmentsCreatedToday(int facilityId)
+        {
+            return await context.Appointments.Where(a => a.CreatedAt.Date == DateTime.UtcNow.Date).CountAsync();
         }
 
         private bool Overlap(TimeOnly startA, TimeOnly endA, TimeOnly startB, TimeOnly endB)

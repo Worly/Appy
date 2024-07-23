@@ -53,6 +53,10 @@
     "CONFIRM": "Confirm",
 
     "pages": {
+        "home": {
+            "NUMBER_OF_APPOINMENTS_CREATED_TODAY": "Number of appointments booked today" 
+        },
+
         "error": {
             "ERROR": "There was an error"
         },

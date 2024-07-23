@@ -53,6 +53,10 @@
     "CONFIRM": "Potvrdi",
 
     "pages": {
+        "home": {
+            "NUMBER_OF_APPOINMENTS_CREATED_TODAY": "Broj termina zapisanih danas" 
+        },
+
         "error": {
             "ERROR": "Dogodila se greška"
         },
