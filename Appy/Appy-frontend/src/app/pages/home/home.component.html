@@ -3,7 +3,10 @@
 <app-loading *ngIf="stats == null"></app-loading>
 <div *ngIf="stats != null">
     <div class="stat w-card">
-        <div>{{'pages.home.NUMBER_OF_APPOINMENTS_CREATED_TODAY' | translate}}</div>
-        <div>{{stats.numberOfAppointmentsCreatedToday}}</div>
+        <div class="title">{{'pages.home.NUMBER_OF_APPOINMENTS_CREATED_TODAY' | translate}}</div>
+        <div class="value">
+            <div>{{stats.numberOfAppointmentsCreatedToday}}</div>
+            <div>{{emojies["numberOfAppointmentsCreatedToday"]}}</div>
+        </div>
     </div>
 </div>
