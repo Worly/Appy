@@ -46,6 +46,16 @@
         <div class="notes-title">{{'pages.appointments.NOTES' | translate}}:</div>
         <div class="notes-body">{{appointment.notes}}</div>
     </div>
+    <div class="created-updated-at">
+        <div>
+            <div>{{'CREATED_AT' | translate}}:</div>
+            <div>{{appointment.createdAt?.format("DD.MM.YYYY HH:mm")}}</div>
+        </div>
+        <div>
+            <div>{{'LAST_UPDATED_AT' | translate}}:</div>
+            <div>{{appointment.lastUpdatedAt?.format("DD.MM.YYYY HH:mm")}}</div>
+        </div>
+    </div>
     <div *ngIf="editable" class="action-bar">
         <app-button icon="trash" color="danger" look="solid" text="{{'DELETE' | translate}}"
             [disabled]="isLoadingDelete" [isLoading]="isLoadingDelete" (onClick)="onDelete()">

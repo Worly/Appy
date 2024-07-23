@@ -44,6 +44,8 @@
     "CLEAR": "Clear",
     "STATUS": "Status",
     "CHOOSE_STATUS": "Choose status",
+    "CREATED_AT": "Created at",
+    "LAST_UPDATED_AT": "Last updated at",
 
     "UNCONFIRMED": "Unconfirmed",
     "UNCONFIRM": "Unconfirm",

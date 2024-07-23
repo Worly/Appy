@@ -89,7 +89,9 @@ namespace Appy.Services
                 Service = service,
                 Client = client,
                 Status = dto.Status,
-                Notes = dto.Notes
+                Notes = dto.Notes,
+                CreatedAt = DateTime.UtcNow,
+                LastUpdatedAt = DateTime.UtcNow,
             };
 
             var sameDayAppointments = await GetAll(dto.Date, facilityId, null);
@@ -124,6 +126,7 @@ namespace Appy.Services
             appointment.ClientId = client.Id;
             appointment.Status = dto.Status;
             appointment.Notes = dto.Notes;
+            appointment.LastUpdatedAt = DateTime.UtcNow;
 
             var sameDayAppointments = (await GetAll(dto.Date, facilityId, null)).Where(a => a.Id != appointment.Id).ToList();
             var workingHours = await workingHourService.GetWorkingHours(dto.Date, facilityId);

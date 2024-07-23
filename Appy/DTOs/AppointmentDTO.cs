@@ -16,6 +16,9 @@ namespace Appy.DTOs
         public AppointmentStatus Status { get; set; }
 
         public string? Notes { get; set; }
+        
+        public DateTime CreatedAt { get; set; } 
+        public DateTime LastUpdatedAt { get; set; }
     }
 
     public class FreeTimeDTO

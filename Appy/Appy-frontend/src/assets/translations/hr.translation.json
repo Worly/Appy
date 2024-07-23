@@ -44,6 +44,8 @@
     "CLEAR": "Očisti",
     "STATUS": "Status",
     "CHOOSE_STATUS": "Odaberi status",
+    "CREATED_AT": "Kreirano",
+    "LAST_UPDATED_AT": "Zadnje uređivano",
 
     "UNCONFIRMED": "Nepotvrđeno",
     "UNCONFIRM": "Nepotvrdi",

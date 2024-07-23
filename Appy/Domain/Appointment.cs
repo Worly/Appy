@@ -34,6 +34,9 @@ namespace Appy.Domain
 
         public string? Notes { get; set; }
 
+        public DateTime CreatedAt { get; set; }
+        public DateTime LastUpdatedAt { get; set; }
+
         public AppointmentDTO GetDTO()
         {
             return new AppointmentDTO()
@@ -45,7 +48,9 @@ namespace Appy.Domain
                 Service = Service.GetDTO(),
                 Client = Client.GetDTO(),
                 Status = Status,
-                Notes = Notes
+                Notes = Notes,
+                CreatedAt = CreatedAt,
+                LastUpdatedAt = LastUpdatedAt,
             };
         }
 

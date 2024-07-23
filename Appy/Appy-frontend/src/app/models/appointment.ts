@@ -44,6 +44,9 @@ export class AppointmentDTO {
     public status?: AppointmentStatus;
 
     public notes?: string;
+
+    public createdAt?: string;
+    public lastUpdatedAt?: string;
 }
 
 export class Appointment extends Model<Appointment> {
@@ -58,6 +61,9 @@ export class Appointment extends Model<Appointment> {
     public status?: AppointmentStatus;
 
     public notes?: string;
+
+    public createdAt?: Dayjs;
+    public lastUpdatedAt?: Dayjs;
 
     override validations: Validation<Appointment>[] = [
         {
@@ -98,6 +104,8 @@ export class Appointment extends Model<Appointment> {
         this.client = dto.client;
         this.status = dto.status;
         this.notes = dto.notes;
+        this.createdAt = dto.createdAt ? dayjs(dto.createdAt) : undefined;
+        this.lastUpdatedAt = dto.lastUpdatedAt ? dayjs(dto.lastUpdatedAt) : undefined;
 
         this.initProperties();
     }
