@@ -22,7 +22,7 @@ namespace Appy.Controllers
         {
             try
             {
-                var response = await userService.Authenticate(dto);
+                var response = await userService.Authenticate(dto, HttpContext.Request.Headers.UserAgent.ToString());
                 return Ok(response);
             }
             catch (HttpException)
@@ -34,7 +34,7 @@ namespace Appy.Controllers
         [HttpPost("register")]
         public async Task<ActionResult> Register(RegisterDTO dto)
         {
-            var response = await userService.Register(dto);
+            var response = await userService.Register(dto, HttpContext.Request.Headers.UserAgent.ToString());
 
             return Ok(response);
         }
