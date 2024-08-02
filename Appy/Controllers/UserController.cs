@@ -40,7 +40,7 @@ namespace Appy.Controllers
         }
 
         [HttpPost("refresh")]
-        public async Task<ActionResult> RefreshTokens([FromBody] RefreshTokensDTO dto)
+        public async Task<ActionResult> RefreshTokens([FromBody] RefreshTokenDTO dto)
         {
             var response = await userService.RefreshTokens(dto.RefreshToken);
 
