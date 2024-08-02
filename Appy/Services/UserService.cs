@@ -14,6 +14,7 @@ namespace Appy.Services
         Task<LogInResponseDTO> Authenticate(LogInDTO model, string userAgent);
         Task<LogInResponseDTO> Register(RegisterDTO model, string userAgent);
         Task<LogInResponseDTO> RefreshTokens(string refreshToken);
+        Task LogOut(string refreshToken);
         Task<User> GetById(int id);
     }
 
@@ -167,6 +168,28 @@ namespace Appy.Services
                 RefreshToken = newRefreshToken,
                 AccessToken = newAccesToken
             };
+        }
+
+        public async Task LogOut(string refreshToken)
+        {
+            var (valid, parsedRefreshToken) = await jwtService.ValidateToken(refreshToken, validateLifetime: false);
+            if (!valid || parsedRefreshToken == null)
+                throw new BadRequestException();
+
+            string receivedFamily = parsedRefreshToken.Claims.FirstOrDefault(c => c.Type == "family")?.Value
+                ?? throw new BadRequestException();
+
+            if (!int.TryParse(parsedRefreshToken.Claims.FirstOrDefault(c => c.Type == "id")?.Value, out int userId))
+                throw new BadRequestException();
+
+            var user = await context.Users.Include(u => u.LoginSessions.Where(s => s.Family == receivedFamily)).FirstOrDefaultAsync(x => x.Id == userId)
+                ?? throw new BadRequestException();
+
+            if (user.LoginSessions.Count == 0)
+                throw new BadRequestException();
+
+            user.LoginSessions.Remove(user.LoginSessions.Single());
+            await context.SaveChangesAsync();
         }
 
         public async Task<User> GetById(int id)

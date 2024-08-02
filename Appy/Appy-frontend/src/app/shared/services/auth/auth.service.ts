@@ -89,6 +89,32 @@ export class AuthService {
         });
     }
 
+    public logOut(): Observable<void> {
+        let refreshToken = this.refreshToken;
+
+        this.accessToken = null;
+        this.refreshToken = null;
+        localStorage.removeItem(this.ACCESS_TOKEN_KEY);
+        localStorage.removeItem(this.REFRESH_TOKEN_KEY);
+        this.facilityService.clear();
+        this.router.navigate(["login"]);
+
+        return new Observable<void>(s => {
+            if (refreshToken != null) {
+                this.httpClient.post<any>(appConfig.apiUrl + "user/logout", {
+                    refreshToken: refreshToken
+                }).subscribe({
+                    next: (o: any) => s.next(o),
+                    error: (o: any) => s.error(o)
+                });
+            }
+            else {
+                s.next();
+            }
+            
+        });
+    }
+
     private setTokens(accessToken: string, refreshToken: string, loadFacilities: boolean = true): Observable<void> | null {
         if (accessToken == null) {
             this.logOut();
@@ -115,15 +141,6 @@ export class AuthService {
 
     public isLoggedIn(): boolean {
         return this.accessToken != null;
-    }
-
-    public logOut(): void {
-        this.accessToken = null;
-        this.refreshToken = null;
-        localStorage.removeItem(this.ACCESS_TOKEN_KEY);
-        localStorage.removeItem(this.REFRESH_TOKEN_KEY);
-        this.facilityService.clear();
-        this.router.navigate(["login"]);
     }
 
     public getName(): { name: string, surname: string } | null {

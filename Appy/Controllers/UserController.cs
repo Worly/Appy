@@ -46,5 +46,11 @@ namespace Appy.Controllers
 
             return Ok(response);
         }
+
+        [HttpPost("logout")]
+        public async Task LogOut([FromBody] RefreshTokenDTO dto)
+        {
+            await userService.LogOut(dto.RefreshToken);
+        }
     }
 }
