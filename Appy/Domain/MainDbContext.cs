@@ -6,6 +6,7 @@ namespace Appy.Domain
     public class MainDbContext : DbContext
     {
         public DbSet<User> Users { get; set; }
+        public DbSet<LoginSession> LoginSessions { get; set; }
         public DbSet<Facility> Facilities { get; set; }
         public DbSet<Service> Services { get; set; }
         public DbSet<Appointment> Appointments { get; set; }

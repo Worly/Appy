@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Appy.Domain
+﻿namespace Appy.Domain
 {
     public class User
     {
@@ -13,11 +11,10 @@ namespace Appy.Domain
         public byte[] Salt { get; set; }
 
         public int? SelectedFacilityId { get; set; }
-        public string? RefreshToken { get; set; }
 
+        public ICollection<LoginSession> LoginSessions { get; set; }
         public ICollection<Facility> Facilities { get; set; }
 
-        //Metode
         public List<string> GetRoles()
         {
             var roles = new List<string>();
