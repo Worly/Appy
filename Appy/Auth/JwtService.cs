@@ -63,7 +63,6 @@ namespace Appy.Services
 
         public string GenerateToken(TimeSpan lifespan, params Claim[] claims)
         {
-            // generate token that is valid for 7 days
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(jwtSecret);
             var tokenDescriptor = new SecurityTokenDescriptor
