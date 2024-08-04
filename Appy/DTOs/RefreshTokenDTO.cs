@@ -1,6 +1,6 @@
 ﻿namespace Appy.DTOs
 {
-    public class RefreshTokensDTO
+    public class RefreshTokenDTO
     {
         public string RefreshToken { get; set; }
     }

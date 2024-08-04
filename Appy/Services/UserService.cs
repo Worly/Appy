@@ -11,9 +11,10 @@ namespace Appy.Services
 {
     public interface IUserService
     {
-        Task<LogInResponseDTO> Authenticate(LogInDTO model);
-        Task<LogInResponseDTO> Register(RegisterDTO model);
+        Task<LogInResponseDTO> Authenticate(LogInDTO model, string userAgent);
+        Task<LogInResponseDTO> Register(RegisterDTO model, string userAgent);
         Task<LogInResponseDTO> RefreshTokens(string refreshToken);
+        Task LogOut(string refreshToken);
         Task<User> GetById(int id);
     }
 
@@ -28,7 +29,7 @@ namespace Appy.Services
             this.jwtService = jwtService;
         }
 
-        public async Task<LogInResponseDTO> Authenticate(LogInDTO model)
+        public async Task<LogInResponseDTO> Authenticate(LogInDTO model, string userAgent)
         {
             var user = await context.Users.FirstOrDefaultAsync(x => x.Email == model.Email);
             if (user == null)
@@ -40,9 +41,16 @@ namespace Appy.Services
                 throw new BadRequestException();
 
             var accessToken = GenerateAccessJwtToken(user);
-            var refreshToken = GenerateRefreshJwtToken(user.Id, GenerateFamily());
+            var refreshTokenFamily = GenerateFamily();
+            var refreshToken = GenerateRefreshJwtToken(user.Id, refreshTokenFamily);
 
-            user.RefreshToken = refreshToken;
+            context.LoginSessions.Add(new LoginSession()
+            {
+                UserAgent = userAgent,
+                RefreshToken = refreshToken,
+                Family = refreshTokenFamily,
+                User = user,
+            });
             await context.SaveChangesAsync();
 
             return new LogInResponseDTO()
@@ -52,7 +60,7 @@ namespace Appy.Services
             };
         }
 
-        public async Task<LogInResponseDTO> Register(RegisterDTO model)
+        public async Task<LogInResponseDTO> Register(RegisterDTO model, string userAgent)
         {
             var userWithSameEmail = await context.Users.SingleOrDefaultAsync(x => x.Email == model.Email);
             if (userWithSameEmail != null)
@@ -74,9 +82,16 @@ namespace Appy.Services
             await context.SaveChangesAsync();
 
             var accessToken = GenerateAccessJwtToken(user);
-            var refreshToken = GenerateRefreshJwtToken(user.Id, GenerateFamily());
+            var refreshTokenFamily = GenerateFamily();
+            var refreshToken = GenerateRefreshJwtToken(user.Id, refreshTokenFamily);
 
-            user.RefreshToken = refreshToken;
+            context.LoginSessions.Add(new LoginSession()
+            {
+                UserAgent = userAgent,
+                RefreshToken = refreshToken,
+                Family = refreshTokenFamily,
+                User = user,
+            });
             await context.SaveChangesAsync();
 
             return new LogInResponseDTO()
@@ -86,36 +101,44 @@ namespace Appy.Services
             };
         }
 
-        // Refresh token rotation -> every time refresh token is used, generate a new one
-        // Reuse protection -> using old but valid refresh token invalidates whole family
+        // 1. Refresh token rotation -> every time refresh token is used, a new refresh token is generated
+        // 2. Reuse protection -> refresh tokens generated on access token refresh use the same family
+        //                        so if a refresh token is used which is valid and has the same family but is old
+        //                        the whole refresh token family must be invalidated
         public async Task<LogInResponseDTO> RefreshTokens(string refreshToken)
         {
             // get userId claim
-            var (valid, token) = await jwtService.ValidateToken(refreshToken, validateLifetime: false);
-            if (!valid || token == null)
+            var (valid, parsedRefreshToken) = await jwtService.ValidateToken(refreshToken, validateLifetime: false);
+            if (!valid || parsedRefreshToken == null)
                 throw new BadRequestException();
 
-            if (!int.TryParse(token.Claims.FirstOrDefault(c => c.Type == "id")?.Value, out int userId))
+            string receivedFamily = parsedRefreshToken.Claims.FirstOrDefault(c => c.Type == "family")?.Value
+                ?? throw new BadRequestException();
+
+            if (!int.TryParse(parsedRefreshToken.Claims.FirstOrDefault(c => c.Type == "id")?.Value, out int userId))
                 throw new BadRequestException();
 
-            var user = await context.Users.FirstOrDefaultAsync(x => x.Id == userId);
-            if (user == null)
+            var user = await context.Users.Include(u => u.LoginSessions.Where(s => s.Family == receivedFamily)).FirstOrDefaultAsync(x => x.Id == userId) 
+                ?? throw new BadRequestException();
+
+            // there is no active login session for this user for this family, so this refresh token is old
+            if (user.LoginSessions.Count == 0)
                 throw new BadRequestException();
 
-            string? currentFamily = user.RefreshToken == null ? null : jwtService.ParseToken(user.RefreshToken)?.Claims.FirstOrDefault(c => c.Type == "family")?.Value;
+            var loginSession = user.LoginSessions.Single();
 
-            // check families
-            {
-                string? receivedFamily = token.Claims.FirstOrDefault(c => c.Type == "family")?.Value;
-                if (receivedFamily == null)
-                    throw new BadRequestException();
+            string currentFamily = jwtService.ParseToken(loginSession.RefreshToken)?.Claims.FirstOrDefault(c => c.Type == "family")?.Value 
+                ?? throw new Exception("Failed to get current family from the current saved refresh token");
 
-                if (user.RefreshToken != refreshToken)
+            { // check families
+                if (loginSession.RefreshToken != refreshToken)
                 {
-                    // if we received a valid token with the same family someone stole the refresh token!
+                    // we received valid but old refresh token with the same family, so it means it was reused
+                    // so someone stole the refresh token!
                     if (currentFamily == receivedFamily)
                     {
-                        user.RefreshToken = null;
+                        // invalidate the whole family
+                        user.LoginSessions.Remove(loginSession);
                         await context.SaveChangesAsync();
                     }
 
@@ -123,21 +146,21 @@ namespace Appy.Services
                 }
             }
 
-            // check lifetime
-            {
+            { // check lifetime
                 var (validLifetime, tokenLifetime) = await jwtService.ValidateToken(refreshToken, validateLifetime: true);
                 if (!validLifetime || tokenLifetime == null)
-                    throw new BadRequestException();
-            }
+                {
+                    user.LoginSessions.Remove(loginSession);
+                    await context.SaveChangesAsync();
 
-            // generate new
-            if (currentFamily == null)
-                currentFamily = GenerateFamily();
+                    throw new BadRequestException();
+                }
+            }
 
             var newRefreshToken = GenerateRefreshJwtToken(userId, currentFamily);
             var newAccesToken = GenerateAccessJwtToken(user);
 
-            user.RefreshToken = newRefreshToken;
+            loginSession.RefreshToken = newRefreshToken;
             await context.SaveChangesAsync();
 
             return new LogInResponseDTO()
@@ -145,6 +168,28 @@ namespace Appy.Services
                 RefreshToken = newRefreshToken,
                 AccessToken = newAccesToken
             };
+        }
+
+        public async Task LogOut(string refreshToken)
+        {
+            var (valid, parsedRefreshToken) = await jwtService.ValidateToken(refreshToken, validateLifetime: false);
+            if (!valid || parsedRefreshToken == null)
+                throw new BadRequestException();
+
+            string receivedFamily = parsedRefreshToken.Claims.FirstOrDefault(c => c.Type == "family")?.Value
+                ?? throw new BadRequestException();
+
+            if (!int.TryParse(parsedRefreshToken.Claims.FirstOrDefault(c => c.Type == "id")?.Value, out int userId))
+                throw new BadRequestException();
+
+            var user = await context.Users.Include(u => u.LoginSessions.Where(s => s.Family == receivedFamily)).FirstOrDefaultAsync(x => x.Id == userId)
+                ?? throw new BadRequestException();
+
+            if (user.LoginSessions.Count == 0)
+                throw new BadRequestException();
+
+            user.LoginSessions.Remove(user.LoginSessions.Single());
+            await context.SaveChangesAsync();
         }
 
         public async Task<User> GetById(int id)
@@ -177,7 +222,7 @@ namespace Appy.Services
             return hashed;
         }
 
-        private string GenerateFamily()
+        private static string GenerateFamily()
         {
             return Encoding.ASCII.GetString(RandomNumberGenerator.GetBytes(64));
         }
@@ -185,7 +230,7 @@ namespace Appy.Services
         private string GenerateAccessJwtToken(User user)
         {
             return jwtService.GenerateToken(
-                new TimeSpan(hours: 3, minutes: 0, seconds: 0),
+                new TimeSpan(hours: 1, minutes: 0, seconds: 10),
                 new Claim("id", user.Id.ToString()),
                 new Claim("name", user.Name),
                 new Claim("surname", user.Surname),

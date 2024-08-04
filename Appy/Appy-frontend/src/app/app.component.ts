@@ -62,7 +62,7 @@ export class AppComponent implements OnInit {
   }
 
   public logOut(): void {
-    this.authService.logOut();
+    this.authService.logOut().subscribe(() => {});
   }
 
   public visibleNavigation(nav: Navigation): boolean {
