@@ -1,7 +1,7 @@
 <app-loading *ngIf="client == null"></app-loading>
 <div *ngIf="client != null">
     <div class="w-title" *ngIf="isNew">{{"pages.clients.NEW_CLIENT" | translate}}</div>
-    <div class="w-title" *ngIf="!isNew">{{"pages.clients.CLIENT" | translate}} - {{originalNickname}}</div>
+    <div class="w-title" *ngIf="!isNew">{{"pages.clients.CLIENT" | translate}} - {{originalFullname}}</div>
 
     <div class="w-input-container">
         <div class="w-label">{{'pages.clients.NAME' | translate}}</div>
@@ -14,13 +14,6 @@
         <input class="w-input" type="text" [style.width]="'100%'" placeholder="{{'pages.clients.SURNAME' | translate}}"
             [(ngModel)]="client.surname">
         <div class="w-validation-message">{{ client.getValidationErrors("surname") | translate }}</div>
-    </div>
-    <div class="w-input-container">
-        <div class="w-label">{{'pages.clients.NICKNAME' | translate}}</div>
-        <input class="w-input" type="text" [style.width]="'100%'"
-            [placeholder]="getGeneratedNickname() ?? ('pages.clients.NICKNAME' | translate)"
-            [(ngModel)]="client.nickname">
-        <div class="w-validation-message">{{ client.getValidationErrors("nickname") | translate }}</div>
     </div>
     <div class="w-input-container">
         <div class="w-label">{{'pages.clients.PHONE_NUMBER' | translate}}</div>

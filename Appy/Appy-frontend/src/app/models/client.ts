@@ -2,18 +2,23 @@ import { Model, REQUIRED_VALIDATION, Validation } from "./base-model";
 
 export class ClientDTO {
     public id: number = 0;
-    public nickname?: string;
-    public name?: string;
+    public name!: string;
     public surname?: string;
     public phoneNumber?: string;
     public email?: string;
     public notes?: string;
     public isArchived?: boolean;
+
+    public static getFullname(dto: ClientDTO): string {
+        if (dto.surname == null || dto.surname == "")
+            return dto.name;
+
+        return dto.name + " " + dto.surname;
+    }
 }
 
 export class Client extends Model<Client> {
     public id: number;
-    public nickname?: string;
     public name?: string;
     public surname?: string;
     public phoneNumber?: string;
@@ -23,9 +28,9 @@ export class Client extends Model<Client> {
 
     override validations: Validation<Client>[] = [
         {
-            isValid: () => REQUIRED_VALIDATION(this.nickname),
-            propertyName: "nickname",
-            errorCode: "pages.clients.errors.MISSING_NICKNAME"
+            isValid: () => REQUIRED_VALIDATION(this.name),
+            propertyName: "name",
+            errorCode: "pages.clients.errors.MISSING_NAME"
         },
     ]
 
@@ -33,7 +38,6 @@ export class Client extends Model<Client> {
         super();
 
         this.id = dto.id;
-        this.nickname = dto.nickname;
         this.name = dto.name;
         this.surname = dto.surname;
         this.phoneNumber = dto.phoneNumber;
@@ -47,8 +51,7 @@ export class Client extends Model<Client> {
     public getDTO(): ClientDTO {
         let dto = new ClientDTO();
         dto.id = this.id;
-        dto.nickname = this.nickname;
-        dto.name = this.name;
+        dto.name = this.name!;
         dto.surname = this.surname;
         dto.phoneNumber = this.phoneNumber;
         dto.email = this.email;
@@ -56,5 +59,12 @@ export class Client extends Model<Client> {
         dto.isArchived = this.isArchived;
 
         return dto;
+    }
+
+    public getFullname(): string {
+        if (this.surname == null || this.surname == "")
+            return this.name!;
+
+        return this.name + " " + this.surname;
     }
 }

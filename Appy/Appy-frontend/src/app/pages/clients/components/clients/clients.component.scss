@@ -30,12 +30,8 @@
     display: grid;
 
     grid-template-areas:
-        "nickname phone-number"
+        "full-name phone-number"
         "full-name email";
-
-    .nickname {
-        grid-area: nickname;
-    }
 
     .phone-number {
         grid-area: phone-number;

@@ -87,7 +87,7 @@ export class ClientLookupComponent implements OnInit, OnDestroy {
   }
 
   public selectClient(client: Client | undefined) {
-    this.setDatasource(client);
+    this.setDatasource(client?.getDTO());
   }
 
   private clientChanged(dto?: ClientDTO) {
@@ -103,12 +103,15 @@ export class ClientLookupComponent implements OnInit, OnDestroy {
   addNew() {
     this.validationError = null;
     if (this.search?.search == null || this.search?.search == "") {
-      this.validationError = "pages.clients.errors.MISSING_NICKNAME";
+      this.validationError = "pages.clients.errors.MISSING_NAME_SURNAME";
       return;
     }
 
+    var nameSurnameSplit = this.search.search.split(/ (.*)/s);
+
     let client = new Client();
-    client.nickname = this.search.search;
+    client.name = nameSurnameSplit[0];
+    client.surname = nameSurnameSplit.length > 1 ? nameSurnameSplit[1] : undefined;
 
     this.isLoadingNew = true;
     this.clientService.addNew(client).subscribe({
@@ -122,7 +125,7 @@ export class ClientLookupComponent implements OnInit, OnDestroy {
       },
       error: e => {
         this.isLoadingNew = false;
-        this.validationError = client.getValidationErrors("nickname");
+        this.validationError = client.getValidationErrors("name") ?? client.getValidationErrors("surname");
       }
     });
   }

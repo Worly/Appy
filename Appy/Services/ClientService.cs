@@ -45,7 +45,11 @@ namespace Appy.Services
 
         public async Task<Client> AddNew(ClientDTO dto, int facilityId)
         {
-            var nameSurnameTaken = await context.Clients.Where(o => o.FacilityId == facilityId && o.Name == dto.Name && o.Surname == dto.Surname).AnyAsync();
+            var lowercaseSurname = dto.Surname?.ToLower();
+
+            var nameSurnameTaken = await context.Clients.Where(o => o.FacilityId == facilityId 
+                && o.Name.ToLower() == dto.Name.ToLower() 
+                && (o.Surname == null ? o.Surname : o.Surname.ToLower()) == lowercaseSurname).AnyAsync();
             if (nameSurnameTaken)
                 throw new ValidationException(nameof(Client.Surname), "pages.clients.errors.NAME_AND_SURNAME_TAKEN");
 

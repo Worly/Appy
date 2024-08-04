@@ -129,7 +129,6 @@
             "CLIENT": "Klijent",
             "NAME": "Ime",
             "SURNAME": "Prezime",
-            "NICKNAME": "Nadimak",
             "PHONE_NUMBER": "Broj mobitela",
             "EMAIL": "Email",
             "NOTES": "Bilješke",
@@ -144,8 +143,9 @@
             "ADD_CLIENT": "Dodaj klijenta",
 
             "errors": {
-                "MISSING_NICKNAME": "Molim upišite nadimak",
-                "NICKNAME_TAKEN": "Klijent s tim nadimkom već postoji"
+                "MISSING_NAME": "Molim upišite ime",
+                "MISSING_NAME_SURNAME": "Molim upišite ime i prezime",
+                "NAME_AND_SURNAME_TAKEN": "Klijent s tim imenom i prezimenom već postoji"
             }
         },
 

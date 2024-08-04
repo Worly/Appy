@@ -18,7 +18,7 @@ export class ClientEditComponent implements OnInit, OnDestroy {
 
   public isNew: boolean = false;
   public client?: Client = undefined;
-  public originalNickname?: string;
+  public originalFullname?: string;
 
   public isLoadingSave: boolean = false;
   public isLoadingDelete: boolean = false;
@@ -60,7 +60,7 @@ export class ClientEditComponent implements OnInit, OnDestroy {
   private load(id: number) {
     this.subs.push(this.clientService.get(id).subscribe((s: Client) => {
       this.client = s;
-      this.originalNickname = s.nickname;
+      this.originalFullname = s.getFullname();
     }));
   }
 
@@ -71,9 +71,6 @@ export class ClientEditComponent implements OnInit, OnDestroy {
   public save() {
     if (this.client == null)
       return;
-
-    if (this.client.nickname == null || this.client.nickname == "")
-      this.client.nickname = this.getGeneratedNickname();
 
     if (!this.client.validate())
       return;
@@ -134,25 +131,6 @@ export class ClientEditComponent implements OnInit, OnDestroy {
 
   public goBack() {
     this.location.back();
-  }
-
-  public getGeneratedNickname(): string | undefined {
-    if (this.client == null)
-      return undefined;
-
-    let hasName = this.client.name != null && this.client.name != "";
-    let hasSurname = this.client.surname != null && this.client.surname != "";
-
-    if (hasName && hasSurname)
-      return this.client.name + " " + this.client.surname?.trim().charAt(0).toUpperCase();
-
-    if (hasName)
-      return this.client.name as string;
-
-    if (hasSurname)
-      return this.client.surname as string;
-
-    return undefined;
   }
 
   public goToFilteredAppointments() {

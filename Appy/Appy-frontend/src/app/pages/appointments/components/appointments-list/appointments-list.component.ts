@@ -9,6 +9,7 @@ import { BeforeAttach, BeforeDetach } from 'src/app/services/attach-detach-hooks
 import { PageableListDatasource } from 'src/app/shared/services/base-model-service';
 import { AppointmentService } from '../../services/appointment.service';
 import { appFilterToSmartFilter, AppointmentsFilter } from '../appointments/appointments.component';
+import { ClientDTO } from 'src/app/models/client';
 
 @Component({
   selector: 'app-appointments-list',
@@ -221,7 +222,7 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
         serviceColor: this.serviceColorsService.get(ap.service?.colorId),
         isUnconfirmed: ap.status == "Unconfirmed",
         hasNotes: ap.notes != null && ap.notes != "",
-        client: ap.client?.nickname as string,
+        client: ClientDTO.getFullname(ap.client!) as string,
         dateISO: ap.date?.format("YYYY-MM-DD") ?? "",
         isLast: i == sortedAppointments.length - 1
       });

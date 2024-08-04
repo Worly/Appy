@@ -16,7 +16,7 @@ import { ClientsComponent } from "./components/clients/clients.component";
     declarations: [
         ClientsComponent,
         ClientEditComponent,
-        ClientLookupComponent
+        ClientLookupComponent,
     ],
     imports: [
         ClientsRoutingModule,
@@ -31,7 +31,7 @@ import { ClientsComponent } from "./components/clients/clients.component";
         SearchModule
     ],
     exports: [
-        ClientLookupComponent
+        ClientLookupComponent,
     ]
 })
 export class ClientsModule {

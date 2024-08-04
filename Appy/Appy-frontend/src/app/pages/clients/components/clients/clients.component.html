@@ -14,7 +14,6 @@
     <div *ngFor="let s of filteredClients" class="w-clickable w-card single-client-outer-container"
         (click)="goToEdit(s.id)">
         <div class="single-client-container">
-            <div class="nickname">{{s.nickname}}</div>
             <div class="full-name">{{s.name}} {{s.surname}}</div>
             <div class="phone-number">{{s.phoneNumber}}</div>
             <div class="email">{{s.email}}</div>

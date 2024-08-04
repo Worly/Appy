@@ -129,7 +129,6 @@
             "CLIENT": "Client",
             "NAME": "Name",
             "SURNAME": "Surname",
-            "NICKNAME": "Nickname",
             "PHONE_NUMBER": "Phone number",
             "EMAIL": "Email",
             "NOTES": "Notes",
@@ -144,8 +143,9 @@
             "ADD_CLIENT": "Add a client",
 
             "errors": {
-                "MISSING_NICKNAME": "Please enter a nickname",
-                "NICKNAME_TAKEN": "Client with that nickname already exists"
+                "MISSING_NAME": "Please enter a name",
+                "MISSING_NAME_SURNAME": "Please enter a name and surname",
+                "NAME_AND_SURNAME_TAKEN": "Client with that name and surname already exists"
             }
         },
 
