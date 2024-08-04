@@ -6,9 +6,11 @@ export class Search {
     }
 
     public search<T>(items: T[], term: string): T[] {
-
         term = term.trim().toLowerCase();
-        let terms = term.split(" ").map(t => ascii(t));
+        let terms = term.split(" ").map(t => ascii(t)).filter(t => t != null && t != "");
+
+        if (terms.length == 0)
+            return items;
 
         let searchResults: SearchResult<T>[] = items.map(i => {
             let score = 0;
@@ -24,6 +26,8 @@ export class Search {
 
                     for (let term of terms) {
                         if (asciiValue == term)
+                            score += 3;
+                        if (asciiValue.startsWith(term))
                             score += 2;
                         else if (asciiValue.includes(term))
                             score += 1;
