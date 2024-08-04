@@ -2,7 +2,6 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { appConfig } from "src/app/app.config";
-import { DashboardStats } from "../dashboard-stats";
 
 @Injectable({ providedIn: "root" })
 export class DashboardService {
@@ -10,7 +9,7 @@ export class DashboardService {
 
     constructor(private httpClient: HttpClient) { }
 
-    public getStats(): Observable<DashboardStats> {
-        return this.httpClient.get<DashboardStats>(`${appConfig.apiUrl}${this.controllerName}/stats`);
+    public getBookedToday(): Observable<number> {
+        return this.httpClient.get<number>(`${appConfig.apiUrl}${this.controllerName}/bookedToday`);
     }
 }

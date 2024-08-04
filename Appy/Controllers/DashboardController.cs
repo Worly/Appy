@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Appy.Auth;
 using Appy.Services.Facilities;
-using Appy.DTOs;
 using Appy.Services;
 
 namespace Appy.Controllers
@@ -18,14 +17,11 @@ namespace Appy.Controllers
             this.appointmentService = appointmentService;
         }
 
-        [HttpGet("stats")]
+        [HttpGet("bookedToday")]
         [Authorize]
-        public async Task<ActionResult<HomeStatsDTO>> Stats()
+        public async Task<ActionResult<int>> BookedToday()
         {
-            return Ok(new HomeStatsDTO()
-            {
-                NumberOfAppointmentsCreatedToday = await appointmentService.GetNumberOfAppointmentsCreatedToday(HttpContext.SelectedFacility())
-            });
+            return Ok(await appointmentService.GetNumberOfAppointmentsCreatedToday(HttpContext.SelectedFacility()));
         }
 
     }
