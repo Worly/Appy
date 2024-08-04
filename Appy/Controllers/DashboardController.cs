@@ -9,11 +9,11 @@ namespace Appy.Controllers
     [ApiController]
     [Route("[controller]")]
     [SelectedFacility]
-    public class HomeController : ControllerBase
+    public class DashboardController : ControllerBase
     {
         private readonly IAppointmentService appointmentService;
 
-        public HomeController(IAppointmentService appointmentService)
+        public DashboardController(IAppointmentService appointmentService)
         {
             this.appointmentService = appointmentService;
         }

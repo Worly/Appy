@@ -1,15 +1,15 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { HomeService } from './services/home.service';
-import { HomeStats } from './home-stats';
+import { DashboardService } from './services/dashboard.service';
+import { DashboardStats } from './dashboard-stats';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css']
+  selector: 'app-dashboard',
+  templateUrl: './dashboard.component.html',
+  styleUrls: ['./dashboard.component.css']
 })
-export class HomeComponent implements OnInit, OnDestroy {
-  stats?: HomeStats = undefined;
+export class DashboardComponent implements OnInit, OnDestroy {
+  stats?: DashboardStats = undefined;
   emojies: { [key: string]: string } = {};
 
   numberOfAppointmentsTodayEmoji: { [key: number]: string } = {
@@ -25,7 +25,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   private subs: Subscription[] = [];
 
-  constructor(private homeService: HomeService) { }
+  constructor(private homeService: DashboardService) { }
 
   ngOnInit(): void {
     this.subs.push(this.homeService.getStats().subscribe(s => {

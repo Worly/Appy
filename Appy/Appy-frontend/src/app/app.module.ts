@@ -15,7 +15,7 @@ import { TranslateModule } from './components/translate/translate.module';
 import { LanguagePickerModule } from './components/language-picker/language-picker.module';
 import { LoginModule } from './pages/login/login.module';
 import { RegisterModule } from './pages/register/register.module';
-import { HomeModule } from './pages/home/home.module';
+import { DashboardModule } from './pages/dashboard/dashboard.module';
 import { ErrorModule } from './pages/error/error.module';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
@@ -96,7 +96,7 @@ dayjs.extend(duration);
     LoginModule,
     RegisterModule,
     FacilitiesModule,
-    HomeModule,
+    DashboardModule,
 
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: environment.production,

@@ -1,3 +1,3 @@
-export class HomeStats {
+export class DashboardStats {
     public numberOfAppointmentsCreatedToday?: number;
 }

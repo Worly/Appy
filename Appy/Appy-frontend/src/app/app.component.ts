@@ -17,7 +17,7 @@ export class AppComponent implements OnInit {
     {
       name: "HOME",
       icon: "house",
-      link: "/home",
+      link: "/dashboard",
       visible: () => this.authService.isLoggedIn() && this.facilityService.getSelected() != null
     },
     {
