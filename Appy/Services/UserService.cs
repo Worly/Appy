@@ -224,7 +224,10 @@ namespace Appy.Services
 
         private static string GenerateFamily()
         {
-            return Encoding.ASCII.GetString(RandomNumberGenerator.GetBytes(64));
+            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var familyLen = 64;
+
+            return new string(Enumerable.Range(0, familyLen).Select(_ => chars[RandomNumberGenerator.GetInt32(chars.Length)]).ToArray());
         }
 
         private string GenerateAccessJwtToken(User user)
