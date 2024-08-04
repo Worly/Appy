@@ -1,5 +1,5 @@
 <app-button #buttonRef="elementRef" appElementRef width="100%"
-    [text]="value && value.nickname ? value.nickname : ('pages.clients.CHOOSE_CLIENT' | translate)"
+    [text]="value ? (value.surname != null ? value.name + ' ' + value.surname : value.name) : ('pages.clients.CHOOSE_CLIENT' | translate)"
     (onClick)="openContextMenu()"></app-button>
 
 <app-button *ngIf="showClearButton && value != null" class="clear-button" look="transparent" icon="times"
@@ -20,7 +20,6 @@
     <app-button class="single-client-button" *ngFor="let client of filteredClients" width="100%"
         (onClick)="selectClient(client)">
         <div class="single-client-container" [ngClass]="{'selected': client.id == value?.id}">
-            <div class="nickname">{{client.nickname}}</div>
             <div class="full-name">{{client.name}} {{client.surname}}</div>
             <div class="phone-number">{{client.phoneNumber}}</div>
         </div>

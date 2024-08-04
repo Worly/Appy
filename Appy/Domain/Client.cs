@@ -9,8 +9,7 @@ namespace Appy.Domain
         public int FacilityId { get; set; }
         public Facility Facility { get; set; }
 
-        public string Nickname { get; set; }
-        public string? Name { get; set; }
+        public string Name { get; set; }
         public string? Surname { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Email { get; set; }
@@ -23,7 +22,6 @@ namespace Appy.Domain
             return new ClientDTO()
             {
                 Id = Id,
-                Nickname = Nickname,
                 Name = Name,
                 Surname = Surname,
                 PhoneNumber = PhoneNumber,

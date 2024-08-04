@@ -46,26 +46,10 @@
 .single-client-container {
     width: 100%;
 
-    display: grid;
-    grid-template-areas:
-        "nickname full-name"
-        "nickname phone-number";
+    display: flex;
+    justify-content: space-between;
 
     &.selected {
         font-weight: bold;
-    }
-
-    .nickname {
-        grid-area: nickname;
-    }
-
-    .full-name {
-        grid-area: full-name;
-        text-align: end;
-    }
-
-    .phone-number {
-        grid-area: phone-number;
-        text-align: end;
     }
 }

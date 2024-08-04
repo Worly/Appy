@@ -3,6 +3,7 @@ using System;
 using Appy.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Appy.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240726162341_RemoveClientNickname")]
+    partial class RemoveClientNickname
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -130,39 +132,6 @@ namespace Appy.Migrations
                     b.ToTable("Facilities");
                 });
 
-            modelBuilder.Entity("Appy.Domain.LoginSession", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Family")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("RefreshToken")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserAgent")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Family")
-                        .IsUnique();
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("LoginSessions");
-                });
-
             modelBuilder.Entity("Appy.Domain.Service", b =>
                 {
                     b.Property<int>("Id")
@@ -216,6 +185,9 @@ namespace Appy.Migrations
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("RefreshToken")
                         .HasColumnType("text");
 
                     b.Property<byte[]>("Salt")
@@ -310,17 +282,6 @@ namespace Appy.Migrations
                     b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("Appy.Domain.LoginSession", b =>
-                {
-                    b.HasOne("Appy.Domain.User", "User")
-                        .WithMany("LoginSessions")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Appy.Domain.Service", b =>
                 {
                     b.HasOne("Appy.Domain.Facility", "Facility")
@@ -346,8 +307,6 @@ namespace Appy.Migrations
             modelBuilder.Entity("Appy.Domain.User", b =>
                 {
                     b.Navigation("Facilities");
-
-                    b.Navigation("LoginSessions");
                 });
 #pragma warning restore 612, 618
         }
