@@ -46,6 +46,7 @@
     "CHOOSE_STATUS": "Odaberi status",
     "CREATED_AT": "Kreirano",
     "LAST_UPDATED_AT": "Zadnje uređivano",
+    "VIEW_ALL": "Pogledaj sve",
 
     "UNCONFIRMED": "Nepotvrđeno",
     "UNCONFIRM": "Nepotvrdi",
@@ -53,8 +54,12 @@
     "CONFIRM": "Potvrdi",
 
     "pages": {
-        "home": {
-            "NUMBER_OF_APPOINMENTS_CREATED_TODAY": "Broj termina zapisanih danas" 
+        "dashboard": {
+            "NUMBER_OF_APPOINMENTS_CREATED_TODAY": "Broj termina zapisanih danas",
+            "UPCOMING_UNCONFIRMED_APPOINTMENTS": "Nadolazeći nepotvrđeni termini",
+            "MORE": "Još",
+            "NONE_IN_THE_NEXT": "Nema u sljedećih",
+            "DAYS": "Dana"
         },
 
         "error": {

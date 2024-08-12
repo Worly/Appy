@@ -1,0 +1,20 @@
+<div class="stat w-card">
+    <app-loading *ngIf="appointments == null"></app-loading>
+    <div *ngIf="appointments != null">
+        <div class="title-container">
+            <div class="title">{{'pages.dashboard.UPCOMING_UNCONFIRMED_APPOINTMENTS' | translate}}</div>
+            <app-button icon="gear" look="transparent" [isCircle]="true"></app-button>
+        </div>
+        <div *ngIf="appointments.length > 0">
+            <app-single-appointment-list-item *ngFor="let i of appointments | slice: 0:numberOfAppointmentsToShow"
+                [appointment]="i" [showDate]="true"></app-single-appointment-list-item>
+            <app-button class="more-button" [text]="viewMoreText ?? ''" alignContent="center" (onClick)="openAppointments()"></app-button>
+        </div>
+        <div *ngIf="appointments.length == 0" class="none-container">
+            <div>
+                {{ "pages.dashboard.NONE_IN_THE_NEXT" | translate }} {{ numberOfAppointmentsToShow }} {{ "pages.dashboard.DAYS" | translate | lowercase }}
+            </div>
+            <fa-icon class="none-icon" [icon]="['far', 'circle-check']"></fa-icon>
+        </div>
+    </div>
+</div>

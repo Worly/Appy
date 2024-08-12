@@ -17,19 +17,9 @@
             {{i.dateFormatted}} {{i.isEmptyDate ? " - " + ("pages.appointments.NO_APPOINTMENTS" | translate) : ""}}
         </div>
 
-        <div #appointmentElement *ngIf="i.type == 'appointment'" class="appointment" [attr.data-date]="i.dateISO"
-            [ngClass]="{'last': i.isLast}" [attr.data-appId]="i.id" (click)="onAppointmentClick(i.id)">
-            <div class="color" [style.backgroundColor]="i.serviceColor"></div>
-            <div class="info-container">
-                <div class="time">{{i.time}}</div>
-                <div class="service">{{i.service}}</div>
-                <div class="client">{{i.client}}</div>
-            </div>
-            <div class="status-icon-container">
-                <fa-icon *ngIf="i.isUnconfirmed" class="warn" [icon]="['fas', 'question']" ></fa-icon>
-                <fa-icon *ngIf="i.hasNotes" [icon]="['far', 'file-lines']"></fa-icon>
-            </div>
-        </div>
+        <app-single-appointment-list-item #appointmentElement *ngIf="i.type == 'appointment'"
+            [attr.data-date]="i.dateISO" [ngClass]="{'last': i.isLast}"
+            [attr.data-appId]="i.id" [appointment]="i.appointment"></app-single-appointment-list-item>
     </div>
 
     <div *ngIf="isReachedBottom() && appointments?.length != 0" class="no-appointments big">
@@ -43,8 +33,3 @@
 <div *ngIf="appointments?.length == 0 && !isLoadingNext() && !isLoadingPrevious()" class="no-appointments big">
     {{"pages.appointments.NO_APPOINTMENTS" | translate}}
 </div>
-
-<app-dialog #appointmentDialog>
-    <app-single-appointment *ngIf="appointmentDialog.isOpen" [id]="viewAppointmentId"
-        (onDone)="closeAppointmentDialog()"></app-single-appointment>
-</app-dialog>

@@ -1,0 +1,34 @@
+.stat {
+    min-height: 80px;
+
+    .title-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+    }
+
+    .title {
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+    }
+}
+
+.more-button {
+    width: 100%;
+    height: 40px;
+}
+
+.none-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-left: 20px;
+    margin-right: 20px;
+
+    font-size: 1rem;
+
+    .none-icon {
+        color: var(--success);
+        font-size: 1.6rem;
+    }
+}

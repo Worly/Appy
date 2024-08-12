@@ -36,6 +36,9 @@ namespace Appy.Services.SmartFiltering
             };
         }
 
+        public static SmartFilter FromFieldFilter(string propertyName, Comparator comparator, float number) => FromFieldFilter(new FieldFilter(propertyName, comparator, number));
+        public static SmartFilter FromFieldFilter(string propertyName, Comparator comparator, string? str) => FromFieldFilter(new FieldFilter(propertyName, comparator, str));
+
         public static SmartFilter Not(SmartFilter smartFilter)
         {
             return new SmartFilter(SmartFilterType.Not)
@@ -210,7 +213,16 @@ namespace Appy.Services.SmartFiltering
         {
             if (type.IsEnum)
             {
+                // Enum.Parse<T>(value, true);
                 return Expression.Call(typeof(Enum), "Parse", new Type[] { type }, expression, Expression.Constant(true));
+            }
+
+            if (type == typeof(DateOnly))
+            {
+                // DateOnly.Parse(value);
+                var method = typeof(DateOnly).GetMethod("Parse", new Type[] { typeof(string) }) 
+                    ?? throw new Exception("Couldn't find the DateOnly.Parse method for conversion");
+                return Expression.Call(method, expression);
             }
 
             return Expression.Convert(expression, type);

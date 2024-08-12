@@ -31,6 +31,7 @@ import { faAngleDown } from "@fortawesome/free-solid-svg-icons/faAngleDown";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 import { faEllipsisV } from "@fortawesome/free-solid-svg-icons/faEllipsisV";
+import { faGear } from "@fortawesome/free-solid-svg-icons/faGear";
 import { faPen } from "@fortawesome/free-solid-svg-icons/faPen";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons/faSpinner";
@@ -130,7 +131,7 @@ export class AppModule {
       faTimes, faPlus,
       faCaretDown, faCaretUp,
       faTrash, faPen,
-      faEllipsisV,
+      faEllipsisV, faGear,
       faBusinessTime,
       faBoxArchive,
       faCircleCheck, farCircleCheck, faQuestion, faCheck,
