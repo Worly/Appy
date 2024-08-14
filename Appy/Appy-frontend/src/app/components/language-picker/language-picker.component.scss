@@ -3,5 +3,5 @@
 }
 
 :host::ng-deep > app-button > div.my-button {
-    color: var(--anti-text);
+    color: rgb(var(--rgb-anti-text));
 }

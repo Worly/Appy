@@ -18,8 +18,8 @@
 
         margin: 0;
         padding: 10px 15px;
-        background-color: var(--input-background-color);
-        box-shadow: 0 25px 22px 19px var(--text);
+        background-color: rgb(var(--rgb-input-background));
+        box-shadow: 0 25px 22px 19px rgb(var(--rgb-text));
 
         &.compact {
             padding: 10px 10px;

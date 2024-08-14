@@ -22,9 +22,9 @@ export class ButtonComponent implements OnInit {
   @Input() look: "solid" | "outlined" | "normal" | "transparent" | "custom" = "normal";
   @Input() color: Color = "normal";
 
-  @Input() customColor: string = "#FFFFFF";
-  @Input() customTextColor: string = "black";
-  @Input() customBorderColor: string = "black";
+  @Input() customColor: string = "rgb(var(--rgb-anti-text))";
+  @Input() customTextColor: string = "rgb(var(--rgb-text))";
+  @Input() customBorderColor: string = "rgb(var(--rgb-text))";
 
   @Input() borderStyle: "solid" | "dashed" | "dotted" | "double" = "solid";
   @Input() borderWidth: string = "2px";

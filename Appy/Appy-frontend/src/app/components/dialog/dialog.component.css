@@ -1,7 +1,7 @@
 .dialog-container {
     padding: 30px 30px;
     position: relative;
-    box-shadow: 0 0 20px -10px var(--text);
+    box-shadow: 0 0 20px -10px rgb(var(--rgb-text));
     min-width: min(90vw, 500px);
     min-height: 20vh;
 }

@@ -1,10 +1,10 @@
 .context-menu-container {
-    background-color: var(--input-background-color);
+    background-color: rgb(var(--rgb-input-background));
     border-radius: var(--default-border-radius);
     display: flex;
     flex-direction: column;
     width: 100%;
-    box-shadow: 0 3px 9px 0px var(--focus-outline-color);
+    box-shadow: 0 3px 9px 0px rgb(var(--rgb-focus-outline));
     overflow: overlay;
     overscroll-behavior: contain;
 }
@@ -20,11 +20,11 @@
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-    background: rgb(153, 153, 153);
+    background: rgb(var(--rgb-input-border));
     border-radius: 4px;
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-    background: rgb(119, 119, 119);
+    background: rgb(var(--rgb-focus-outline));
 }

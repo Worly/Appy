@@ -8,7 +8,7 @@
         <div class="action-buttons">
             <app-action-bar [style.width.%]="100" [compact]="true">
                 <app-button icon="business-time" look="custom"
-                    [customBorderColor]="showAnyHour ? 'var(--text)' : 'var(--input-background-color)'"
+                    [customBorderColor]="showAnyHour ? 'rgb(var(--rgb-text))' : 'rgb(var(--rgb-input-background))'"
                     (onClick)="toggleShowAnyHour()">
                 </app-button>
                 <app-date-selector flex-splitter [(date)]="date" [compact]="true"></app-date-selector>

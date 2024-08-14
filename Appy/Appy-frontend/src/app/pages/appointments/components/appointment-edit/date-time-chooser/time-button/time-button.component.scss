@@ -2,7 +2,7 @@
     display: block;
     position: relative;
     width: 100%;
-    background-color: var(--input-background-color);
+    background-color: rgb(var(--rgb-input-background));
     border-radius: var(--default-border-radius);
     overflow: hidden;
 
@@ -23,14 +23,14 @@
         border-radius: var(--default-border-radius);
         font-size: 1rem;
 
-        box-shadow: 0 0 0 1px var(--input-border-color) inset;
+        box-shadow: 0 0 0 1px rgb(var(--rgb-input-border)) inset;
 
         &.contains-selection {
-            box-shadow: 0 0 0 2px var(--text) inset;
+            box-shadow: 0 0 0 2px rgb(var(--rgb-text)) inset;
         }
 
         &.selected {
-            box-shadow: 0 0 0 3px var(--text) inset;
+            box-shadow: 0 0 0 3px rgb(var(--rgb-text)) inset;
             font-weight: bold;
         }
     }
@@ -47,18 +47,18 @@
     border-right: 6px solid var(--status-color);
 
     &.free-time {
-        --status-color: var(--success);
+        --status-color: rgb(var(--rgb-success));
         & > div {
             display: none;
         }
     }
 
     &.taken-time {
-        --status-color: var(--danger);
+        --status-color: rgb(var(--rgb-danger));
     }
 
     &.closed-time {
-        --status-color: var(--input-border-color);
+        --status-color: rgb(var(--rgb-input-border));
     }
 
     & > div {
