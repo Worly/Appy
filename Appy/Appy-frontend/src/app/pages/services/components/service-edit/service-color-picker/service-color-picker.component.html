@@ -1,10 +1,11 @@
-<app-button #buttonRef="elementRef" appElementRef look="custom" borderWidth="0" [customColor]="serviceColorsService.get(colorId)"
+<app-button #buttonRef="elementRef" appElementRef look="custom" borderWidth="0"
+    [customColor]="colorId == null ? 'rgb(var(--rgb-input-background))' : serviceColorsService.get(colorId)"
     customTextColor="rgb(var(--rgb-text))" width="100%"
     [text]="(colorId != null ? ('pages.services.COLOR' | translate) + ' ' + (colorId + 1) + ': ' + (serviceColorsService.get(colorId) | uppercase) : ('pages.services.CHOOSE_COLOR' | translate))"
     (onClick)="contextMenu.toggle()"></app-button>
 
 <app-context-menu #contextMenu [relativeTo]="buttonRef.elementRef" [copyOriginWidth]="true">
-    <app-button *ngFor="let color of serviceColorsService.getAll()" borderWidth="0" look="custom" [customColor]="color.color"
+    <app-button *ngFor="let color of allColors" borderWidth="0" look="custom" [customColor]="color.color"
         customTextColor="rgb(var(--rgb-text))" width="100%"
         [text]="('pages.services.COLOR' | translate) + ' ' + (color.id + 1) + ': ' + (color.color | uppercase)"
         (onClick)="selectColor(color.id)">

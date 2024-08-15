@@ -46,6 +46,9 @@
     "CHOOSE_STATUS": "Choose status",
     "CREATED_AT": "Created at",
     "LAST_UPDATED_AT": "Last updated at",
+    "DARK": "Dark",
+    "LIGHT": "Light",
+    "FOLLOW_OS": "Follow OS",
 
     "UNCONFIRMED": "Unconfirmed",
     "UNCONFIRM": "Unconfirm",

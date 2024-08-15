@@ -26,11 +26,11 @@
         box-shadow: 0 0 0 1px rgb(var(--rgb-input-border)) inset;
 
         &.contains-selection {
-            box-shadow: 0 0 0 2px rgb(var(--rgb-text)) inset;
+            box-shadow: 0 0 0 2px rgba(var(--rgb-text), 0.7) inset;
         }
 
         &.selected {
-            box-shadow: 0 0 0 3px rgb(var(--rgb-text)) inset;
+            box-shadow: 0 0 0 3px rgba(var(--rgb-text), 0.7) inset;
             font-weight: bold;
         }
     }

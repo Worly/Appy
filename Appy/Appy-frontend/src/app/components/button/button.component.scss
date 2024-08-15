@@ -55,7 +55,7 @@
         }
 
         &:active {
-            box-shadow: inset 0 1px 6px -1px rgb(var(--rgb-text));
+            box-shadow: inset 0 1px 6px -1px rgba(var(--rgb-text), 0.5);
         }
     }
 
@@ -144,6 +144,11 @@
         color: rgb(var(--rgb-normal));
         border-color: rgb(var(--rgb-input-border));
     }
+    &-inherit {
+        background-color: inherit;
+        color: inherit;
+        border-color: inherit;
+    }
 }
 
 .my-disabled {
@@ -154,7 +159,23 @@
 
 .look {
     &-solid {
-        color: rgb(var(--rgb-anti-text));
+        &.color {
+            &-success {
+                color: rgb(var(--rgb-text-on-success));
+            }
+            &-danger {
+                color: rgb(var(--rgb-text-on-danger));
+            }
+            &-warning {
+                color: rgb(var(--rgb-text-on-warning));
+            }
+            &-normal {
+                color: rgb(var(--rgb-text-on-normal));
+            }
+            &-inherit {
+                color: inherit;
+            }
+        }
         border-width: 0px;
     }
     &-outlined {

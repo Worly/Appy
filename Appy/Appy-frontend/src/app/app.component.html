@@ -2,7 +2,7 @@
 <div>
   <div class="navigation-bar">
     <div class="navigation-bar-content"
-      [style]="'--nvaigation-bar-item-count: ' + navigations.filter(visibleNavigation).length">
+      [style]="'--navigation-bar-item-count: ' + navigations.filter(visibleNavigation).length">
       <div *ngFor="let item of navigations.filter(visibleNavigation)" class="navigation-button w-clickable"
         [routerLink]="item.link" [routerLinkActive]="'active'">
         <div class="icon">
@@ -21,9 +21,12 @@
         </div>
         <div class="w-overlay-dark"></div>
       </div>
+
+      <div class="pickers" *ngIf="dropdownNavigations.filter(visibleNavigation).length == 0">
+        <app-color-scheme-picker></app-color-scheme-picker>
+        <app-language-picker></app-language-picker>
+      </div>
     </div>
-    <app-language-picker *ngIf="dropdownNavigations.filter(visibleNavigation).length == 0" class="language-picker">
-    </app-language-picker>
   </div>
   <app-context-menu #navigationDropdown [relativeTo]="dropdownButton.elementRef" [viewportMargin]="0">
     <div class="navigation-dropdown">
@@ -49,7 +52,10 @@
         <div class="w-overlay-dark"></div>
       </div>
 
-      <app-language-picker class="language-picker"></app-language-picker>
+      <div class="pickers">
+        <app-color-scheme-picker></app-color-scheme-picker>
+        <app-language-picker></app-language-picker>
+      </div>
     </div>
   </app-context-menu>
   <div class="navigation-bar-shadow"></div>

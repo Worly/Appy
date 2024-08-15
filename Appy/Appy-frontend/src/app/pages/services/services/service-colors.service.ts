@@ -1,4 +1,6 @@
 import { Injectable } from "@angular/core";
+import { ColorSchemeService } from "src/app/services/color-scheme.service";
+import colorConvert from "color-convert";
 
 @Injectable({ providedIn: "root" })
 export class ServiceColorsService {
@@ -37,12 +39,32 @@ export class ServiceColorsService {
 
     private missingColor: ServiceColor = { id: -1, color: "#FFFFFF" };
 
+    constructor(private colorSchemeService: ColorSchemeService) {}
+
     public get(colorId?: number): string {
-        return this.colors.find(c => c.id == colorId)?.color ?? this.missingColor.color;
+        let color = this.colors.find(c => c.id == colorId)?.color ?? this.missingColor.color;
+
+        return this.darkenIfDarkMode(color);
     }
 
     public getAll(): ServiceColor[] {
-        return this.colors;
+        return this.colors.map(c => {
+            return {
+                id: c.id,
+                color: this.darkenIfDarkMode(c.color)
+            }
+        });
+    }
+
+    private darkenIfDarkMode(color: string): string {
+        if (this.colorSchemeService.isDark()) {
+            var hslColor = colorConvert.hex.hsv(color);
+            hslColor[1] *= 1.2;
+            hslColor[2] *= 0.7;
+            color = "#" + colorConvert.hsv.hex(hslColor);
+        }
+
+        return color;
     }
 }
 

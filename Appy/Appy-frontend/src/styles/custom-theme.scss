@@ -17,12 +17,11 @@
 @include mat.all-legacy-component-typographies();
 @include mat.legacy-core();
 
-$mat-my: (
-  100: #16b9c5,
-  500: #16b9c5,
-  700: #16b9c5,
-  contrast: (
-    50: black,
+$mat-light: (
+  100: rgb(79, 117, 155),
+  500: rgb(79, 117, 155),
+  700: rgb(79, 117, 155),
+  contrast: (50: black,
     100: black,
     200: black,
     300: white,
@@ -39,27 +38,59 @@ $mat-my: (
   )
 );
 
-// Define the palettes for your theme using the Material Design palettes available in palette.scss
-// (imported above). For each palette, you can optionally specify a default, lighter, and darker
-// hue. Available color palettes: https://material.io/design/color/
-$Appy-frontend-primary: mat.define-palette($mat-my);
-$Appy-frontend-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
+$light-primary: mat.define-palette($mat-light);
+$light-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
 
-// The warn palette is optional (defaults to red).
-$Appy-frontend-warn: mat.define-palette(mat.$red-palette);
+$light-theme: mat.define-light-theme((color: (primary: $light-primary,
+        accent: $light-accent )));
 
-// Create the theme object. A theme consists of configurations for individual
-// theming systems such as "color" or "typography".
-$Appy-frontend-theme: mat.define-light-theme((
-  color: (
-    primary: $Appy-frontend-primary,
-    accent: $Appy-frontend-accent,
-    warn: $Appy-frontend-warn,
+$mat-dark: (
+  100: rgb(40, 63, 84),
+  500: rgb(40, 63, 84),
+  700: rgb(40, 63, 84),
+  contrast: (50: black,
+    100: black,
+    200: black,
+    300: white,
+    400: white,
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+    A100: black,
+    A200: white,
+    A400: white,
+    A700: white,
   )
-));
+);
 
-// Include theme styles for core and each component used in your app.
-// Alternatively, you can import and @include the theme mixins for each component
-// that you are using.
-@include mat.all-legacy-component-themes($Appy-frontend-theme);
+$dark-primary: mat.define-palette($mat-dark);
+$dark-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
 
+$dark-theme: mat.define-dark-theme((color: (primary: $dark-primary,
+        accent: $dark-accent )));
+
+html {
+  @include mat.all-legacy-component-themes($light-theme);
+}
+
+html[color-scheme="light"] {
+  @include mat.all-legacy-component-themes($light-theme);
+}
+
+html[color-scheme="dark"] {
+  @include mat.all-legacy-component-themes($dark-theme);
+}
+
+@media (prefers-color-scheme: dark) {
+  html[color-scheme="follow-os"] {
+    @include mat.all-legacy-component-themes($dark-theme);
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  html[color-scheme="follow-os"] {
+    @include mat.all-legacy-component-themes($light-theme);
+  }
+}

@@ -46,6 +46,9 @@
     "CHOOSE_STATUS": "Odaberi status",
     "CREATED_AT": "Kreirano",
     "LAST_UPDATED_AT": "Zadnje uređivano",
+    "DARK": "Tamno",
+    "LIGHT": "Svijetlo",
+    "FOLLOW_OS": "Prati OS",
 
     "UNCONFIRMED": "Nepotvrđeno",
     "UNCONFIRM": "Nepotvrdi",

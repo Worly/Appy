@@ -1,7 +1,7 @@
 import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { IconName, IconPrefix } from '@fortawesome/fontawesome-svg-core';
 
-export type Color = "success" | "danger" | "warning" | "normal";
+export type Color = "success" | "danger" | "warning" | "normal" | "inherit";
 
 @Component({
   selector: 'app-button',

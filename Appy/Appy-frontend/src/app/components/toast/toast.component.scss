@@ -10,10 +10,10 @@
   font-size: 1rem;
   text-align: center;
 
-  color: rgb(var(--rgb-anti-text));
+  color: rgb(var(--rgb-toast-text));
   background-color: rgb(var(--rgb-toast-background));
   border-radius: 15px;
-  box-shadow: 0 0 20px -4px rgb(var(--rgb-text));
+  box-shadow: 0 0 20px -4px black;
 
   opacity: 0;
   transform: translateY(100%);
@@ -37,7 +37,7 @@
       color: rgb(var(--rgb-warning));
     }
     &-normal {
-      color: rgb(var(--rgb-anti-text));
+      color: rgb(var(--rgb-normal));
     }
     &-custom {
       color: var(--custom-icon-color);
@@ -56,7 +56,7 @@
 
     app-button {
       div.my-button {
-        color: rgb(var(--rgb-anti-text));
+        color: rgb(var(--rgb-toast-text));
         font-weight: bold;
 
         padding: 6px 6px;
