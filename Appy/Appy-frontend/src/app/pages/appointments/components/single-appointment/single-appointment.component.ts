@@ -98,9 +98,7 @@ export class SingleAppointmentComponent implements OnInit, OnDestroy {
   }
 
   goToEdit() {
-    this.router.navigate(["edit", this.id], {
-      relativeTo: this.activatedRoute
-    });
+    this.router.navigate(["appointments", "edit", this.id]);
     this.onDone.next();
   }
 
