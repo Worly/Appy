@@ -4,7 +4,7 @@
     margin-bottom: 10px;
     padding: 10px 15px;
 
-    background-color: var(--input-background-color);
+    background-color: rgb(var(--rgb-input-background));
     border-radius: var(--default-border-radius);
 
     display: flex;
@@ -39,7 +39,7 @@
 
         fa-icon.warn {
             opacity: 100%;
-            color: var(--warning)
+            color: rgb(var(--rgb-warning))
         }
     }
 }
