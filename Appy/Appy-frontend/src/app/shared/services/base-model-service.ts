@@ -1,18 +1,19 @@
 import { HttpClient, HttpContext, HttpErrorResponse } from "@angular/common/http";
 import { Injector } from "@angular/core";
-import { catchError, map, Observable, Observer, Subscriber, Subscription, throwError } from "rxjs";
+import { catchError, map, Observable, Observer, Subscriber, Subscription, take, throwError } from "rxjs";
 import { appConfig } from "../../app.config";
 import { Model } from "../../models/base-model";
-import { isEqual, reduceRight } from "lodash-es";
+import { isEqual } from "lodash-es";
 import { IGNORE_NOT_FOUND } from "./errors/error-interceptor.service";
 import { getInsertIndex, isSorted } from "src/app/utils/array-utils";
 import { applySmartFilter, SmartFilter } from "./smart-filter";
+import { EntityChangeNotifyFns, EntityChangeNotifyPredicates, EntityChangeNotifyService } from "./entity-change-notify.service";
+import { onUnsubscribed } from "src/app/utils/smart-subscriber";
 
-export class BaseModelService<T extends Model<T>> implements IEntityTracker<T> {
+export class BaseModelService<T extends Model<T>> {
 
     protected httpClient: HttpClient;
-
-    private datasources: IDatasource<T>[] = [];
+    protected entityChangeNotifyService: EntityChangeNotifyFns<T>;
 
     constructor(
         protected injector: Injector,
@@ -20,18 +21,17 @@ export class BaseModelService<T extends Model<T>> implements IEntityTracker<T> {
         private typeFactory: (new (dto?: any) => T)) {
 
         this.httpClient = this.injector.get(HttpClient);
+        this.entityChangeNotifyService = this.injector.get(EntityChangeNotifyService).for(this.controllerName);
     }
 
     private createListDatasourceInternal(sub: Subscriber<T[]>, datasourceFilterPredicate?: (entity: T) => boolean): Datasource<T> {
-        let dc = new ListDatasource<T>([], sub, datasourceFilterPredicate);
-        this.datasources.push(dc);
+        let dc = new ListDatasource<T>(this.entityChangeNotifyService.subscribeAll, [], sub, datasourceFilterPredicate);
 
         return dc;
     }
 
-    private createSingleDatasourceInternal(sub: Subscriber<T>, id: any) {
-        let dc = new SingleDatasource<T>([], sub, e => e.getId() == id);
-        this.datasources.push(dc);
+    private createSingleDatasourceInternal(sub: Subscriber<T>, id: any): Datasource<T> {
+        let dc = new SingleDatasource<T>(this.entityChangeNotifyService.subscribeAll, [], sub, e => e.getId() == id);
 
         return dc;
     }
@@ -41,8 +41,12 @@ export class BaseModelService<T extends Model<T>> implements IEntityTracker<T> {
         sortPredicate: (a: T, b: T) => number,
         filterPredicate?: (e: T) => boolean): PageableListDatasource<T> {
 
-        let dc = new PageableListDatasource<T>(loadFunction, sortPredicate, filterPredicate);
-        this.datasources.push(dc);
+        let dc = new PageableListDatasource<T>(
+            this.entityChangeNotifyService.subscribeAll,
+            loadFunction,
+            sortPredicate,
+            filterPredicate
+        );
 
         return dc;
     }
@@ -102,7 +106,7 @@ export class BaseModelService<T extends Model<T>> implements IEntityTracker<T> {
                 map(s => {
                     let newEntity = new this.typeFactory(s);
 
-                    this.notifyUpdated(newEntity);
+                    this.entityChangeNotifyService.notifyUpdated(newEntity);
 
                     return newEntity;
                 }),
@@ -120,7 +124,7 @@ export class BaseModelService<T extends Model<T>> implements IEntityTracker<T> {
                 map(s => {
                     let newEntity = new this.typeFactory(s);
 
-                    this.notifyAdded(newEntity);
+                    this.entityChangeNotifyService.notifyAdded(newEntity);
 
                     return newEntity;
                 }),
@@ -135,7 +139,7 @@ export class BaseModelService<T extends Model<T>> implements IEntityTracker<T> {
     public delete(id: any): Observable<void> {
         return this.httpClient.delete<void>(`${appConfig.apiUrl}${this.controllerName}/delete/${id}`)
             .pipe(map(() => {
-                this.notifyDeleted(id);
+                this.entityChangeNotifyService.notifyDeleted(id);
             }));
     }
 
@@ -162,42 +166,12 @@ export class BaseModelService<T extends Model<T>> implements IEntityTracker<T> {
                 });
         });
     }
-
-    private getDatasourceContexts(): IDatasource<T>[] {
-        let contexts = this.datasources.filter(c => !c.isUnsubscribed());
-
-        this.datasources = contexts;
-        return contexts;
-    }
-
-    public notifyAdded(entity: T): void {
-        for (let c of this.getDatasourceContexts())
-            c.add([entity]);
-    }
-
-    public notifyDeleted(id: any): void {
-        for (let c of this.getDatasourceContexts())
-            c.delete(id);
-    }
-
-    public notifyUpdated(entity: T): void {
-        for (let c of this.getDatasourceContexts())
-            c.update(entity);
-    }
-}
-
-export interface IEntityTracker<T extends Model<T>> {
-    notifyAdded(entity: T): void;
-    notifyDeleted(id: any): void;
-    notifyUpdated(entity: T): void;
 }
 
 export interface IDatasource<T extends Model<T>> {
     add(entities: T[]): void;
     update(entity: T): void;
     delete(id: any): void;
-
-    isUnsubscribed(): boolean;
 }
 
 abstract class Datasource<T extends Model<T>> implements IDatasource<T> {
@@ -205,9 +179,23 @@ abstract class Datasource<T extends Model<T>> implements IDatasource<T> {
     filterPredicate?: (entity: T) => boolean;
     isLoaded: boolean = false;
 
-    constructor(data: T[], filterPredicate?: (entity: T) => boolean) {
+    constructor(
+        entityChangeNotifySubject: (subs: EntityChangeNotifyPredicates<T>) => Subscription[],
+        onUnsubscribe: Observable<void>,
+        data: T[],
+        filterPredicate?: (entity: T) => boolean
+    ) {
         this.data = data;
         this.filterPredicate = filterPredicate;
+
+        let subs = entityChangeNotifySubject({
+            onAdded: e => this.add([e]),
+            onDeleted: id => this.delete(id),
+            onUpdated: e => this.update(e)
+        });
+        onUnsubscribe.pipe(take(1)).subscribe(() => {
+            subs.forEach(s => s.unsubscribe());
+        });
     }
 
     add(entities: T[]) {
@@ -278,14 +266,18 @@ abstract class Datasource<T extends Model<T>> implements IDatasource<T> {
     }
 
     abstract notifySubscriber(): void;
-    abstract isUnsubscribed(): boolean;
 }
 
 class ListDatasource<T extends Model<T>> extends Datasource<T> {
     subscriber: Subscriber<T[]>;
 
-    constructor(data: T[], sub: Subscriber<T[]>, filterPredicate?: (entity: T) => boolean) {
-        super(data, filterPredicate);
+    constructor(
+        entityChangeNotifySubject: (subs: EntityChangeNotifyPredicates<T>) => Subscription[],
+        data: T[],
+        sub: Subscriber<T[]>,
+        filterPredicate?: (entity: T) => boolean
+    ) {
+        super(entityChangeNotifySubject, onUnsubscribed(sub), data, filterPredicate);
 
         this.subscriber = sub;
     }
@@ -302,8 +294,13 @@ class ListDatasource<T extends Model<T>> extends Datasource<T> {
 class SingleDatasource<T extends Model<T>> extends Datasource<T> {
     subscriber: Subscriber<T>;
 
-    constructor(data: T[], sub: Subscriber<T>, filterPredicate?: (entity: T) => boolean) {
-        super(data, filterPredicate);
+    constructor(
+        entityChangeNotifySubject: (subs: EntityChangeNotifyPredicates<T>) => Subscription[],
+        data: T[],
+        sub: Subscriber<T>,
+        filterPredicate?: (entity: T) => boolean
+    ) {
+        super(entityChangeNotifySubject, onUnsubscribed(sub), data, filterPredicate);
 
         this.subscriber = sub;
     }
@@ -339,13 +336,14 @@ export class PageableListDatasource<T extends Model<T>> implements IDatasource<T
     private isFirstLoading: boolean = false;
 
     private subscribers: Subscriber<T[]>[] = [];
+    private entityChangeNotifySubs?: Subscription[];
 
     constructor(
+        private entityChangeNotifySubject: (subs: EntityChangeNotifyPredicates<T>) => Subscription[],
         private loadFunction: (dir: "forwards" | "backwards", skip: number, take: number) => Observable<T[]>,
         private sortPredicate: (a: T, b: T) => number,
-        private filterPredicate?: (e: T) => boolean) {
-
-    }
+        private filterPredicate?: (e: T) => boolean
+    ) { }
 
     add(entities: T[], forceNotifySubscribers: boolean = false): void {
         if (!isSorted(entities, this.sortPredicate))
@@ -486,6 +484,9 @@ export class PageableListDatasource<T extends Model<T>> implements IDatasource<T
         return new Observable<T[]>(s => {
             this.subscribers.push(s);
 
+            this.subscribeToEntityChangeNotify();
+            this.listenForUnsubscribeAndUnsubscribeEntityChangeNotify(onUnsubscribed(s));
+
             if (!this.isFirstLoading)
                 s.next([...this.data]);
         }).subscribe(observer);
@@ -497,6 +498,10 @@ export class PageableListDatasource<T extends Model<T>> implements IDatasource<T
 
         for (let s of this.subscribers) {
             s.unsubscribe();
+        }
+
+        if (this.entityChangeNotifySubs != undefined) {
+            throw "We have a leak on entityChangeNotifySubs!";
         }
     }
 
@@ -514,6 +519,25 @@ export class PageableListDatasource<T extends Model<T>> implements IDatasource<T
 
     isReachedEndForwards(): boolean {
         return this.reachedEndForwards;
+    }
+
+    private subscribeToEntityChangeNotify() {
+        if (this.entityChangeNotifySubs == null) {
+            this.entityChangeNotifySubs = this.entityChangeNotifySubject({
+                onAdded: e => this.add([e]),
+                onDeleted: id => this.delete(id),
+                onUpdated: e => this.update(e)
+            });
+        }
+    }
+
+    private listenForUnsubscribeAndUnsubscribeEntityChangeNotify(onUnsubscribe: Observable<void>) {
+        onUnsubscribe.pipe(take(1)).subscribe(() => {
+            if (this.subscribers.length == 0 || this.subscribers.every(s => s.closed)) {
+                this.entityChangeNotifySubs?.forEach(s => s.unsubscribe());
+                this.entityChangeNotifySubs = undefined;
+            }
+        });
     }
 }
 

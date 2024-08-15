@@ -22,7 +22,7 @@ export class ServiceService extends BaseModelService<Service> {
                 map(s => {
                     let newEntity = new Service(s);
 
-                    this.notifyUpdated(newEntity);
+                    this.entityChangeNotifyService.notifyUpdated(newEntity);
 
                     return newEntity;
                 }),
