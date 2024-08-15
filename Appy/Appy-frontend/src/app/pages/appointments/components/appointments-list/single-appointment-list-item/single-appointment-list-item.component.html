@@ -1,5 +1,5 @@
 <div *ngIf="renderedAppointment != null" class="appointment" [attr.data-date]="renderedAppointment.dateISO"
-    [attr.data-appId]="renderedAppointment.id" (click)="appointmentDialog.open()">
+    [attr.data-appId]="renderedAppointment.id" (click)="onOpenView.emit()">
     <div class="color" [style.backgroundColor]="renderedAppointment.serviceColor"></div>
     <div class="info-container">
         <div class="time"><span class="date" *ngIf="showDate">{{renderedAppointment.dateFormatted}} </span>{{renderedAppointment.time}}</div>
@@ -11,8 +11,3 @@
         <fa-icon *ngIf="renderedAppointment.hasNotes" [icon]="['far', 'file-lines']"></fa-icon>
     </div>
 </div>
-
-<app-dialog #appointmentDialog>
-    <app-single-appointment *ngIf="appointmentDialog.isOpen" [id]="renderedAppointment?.id"
-        (onDone)="appointmentDialog.close()"></app-single-appointment>
-</app-dialog>

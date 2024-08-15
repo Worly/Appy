@@ -53,9 +53,10 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
 
   public renderedItems: (RenderedType & (RenderedAppointment | RenderedDate))[] = [];
 
-  viewAppointmentId?: number;
   keptScrollPosition: number | null = null;
   keptScrollElement: (() => HTMLElement | undefined) | null = null;
+  
+  viewingAppointmentId: number = 0;
 
   private detaching: boolean = false;
 

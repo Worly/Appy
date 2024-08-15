@@ -17,6 +17,8 @@ export class UpcomingUnconfirmedComponent {
   appointments?: Appointment[];
   viewMoreText?: string;
 
+  viewingAppointmentId: number = 0;
+
   private subs: Subscription[] = [];
 
   constructor(

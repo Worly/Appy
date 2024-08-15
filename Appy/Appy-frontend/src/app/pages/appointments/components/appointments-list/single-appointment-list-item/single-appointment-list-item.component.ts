@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Duration } from 'dayjs/plugin/duration';
 import { Appointment } from 'src/app/models/appointment';
 import { ClientDTO } from 'src/app/models/client';
@@ -29,6 +29,9 @@ export class SingleAppointmentListItemComponent {
 
   @Input()
   showDate: boolean = false;
+
+  @Output()
+  onOpenView: EventEmitter<void> = new EventEmitter();
 
   renderedAppointment?: RenderedAppointment;
 

@@ -18,8 +18,9 @@
         </div>
 
         <app-single-appointment-list-item #appointmentElement *ngIf="i.type == 'appointment'"
-            [attr.data-date]="i.dateISO" [ngClass]="{'last': i.isLast}"
-            [attr.data-appId]="i.id" [appointment]="i.appointment"></app-single-appointment-list-item>
+            [attr.data-date]="i.dateISO" [ngClass]="{'last': i.isLast}" [attr.data-appId]="i.id"
+            [appointment]="i.appointment"
+            (onOpenView)="this.viewingAppointmentId = i.id; appointmentDialog.open();"></app-single-appointment-list-item>
     </div>
 
     <div *ngIf="isReachedBottom() && appointments?.length != 0" class="no-appointments big">
@@ -33,3 +34,8 @@
 <div *ngIf="appointments?.length == 0 && !isLoadingNext() && !isLoadingPrevious()" class="no-appointments big">
     {{"pages.appointments.NO_APPOINTMENTS" | translate}}
 </div>
+
+<app-dialog #appointmentDialog>
+    <app-single-appointment *ngIf="appointmentDialog.isOpen" [id]="viewingAppointmentId"
+        (onDone)="appointmentDialog.close()"></app-single-appointment>
+</app-dialog>

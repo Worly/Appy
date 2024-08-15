@@ -53,6 +53,7 @@ import { SingleAppointmentListItemComponent } from "./components/appointments-li
         ContextMenuModule
     ],
     exports: [
+        SingleAppointmentComponent,
         SingleAppointmentListItemComponent
     ]
 })
