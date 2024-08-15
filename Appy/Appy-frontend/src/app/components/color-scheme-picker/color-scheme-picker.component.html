@@ -1,0 +1,6 @@
+<app-button #mainButton="elementRef" appElementRef [icon]="selectedScheme.icon" look="transparent" color="inherit"
+    alignContent="center" (onClick)="contextMenu.open()"></app-button>
+
+<app-context-menu #contextMenu [relativeTo]="mainButton.elementRef">
+    <app-button *ngFor="let scheme of options" [icon]="scheme.icon" [text]="scheme.text | translate" (onClick)="selectScheme(scheme)"></app-button>
+</app-context-menu>

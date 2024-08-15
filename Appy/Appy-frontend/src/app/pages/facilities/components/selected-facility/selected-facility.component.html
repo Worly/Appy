@@ -1,6 +1,6 @@
-<app-button class="my-button" look="transparent" [curved]="false" (onClick)="navigateToFacilities()" width="100%"
-    alignContent="center" routerLink="/facilities" routerLinkActive="link-active">
-    <div class="my-container">
+<app-button class="my-button" look="transparent" [curved]="false" color="inherit" (onClick)="navigateToFacilities()"
+    width="100%" alignContent="center" routerLink="/facilities" routerLinkActive="link-active">
+    <div>
         <div class="facility-text">{{'pages.facilities.FACILITY' | translate | uppercase}}</div>
         <div class="facility-name">{{facilityService.getSelected()?.name}}</div>
     </div>
