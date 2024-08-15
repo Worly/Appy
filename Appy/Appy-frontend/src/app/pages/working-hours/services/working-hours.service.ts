@@ -7,7 +7,7 @@ import { BaseModelService } from "src/app/shared/services/base-model-service";
 @Injectable({ providedIn: "root" })
 export class WorkingHoursService extends BaseModelService<WorkingHour> {
     constructor(injector: Injector) {
-        super(injector, "workingHour", WorkingHour);
+        super(injector, WorkingHour.ENTITY_TYPE, WorkingHour);
     }
 
     public set(workingHours: WorkingHour[]): Observable<void> {

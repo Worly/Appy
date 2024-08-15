@@ -50,6 +50,8 @@ export class AppointmentDTO {
 }
 
 export class Appointment extends Model<Appointment> {
+    public static readonly ENTITY_TYPE: string = "appointment";
+
     public id: number;
     public date?: Dayjs;
     public time?: Dayjs;

@@ -7,7 +7,7 @@ import { BaseModelService } from "src/app/shared/services/base-model-service";
 @Injectable({ providedIn: "root" })
 export class ClientService extends BaseModelService<Client> {
     constructor(injector: Injector) {
-        super(injector, "client", Client);
+        super(injector, Client.ENTITY_TYPE, Client);
     }
 
     public override getAll(archived?: boolean): Observable<Client[]> {

@@ -18,6 +18,8 @@ export class ClientDTO {
 }
 
 export class Client extends Model<Client> {
+    public static readonly ENTITY_TYPE: string = "client";
+
     public id: number;
     public name?: string;
     public surname?: string;
