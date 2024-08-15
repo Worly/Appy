@@ -29,7 +29,7 @@
 
     &:focus {
         outline: none;
-        box-shadow: inset 0 0 4px var(--focus-outline-color);
+        box-shadow: inset 0 0 4px rgb(var(--rgb-focus-outline));
     }
 
     &:not(.my-disabled) {
@@ -46,16 +46,16 @@
             transition: opacity 0.1s;
         }
         &:hover::before {
-            background-color: var(--text);
+            background-color: rgb(var(--rgb-text));
             opacity: 0.08;
         }
         &:active::before {
-            background-color: var(--text);
+            background-color: rgb(var(--rgb-text));
             opacity: 0.15;
         }
 
         &:active {
-            box-shadow: inset 0 1px 6px -1px var(--text);
+            box-shadow: inset 0 1px 6px -1px rgba(var(--rgb-text), 0.5);
         }
     }
 
@@ -125,44 +125,65 @@
 
 .color {
     &-success {
-        background-color: var(--success);
-        color: var(--success);
-        border-color: var(--success);
+        background-color: rgb(var(--rgb-success));
+        color: rgb(var(--rgb-success));
+        border-color: rgb(var(--rgb-success));
     }
     &-danger {
-        background-color: var(--danger);
-        color: var(--danger);
-        border-color: var(--danger);
+        background-color: rgb(var(--rgb-danger));
+        color: rgb(var(--rgb-danger));
+        border-color: rgb(var(--rgb-danger));
     }
     &-warning {
-        background-color: var(--warning);
-        color: var(--warning);
-        border-color: var(--warning);
+        background-color: rgb(var(--rgb-warning));
+        color: rgb(var(--rgb-warning));
+        border-color: rgb(var(--rgb-warning));
     }
     &-normal {
-        background-color: var(--normal);
-        color: var(--normal);
-        border-color: var(--input-border-color);
+        background-color: rgb(var(--rgb-normal));
+        color: rgb(var(--rgb-normal));
+        border-color: rgb(var(--rgb-input-border));
+    }
+    &-inherit {
+        background-color: inherit;
+        color: inherit;
+        border-color: inherit;
     }
 }
 
 .my-disabled {
-    background-color: var(--disabled);
-    color: var(--disabled);
-    border-color: var(--disabled);
+    background-color: rgb(var(--rgb-disabled));
+    color: rgb(var(--rgb-disabled));
+    border-color: rgb(var(--rgb-disabled));
 }
 
 .look {
     &-solid {
-        color: var(--anti-text);
+        &.color {
+            &-success {
+                color: rgb(var(--rgb-text-on-success));
+            }
+            &-danger {
+                color: rgb(var(--rgb-text-on-danger));
+            }
+            &-warning {
+                color: rgb(var(--rgb-text-on-warning));
+            }
+            &-normal {
+                color: rgb(var(--rgb-text-on-normal));
+            }
+            &-inherit {
+                color: inherit;
+            }
+        }
         border-width: 0px;
     }
     &-outlined {
-        background-color: var(--input-background-color);
+        background-color: rgb(var(--rgb-input-background));
         border-width: var(--border-width);
     }
     &-normal {
-        background-color: var(--input-background-color);
+        background-color: rgb(var(--rgb-input-background));
         border-width: 0px;
     }
     &-transparent {

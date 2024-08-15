@@ -53,6 +53,9 @@ import { faFileLines } from "@fortawesome/free-regular-svg-icons/faFileLines";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons/faWhatsapp"
 import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
 import { faCheck } from "@fortawesome/free-solid-svg-icons/faCheck";
+import { faMoon } from "@fortawesome/free-solid-svg-icons/faMoon";
+import { faSun } from "@fortawesome/free-solid-svg-icons/faSun";
+import { faCircleHalfStroke } from "@fortawesome/free-solid-svg-icons/faCircleHalfStroke";
 
 import dayjs from "dayjs";
 import "dayjs/locale/hr";
@@ -66,6 +69,7 @@ import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import isBetween from "dayjs/plugin/isBetween";
 import duration from "dayjs/plugin/duration";
+import { ColorSchemePickerComponent } from './components/color-scheme-picker/color-scheme-picker.component';
 
 dayjs.extend(updateLocale);
 dayjs.extend(localeData);
@@ -80,6 +84,7 @@ dayjs.extend(duration);
 @NgModule({
   declarations: [
     AppComponent,
+    ColorSchemePickerComponent,
   ],
   imports: [
     BrowserModule,
@@ -137,7 +142,8 @@ export class AppModule {
       faCircleCheck, farCircleCheck, faQuestion, faCheck,
       faHouse, faHandHoldingHeart, faUsers, faCalendarWeek, faRightFromBracket,
       faCalendarDays, faTableList, faFilter, faFileLines,
-      faWhatsapp
+      faWhatsapp,
+      faMoon, faSun, faCircleHalfStroke
     );
   }
 

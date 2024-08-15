@@ -1,0 +1,29 @@
+* {
+    --rgb-primary: 40, 63, 84;
+    --rgb-text-on-primary: var(--rgb-text);
+    --rgb-background: 0, 0, 0;
+    --rgb-card-background: 11, 19, 31;
+
+    --rgb-input-background: 32, 32, 32;
+    --rgb-input-border: 63, 63, 63;
+
+    --rgb-focus-outline: 104, 104, 104;
+
+    --rgb-text: 240, 240, 240;
+    --rgb-anti-text: 0, 0, 0;
+
+    --rgb-toast-background: 50, 50, 50;
+    --rgb-toast-text: var(--rgb-text);
+
+    --rgb-success: 70, 154, 89;
+    --rgb-danger: 186, 81, 81;
+    --rgb-warning: 172, 148, 10;
+    --rgb-normal: 240, 240, 240;
+    --rgb-disabled: 77, 77, 77;
+
+    --rgb-text-on-success: var(--rgb-text);
+    --rgb-text-on-danger: var(--rgb-text);
+    --rgb-text-on-warning: var(--rgb-text);
+    --rgb-text-on-normal: var(--rgb-text);
+    --rgb-text-on-disabled: var(--rgb-text);
+}

@@ -16,7 +16,7 @@
         [icon]="type == 'scroller' ? 'calendar-days' : 'table-list'"
         (onClick)="type = (type == 'scroller' ? 'list' : 'scroller')"></app-button>
     <app-button icon="filter" look="custom"
-        [customBorderColor]="hasFilters() ? 'var(--danger)' : 'var(--input-background-color)'"
+        [customBorderColor]="hasFilters() ? 'rgb(var(--rgb-danger))' : 'rgb(var(--rgb-input-background))'"
         (onClick)="filterDialog.open()"></app-button>
     <app-button class="new-button" icon="plus" [isCircle]="true" color="success" look="solid" alignContent="center"
         (onClick)="goToNew()">

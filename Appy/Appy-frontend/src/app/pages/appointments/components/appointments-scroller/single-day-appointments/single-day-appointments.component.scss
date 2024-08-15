@@ -4,9 +4,9 @@
     grid-template-columns: minmax(0, 1fr);
     position: relative;
 
-    background-color: var(--input-background-color);
+    background-color: rgb(var(--rgb-input-background));
     border-radius: var(--default-border-radius);
-    box-shadow: 0 0 4px -1px var(--text);
+    box-shadow: 0 0 4px -1px black;
 }
 
 .sticky-header {
@@ -17,14 +17,14 @@
     border-top-left-radius: var(--default-border-radius);
     border-top-right-radius: var(--default-border-radius);
 
-    border-bottom: 1px solid var(--text);
+    border-bottom: 1px solid rgb(var(--rgb-text));
 
     &.date-today {
-        background-color: var(--card-background-color);
+        background-color: rgb(var(--rgb-card-background));
     }
 
     &:not(.date-today) {
-        background-color: var(--input-background-color);
+        background-color: rgb(var(--rgb-input-background));
     }
 }
 
@@ -87,14 +87,14 @@
 
     td {
         position: relative;
-        border-top: 1px solid var(--input-border-color);
+        border-top: 1px solid rgb(var(--rgb-input-border));
     }
 }
 
 .hour-display {
     position: absolute;
     top: -3px;
-    color: var(--input-border-color);
+    color: rgb(var(--rgb-input-border));
 }
 
 .time-status {
@@ -106,18 +106,18 @@
     border-right: 5px solid var(--status-color);
 
     &.free-time {
-        --status-color: var(--success);
+        --status-color: rgb(var(--rgb-success));
         & > div {
             display: none;
         }
     }
 
     &.taken-time {
-        --status-color: var(--danger);
+        --status-color: rgb(var(--rgb-danger));
     }
 
     &.closed-time {
-        --status-color: var(--input-border-color);
+        --status-color: rgb(var(--rgb-input-border));
     }
 
     & > div {
@@ -146,7 +146,7 @@
     width: 100%;
     
     border-radius: var(--default-border-radius);
-    border: 1px solid var(--anti-text);
+    border: 1px solid rgb(var(--rgb-anti-text));
     padding-left: 2px;
     padding-right: 2px;
 
@@ -161,7 +161,7 @@
 
     &.shadow-appointment {
         opacity: 60%;
-        border: 2px dashed var(--text);
+        border: 2px dashed rgb(var(--rgb-text));
     }
 }
 
@@ -180,5 +180,5 @@
     pointer-events: none;
     width: 100%;
     height: 2px;
-    background-color: var(--danger);
+    background-color: rgb(var(--rgb-danger));
 }

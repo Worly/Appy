@@ -1,6 +1,6 @@
 <app-button #buttonRef="elementRef" appElementRef width="100%"
     [text]="value && value.name ? value.name : ('pages.services.CHOOSE_SERVICE' | translate)" look="custom"
-    borderWidth="0" [customColor]="serviceColorsService.get(value?.colorId)"
+    borderWidth="0" [customColor]="value == null ? 'rgb(var(--rgb-input-background))' : serviceColorsService.get(value.colorId)"
     (onClick)="contextMenu.toggle(); search = ''; searchInput.focus()"></app-button>
 
 <app-button *ngIf="showClearButton && value != null" class="clear-button" look="transparent" icon="times"

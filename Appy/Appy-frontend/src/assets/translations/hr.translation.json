@@ -47,6 +47,9 @@
     "CREATED_AT": "Kreirano",
     "LAST_UPDATED_AT": "Zadnje uređivano",
     "VIEW_ALL": "Pogledaj sve",
+    "DARK": "Tamno",
+    "LIGHT": "Svijetlo",
+    "FOLLOW_OS": "Prati OS",
 
     "UNCONFIRMED": "Nepotvrđeno",
     "UNCONFIRM": "Nepotvrdi",

@@ -1,5 +1,5 @@
 <app-button #mainButton="elementRef" appElementRef [text]="selectedLanguage.displayName" look="transparent"
-    (onClick)="contextMenu.open()"></app-button>
+    alignContent="center" color="inherit" (onClick)="contextMenu.open()"></app-button>
 
 <app-context-menu #contextMenu [relativeTo]="mainButton.elementRef">
     <app-button *ngFor="let lang of languages" [text]="lang.displayName" (onClick)="selectLanguage(lang)"></app-button>

@@ -4,6 +4,7 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { ContextMenuComponent } from './components/context-menu/context-menu.component';
 import { FacilityService } from './pages/facilities/services/facility.service';
 import { AuthService } from './shared/services/auth/auth.service';
+import { ColorSchemeService } from './services/color-scheme.service';
 
 @Component({
   selector: 'app-root',

@@ -2,6 +2,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using WappChatAnalyzer.Services;
 
 namespace Appy.Services
 {
@@ -16,9 +17,9 @@ namespace Appy.Services
     {
         private string jwtSecret;
 
-        public JwtService(IConfiguration configuration)
+        public JwtService(IConfigurationService configurationService)
         {
-            this.jwtSecret = configuration.GetValue<string>("JWT:Secret");
+            this.jwtSecret = configurationService.Get<string>("JwtSecret");
         }
 
         public async Task<(bool valid, JwtSecurityToken? token)> ValidateToken(string token, bool validateLifetime = true)

@@ -47,6 +47,9 @@
     "CREATED_AT": "Created at",
     "LAST_UPDATED_AT": "Last updated at",
     "VIEW_ALL": "View all",
+    "DARK": "Dark",
+    "LIGHT": "Light",
+    "FOLLOW_OS": "Follow OS",
 
     "UNCONFIRMED": "Unconfirmed",
     "UNCONFIRM": "Unconfirm",
