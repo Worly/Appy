@@ -3,7 +3,8 @@
     <div *ngIf="appointments != null">
         <div class="title-container">
             <div class="title">{{'pages.dashboard.UPCOMING_UNCONFIRMED_APPOINTMENTS' | translate}}</div>
-            <app-button icon="gear" look="transparent" [isCircle]="true"></app-button>
+            <app-button icon="gear" look="transparent" [isCircle]="true" alignContent="center"
+                (onClick)="settingsDialog.open()"></app-button>
         </div>
         <div *ngIf="appointments.length > 0">
             <app-single-appointment-list-item *ngFor="let i of appointments | slice: 0:numberOfAppointmentsToShow"
@@ -14,7 +15,7 @@
         </div>
         <div *ngIf="appointments.length == 0" class="none-container">
             <div>
-                {{ "pages.dashboard.NONE_IN_THE_NEXT" | translate }} {{ numberOfAppointmentsToShow }} {{
+                {{ "pages.dashboard.NONE_IN_THE_NEXT" | translate }} {{ numberOfDays }} {{
                 "pages.dashboard.DAYS" | translate | lowercase }}
             </div>
             <fa-icon class="none-icon" [icon]="['far', 'circle-check']"></fa-icon>
@@ -25,4 +26,24 @@
 <app-dialog #appointmentDialog>
     <app-single-appointment *ngIf="appointmentDialog.isOpen" [id]="viewingAppointmentId"
         (onDone)="appointmentDialog.close()"></app-single-appointment>
+</app-dialog>
+
+<app-dialog #settingsDialog>
+    <div *ngIf="settingsDialog.isOpen">
+        <div class="settings-title">{{'pages.dashboard.UPCOMING_UNCONFIRMED_APPOINTMENTS' | translate}} - {{'SETTINGS' |
+            translate}}</div>
+
+        <div class="w-input-container">
+            <div class="w-label">{{'pages.dashboard.NUMBER_OF_DAYS' | translate}}</div>
+            <app-dropdown #numberOfDaysDropdown [value]="numberOfDays"
+                [items]="[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]"></app-dropdown>
+        </div>
+
+        <div class="settings-action-bar">
+            <app-button style="margin-left: auto" [text]="'CANCEL' | translate" color="danger" look="normal"
+                (onClick)="settingsDialog.close()"></app-button>
+            <app-button [text]="'APPLY' | translate" color="success" look="solid"
+                (onClick)="saveSettings(numberOfDaysDropdown.value); settingsDialog.close()"></app-button>
+        </div>
+    </div>
 </app-dialog>

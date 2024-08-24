@@ -66,7 +66,7 @@ export class ButtonComponent implements OnInit {
 
     event.stopPropagation();
 
-    this.onClick.emit();
+    this.onClick.emit(event);
 
     setTimeout(() => this.myButton?.nativeElement.blur(), 100);
   }

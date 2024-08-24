@@ -50,6 +50,8 @@
     "DARK": "Dark",
     "LIGHT": "Light",
     "FOLLOW_OS": "Follow OS",
+    "SETTINGS": "Settings",
+    "SETTINGS_SAVED": "Settings saved",
 
     "UNCONFIRMED": "Unconfirmed",
     "UNCONFIRM": "Unconfirm",
@@ -62,7 +64,8 @@
             "UPCOMING_UNCONFIRMED_APPOINTMENTS": "Upcoming unconfirmed appointments",
             "MORE": "More",
             "NONE_IN_THE_NEXT": "None in the next",
-            "DAYS": "Days"
+            "DAYS": "Days",
+            "NUMBER_OF_DAYS": "Number of days"
         },
 
         "error": {

@@ -50,6 +50,8 @@
     "DARK": "Tamno",
     "LIGHT": "Svijetlo",
     "FOLLOW_OS": "Prati OS",
+    "SETTINGS": "Opcije",
+    "SETTINGS_SAVED": "Opcije spremljene",
 
     "UNCONFIRMED": "Nepotvrđeno",
     "UNCONFIRM": "Nepotvrdi",
@@ -62,7 +64,8 @@
             "UPCOMING_UNCONFIRMED_APPOINTMENTS": "Nadolazeći nepotvrđeni termini",
             "MORE": "Još",
             "NONE_IN_THE_NEXT": "Nema u sljedećih",
-            "DAYS": "Dana"
+            "DAYS": "Dana",
+            "NUMBER_OF_DAYS": "Broj dana"
         },
 
         "error": {

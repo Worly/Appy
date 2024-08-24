@@ -6,6 +6,7 @@ import { UpcomingUnconfirmedComponent } from './upcoming-unconfirmed/upcoming-un
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { AppointmentsModule } from "../appointments/appointments.module";
 import { DialogModule } from "src/app/components/dialog/dialog.module";
+import { DropdownModule } from "../../components/dropdown/dropdown.module";
 
 @NgModule({
     declarations: [
@@ -15,11 +16,10 @@ import { DialogModule } from "src/app/components/dialog/dialog.module";
     ],
     imports: [
         SharedModule,
-
         FontAwesomeModule,
-
         DialogModule,
         AppointmentsModule,
+        DropdownModule
     ],
     exports: [
         DashboardComponent

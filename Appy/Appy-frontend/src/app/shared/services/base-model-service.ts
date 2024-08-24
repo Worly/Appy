@@ -152,8 +152,9 @@ export class BaseModelService<T extends Model<T>> {
         return new Observable<T>(s => {
             let datasource = this.createSingleDatasourceInternal(s, id);
 
-            let context = new HttpContext().set(IGNORE_NOT_FOUND, true);
-            this.httpClient.get<any>(`${appConfig.apiUrl}${this.controllerName}/get/${id}`, { context })
+            this.httpClient.get<any>(`${appConfig.apiUrl}${this.controllerName}/get/${id}`, {
+                context: new HttpContext().set(IGNORE_NOT_FOUND, true)
+            })
                 .pipe(map(s => new this.typeFactory(s)))
                 .subscribe({
                     next: (r: T) => datasource.add([r]),

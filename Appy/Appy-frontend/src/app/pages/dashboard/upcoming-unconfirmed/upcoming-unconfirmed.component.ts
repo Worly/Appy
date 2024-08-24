@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DashboardService } from '../services/dashboard.service';
 import { Appointment } from 'src/app/models/appointment';
@@ -12,6 +12,20 @@ import { EntityChangeNotifyService } from 'src/app/shared/services/entity-change
   styleUrls: ['./upcoming-unconfirmed.component.scss']
 })
 export class UpcomingUnconfirmedComponent {
+  private _numberOfDays: number = 7;
+  @Input() set numberOfDays(value: number) {
+    if (value == this._numberOfDays)
+      return;
+
+    this._numberOfDays = value;
+    this.load();
+  }
+  get numberOfDays(): number {
+    return this._numberOfDays;
+  }
+
+  @Output() numberOfDaysChange: EventEmitter<number> = new EventEmitter();
+
   numberOfAppointmentsToShow = 3;
 
   appointments?: Appointment[];
@@ -45,7 +59,9 @@ export class UpcomingUnconfirmedComponent {
   }
 
   load(): void {
-    this.subs.push(this.dashboardService.getUpcomingUnconfirmed().subscribe(a => {
+    this.appointments = undefined;
+
+    this.subs.push(this.dashboardService.getUpcomingUnconfirmed(this.numberOfDays).subscribe(a => {
       this.appointments = a;
 
       this.viewMoreText = "";
@@ -70,5 +86,11 @@ export class UpcomingUnconfirmedComponent {
         })
       }
     });
+  }
+
+  saveSettings(numberOfDays: number) {
+    this.numberOfDays = numberOfDays;
+
+    this.numberOfDaysChange.emit(numberOfDays);
   }
 }

@@ -1,6 +1,8 @@
 <div class="w-title">{{'HOME' | translate}}</div>
 
-<div class="panels-container">
+<app-loading *ngIf="this.settings == null"></app-loading>
+<div *ngIf="this.settings != null" class="panels-container">
     <app-booked-today></app-booked-today>
-    <app-upcoming-unconfirmed></app-upcoming-unconfirmed>
+    <app-upcoming-unconfirmed [(numberOfDays)]="this.settings.upcomingUnconfirmedDays"
+        (numberOfDaysChange)="saveSettings()"></app-upcoming-unconfirmed>
 </div>
