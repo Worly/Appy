@@ -17,8 +17,6 @@ import { ClientDTO } from 'src/app/models/client';
   styleUrls: ['./appointments-list.component.scss']
 })
 export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetach, BeforeAttach {
-
-  @ViewChild("appointmentDialog", { read: DialogComponent }) appointmentDialog?: DialogComponent;
   @ViewChildren("appointmentElement") appointmentElements?: QueryList<ElementRef<HTMLElement>>;
   @ViewChildren("dateElement") dateElements?: QueryList<ElementRef<HTMLElement>>;
 
@@ -55,9 +53,10 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
 
   public renderedItems: (RenderedType & (RenderedAppointment | RenderedDate))[] = [];
 
-  viewAppointmentId?: number;
   keptScrollPosition: number | null = null;
   keptScrollElement: (() => HTMLElement | undefined) | null = null;
+  
+  viewingAppointmentId: number = 0;
 
   private detaching: boolean = false;
 
@@ -217,12 +216,7 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
       this.renderedItems.push({
         type: "appointment",
         id: ap.id,
-        time: `${ap.time?.format("HH:mm")} - ${ap.time?.add(ap.duration as Duration).format("HH:mm")}`,
-        service: ap.service?.displayName as string,
-        serviceColor: this.serviceColorsService.get(ap.service?.colorId),
-        isUnconfirmed: ap.status == "Unconfirmed",
-        hasNotes: ap.notes != null && ap.notes != "",
-        client: ClientDTO.getFullname(ap.client!) as string,
+        appointment: ap,
         dateISO: ap.date?.format("YYYY-MM-DD") ?? "",
         isLast: i == sortedAppointments.length - 1
       });
@@ -354,16 +348,6 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
 
     return dayjs(date);
   }
-
-  onAppointmentClick(apId: number) {
-    this.viewAppointmentId = apId;
-    this.appointmentDialog?.open();
-  }
-
-  closeAppointmentDialog() {
-    this.viewAppointmentId = undefined;
-    this.appointmentDialog?.close();
-  }
 }
 
 function appointmentSort(a: Appointment, b: Appointment): number {
@@ -386,13 +370,8 @@ type RenderedType = {
 export type RenderedAppointment = {
   type: "appointment";
   id: number;
-  time: string;
-  service: string;
-  serviceColor: string;
-  isUnconfirmed: boolean;
-  hasNotes: boolean;
-  client: string;
   dateISO: string;
+  appointment: Appointment;
   isLast: boolean;
 }
 

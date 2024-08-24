@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { ErrorComponent } from './pages/error/error.component';
-import { HomeComponent } from './pages/home/home.component';
+import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
 import { SelectedFacilityGuard } from './pages/facilities/services/facility.guard';
@@ -18,8 +18,8 @@ const routes: Routes = [
     component: ErrorComponent,
   },
   {
-    path: "home",
-    component: HomeComponent,
+    path: "dashboard",
+    component: DashboardComponent,
     canActivate: [LoggedInGuard, SelectedFacilityGuard]
   },
   {

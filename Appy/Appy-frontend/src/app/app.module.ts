@@ -15,7 +15,7 @@ import { TranslateModule } from './components/translate/translate.module';
 import { LanguagePickerModule } from './components/language-picker/language-picker.module';
 import { LoginModule } from './pages/login/login.module';
 import { RegisterModule } from './pages/register/register.module';
-import { HomeModule } from './pages/home/home.module';
+import { DashboardModule } from './pages/dashboard/dashboard.module';
 import { ErrorModule } from './pages/error/error.module';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
@@ -31,6 +31,7 @@ import { faAngleDown } from "@fortawesome/free-solid-svg-icons/faAngleDown";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 import { faEllipsisV } from "@fortawesome/free-solid-svg-icons/faEllipsisV";
+import { faGear } from "@fortawesome/free-solid-svg-icons/faGear";
 import { faPen } from "@fortawesome/free-solid-svg-icons/faPen";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons/faSpinner";
@@ -101,7 +102,7 @@ dayjs.extend(duration);
     LoginModule,
     RegisterModule,
     FacilitiesModule,
-    HomeModule,
+    DashboardModule,
 
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: environment.production,
@@ -135,7 +136,7 @@ export class AppModule {
       faTimes, faPlus,
       faCaretDown, faCaretUp,
       faTrash, faPen,
-      faEllipsisV,
+      faEllipsisV, faGear,
       faBusinessTime,
       faBoxArchive,
       faCircleCheck, farCircleCheck, faQuestion, faCheck,

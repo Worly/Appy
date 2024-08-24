@@ -11,7 +11,7 @@ import { SmartFilter } from "src/app/shared/services/smart-filter";
 @Injectable({ providedIn: "root" })
 export class AppointmentService extends BaseModelService<Appointment> {
     constructor(injector: Injector) {
-        super(injector, "appointment", Appointment);
+        super(injector, Appointment.ENTITY_TYPE, Appointment);
     }
 
     public override getAll(date?: Dayjs): Observable<Appointment[]> {

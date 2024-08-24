@@ -1,16 +1,15 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { HomeService } from './services/home.service';
-import { HomeStats } from './home-stats';
 import { Subscription } from 'rxjs';
+import { DashboardService } from '../services/dashboard.service';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css']
+  selector: 'app-booked-today',
+  templateUrl: './booked-today.component.html',
+  styleUrls: ['./booked-today.component.scss']
 })
-export class HomeComponent implements OnInit, OnDestroy {
-  stats?: HomeStats = undefined;
-  emojies: { [key: string]: string } = {};
+export class BookedTodayComponent implements OnInit, OnDestroy {
+  bookedToday?: number = undefined;
+  emoji?: string;
 
   numberOfAppointmentsTodayEmoji: { [key: number]: string } = {
     0: "😢",
@@ -25,11 +24,11 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   private subs: Subscription[] = [];
 
-  constructor(private homeService: HomeService) { }
-
+  constructor(private dashboardService: DashboardService) { }
+  
   ngOnInit(): void {
-    this.subs.push(this.homeService.getStats().subscribe(s => {
-      this.stats = s;
+    this.subs.push(this.dashboardService.getBookedToday().subscribe(s => {
+      this.bookedToday = s;
       this.calculateEmojies();
     }));
   }
@@ -39,14 +38,12 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private calculateEmojies() {
-    if (this.stats == null) {
-      this.emojies = {};
+    if (this.bookedToday == null) {
+      this.emoji = undefined;
       return;
     }
-
-    this.emojies = {
-      numberOfAppointmentsCreatedToday: this.getEmojiForNumberOfAppointmentsToday(<number>this.stats.numberOfAppointmentsCreatedToday)
-    }
+    
+    this.emoji = this.getEmojiForNumberOfAppointmentsToday(this.bookedToday);
   }
 
   private getEmojiForNumberOfAppointmentsToday(num: number): string {

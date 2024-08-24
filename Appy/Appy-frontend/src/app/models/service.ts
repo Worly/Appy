@@ -12,6 +12,8 @@ export class ServiceDTO {
 }
 
 export class Service extends Model<Service> {
+    public static readonly ENTITY_TYPE: string = "service";
+
     public id: number;
     public name?: string;
     public displayName?: string;

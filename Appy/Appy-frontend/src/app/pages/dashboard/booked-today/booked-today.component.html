@@ -1,0 +1,10 @@
+<div class="stat w-card">
+    <app-loading *ngIf="bookedToday == null"></app-loading>
+    <div *ngIf="bookedToday != null">
+        <div class="title">{{'pages.dashboard.NUMBER_OF_APPOINMENTS_CREATED_TODAY' | translate}}</div>
+        <div class="value">
+            <div>{{bookedToday}}</div>
+            <div>{{emoji}}</div>
+        </div>
+    </div>
+</div>

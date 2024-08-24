@@ -1,0 +1,45 @@
+.appointment {
+    font-size: 1rem;
+
+    margin-bottom: 10px;
+    padding: 10px 15px;
+
+    background-color: rgb(var(--rgb-input-background));
+    border-radius: var(--default-border-radius);
+
+    display: flex;
+    gap: 15px;
+
+    .color {
+        width: 10px;
+    }
+
+    .date {
+        margin-right: 10px;
+    }
+
+    .time {
+        font-size: 0.9rem;
+    }
+
+    &.last {
+        margin-bottom: 40px;
+    }
+
+    .status-icon-container {
+        margin-left: auto;
+        margin-top: auto;
+
+        display: flex;
+        gap: 10px;
+
+        fa-icon {
+            opacity: 50%;
+        }
+
+        fa-icon.warn {
+            opacity: 100%;
+            color: rgb(var(--rgb-warning))
+        }
+    }
+}

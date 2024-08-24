@@ -9,6 +9,8 @@ export class WorkingHourDTO {
 }
 
 export class WorkingHour extends Model<WorkingHour> {
+    public static readonly ENTITY_TYPE: string = "workingHour";
+
     public dayOfWeek?: DayOfWeek;
     public timeFrom?: Dayjs;
     public timeTo?: Dayjs;

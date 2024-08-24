@@ -7,7 +7,7 @@ import { BaseModelService } from "src/app/shared/services/base-model-service";
 @Injectable({ providedIn: "root" })
 export class ServiceService extends BaseModelService<Service> {
     constructor(injector: Injector) {
-        super(injector, "service", Service);
+        super(injector, Service.ENTITY_TYPE, Service);
     }
 
     public override getAll(archived?: boolean): Observable<Service[]> {
@@ -22,7 +22,7 @@ export class ServiceService extends BaseModelService<Service> {
                 map(s => {
                     let newEntity = new Service(s);
 
-                    this.notifyUpdated(newEntity);
+                    this.entityChangeNotifyService.notifyUpdated(newEntity);
 
                     return newEntity;
                 }),

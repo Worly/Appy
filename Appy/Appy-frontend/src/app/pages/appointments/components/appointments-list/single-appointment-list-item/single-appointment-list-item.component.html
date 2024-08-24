@@ -1,0 +1,13 @@
+<div *ngIf="renderedAppointment != null" class="appointment" [attr.data-date]="renderedAppointment.dateISO"
+    [attr.data-appId]="renderedAppointment.id" (click)="onOpenView.emit()">
+    <div class="color" [style.backgroundColor]="renderedAppointment.serviceColor"></div>
+    <div class="info-container">
+        <div class="time"><span class="date" *ngIf="showDate">{{renderedAppointment.dateFormatted}} </span>{{renderedAppointment.time}}</div>
+        <div class="service">{{renderedAppointment.service}}</div>
+        <div class="client">{{renderedAppointment.client}}</div>
+    </div>
+    <div class="status-icon-container">
+        <fa-icon *ngIf="renderedAppointment.isUnconfirmed" class="warn" [icon]="['fas', 'question']"></fa-icon>
+        <fa-icon *ngIf="renderedAppointment.hasNotes" [icon]="['far', 'file-lines']"></fa-icon>
+    </div>
+</div>
