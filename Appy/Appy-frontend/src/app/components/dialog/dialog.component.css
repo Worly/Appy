@@ -8,6 +8,8 @@
 
 .close-button {
     position: absolute;
-    right: 5px;
-    top: 5px
+    right: 0px;
+    top: 0px;
+    width: 40px;
+    height: 40px;
 }
