@@ -13,6 +13,7 @@ namespace Appy.Services
         Task<Appointment> GetById(int id, int facilityId);
         Task<Appointment> AddNew(AppointmentDTO dto, int facilityId, bool ignoreTimeNotAvailable);
         Task<Appointment> Edit(int id, AppointmentDTO dto, int facilityId, bool ignoreTimeNotAvailable);
+        Task<Appointment> SetStatus(int id, AppointmentStatus status, int facilityId);
         Task Delete(int id, int facilityId);
 
         List<FreeTimeDTO> GetFreeTimes(List<Appointment> appointmentsOfTheDay, List<WorkingHour> workingHours, Service service, TimeSpan duration);
@@ -134,6 +135,21 @@ namespace Appy.Services
             var workingHours = await workingHourService.GetWorkingHours(dto.Date, facilityId);
             if (!ignoreTimeNotAvailable && !IsAppointmentTimeOk(sameDayAppointments, workingHours, appointment))
                 throw new ValidationException(nameof(AppointmentDTO.Time), "pages.appointments.errors.TIME_NOT_AVAILABLE");
+
+            await context.SaveChangesAsync();
+
+            return appointment;
+        }
+
+        public async Task<Appointment> SetStatus(int id, AppointmentStatus status, int facilityId)
+        {
+            var appointment = await context.Appointments.Include(a => a.Client).Include(a => a.Service)
+                .FirstOrDefaultAsync(s => s.Id == id && s.FacilityId == facilityId);
+            if (appointment == null)
+                throw new NotFoundException();
+
+            appointment.Status = status;
+            appointment.LastUpdatedAt = DateTime.UtcNow;
 
             await context.SaveChangesAsync();
 
