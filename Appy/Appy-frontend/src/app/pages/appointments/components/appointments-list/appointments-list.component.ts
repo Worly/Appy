@@ -17,7 +17,7 @@ import { ClientDTO } from 'src/app/models/client';
   styleUrls: ['./appointments-list.component.scss']
 })
 export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetach, BeforeAttach {
-  @ViewChildren("appointmentElement") appointmentElements?: QueryList<ElementRef<HTMLElement>>;
+  @ViewChildren("appointmentElement", { read: ElementRef }) appointmentElements?: QueryList<ElementRef<HTMLElement>>;
   @ViewChildren("dateElement") dateElements?: QueryList<ElementRef<HTMLElement>>;
 
   private _date: Dayjs = dayjs();
