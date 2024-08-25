@@ -1,9 +1,9 @@
 import { Injectable, Injector } from "@angular/core";
 import { Dayjs } from "dayjs";
 import { Duration } from "dayjs/plugin/duration";
-import { map, Observable } from "rxjs";
+import { catchError, map, Observable } from "rxjs";
 import { appConfig } from "src/app/app.config";
-import { Appointment } from "src/app/models/appointment";
+import { Appointment, AppointmentDTO, AppointmentStatus } from "src/app/models/appointment";
 import { FreeTime, FreeTimeDTO } from "src/app/models/free-time";
 import { BaseModelService, PageableListDatasource } from "src/app/shared/services/base-model-service";
 import { SmartFilter } from "src/app/shared/services/smart-filter";
@@ -44,5 +44,17 @@ export class AppointmentService extends BaseModelService<Appointment> {
         }).pipe(
             map(t => t.map(o => new FreeTime(o)))
         );
+    }
+
+    public setStatus(appointmentId: number, status: AppointmentStatus): Observable<Appointment> {
+        return this.httpClient.put<AppointmentDTO>(`${appConfig.apiUrl}${this.controllerName}/setStatus/${appointmentId}`, null, { params: { status } })
+            .pipe(
+                map(dto => {
+                    let appointment = new Appointment(dto);
+
+                    this.entityChangeNotifyService.notifyUpdated(appointment);
+
+                    return appointment;
+                }));
     }
 }

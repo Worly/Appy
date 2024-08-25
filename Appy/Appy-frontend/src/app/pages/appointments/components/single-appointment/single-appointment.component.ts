@@ -90,11 +90,11 @@ export class SingleAppointmentComponent implements OnInit, OnDestroy {
   }
 
   onChangeStatus(newStatus: AppointmentStatus) {
-    let newAppointment = new Appointment(this.appointment?.getDTO());
-    newAppointment.status = newStatus;
+    if (this.appointment == null)
+      return;
 
     this.isLoadingStatusChange = true;
-    this.subs.push(this.appointmentService.save(newAppointment).subscribe(() => this.isLoadingStatusChange = false))
+    this.subs.push(this.appointmentService.setStatus(this.appointment?.id, newStatus).subscribe(() => this.isLoadingStatusChange = false))
   }
 
   goToEdit() {

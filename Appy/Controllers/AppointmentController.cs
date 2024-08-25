@@ -4,6 +4,7 @@ using Appy.Services.Facilities;
 using Appy.DTOs;
 using Appy.Services;
 using Appy.Services.SmartFiltering;
+using Appy.Domain;
 
 namespace Appy.Controllers
 {
@@ -65,6 +66,15 @@ namespace Appy.Controllers
         public async Task<ActionResult<AppointmentDTO>> Edit(int id, AppointmentDTO dto, [FromQuery] bool ignoreTimeNotAvailable = false)
         {
             var result = await this.appointmentService.Edit(id, dto, HttpContext.SelectedFacility(), ignoreTimeNotAvailable);
+
+            return Ok(result.GetDTO());
+        }
+
+        [HttpPut("setStatus/{id}")]
+        [Authorize]
+        public async Task<ActionResult<AppointmentDTO>> SetStatus(int id, AppointmentStatus status)
+        {
+            var result = await this.appointmentService.SetStatus(id, status, HttpContext.SelectedFacility());
 
             return Ok(result.GetDTO());
         }
