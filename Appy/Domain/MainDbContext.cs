@@ -20,11 +20,9 @@ namespace Appy.Domain
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder
-                .UseLoggerFactory(LoggerFactory.Create(b => b.AddConsole()))
-                .EnableSensitiveDataLogging()
-                .UseExceptionProcessor()
-                .UseNpgsql();
+            optionsBuilder.UseLoggerFactory(LoggerFactory.Create(b => b.AddFilter((category, level) => level > LogLevel.Information)));
+            optionsBuilder.UseExceptionProcessor();
+            optionsBuilder.UseNpgsql();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
