@@ -9,6 +9,8 @@ using WappChatAnalyzer.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var spaPath = "Appy-frontend/build";
+
 // Add services to the container.
 
 builder.Services.AddDbContext<MainDbContext>(options =>
@@ -51,22 +53,20 @@ builder.Services
 
 builder.Services.AddSpaStaticFiles(configuration =>
 {
-    configuration.RootPath = "Appy-frontend/build";
+    configuration.RootPath = spaPath;
 });
 
 builder.Services.AddHealthChecks().AddCheck("self", () => HealthCheckResult.Healthy());
 
 var app = builder.Build();
 
+var useLocalSPA = app.Environment.IsDevelopment() && Environment.GetEnvironmentVariable("NO_FRONTEND") != "true";
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseSpaStaticFiles();
 
 app.UseRouting();
-
-app.UseMiddleware<ExceptionMiddleware>();
-app.UseMiddleware<Appy.Auth.JwtMiddleware>();
-app.UseMiddleware<FacilityMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -78,23 +78,48 @@ if (app.Environment.IsDevelopment())
         .AllowCredentials()); // allow credentials
 }
 
+app.UseMiddleware<ExceptionMiddleware>();
+app.UseMiddleware<Appy.Auth.JwtMiddleware>();
+app.UseMiddleware<FacilityMiddleware>();
+
 app.UseAuthorization();
 
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
     endpoints.MapHealthChecks("/health");
-});
 
-app.UseSpa(spa =>
-{
-    spa.Options.SourcePath = "Appy-frontend";
-
-    if (app.Environment.IsDevelopment() && Environment.GetEnvironmentVariable("NO_FRONTEND") != "true")
+    if (!useLocalSPA)
     {
-        spa.UseAngularCliServer(npmScript: "start");
+        // Explicit Fallback to index.html in SpaStaticFiles directory
+        endpoints.MapFallback(async context =>
+        {
+            var indexFilePath = Path.Combine(app.Environment.ContentRootPath, $"{spaPath}/index.html");
+
+            if (File.Exists(indexFilePath))
+            {
+                context.Response.ContentType = "text/html";
+                await context.Response.SendFileAsync(indexFilePath);
+            }
+            else
+            {
+                // Log if index.html is not found
+                app.Logger.LogWarning("Fallback file index.html not found at path: {indexFilePath}", indexFilePath);
+                context.Response.StatusCode = 404;
+            }
+        });
     }
 });
+
+if (useLocalSPA)
+{
+    app.UseSpa(spa =>
+    {
+        spa.Options.SourcePath = "Appy-frontend";
+
+        spa.UseAngularCliServer(npmScript: "start");
+    });
+}
 
 using (var scope = app.Services.CreateScope())
 {
