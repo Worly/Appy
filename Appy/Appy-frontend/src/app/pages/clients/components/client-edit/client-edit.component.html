@@ -24,7 +24,7 @@
                 <input class="w-input" type="text" [style.width]="'100%'"
                     placeholder="{{'pages.clients.CONTACT' | translate}}" [(ngModel)]="contact.value">
 
-                <app-button *ngIf="i == 0" color="warning" look="transparent" icon="star"></app-button>
+                <app-button *ngIf="i == 0 && client.contacts != null && client.contacts.length > 1" color="warning" look="transparent" icon="star"></app-button>
                 <app-button *ngIf="i != 0" color="normal" look="transparent" icon="arrow-up"
                     (onClick)="moveContactUp(i)"></app-button>
                 <app-button color="danger" look="transparent" icon="trash" (onClick)="deleteContact(i)"></app-button>
