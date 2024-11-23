@@ -5,9 +5,10 @@ import { combineLatest, debounceTime, Observable, Subscription } from 'rxjs';
 import { NotifyDialogService } from 'src/app/components/notify-dialog/notify-dialog.service';
 import { TranslateService } from 'src/app/components/translate/translate.service';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Client } from 'src/app/models/client';
+import { Client, ClientContact, ClientContactType } from 'src/app/models/client';
 import { ClientService } from '../../services/client.service';
-import { parsePhoneNumber } from 'libphonenumber-js';
+import { IconName } from '@fortawesome/fontawesome-svg-core';
+import { getClientContactTypeIcon, openClientContactApp } from '../../clients.module';
 
 @Component({
   selector: 'app-client-edit',
@@ -129,6 +130,42 @@ export class ClientEditComponent implements OnInit, OnDestroy {
     }));
   }
 
+  public addNewContact(type: ClientContactType) {
+    if (this.client == null)
+      return;
+
+    if (this.client.contacts == null)
+      this.client.contacts = [];
+
+    var contact = new ClientContact();
+    contact.type = type;
+
+    this.client.contacts.push(contact);
+  }
+
+  public deleteContact(index: number) {
+    this.client?.contacts?.splice(index, 1);
+  }
+
+  public moveContactUp(index: number) {
+    if (index <= 0)
+      return;
+
+    var contact = this.client?.contacts?.splice(index, 1)[0];
+    if (contact == null)
+      return;
+
+    this.client?.contacts?.splice(index - 1, 0, contact);
+  }
+
+  public openContact(contact: ClientContact) {
+    openClientContactApp(contact.getDTO());
+  }
+
+  public getContactTypeIcon(type: ClientContactType): IconName {
+    return getClientContactTypeIcon(type);
+  }
+
   public goBack() {
     this.location.back();
   }
@@ -137,26 +174,11 @@ export class ClientEditComponent implements OnInit, OnDestroy {
     let filter = {
       client: this.client?.getDTO()
     }
-    
+
     this.router.navigate(["appointments"], {
       queryParams: {
         filter: JSON.stringify(filter)
       }
     })
-  }
-
-  public openWapp() {
-    if (!this.client?.phoneNumber) {
-      return
-    }
-
-    let phoneNumber = parsePhoneNumber(this.client.phoneNumber, "HR")
-    if (!phoneNumber.isValid()) {
-      console.log("Invalid phone number!");
-    }
-
-    // substr removes '+' sign at the begging
-    let normalized = phoneNumber.format("E.164").substring(1);
-    window.open(`whatsapp://send?phone=${normalized}`)
   }
 }

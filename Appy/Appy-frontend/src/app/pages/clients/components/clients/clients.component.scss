@@ -21,29 +21,18 @@
 }
 
 .single-client-outer-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
     font-size: 1rem;
     margin-bottom: 10px;
-    padding: 20px;
+    padding: 12px 20px;
+    min-height: 60px;
 }
 
 .single-client-container {
-    display: grid;
-
-    grid-template-areas:
-        "full-name phone-number"
-        "full-name email";
-
-    .phone-number {
-        grid-area: phone-number;
-        text-align: end;
-    }
-
-    .full-name {
-        grid-area: full-name;
-    }
-
-    .email {
-        grid-area: email;
-        text-align: end;
-    }
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }

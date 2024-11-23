@@ -11,8 +11,7 @@ namespace Appy.Domain
 
         public string Name { get; set; }
         public string? Surname { get; set; }
-        public string? PhoneNumber { get; set; }
-        public string? Email { get; set; }
+        public List<ClientContact> Contacts { get; set; }
         public string? Notes { get; set; }
 
         public bool IsArchived { get; set; }
@@ -24,10 +23,9 @@ namespace Appy.Domain
                 Id = Id,
                 Name = Name,
                 Surname = Surname,
-                PhoneNumber = PhoneNumber,
-                Email = Email,
                 Notes = Notes,
-                IsArchived = IsArchived
+                IsArchived = IsArchived,
+                Contacts = Contacts?.OrderBy(o => o.Order).Select(c => c.GetDTO()).ToList(),
             };
         }
     }

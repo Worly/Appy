@@ -1,8 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Data, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { Client } from 'src/app/models/client';
+import { Client, ClientContact, ClientContactType } from 'src/app/models/client';
 import { ClientService } from '../../services/client.service';
+import { getClientContactTypeIcon, openClientContactApp } from '../../clients.module';
+import { IconName } from '@fortawesome/fontawesome-svg-core';
 
 @Component({
   selector: 'app-clients',
@@ -10,7 +12,6 @@ import { ClientService } from '../../services/client.service';
   styleUrls: ['./clients.component.scss']
 })
 export class ClientsComponent implements OnInit, OnDestroy {
-
   clients?: Client[] = undefined;
   filteredClients: Client[] = [];
   isArchive: boolean = false;
@@ -61,5 +62,13 @@ export class ClientsComponent implements OnInit, OnDestroy {
       this.router.navigate([".."], { relativeTo: this.activatedRoute });
     else
       this.router.navigate(["archive"], { relativeTo: this.activatedRoute });
+  }
+
+  public openContact(contact: ClientContact) {
+    openClientContactApp(contact.getDTO());
+  }
+
+  public getContactTypeIcon(type: ClientContactType): IconName {
+    return getClientContactTypeIcon(type);
   }
 }

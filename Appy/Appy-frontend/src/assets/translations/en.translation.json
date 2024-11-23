@@ -142,6 +142,9 @@
             "SURNAME": "Surname",
             "PHONE_NUMBER": "Phone number",
             "EMAIL": "Email",
+            "CONTACT": "Contact",
+            "CONTACTS": "Contacts",
+            "ADD_CONTACT": "Add contact",
             "NOTES": "Notes",
             "NEW_CLIENT": "New client",
             "CHOOSE_CLIENT": "Choose client",
@@ -156,7 +159,8 @@
             "errors": {
                 "MISSING_NAME": "Please enter a name",
                 "MISSING_NAME_SURNAME": "Please enter a name and surname",
-                "NAME_AND_SURNAME_TAKEN": "Client with that name and surname already exists"
+                "NAME_AND_SURNAME_TAKEN": "Client with that name and surname already exists",
+                "MISSING_CONTACT_VALUE": "Please enter a contact information"
             }
         },
 

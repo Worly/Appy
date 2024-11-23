@@ -28,6 +28,7 @@ namespace Appy.Services
         public Task<List<Client>> GetAll(int facilityId, bool archived)
         {
             return context.Clients
+                .Include(c => c.Contacts)
                 .Where(s => s.FacilityId == facilityId && s.IsArchived == archived)
                 .OrderBy(o => o.Name)
                 .ThenBy(o => o.Surname)
@@ -36,7 +37,10 @@ namespace Appy.Services
 
         public async Task<Client> GetById(int id, int facilityId)
         {
-            var client = await context.Clients.FirstOrDefaultAsync(s => s.Id == id && s.FacilityId == facilityId);
+            var client = await context.Clients
+                .Include(c => c.Contacts)
+                .FirstOrDefaultAsync(s => s.Id == id && s.FacilityId == facilityId);
+
             if (client == null)
                 throw new NotFoundException();
 
@@ -58,9 +62,8 @@ namespace Appy.Services
                 FacilityId = facilityId,
                 Name = dto.Name,
                 Surname = dto.Surname,
-                PhoneNumber = dto.PhoneNumber,
-                Email = dto.Email,
                 Notes = dto.Notes,
+                Contacts = GetOrderedContacts(dto.Contacts),
                 IsArchived = dto.IsArchived
             };
 
@@ -72,7 +75,7 @@ namespace Appy.Services
 
         public async Task<Client> Edit(int id, ClientDTO dto, int facilityId)
         {
-            var client = await context.Clients.FirstOrDefaultAsync(s => s.Id == id && s.FacilityId == facilityId);
+            var client = await context.Clients.Include(c => c.Contacts).FirstOrDefaultAsync(s => s.Id == id && s.FacilityId == facilityId);
             if (client == null)
                 throw new NotFoundException();
 
@@ -82,9 +85,8 @@ namespace Appy.Services
 
             client.Name = dto.Name;
             client.Surname = dto.Surname;
-            client.PhoneNumber = dto.PhoneNumber;
-            client.Email = dto.Email;
             client.Notes = dto.Notes;
+            client.Contacts = GetOrderedContacts(dto.Contacts);
             client.IsArchived = dto.IsArchived;
             await context.SaveChangesAsync();
 
@@ -119,6 +121,22 @@ namespace Appy.Services
             await context.SaveChangesAsync();
 
             return client;
+        }
+
+        private List<ClientContact> GetOrderedContacts(List<ClientContactDTO> contactDTOs)
+        {
+            var contacts = contactDTOs.Select(c => new ClientContact()
+            {
+                Type = c.Type,
+                Value = c.Value,
+            }).ToList();
+
+            for (int i = 0; i < contacts.Count; i++)
+            {
+                contacts[i].Order = i;
+            }
+
+            return contacts;
         }
     }
 }

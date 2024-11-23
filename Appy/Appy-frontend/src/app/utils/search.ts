@@ -1,8 +1,10 @@
 export class Search {
+    private static readonly implicitlyIgnoredFields: string[] = ["validations"];
+
     private ignoreFields: string[];
 
     constructor(...ignoreFields: string[]) {
-        this.ignoreFields = ignoreFields;
+        this.ignoreFields = [...ignoreFields, ...Search.implicitlyIgnoredFields];
     }
 
     public search<T>(items: T[], term: string): T[] {
@@ -13,30 +15,8 @@ export class Search {
             return items;
 
         let searchResults: SearchResult<T>[] = items.map(i => {
-            let score = 0;
-
-            for (let field in i) {
-                if (this.ignoreFields.includes(field))
-                    continue;
-
-                let value = i[field];
-
-                if (typeof value == "string") {
-                    let asciiValue = ascii(value);
-
-                    for (let term of terms) {
-                        if (asciiValue == term)
-                            score += 3;
-                        if (asciiValue.startsWith(term))
-                            score += 2;
-                        else if (asciiValue.includes(term))
-                            score += 1;
-                    }
-                }
-            }
-
             return {
-                score: score,
+                score: this.getItemScore(i, terms),
                 item: i
             };
         });
@@ -46,6 +26,43 @@ export class Search {
 
         let results = searchResults.map(s => s.item);
         return results;
+    }
+
+    private getItemScore(item: any, terms: string[]): number {
+        let score = 0;
+
+        for (let field in item) {
+            if (this.ignoreFields.includes(field))
+                continue;
+
+            let value = item[field];
+
+            if (Array.isArray(value)) {
+                for (let v of value) {
+                    score += this.getItemScore(v, terms);
+                }
+            }
+            else if (typeof value == "string") {
+                score += this.getValueScore(value, terms);
+            }
+        }
+
+        return score;
+    }
+
+    private getValueScore(value: string, terms: string[]): number {
+        let asciiValue = ascii(value);
+
+        for (let term of terms) {
+            if (asciiValue == term)
+                return 3;
+            if (asciiValue.startsWith(term))
+                return 2;
+            else if (asciiValue.includes(term))
+                return 1;
+        }
+
+        return 0;
     }
 }
 

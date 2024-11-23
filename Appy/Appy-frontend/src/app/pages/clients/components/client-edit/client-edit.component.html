@@ -16,19 +16,31 @@
         <div class="w-validation-message">{{ client.getValidationErrors("surname") | translate }}</div>
     </div>
     <div class="w-input-container">
-        <div class="w-label">{{'pages.clients.PHONE_NUMBER' | translate}}</div>
-        <div class="input-with-buttons">
-            <input class="w-input" type="text" [style.width]="'100%'"
-                placeholder="{{'pages.clients.PHONE_NUMBER' | translate}}" [(ngModel)]="client.phoneNumber">
-            <app-button *ngIf="client.phoneNumber" iconPrefix="fab" icon="whatsapp" (onClick)="openWapp()"></app-button>
+        <div class="w-label">{{'pages.clients.CONTACTS' | translate}}</div>
+        <div *ngFor="let contact of client.contacts; let i = index" class="contact-container">
+            <div class="contact-input-container">
+                <app-button class="contact-type" iconPrefix="fab" [icon]="getContactTypeIcon(contact.type)"
+                    look="transparent" (onClick)="openContact(contact)"></app-button>
+                <input class="w-input" type="text" [style.width]="'100%'"
+                    placeholder="{{'pages.clients.CONTACT' | translate}}" [(ngModel)]="contact.value">
+
+                <app-button *ngIf="i == 0" color="warning" look="transparent" icon="star"></app-button>
+                <app-button *ngIf="i != 0" color="normal" look="transparent" icon="arrow-up"
+                    (onClick)="moveContactUp(i)"></app-button>
+                <app-button color="danger" look="transparent" icon="trash" (onClick)="deleteContact(i)"></app-button>
+            </div>
+            <div class="w-validation-message">{{ contact.getValidationErrors("value") | translate }}</div>
         </div>
-        <div class="w-validation-message">{{ client.getValidationErrors("phoneNumber") | translate }}</div>
-    </div>
-    <div class="w-input-container">
-        <div class="w-label">{{'pages.clients.EMAIL' | translate}}</div>
-        <input class="w-input" type="text" [style.width]="'100%'" placeholder="{{'pages.clients.EMAIL' | translate}}"
-            [(ngModel)]="client.email">
-        <div class="w-validation-message">{{ client.getValidationErrors("email") | translate }}</div>
+        <app-button #addContactButton="elementRef" appElementRef borderStyle="dashed" color="success" look="outlined"
+            icon="plus" text="{{'pages.clients.ADD_CONTACT' | translate}}"
+            (onClick)="contactTypeContextMenu.open()"></app-button>
+
+        <app-context-menu #contactTypeContextMenu [relativeTo]="addContactButton.elementRef" [copyOriginWidth]="true">
+            <app-button iconPrefix="fab" icon="instagram" text="Instagram"
+                (onClick)="addNewContact('Instagram')"></app-button>
+            <app-button iconPrefix="fab" icon="whatsapp" text="WhatsApp"
+                (onClick)="addNewContact('WhatsApp')"></app-button>
+        </app-context-menu>
     </div>
     <div class="w-input-container">
         <div class="w-label">{{'pages.clients.NOTES' | translate}}</div>
@@ -58,3 +70,5 @@
             [isLoading]="isLoadingSave" (onClick)="save()"></app-button>
     </app-action-bar>
 </div>
+
+<!-- <app-dropdown #contactTypeDropdown [items]="['instagram', 'whatsapp']"></app-dropdown> -->

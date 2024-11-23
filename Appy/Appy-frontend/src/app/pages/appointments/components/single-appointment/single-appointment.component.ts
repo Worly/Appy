@@ -5,6 +5,9 @@ import { NotifyDialogService } from 'src/app/components/notify-dialog/notify-dia
 import { TranslateService } from 'src/app/components/translate/translate.service';
 import { Appointment, AppointmentStatus } from 'src/app/models/appointment';
 import { AppointmentService } from '../../services/appointment.service';
+import { getClientContactTypeIcon, openClientContactApp } from 'src/app/pages/clients/clients.module';
+import { IconName } from '@fortawesome/fontawesome-svg-core';
+import { ClientContactDTO, ClientContactType } from 'src/app/models/client';
 
 @Component({
   selector: 'app-single-appointment',
@@ -105,5 +108,13 @@ export class SingleAppointmentComponent implements OnInit, OnDestroy {
   goToClient(clientId: number) {
     this.router.navigate(["clients", "edit", clientId]);
     this.onDone.next();
+  }
+
+  public openContact(contact: ClientContactDTO) {
+    openClientContactApp(contact);
+  }
+
+  public getContactTypeIcon(type: ClientContactType): IconName {
+    return getClientContactTypeIcon(type);
   }
 }
