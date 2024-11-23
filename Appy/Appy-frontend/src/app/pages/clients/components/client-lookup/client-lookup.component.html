@@ -21,7 +21,6 @@
         (onClick)="selectClient(client)">
         <div class="single-client-container" [ngClass]="{'selected': client.id == value?.id}">
             <div class="full-name">{{client.name}} {{client.surname}}</div>
-            <div class="phone-number">{{client.phoneNumber}}</div>
         </div>
     </app-button>
 

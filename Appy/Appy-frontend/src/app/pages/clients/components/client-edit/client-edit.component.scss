@@ -15,3 +15,17 @@
         right: 3px;
     }
 }
+
+.contact-container {
+    margin-bottom: 10px;
+}
+
+::ng-deep .contact-input-container {
+    display: flex;
+    align-items: stretch;
+    gap: 5px;
+
+    >app-button.contact-type>.my-button { 
+        font-size: 1.3rem;
+    }
+}

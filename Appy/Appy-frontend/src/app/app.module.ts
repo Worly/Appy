@@ -27,6 +27,7 @@ import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faCaretDown } from "@fortawesome/free-solid-svg-icons/faCaretDown";
 import { faCaretUp } from "@fortawesome/free-solid-svg-icons/faCaretUp";
 import { faAngleUp } from "@fortawesome/free-solid-svg-icons/faAngleUp";
+import { faArrowUp } from "@fortawesome/free-solid-svg-icons/faArrowUp";
 import { faAngleDown } from "@fortawesome/free-solid-svg-icons/faAngleDown";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
@@ -51,11 +52,13 @@ import { faTableList } from "@fortawesome/free-solid-svg-icons/faTableList";
 import { faFilter } from "@fortawesome/free-solid-svg-icons/faFilter";
 import { faFileLines } from "@fortawesome/free-regular-svg-icons/faFileLines";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons/faWhatsapp"
+import { faInstagram } from "@fortawesome/free-brands-svg-icons/faInstagram"
 import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
 import { faCheck } from "@fortawesome/free-solid-svg-icons/faCheck";
 import { faMoon } from "@fortawesome/free-solid-svg-icons/faMoon";
 import { faSun } from "@fortawesome/free-solid-svg-icons/faSun";
 import { faCircleHalfStroke } from "@fortawesome/free-solid-svg-icons/faCircleHalfStroke";
+import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 
 import dayjs from "dayjs";
 import "dayjs/locale/hr";
@@ -134,7 +137,7 @@ export class AppModule {
       faSpinner,
       faAngleUp, faAngleDown, faAngleLeft, faAngleRight,
       faTimes, faPlus,
-      faCaretDown, faCaretUp,
+      faCaretDown, faCaretUp, faArrowUp,
       faTrash, faPen,
       faEllipsisV, faGear,
       faBusinessTime,
@@ -142,8 +145,8 @@ export class AppModule {
       faCircleCheck, farCircleCheck, faQuestion, faCheck,
       faHouse, faHandHoldingHeart, faUsers, faCalendarWeek, faRightFromBracket,
       faCalendarDays, faTableList, faFilter, faFileLines,
-      faWhatsapp,
-      faMoon, faSun, faCircleHalfStroke
+      faWhatsapp, faInstagram,
+      faMoon, faSun, faCircleHalfStroke, faStar
     );
   }
 

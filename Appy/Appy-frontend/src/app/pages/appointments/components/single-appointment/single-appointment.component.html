@@ -14,21 +14,24 @@
             {{appointment.time?.add($any(appointment.duration))?.format("HH:mm")}}
         </div>
     </div>
-    <app-button class="client-button" (onClick)="goToClient($any(appointment.client?.id))">
+    <app-button *ngIf="appointment.client != null" class="client-button"
+        (onClick)="goToClient($any(appointment.client.id))">
         <div class="client">
             <div class="client-column">
-                <div class="full-name">{{appointment.client?.name}} {{appointment.client?.surname}}</div>
+                <div class="full-name">{{appointment.client.name}} {{appointment.client.surname}}</div>
             </div>
-            <div class="client-column">
-                <div class="phone-number">{{appointment.client?.phoneNumber}}</div>
-                <div class="email">{{appointment.client?.email}}</div>
-            </div>
+
+            <app-button *ngIf="appointment.client.contacts != null && appointment.client.contacts.length > 0"
+                look="transparent" iconPrefix="fab" [icon]="getContactTypeIcon(appointment.client.contacts[0].type)"
+                [text]="appointment.client.contacts[0].value"
+                (onClick)="openContact(appointment.client.contacts[0])"></app-button>
         </div>
     </app-button>
     <div class="status">
         <div class="status-title">{{'STATUS' | translate}}:</div>
         <div class="status-content">
-            <div class="status-display" [ngStyle]="{'color': 'rgb(var(--rgb-' + (appointment.status | appointmentStatusInfo)?.color + '))'}">
+            <div class="status-display"
+                [ngStyle]="{'color': 'rgb(var(--rgb-' + (appointment.status | appointmentStatusInfo)?.color + '))'}">
                 <fa-icon
                     [icon]="[(appointment.status | appointmentStatusInfo)?.iconPrefix ?? 'fas', $any((appointment.status | appointmentStatusInfo)?.iconName)]"></fa-icon>
                 {{appointment.status | uppercase | translate}}
