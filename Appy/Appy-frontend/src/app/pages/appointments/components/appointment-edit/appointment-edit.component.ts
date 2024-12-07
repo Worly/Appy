@@ -13,6 +13,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AppointmentService } from '../../services/appointment.service';
 import { TranslateService } from 'src/app/components/translate/translate.service';
 import { ClientDTO } from 'src/app/models/client';
+import { ToastService } from 'src/app/components/toast/toast.service';
 
 @Component({
   selector: 'app-appointment-edit',
@@ -40,6 +41,7 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
     private activatedRoute: ActivatedRoute,
     private appointmentService: AppointmentService,
     private notifyDialogService: NotifyDialogService,
+    private toastService: ToastService,
     private translateService: TranslateService
   ) { }
 
@@ -113,7 +115,10 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
       action = this.appointmentService.save(this.appointment as Appointment, { ignoreTimeNotAvailable });
 
     this.subs.push(action.subscribe({
-      next: () => this.goBack(),
+      next: (ap: Appointment) => {
+        this.notifySaved(ap.id, ap.status == "Unconfirmed");
+        this.goBack();
+      },
       error: (e: HttpErrorResponse) => {
         this.isLoadingSave = false;
         if (e.error?.errors?.time == "pages.appointments.errors.TIME_NOT_AVAILABLE") {
@@ -125,6 +130,29 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
         }
       }
     }));
+  }
+
+  private notifySaved(appointmentId: number, showConfirm: boolean) {
+    let actions = [];
+
+    if (showConfirm) {
+      actions.push({
+        text: this.translateService.translate("CONFIRM"),
+        onClick: (closeToast: () => void) => { 
+          this.appointmentService.setStatus(appointmentId, "Confirmed").subscribe({
+            next: () => closeToast(),
+            error: (e: any) => closeToast()
+          })
+        }
+      });
+    }
+
+    this.toastService.show({
+      text: this.translateService.translate("pages.appointments.APPOINTMENT_SAVED"),
+      icon: "check",
+      iconColor: "success",
+      actions: actions
+    })
   }
 
   public deleteAppointment() {

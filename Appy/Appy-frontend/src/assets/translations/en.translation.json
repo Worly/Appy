@@ -180,6 +180,7 @@
             "NO_APPOINTMENTS_BEFORE": "There are no more appointments before this date",
             "NO_APPOINTMENTS_AFTER": "There are no more appointments after this date",
             "NO_APPOINTMENTS": "No appointments found",
+            "APPOINTMENT_SAVED": "Appointment is saved",
             
             "errors": {
                 "MISSING_SERVICE": "Please choose a service",
