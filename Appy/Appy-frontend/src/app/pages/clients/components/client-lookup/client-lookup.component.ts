@@ -133,7 +133,7 @@ export class ClientLookupComponent implements OnInit, OnDestroy {
   private showAddNewSuccess(client: Client) {
     this.toastService.show({
       text: this.translateService.translate("pages.clients.ADDED_SUCCESSFULY"),
-      icon: ["far", "circle-check"],
+      icon: "check",
       iconColor: "success",
       actions: [
         {
