@@ -138,11 +138,13 @@ export class ClientLookupComponent implements OnInit, OnDestroy {
       actions: [
         {
           text: this.translateService.translate("UNDO"),
-          onClick: () => {
+          onClick: (closeToast: () => void) => {
             this.clientService.delete(client.id).subscribe({
               next: () => {
                 this.contextMenu?.open();
-              }
+                closeToast();
+              },
+              error: () => closeToast()
             })
           }
         },
