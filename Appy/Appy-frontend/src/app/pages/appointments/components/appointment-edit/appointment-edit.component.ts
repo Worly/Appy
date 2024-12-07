@@ -14,6 +14,7 @@ import { AppointmentService } from '../../services/appointment.service';
 import { TranslateService } from 'src/app/components/translate/translate.service';
 import { ClientDTO } from 'src/app/models/client';
 import { ToastService } from 'src/app/components/toast/toast.service';
+import { Icon, icon, IconName } from '@fortawesome/fontawesome-svg-core';
 
 @Component({
   selector: 'app-appointment-edit',
@@ -138,6 +139,7 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
     if (showConfirm) {
       actions.push({
         text: this.translateService.translate("CONFIRM"),
+        icon: "check" as IconName,
         onClick: (closeToast: () => void) => { 
           this.appointmentService.setStatus(appointmentId, "Confirmed").subscribe({
             next: () => closeToast(),
@@ -183,6 +185,8 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
       let duration = this.appointment?.duration ? this.appointment.duration.format("HH:mm:ss") : null;
       let service = this.appointment?.service ? JSON.stringify(this.appointment.service) : null;
       let client = this.appointment?.client ? JSON.stringify(this.appointment.client) : null;
+
+      console.log("Saving URL params", date, time, duration, service, client);
 
       setUrlParams(this.router, this.activatedRoute, this.location, {
         date, time, duration, service, client

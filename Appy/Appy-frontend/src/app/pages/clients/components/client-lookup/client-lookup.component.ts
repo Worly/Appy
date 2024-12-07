@@ -7,6 +7,7 @@ import { ToastService } from 'src/app/components/toast/toast.service';
 import { TranslateService } from 'src/app/components/translate/translate.service';
 import { Client, ClientDTO } from 'src/app/models/client';
 import { ClientService } from '../../services/client.service';
+import { IconName } from '@fortawesome/fontawesome-svg-core';
 
 @Component({
   selector: 'app-client-lookup',
@@ -138,6 +139,7 @@ export class ClientLookupComponent implements OnInit, OnDestroy {
       actions: [
         {
           text: this.translateService.translate("UNDO"),
+          icon: "trash" as IconName,
           onClick: (closeToast: () => void) => {
             this.clientService.delete(client.id).subscribe({
               next: () => {
@@ -150,6 +152,7 @@ export class ClientLookupComponent implements OnInit, OnDestroy {
         },
         {
           text: this.translateService.translate("EDIT"),
+          icon: "pen" as IconName,
           onClick: () => {
             this.router.navigate(["clients", "edit", client.id]);
           }

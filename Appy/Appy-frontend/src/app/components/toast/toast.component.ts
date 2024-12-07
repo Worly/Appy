@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit } from '@angular/core';
-import { IconProp } from '@fortawesome/fontawesome-svg-core';
+import { IconName, IconProp } from '@fortawesome/fontawesome-svg-core';
 import { Observable, of, delay } from 'rxjs';
 
 @Component({
@@ -15,6 +15,7 @@ export class ToastComponent implements OnInit {
   actions?: {
     text: string;
     onClick: (() => void);
+    icon?: IconName;
     isLoading: boolean;
   }[];
 

@@ -1,15 +1,12 @@
 import { Overlay, OverlayRef } from "@angular/cdk/overlay";
 import { ComponentPortal } from "@angular/cdk/portal";
 import { Injectable } from "@angular/core";
-import { IconProp, text } from "@fortawesome/fontawesome-svg-core";
-import { TranslateService } from "../translate/translate.service";
+import { IconName, IconProp } from "@fortawesome/fontawesome-svg-core";
 import { ToastComponent } from "./toast.component";
 
 @Injectable()
 export class ToastService {
-    constructor(private overlay: Overlay, private translateService: TranslateService) {
-
-    }
+    constructor(private overlay: Overlay) { }
 
     private createToast(): [OverlayRef, ToastComponent] {
         let overlayRef = this.overlay.create({
@@ -46,6 +43,7 @@ export class ToastService {
         let actions = arg.actions?.map(a => {
             let action = {
                 text: a.text,
+                icon: a.icon,
                 onClick: () => { },
                 isLoading: false
             };
@@ -100,5 +98,6 @@ export type ToastOptions = {
 
 export type ToastAction = {
     text: string;
+    icon?: IconName;
     onClick: (() => void) | ((closeToast: () => void) => void);
 }
