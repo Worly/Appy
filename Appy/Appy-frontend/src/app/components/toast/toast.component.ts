@@ -15,6 +15,7 @@ export class ToastComponent implements OnInit {
   actions?: {
     text: string;
     onClick: (() => void);
+    isLoading: boolean;
   }[];
 
   constructor(private elementRef: ElementRef) { }

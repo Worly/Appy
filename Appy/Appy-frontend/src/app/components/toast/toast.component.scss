@@ -57,6 +57,11 @@
     app-button {
       div.my-button {
         color: rgb(var(--rgb-toast-text));
+
+        &.my-disabled {
+          color: rgb(var(--rgb-disabled));
+        }
+
         font-weight: bold;
 
         padding: 6px 6px;

@@ -1,7 +1,7 @@
 import { Overlay, OverlayRef } from "@angular/cdk/overlay";
 import { ComponentPortal } from "@angular/cdk/portal";
 import { Injectable } from "@angular/core";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { IconProp, text } from "@fortawesome/fontawesome-svg-core";
 import { TranslateService } from "../translate/translate.service";
 import { ToastComponent } from "./toast.component";
 
@@ -35,23 +35,42 @@ export class ToastService {
         let [overlayRef, toastComponent] = this.createToast();
 
         let hidden = false;
+        var hide = () => {
+            if (!hidden)
+                toastComponent.hide().subscribe(() => overlayRef.dispose());
+            hidden = true;
+        }
 
-        arg.actions?.forEach(a => {
+        let autoClose = true;
+
+        let actions = arg.actions?.map(a => {
+            let action = {
+                text: a.text,
+                onClick: () => { },
+                isLoading: false
+            };
+
             let original = a.onClick;
-            a.onClick = function () {
-                if (!hidden)
-                    toastComponent.hide().subscribe(() => overlayRef.dispose());
-                hidden = true;
+            action.onClick = function () {
+                if (original.length == 0) {
+                    hide();
+                }
+                else {
+                    autoClose = false;
+                    action.isLoading = true;
+                }
 
-                original();
+                original(hide);
             }
+
+            return action;
         });
 
         toastComponent.text = arg.text;
         toastComponent.icon = arg.icon;
         toastComponent.iconColor = arg.iconColor;
         toastComponent.customIconColor = arg.customIconColor;
-        toastComponent.actions = arg.actions;
+        toastComponent.actions = actions;
 
         let duration = arg.text.split(" ").length / 2 * 1000;
         if (duration < 2000)
@@ -63,9 +82,10 @@ export class ToastService {
         toastComponent.show();
 
         setTimeout(() => {
-            if (!hidden)
-                toastComponent.hide().subscribe(() => overlayRef.dispose());
-            hidden = true;
+            if (!autoClose)
+                return;
+
+            hide();
         }, duration);
     }
 }
@@ -75,8 +95,10 @@ export type ToastOptions = {
     icon?: IconProp,
     iconColor?: "success" | "danger" | "warning" | "normal" | "custom";
     customIconColor?: string;
-    actions?: {
-        text: string;
-        onClick: (() => void);
-    }[];
+    actions?: ToastAction[];
+}
+
+export type ToastAction = {
+    text: string;
+    onClick: (() => void) | ((closeToast: () => void) => void);
 }

@@ -180,6 +180,7 @@
             "NO_APPOINTMENTS_BEFORE": "Nema više termina prije ovog datuma",
             "NO_APPOINTMENTS_AFTER": "Nema više termina nakon ovog datuma",
             "NO_APPOINTMENTS": "Nema pronađenih termina",
+            "APPOINTMENT_SAVED": "Termin je spremljen",
             
             "errors": {
                 "MISSING_SERVICE": "Molim odaberite uslugu",

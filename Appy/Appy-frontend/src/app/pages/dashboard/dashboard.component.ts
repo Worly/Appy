@@ -39,7 +39,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
         this.toastService.show({
           text: this.translateService.translate("SETTINGS_SAVED"),
-          icon: ["far", "circle-check"],
+          icon: "check",
           iconColor: "success",
         })
       }

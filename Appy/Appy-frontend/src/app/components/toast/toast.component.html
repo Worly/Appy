@@ -4,6 +4,7 @@
 {{text}}
 
 <div *ngIf="actions != null" class="actions">
-    <app-button *ngFor="let action of actions" [text]="action.text" (onClick)="action.onClick()" look="transparent">
+    <app-button *ngFor="let action of actions" [text]="action.text" (onClick)="action.onClick()" look="transparent"
+        [isLoading]="action.isLoading" [disabled]="action.isLoading">
     </app-button>
 </div>

@@ -133,16 +133,18 @@ export class ClientLookupComponent implements OnInit, OnDestroy {
   private showAddNewSuccess(client: Client) {
     this.toastService.show({
       text: this.translateService.translate("pages.clients.ADDED_SUCCESSFULY"),
-      icon: ["far", "circle-check"],
+      icon: "check",
       iconColor: "success",
       actions: [
         {
           text: this.translateService.translate("UNDO"),
-          onClick: () => {
+          onClick: (closeToast: () => void) => {
             this.clientService.delete(client.id).subscribe({
               next: () => {
                 this.contextMenu?.open();
-              }
+                closeToast();
+              },
+              error: () => closeToast()
             })
           }
         },
