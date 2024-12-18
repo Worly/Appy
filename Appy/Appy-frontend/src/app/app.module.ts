@@ -59,6 +59,7 @@ import { faMoon } from "@fortawesome/free-solid-svg-icons/faMoon";
 import { faSun } from "@fortawesome/free-solid-svg-icons/faSun";
 import { faCircleHalfStroke } from "@fortawesome/free-solid-svg-icons/faCircleHalfStroke";
 import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
+import { faBell } from "@fortawesome/free-solid-svg-icons/faBell";
 
 import dayjs from "dayjs";
 import "dayjs/locale/hr";
@@ -146,7 +147,7 @@ export class AppModule {
       faHouse, faHandHoldingHeart, faUsers, faCalendarWeek, faRightFromBracket,
       faCalendarDays, faTableList, faFilter, faFileLines,
       faWhatsapp, faInstagram,
-      faMoon, faSun, faCircleHalfStroke, faStar
+      faMoon, faSun, faCircleHalfStroke, faStar, faBell
     );
   }
 

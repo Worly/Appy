@@ -203,6 +203,10 @@
                 "TIMES_NOT_IN_ORDER": "Vrijeme otvaranja mora biti prije vremena zatvaranja",
                 "TIMES_OVERLAP": "Radna vremena se ne smiju preklapati"
             }
+        },
+
+        "client-notifications": {
+            "CLIENT_NOTIFICATIONS": "Notifikacije klijenta"
         }
     }
 }

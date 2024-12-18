@@ -203,6 +203,10 @@
                 "TIMES_NOT_IN_ORDER": "Open time must be before closing time",
                 "TIMES_OVERLAP": "Working hours must not overlap"
             }
+        },
+
+        "client-notifications": {
+            "CLIENT_NOTIFICATIONS": "Client notifications"
         }
     }
 }
