@@ -206,7 +206,8 @@
         },
 
         "client-notifications": {
-            "CLIENT_NOTIFICATIONS": "Client notifications"
+            "CLIENT_NOTIFICATIONS": "Client notifications",
+            "INSTAGRAM_API_ACCESS_TOKEN": "Instagram API access token"
         }
     }
 }

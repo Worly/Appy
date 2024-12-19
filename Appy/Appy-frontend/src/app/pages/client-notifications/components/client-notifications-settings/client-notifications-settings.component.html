@@ -1,1 +1,36 @@
-<p>client-notifications-settings works!</p>
+<app-loading *ngIf="settings == null"></app-loading>
+<div *ngIf="settings != null">
+    <div class="w-title">{{"pages.client-notifications.CLIENT_NOTIFICATIONS" | translate}}</div>
+
+    <div class="w-input-container">
+        <div class="w-label">{{'pages.client-notifications.INSTAGRAM_API_ACCESS_TOKEN' | translate}}</div>
+        <input class="w-input" type="text" [style.width]="'100%'"
+            placeholder="{{'pages.client-notifications.INSTAGRAM_API_ACCESS_TOKEN' | translate}}"
+            [(ngModel)]="settings.instagramAPIAccessToken">
+    </div>
+
+    <!-- <app-dropdown [items]="hours" [displayFunction]="formatHourMinute" [hasIcon]="false" [value]="wh.timeFrom?.hour()"
+        (valueChange)="setFromHours(wh, $event)"></app-dropdown>
+    <div class="two-dots">:</div>
+    <app-dropdown [items]="minutes" [displayFunction]="formatHourMinute" [hasIcon]="false"
+        [value]="wh.timeFrom?.minute()" (valueChange)="setFromMinutes(wh, $event)"></app-dropdown>
+    <div class="dash">-</div>
+    <app-dropdown [items]="hours" [displayFunction]="formatHourMinute" [hasIcon]="false" [value]="wh.timeTo?.hour()"
+        (valueChange)="setToHours(wh, $event)"></app-dropdown>
+    <div class="two-dots">:</div>
+    <app-dropdown [items]="minutes" [displayFunction]="formatHourMinute" [hasIcon]="false" [value]="wh.timeTo?.minute()"
+        (valueChange)="setToMinutes(wh, $event)"></app-dropdown> -->
+
+    <!-- <app-button icon="trash" color="danger" look="transparent" [style.marginLeft.px]="10"
+        (onClick)="removeWorkingHour(wh)"></app-button> -->
+
+    <!-- <div class="w-validation-message">{{ wh.getValidationErrors("timeFrom") | translate }}</div>
+    <div class="w-validation-message">{{ wh.getValidationErrors("timeTo") | translate }}</div> -->
+
+    <app-action-bar>
+        <app-button flex-splitter [text]="'CANCEL' | translate" color="danger" look="normal" [disabled]="isLoading"
+            (onClick)="cancel()"></app-button>
+        <app-button [text]="'SAVE' | translate" color="success" look="solid" [disabled]="isLoading"
+            [isLoading]="isLoading" (onClick)="save()"></app-button>
+    </app-action-bar>
+</div>
