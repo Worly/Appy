@@ -86,7 +86,7 @@ namespace Appy.Services
             client.Name = dto.Name;
             client.Surname = dto.Surname;
             client.Notes = dto.Notes;
-            client.Contacts = GetOrderedContacts(dto.Contacts);
+            client.Contacts = GetOrderedContacts(dto.Contacts, client.Contacts);
             client.IsArchived = dto.IsArchived;
             await context.SaveChangesAsync();
 
@@ -123,7 +123,7 @@ namespace Appy.Services
             return client;
         }
 
-        private List<ClientContact> GetOrderedContacts(List<ClientContactDTO> contactDTOs)
+        private List<ClientContact> GetOrderedContacts(List<ClientContactDTO> contactDTOs, List<ClientContact>? existingContacts = null)
         {
             var contacts = contactDTOs.Select(c => new ClientContact()
             {
@@ -134,6 +134,16 @@ namespace Appy.Services
             for (int i = 0; i < contacts.Count; i++)
             {
                 contacts[i].Order = i;
+            }
+
+            if (existingContacts != null)
+            {
+                foreach (var newContact in contacts)
+                {
+                    var existing = existingContacts.FirstOrDefault(c => c.Type == newContact.Type && c.Value == newContact.Value);
+                    if (existing != null)
+                        newContact.AppSpecificID = existing.AppSpecificID;
+                }
             }
 
             return contacts;

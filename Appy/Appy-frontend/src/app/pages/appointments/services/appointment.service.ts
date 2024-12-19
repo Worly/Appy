@@ -57,4 +57,8 @@ export class AppointmentService extends BaseModelService<Appointment> {
                     return appointment;
                 }));
     }
+
+    public notifyClient(appointmentId: number): Observable<void> {
+        return this.httpClient.post<void>(`${appConfig.apiUrl}${this.controllerName}/notifyClient/${appointmentId}`, null);
+    }
 }

@@ -16,12 +16,18 @@ namespace Appy.Controllers
         private IAppointmentService appointmentService;
         private IServiceService serviceService;
         private IWorkingHourService workingHourService;
+        private IClientNotificationsService clientNotificationsService;
 
-        public AppointmentController(IAppointmentService appointmentService, IServiceService serviceService, IWorkingHourService workingHourService)
+        public AppointmentController(
+            IAppointmentService appointmentService, 
+            IServiceService serviceService, 
+            IWorkingHourService workingHourService,
+            IClientNotificationsService clientNotificationsService)
         {
             this.appointmentService = appointmentService;
             this.serviceService = serviceService;
             this.workingHourService = workingHourService;
+            this.clientNotificationsService = clientNotificationsService;
         }
 
         [HttpGet("getAll")]
@@ -100,6 +106,20 @@ namespace Appy.Controllers
                 appointmentsOfTheDay = appointmentsOfTheDay.Where(o => o.Id != ignoreAppointmentId).ToList();
 
             return this.appointmentService.GetFreeTimes(appointmentsOfTheDay, workingHours, service, duration);
+        }
+
+        [HttpPost("notifyClient/{id}")]
+        [Authorize]
+        public async Task<ActionResult> NotifyClient(int id)
+        {
+            var appointment = await this.appointmentService.GetById(id, HttpContext.SelectedFacility());
+
+            var success = await this.clientNotificationsService.SendMessageTo(appointment.Client, "Your appointment is coming soon!");
+
+            if (success)
+                return Ok();
+            else
+                return BadRequest();
         }
     }
 }
