@@ -9,6 +9,27 @@
             [(ngModel)]="settings.instagramAPIAccessToken">
     </div>
 
+    <div style="height: 50px;"></div>
+    <div class="w-subtitle">{{"pages.client-notifications.MESSAGE_TEMPLATES" | translate}}</div>
+
+    <div class="message-templates-explanation">
+        {{"pages.client-notifications.MESSAGE_TEMPLATES_EXPLANATION" | translate}}
+        <ul>
+            <li>&#123;clientName&#125; - {{'pages.client-notifications.MESSAGE_TEMPLATES_EXPLANATION_CLIENT_NAME' | translate}}</li>
+            <li>&#123;clientSurname&#125; - {{'pages.client-notifications.MESSAGE_TEMPLATES_EXPLANATION_CLIENT_SURNAME' | translate}}</li>
+            <li>&#123;service&#125; - {{'pages.client-notifications.MESSAGE_TEMPLATES_EXPLANATION_SERVICE' | translate}}</li>
+            <li>&#123;date&#125; - {{'pages.client-notifications.MESSAGE_TEMPLATES_EXPLANATION_DATE' | translate}}</li>
+            <li>&#123;time&#125; - {{'pages.client-notifications.MESSAGE_TEMPLATES_EXPLANATION_TIME' | translate}}</li>
+        </ul>
+    </div>
+
+    <div class="w-input-container">
+        <div class="w-label">{{'pages.client-notifications.APPOINTMENT_CONFIRMATION' | translate}}</div>
+        <textarea class="w-input" type="text" [style.width]="'100%'"
+            placeholder="{{'pages.client-notifications.APPOINTMENT_CONFIRMATION' | translate}}"
+            [(ngModel)]="settings.appointmentConfirmationMessageTemplate"></textarea>
+    </div>
+
     <!-- <app-dropdown [items]="hours" [displayFunction]="formatHourMinute" [hasIcon]="false" [value]="wh.timeFrom?.hour()"
         (valueChange)="setFromHours(wh, $event)"></app-dropdown>
     <div class="two-dots">:</div>
