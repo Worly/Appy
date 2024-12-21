@@ -222,7 +222,7 @@
             "MESSAGE_SUCCESSFULLY_SENT": "Poruka je uspješno poslana",
 
             "defaults": {
-                "APPOINTMENT_CONFIRMATION": "📆✅ Vaš termin je potvrđen! 🎉🎉\nUsluga: {serviceName}\nDatum: {date}\nVrijeme: {time}\nVeselim se Vašem dolasku 🥰"
+                "APPOINTMENT_CONFIRMATION": "📆✅ Vaš termin je potvrđen! 🎉🎉\nUsluga: {service}\nDatum: {date}\nVrijeme: {time}\nVeselim se Vašem dolasku 🥰"
             },
 
             "errors": {

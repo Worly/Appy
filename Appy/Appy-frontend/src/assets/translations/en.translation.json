@@ -222,7 +222,7 @@
             "MESSAGE_SUCCESSFULLY_SENT": "Message was successfully sent",
 
             "defaults": {
-                "APPOINTMENT_CONFIRMATION": "📆✅ Your appointment is confirmed! 🎉🎉\nService: {serviceName}\nDate: {date}\nTime: {time}\nLooking forward to seeing you 🥰"
+                "APPOINTMENT_CONFIRMATION": "📆✅ Your appointment is confirmed! 🎉🎉\nService: {service}\nDate: {date}\nTime: {time}\nLooking forward to seeing you 🥰"
             },
 
             "errors": {
