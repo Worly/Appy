@@ -5,6 +5,8 @@ using Appy.DTOs;
 using Appy.Services;
 using Appy.Services.SmartFiltering;
 using Appy.Domain;
+using System.Globalization;
+using Appy.Utils;
 
 namespace Appy.Controllers
 {
@@ -19,8 +21,8 @@ namespace Appy.Controllers
         private IClientNotificationsService clientNotificationsService;
 
         public AppointmentController(
-            IAppointmentService appointmentService, 
-            IServiceService serviceService, 
+            IAppointmentService appointmentService,
+            IServiceService serviceService,
             IWorkingHourService workingHourService,
             IClientNotificationsService clientNotificationsService)
         {
@@ -73,6 +75,10 @@ namespace Appy.Controllers
         {
             var result = await this.appointmentService.Edit(id, dto, HttpContext.SelectedFacility(), ignoreTimeNotAvailable);
 
+            var canNotifyClient = await this.clientNotificationsService.CanSendAppointmentConfirmationMessage(result.Client);
+            if (canNotifyClient)
+                Response.Headers.AddCustom("X-Can-Notify-Client", "true");
+
             return Ok(result.GetDTO());
         }
 
@@ -81,6 +87,10 @@ namespace Appy.Controllers
         public async Task<ActionResult<AppointmentDTO>> SetStatus(int id, AppointmentStatus status)
         {
             var result = await this.appointmentService.SetStatus(id, status, HttpContext.SelectedFacility());
+
+            var canNotifyClient = await this.clientNotificationsService.CanSendAppointmentConfirmationMessage(result.Client);
+            if (canNotifyClient)
+                Response.Headers.AddCustom("X-Can-Notify-Client", "true");
 
             return Ok(result.GetDTO());
         }
@@ -110,16 +120,23 @@ namespace Appy.Controllers
 
         [HttpPost("notifyClient/{id}")]
         [Authorize]
-        public async Task<ActionResult> NotifyClient(int id)
+        public async Task<ActionResult> NotifyClient(int id, [FromQuery] string languageCode)
         {
             var appointment = await this.appointmentService.GetById(id, HttpContext.SelectedFacility());
 
-            var success = await this.clientNotificationsService.SendMessageTo(appointment.Client, "Your appointment is coming soon!");
+            CultureInfo cultureInfo;
+            try
+            {
+                cultureInfo = CultureInfo.GetCultureInfo(languageCode);
+            }
+            catch (CultureNotFoundException e)
+            {
+                return BadRequest("Invalid language code");
+            }
 
-            if (success)
-                return Ok();
-            else
-                return BadRequest();
+            await this.clientNotificationsService.SendAppointmentConfirmationMessage(appointment.Client, appointment, cultureInfo);
+
+            return Ok();
         }
     }
 }

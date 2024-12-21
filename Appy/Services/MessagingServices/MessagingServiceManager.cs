@@ -4,7 +4,8 @@ namespace Appy.Services.MessagingServices
 {
     public interface IMessagingServiceManager
     {
-        public IMessagingService GetService(ContactType type);
+        bool IsSupported(ContactType type);
+        IMessagingService GetService(ContactType type);
         string GetAccessToken(ContactType type, ClientNotificationsSettings settings);
     }
 
@@ -19,6 +20,8 @@ namespace Appy.Services.MessagingServices
                 { ContactType.Instagram, instagramService }
             };
         }
+
+        public bool IsSupported(ContactType type) => services.ContainsKey(type);
 
         public IMessagingService GetService(ContactType type)
         {
