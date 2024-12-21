@@ -25,28 +25,10 @@
 
     <div class="w-input-container">
         <div class="w-label">{{'pages.client-notifications.APPOINTMENT_CONFIRMATION' | translate}}</div>
-        <textarea class="w-input" type="text" [style.width]="'100%'"
+        <textarea class="w-input message-template-textarea" type="text" [style.width]="'100%'"
             placeholder="{{'pages.client-notifications.APPOINTMENT_CONFIRMATION' | translate}}"
             [(ngModel)]="settings.appointmentConfirmationMessageTemplate"></textarea>
     </div>
-
-    <!-- <app-dropdown [items]="hours" [displayFunction]="formatHourMinute" [hasIcon]="false" [value]="wh.timeFrom?.hour()"
-        (valueChange)="setFromHours(wh, $event)"></app-dropdown>
-    <div class="two-dots">:</div>
-    <app-dropdown [items]="minutes" [displayFunction]="formatHourMinute" [hasIcon]="false"
-        [value]="wh.timeFrom?.minute()" (valueChange)="setFromMinutes(wh, $event)"></app-dropdown>
-    <div class="dash">-</div>
-    <app-dropdown [items]="hours" [displayFunction]="formatHourMinute" [hasIcon]="false" [value]="wh.timeTo?.hour()"
-        (valueChange)="setToHours(wh, $event)"></app-dropdown>
-    <div class="two-dots">:</div>
-    <app-dropdown [items]="minutes" [displayFunction]="formatHourMinute" [hasIcon]="false" [value]="wh.timeTo?.minute()"
-        (valueChange)="setToMinutes(wh, $event)"></app-dropdown> -->
-
-    <!-- <app-button icon="trash" color="danger" look="transparent" [style.marginLeft.px]="10"
-        (onClick)="removeWorkingHour(wh)"></app-button> -->
-
-    <!-- <div class="w-validation-message">{{ wh.getValidationErrors("timeFrom") | translate }}</div>
-    <div class="w-validation-message">{{ wh.getValidationErrors("timeTo") | translate }}</div> -->
 
     <app-action-bar>
         <app-button flex-splitter [text]="'CANCEL' | translate" color="danger" look="normal" [disabled]="isLoading"

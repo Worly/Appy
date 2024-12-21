@@ -221,6 +221,10 @@
             "APPOINTMENT_CONFIRMATION": "Potvrda termina",
             "MESSAGE_SUCCESSFULLY_SENT": "Poruka je uspješno poslana",
 
+            "defaults": {
+                "APPOINTMENT_CONFIRMATION": "📆✅ Vaš termin je potvrđen! 🎉🎉\nUsluga: {serviceName}\nDatum: {date}\nVrijeme: {time}\nVeselim se Vašem dolasku 🥰"
+            },
+
             "errors": {
                 "MESSAGE_FAILED_TO_SEND": "Neuspješno slanje poruke"
             }

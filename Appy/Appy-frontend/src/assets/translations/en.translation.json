@@ -221,6 +221,10 @@
             "APPOINTMENT_CONFIRMATION": "Appointment confirmation",
             "MESSAGE_SUCCESSFULLY_SENT": "Message was successfully sent",
 
+            "defaults": {
+                "APPOINTMENT_CONFIRMATION": "📆✅ Your appointment is confirmed! 🎉🎉\nService: {serviceName}\nDate: {date}\nTime: {time}\nLooking forward to seeing you 🥰"
+            },
+
             "errors": {
                 "MESSAGE_FAILED_TO_SEND": "Failed to send the message"
             }

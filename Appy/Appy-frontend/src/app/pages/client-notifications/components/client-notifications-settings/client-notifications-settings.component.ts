@@ -3,6 +3,7 @@ import { Subscription } from 'rxjs';
 import { ClientNotificationsSettings } from 'src/app/models/client-notifications-settings';
 import { ClientNotificationsService } from '../../services/client-notifications.service';
 import { Location } from '@angular/common';
+import { TranslateService } from 'src/app/components/translate/translate.service';
 
 @Component({
   selector: 'app-client-notifications-settings',
@@ -19,6 +20,7 @@ export class ClientNotificationsSettingsComponent implements OnInit {
   constructor(
     private location: Location,
     private clientNotificationsService: ClientNotificationsService,
+    private translateService: TranslateService
   ) { }
 
   ngOnInit(): void {
@@ -31,6 +33,10 @@ export class ClientNotificationsSettingsComponent implements OnInit {
 
   private load() {
     this.subs.push(this.clientNotificationsService.getSettings().subscribe((settings: ClientNotificationsSettings) => {
+      if (settings.appointmentConfirmationMessageTemplate == null || settings.appointmentConfirmationMessageTemplate == "") {
+        settings.appointmentConfirmationMessageTemplate = this.translateService.translate("pages.client-notifications.defaults.APPOINTMENT_CONFIRMATION");
+      }
+
       this.settings = settings;
     }));
   }
