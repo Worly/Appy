@@ -117,9 +117,4 @@ export class SingleAppointmentComponent implements OnInit, OnDestroy {
   public getContactTypeIcon(type: ClientContactType): IconName {
     return getClientContactTypeIcon(type);
   }
-
-  public notifyClient() {
-    if (this.id != null)
-      this.subs.push(this.appointmentService.notifyClient(this.id).subscribe());
-  }
 }
