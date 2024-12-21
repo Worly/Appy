@@ -3,18 +3,17 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Data, ParamMap, Router } from '@angular/router';
 import { combineLatest, debounceTime, Observable, Subscription } from 'rxjs';
 import { NotifyDialogService } from 'src/app/components/notify-dialog/notify-dialog.service';
-import { Appointment } from 'src/app/models/appointment';
+import { Appointment, AppointmentStatus } from 'src/app/models/appointment';
 import { ServiceDTO } from 'src/app/models/service';
 import { DateTimeChooserResult } from './date-time-chooser/date-time-chooser.component';
 import { setUrlParams } from 'src/app/utils/dynamic-url-params';
-import dayjs, { Dayjs } from 'dayjs';
 import { parseDuration } from 'src/app/utils/time-utils';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { AppointmentService } from '../../services/appointment.service';
 import { TranslateService } from 'src/app/components/translate/translate.service';
 import { ClientDTO } from 'src/app/models/client';
 import { ToastService } from 'src/app/components/toast/toast.service';
-import { Icon, icon, IconName } from '@fortawesome/fontawesome-svg-core';
+import { IconName } from '@fortawesome/fontawesome-svg-core';
 
 @Component({
   selector: 'app-appointment-edit',
@@ -108,16 +107,16 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
 
     this.isLoadingSave = true;
 
-    let action: Observable<Appointment>;
+    let action: Observable<{ model: Appointment, headers: HttpHeaders }>;
 
     if (this.isNew)
-      action = this.appointmentService.addNew(this.appointment as Appointment, { ignoreTimeNotAvailable });
+      action = this.appointmentService.addNewWithHeaders(this.appointment as Appointment, { ignoreTimeNotAvailable });
     else
-      action = this.appointmentService.save(this.appointment as Appointment, { ignoreTimeNotAvailable });
+      action = this.appointmentService.saveWithHeaders(this.appointment as Appointment, { ignoreTimeNotAvailable });
 
     this.subs.push(action.subscribe({
-      next: (ap: Appointment) => {
-        this.notifySaved(ap.id, ap.status == "Unconfirmed");
+      next: (r: { model: Appointment, headers: HttpHeaders }) => {
+        this.notifySaved(r.model.id, r.model.status as AppointmentStatus, r.headers.get("X-Can-Notify-Client") == "true");
         this.goBack();
       },
       error: (e: HttpErrorResponse) => {
@@ -133,20 +132,23 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
     }));
   }
 
-  private notifySaved(appointmentId: number, showConfirm: boolean) {
+  private notifySaved(appointmentId: number, status: AppointmentStatus, canNotifyClient: boolean) {
     let actions = [];
 
-    if (showConfirm) {
+    if (status == "Unconfirmed") {
       actions.push({
         text: this.translateService.translate("CONFIRM"),
         icon: "check" as IconName,
-        onClick: (closeToast: () => void) => { 
+        onClick: (closeToast: () => void) => {
           this.appointmentService.setStatus(appointmentId, "Confirmed").subscribe({
             next: () => closeToast(),
             error: (e: any) => closeToast()
           })
         }
       });
+    }
+    else if (status == "Confirmed" && canNotifyClient) {
+      actions.push(this.appointmentService.getNotifyClientAction(appointmentId));
     }
 
     this.toastService.show({
@@ -185,8 +187,6 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
       let duration = this.appointment?.duration ? this.appointment.duration.format("HH:mm:ss") : null;
       let service = this.appointment?.service ? JSON.stringify(this.appointment.service) : null;
       let client = this.appointment?.client ? JSON.stringify(this.appointment.client) : null;
-
-      console.log("Saving URL params", date, time, duration, service, client);
 
       setUrlParams(this.router, this.activatedRoute, this.location, {
         date, time, duration, service, client
