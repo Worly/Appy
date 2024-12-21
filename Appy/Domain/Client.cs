@@ -1,4 +1,7 @@
 ﻿using Appy.DTOs;
+using Microsoft.EntityFrameworkCore;
+
+#pragma warning disable CS8618
 
 namespace Appy.Domain
 {
@@ -25,8 +28,16 @@ namespace Appy.Domain
                 Surname = Surname,
                 Notes = Notes,
                 IsArchived = IsArchived,
-                Contacts = Contacts?.OrderBy(o => o.Order).Select(c => c.GetDTO()).ToList(),
+                Contacts = Contacts.OrderBy(o => o.Order).Select(c => c.GetDTO()).ToList(),
             };
+        }
+
+        public static void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder
+                .Entity<Client>()
+                .Navigation(e => e.Contacts)
+                .AutoInclude();
         }
     }
 }

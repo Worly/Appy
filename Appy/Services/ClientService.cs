@@ -28,7 +28,6 @@ namespace Appy.Services
         public Task<List<Client>> GetAll(int facilityId, bool archived)
         {
             return context.Clients
-                .Include(c => c.Contacts)
                 .Where(s => s.FacilityId == facilityId && s.IsArchived == archived)
                 .OrderBy(o => o.Name)
                 .ThenBy(o => o.Surname)
@@ -38,7 +37,6 @@ namespace Appy.Services
         public async Task<Client> GetById(int id, int facilityId)
         {
             var client = await context.Clients
-                .Include(c => c.Contacts)
                 .FirstOrDefaultAsync(s => s.Id == id && s.FacilityId == facilityId);
 
             if (client == null)
@@ -75,7 +73,7 @@ namespace Appy.Services
 
         public async Task<Client> Edit(int id, ClientDTO dto, int facilityId)
         {
-            var client = await context.Clients.Include(c => c.Contacts).FirstOrDefaultAsync(s => s.Id == id && s.FacilityId == facilityId);
+            var client = await context.Clients.FirstOrDefaultAsync(s => s.Id == id && s.FacilityId == facilityId);
             if (client == null)
                 throw new NotFoundException();
 

@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
-#nullable disable
+#pragma warning disable CS8618
 
 namespace Appy.Domain
 {
