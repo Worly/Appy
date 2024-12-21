@@ -60,6 +60,8 @@ import { faSun } from "@fortawesome/free-solid-svg-icons/faSun";
 import { faCircleHalfStroke } from "@fortawesome/free-solid-svg-icons/faCircleHalfStroke";
 import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 import { faBell } from "@fortawesome/free-solid-svg-icons/faBell";
+import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
+import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
 
 import dayjs from "dayjs";
 import "dayjs/locale/hr";
@@ -143,11 +145,11 @@ export class AppModule {
       faEllipsisV, faGear,
       faBusinessTime,
       faBoxArchive,
-      faCircleCheck, farCircleCheck, faQuestion, faCheck,
+      faCircleCheck, farCircleCheck, faQuestion, faCheck, faTriangleExclamation,
       faHouse, faHandHoldingHeart, faUsers, faCalendarWeek, faRightFromBracket,
       faCalendarDays, faTableList, faFilter, faFileLines,
       faWhatsapp, faInstagram,
-      faMoon, faSun, faCircleHalfStroke, faStar, faBell
+      faMoon, faSun, faCircleHalfStroke, faStar, faBell, faEnvelope
     );
   }
 

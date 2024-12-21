@@ -181,6 +181,9 @@
             "NO_APPOINTMENTS_AFTER": "There are no more appointments after this date",
             "NO_APPOINTMENTS": "No appointments found",
             "APPOINTMENT_SAVED": "Appointment is saved",
+            "APPOINTMENT_CONFIRMED": "Appointment is confirmed",
+            "APPOINTMENT_UNCONFIRMED": "Appointment is unconfirmed",
+            "NOTIFY_CLIENT": "Notify client",
             
             "errors": {
                 "MISSING_SERVICE": "Please choose a service",
@@ -207,7 +210,20 @@
 
         "client-notifications": {
             "CLIENT_NOTIFICATIONS": "Client notifications",
-            "INSTAGRAM_API_ACCESS_TOKEN": "Instagram API access token"
+            "INSTAGRAM_API_ACCESS_TOKEN": "Instagram API access token",
+            "MESSAGE_TEMPLATES": "Message templates",
+            "MESSAGE_TEMPLATES_EXPLANATION": "These templates will be used for sending messages to clients. You can use the following placeholders that will be replaced with actual data:",
+            "MESSAGE_TEMPLATES_EXPLANATION_CLIENT_NAME": "Name of the client",
+            "MESSAGE_TEMPLATES_EXPLANATION_CLIENT_SURNAME": "Surname of the client",
+            "MESSAGE_TEMPLATES_EXPLANATION_SERVICE": "Name of the service",
+            "MESSAGE_TEMPLATES_EXPLANATION_DATE": "Date of the appointment",
+            "MESSAGE_TEMPLATES_EXPLANATION_TIME": "Time of the appointment",
+            "APPOINTMENT_CONFIRMATION": "Appointment confirmation",
+            "MESSAGE_SUCCESSFULLY_SENT": "Message was successfully sent",
+
+            "errors": {
+                "MESSAGE_FAILED_TO_SEND": "Failed to send the message"
+            }
         }
     }
 }
