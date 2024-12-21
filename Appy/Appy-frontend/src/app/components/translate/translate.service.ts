@@ -70,7 +70,7 @@ export class TranslateService {
         if (result != null && typeof result === "string")
             return result;
         else
-            return "?" + key + "?";
+            return key;
     }
 
     private getDescendantProp(obj: any, desc: string): any {
