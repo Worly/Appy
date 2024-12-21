@@ -1,4 +1,4 @@
-import { HttpClient, HttpContext, HttpErrorResponse } from "@angular/common/http";
+import { HttpClient, HttpContext, HttpErrorResponse, HttpHeaders } from "@angular/common/http";
 import { Injector } from "@angular/core";
 import { catchError, map, Observable, Observer, Subscriber, Subscription, take, throwError } from "rxjs";
 import { appConfig } from "../../app.config";
@@ -100,40 +100,52 @@ export class BaseModelService<T extends Model<T>> {
         return datasource;
     }
 
+    public saveWithHeaders(entity: T, params?: any): Observable<{ model: T, headers: HttpHeaders }> {
+        return this.httpClient.put<any>(`${appConfig.apiUrl}${this.controllerName}/edit/${entity.getId()}`, entity.getDTO(), {
+            observe: "response",
+            params: params
+        }).pipe(
+            map(r => {
+                let newEntity = new this.typeFactory(r.body);
+
+                this.entityChangeNotifyService.notifyUpdated(newEntity);
+
+                return { model: newEntity, headers: r.headers };
+            }),
+            catchError(e => {
+                if (e?.error?.errors)
+                    entity.applyServerValidationErrors(e.error.errors);
+
+                return throwError(() => e);
+            }));
+    }
+
     public save(entity: T, params?: any): Observable<T> {
-        return this.httpClient.put<any>(`${appConfig.apiUrl}${this.controllerName}/edit/${entity.getId()}`, entity.getDTO(), { params })
-            .pipe(
-                map(s => {
-                    let newEntity = new this.typeFactory(s);
+        return this.saveWithHeaders(entity, params).pipe(map(r => r.model));
+    }
 
-                    this.entityChangeNotifyService.notifyUpdated(newEntity);
+    public addNewWithHeaders(entity: T, params?: any): Observable<{ model: T, headers: HttpHeaders }> {
+        return this.httpClient.post<any>(`${appConfig.apiUrl}${this.controllerName}/addNew`, entity.getDTO(), {
+            observe: "response",
+            params: params
+        }).pipe(
+            map(r => {
+                let newEntity = new this.typeFactory(r.body);
 
-                    return newEntity;
-                }),
-                catchError(e => {
-                    if (e?.error?.errors)
-                        entity.applyServerValidationErrors(e.error.errors);
+                this.entityChangeNotifyService.notifyAdded(newEntity);
 
-                    return throwError(() => e);
-                }));
+                return { model: newEntity, headers: r.headers };
+            }),
+            catchError(e => {
+                if (e?.error?.errors)
+                    entity.applyServerValidationErrors(e.error.errors);
+
+                return throwError(() => e);
+            }));
     }
 
     public addNew(entity: T, params?: any): Observable<T> {
-        return this.httpClient.post<any>(`${appConfig.apiUrl}${this.controllerName}/addNew`, entity.getDTO(), { params })
-            .pipe(
-                map(s => {
-                    let newEntity = new this.typeFactory(s);
-
-                    this.entityChangeNotifyService.notifyAdded(newEntity);
-
-                    return newEntity;
-                }),
-                catchError(e => {
-                    if (e?.error?.errors)
-                        entity.applyServerValidationErrors(e.error.errors);
-
-                    return throwError(() => e);
-                }));
+        return this.addNewWithHeaders(entity, params).pipe(map(r => r.model));
     }
 
     public delete(id: any): Observable<void> {

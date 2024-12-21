@@ -28,6 +28,7 @@ namespace Appy.Domain
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             Appointment.OnModelCreating(modelBuilder);
+            Client.OnModelCreating(modelBuilder);
         }
 
         public void UpdateDatabase()

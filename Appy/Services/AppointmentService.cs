@@ -64,7 +64,7 @@ namespace Appy.Services
         {
             var appointment = await context.Appointments
                 .Include(a => a.Service)
-                .Include(a => a.Client).ThenInclude(c => c.Contacts)
+                .Include(a => a.Client)
                 .FirstOrDefaultAsync(s => s.Id == id && s.FacilityId == facilityId);
 
             if (appointment == null)

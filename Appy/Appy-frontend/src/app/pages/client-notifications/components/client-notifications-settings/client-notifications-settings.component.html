@@ -1,0 +1,39 @@
+<app-loading *ngIf="settings == null"></app-loading>
+<div *ngIf="settings != null">
+    <div class="w-title">{{"pages.client-notifications.CLIENT_NOTIFICATIONS" | translate}}</div>
+
+    <div class="w-input-container">
+        <div class="w-label">{{'pages.client-notifications.INSTAGRAM_API_ACCESS_TOKEN' | translate}}</div>
+        <input class="w-input" type="text" [style.width]="'100%'"
+            placeholder="{{'pages.client-notifications.INSTAGRAM_API_ACCESS_TOKEN' | translate}}"
+            [(ngModel)]="settings.instagramAPIAccessToken">
+    </div>
+
+    <div style="height: 50px;"></div>
+    <div class="w-subtitle">{{"pages.client-notifications.MESSAGE_TEMPLATES" | translate}}</div>
+
+    <div class="message-templates-explanation">
+        {{"pages.client-notifications.MESSAGE_TEMPLATES_EXPLANATION" | translate}}
+        <ul>
+            <li>&#123;clientName&#125; - {{'pages.client-notifications.MESSAGE_TEMPLATES_EXPLANATION_CLIENT_NAME' | translate}}</li>
+            <li>&#123;clientSurname&#125; - {{'pages.client-notifications.MESSAGE_TEMPLATES_EXPLANATION_CLIENT_SURNAME' | translate}}</li>
+            <li>&#123;service&#125; - {{'pages.client-notifications.MESSAGE_TEMPLATES_EXPLANATION_SERVICE' | translate}}</li>
+            <li>&#123;date&#125; - {{'pages.client-notifications.MESSAGE_TEMPLATES_EXPLANATION_DATE' | translate}}</li>
+            <li>&#123;time&#125; - {{'pages.client-notifications.MESSAGE_TEMPLATES_EXPLANATION_TIME' | translate}}</li>
+        </ul>
+    </div>
+
+    <div class="w-input-container">
+        <div class="w-label">{{'pages.client-notifications.APPOINTMENT_CONFIRMATION' | translate}}</div>
+        <textarea class="w-input message-template-textarea" type="text" [style.width]="'100%'"
+            placeholder="{{'pages.client-notifications.APPOINTMENT_CONFIRMATION' | translate}}"
+            [(ngModel)]="settings.appointmentConfirmationMessageTemplate"></textarea>
+    </div>
+
+    <app-action-bar>
+        <app-button flex-splitter [text]="'CANCEL' | translate" color="danger" look="normal" [disabled]="isLoading"
+            (onClick)="cancel()"></app-button>
+        <app-button [text]="'SAVE' | translate" color="success" look="solid" [disabled]="isLoading"
+            [isLoading]="isLoading" (onClick)="save()"></app-button>
+    </app-action-bar>
+</div>

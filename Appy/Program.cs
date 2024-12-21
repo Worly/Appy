@@ -2,6 +2,7 @@ using Appy.Domain;
 using Appy.Exceptions;
 using Appy.Services;
 using Appy.Services.Facilities;
+using Appy.Services.MessagingServices;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -39,6 +40,10 @@ builder.Services.AddDbContext<MainDbContext>(options =>
 
 builder.Services.AddSingleton<IConfigurationService, ConfigurationService>();
 builder.Services.AddSingleton<IJwtService, JwtService>();
+
+builder.Services.AddSingleton<InstagramMessagingService>();
+builder.Services.AddScoped<IMessagingServiceManager, MessagingServiceManager>();
+
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IFacilityService, FacilityService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
@@ -46,6 +51,7 @@ builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IWorkingHourService, WorkingHourService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IClientNotificationsService, ClientNotificationsService>();
 
 builder.Services
     .AddControllers(opts => opts.UseDateOnlyTimeOnlyStringConverters())

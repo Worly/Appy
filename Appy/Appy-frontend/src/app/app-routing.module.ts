@@ -48,6 +48,11 @@ const routes: Routes = [
     loadChildren: () => import("./pages/working-hours/working-hours.module").then(m => m.WorkingHoursModule),
     canActivate: [LoggedInGuard, SelectedFacilityGuard],
   },
+  {
+    path: "client-notifications",
+    loadChildren: () => import("./pages/client-notifications/client-notifications.module").then(m => m.ClientNotificationsModule),
+    canActivate: [LoggedInGuard, SelectedFacilityGuard],
+  },
 
   { path: "**", redirectTo: appConfig.homePage }
 ];

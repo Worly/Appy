@@ -28,7 +28,6 @@ namespace Appy.Services
         public Task<List<Client>> GetAll(int facilityId, bool archived)
         {
             return context.Clients
-                .Include(c => c.Contacts)
                 .Where(s => s.FacilityId == facilityId && s.IsArchived == archived)
                 .OrderBy(o => o.Name)
                 .ThenBy(o => o.Surname)
@@ -38,7 +37,6 @@ namespace Appy.Services
         public async Task<Client> GetById(int id, int facilityId)
         {
             var client = await context.Clients
-                .Include(c => c.Contacts)
                 .FirstOrDefaultAsync(s => s.Id == id && s.FacilityId == facilityId);
 
             if (client == null)
@@ -75,7 +73,7 @@ namespace Appy.Services
 
         public async Task<Client> Edit(int id, ClientDTO dto, int facilityId)
         {
-            var client = await context.Clients.Include(c => c.Contacts).FirstOrDefaultAsync(s => s.Id == id && s.FacilityId == facilityId);
+            var client = await context.Clients.FirstOrDefaultAsync(s => s.Id == id && s.FacilityId == facilityId);
             if (client == null)
                 throw new NotFoundException();
 
@@ -86,7 +84,7 @@ namespace Appy.Services
             client.Name = dto.Name;
             client.Surname = dto.Surname;
             client.Notes = dto.Notes;
-            client.Contacts = GetOrderedContacts(dto.Contacts);
+            client.Contacts = GetOrderedContacts(dto.Contacts, client.Contacts);
             client.IsArchived = dto.IsArchived;
             await context.SaveChangesAsync();
 
@@ -123,7 +121,7 @@ namespace Appy.Services
             return client;
         }
 
-        private List<ClientContact> GetOrderedContacts(List<ClientContactDTO> contactDTOs)
+        private List<ClientContact> GetOrderedContacts(List<ClientContactDTO> contactDTOs, List<ClientContact>? existingContacts = null)
         {
             var contacts = contactDTOs.Select(c => new ClientContact()
             {
@@ -134,6 +132,16 @@ namespace Appy.Services
             for (int i = 0; i < contacts.Count; i++)
             {
                 contacts[i].Order = i;
+            }
+
+            if (existingContacts != null)
+            {
+                foreach (var newContact in contacts)
+                {
+                    var existing = existingContacts.FirstOrDefault(c => c.Type == newContact.Type && c.Value == newContact.Value);
+                    if (existing != null)
+                        newContact.AppSpecificID = existing.AppSpecificID;
+                }
             }
 
             return contacts;

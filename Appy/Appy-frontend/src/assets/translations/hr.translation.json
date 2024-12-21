@@ -181,6 +181,9 @@
             "NO_APPOINTMENTS_AFTER": "Nema više termina nakon ovog datuma",
             "NO_APPOINTMENTS": "Nema pronađenih termina",
             "APPOINTMENT_SAVED": "Termin je spremljen",
+            "APPOINTMENT_CONFIRMED": "Termin je potvrđen",
+            "APPOINTMENT_UNCONFIRMED": "Termin je nepotvrđen",
+            "NOTIFY_CLIENT": "Obavijesti klijenta",
             
             "errors": {
                 "MISSING_SERVICE": "Molim odaberite uslugu",
@@ -202,6 +205,28 @@
                 "MISSING_TIME_TO": "Molim odaberite vrijeme zatvaranja",
                 "TIMES_NOT_IN_ORDER": "Vrijeme otvaranja mora biti prije vremena zatvaranja",
                 "TIMES_OVERLAP": "Radna vremena se ne smiju preklapati"
+            }
+        },
+
+        "client-notifications": {
+            "CLIENT_NOTIFICATIONS": "Notifikacije klijenta",
+            "INSTAGRAM_API_ACCESS_TOKEN": "Instagram API pristupni token",
+            "MESSAGE_TEMPLATES": "Predlošci poruka",
+            "MESSAGE_TEMPLATES_EXPLANATION": "Ovi predlošci će se koristiti za slanje poruka klijentima. Možete koristiti sljedeće oznake koje će biti zamijenjene stvarnim podacima:",
+            "MESSAGE_TEMPLATES_EXPLANATION_CLIENT_NAME": "Ime klijenta",
+            "MESSAGE_TEMPLATES_EXPLANATION_CLIENT_SURNAME": "Prezime klijenta",
+            "MESSAGE_TEMPLATES_EXPLANATION_SERVICE": "Naziv usluge",
+            "MESSAGE_TEMPLATES_EXPLANATION_DATE": "Datum termina",
+            "MESSAGE_TEMPLATES_EXPLANATION_TIME": "Vrijeme termina",
+            "APPOINTMENT_CONFIRMATION": "Potvrda termina",
+            "MESSAGE_SUCCESSFULLY_SENT": "Poruka je uspješno poslana",
+
+            "defaults": {
+                "APPOINTMENT_CONFIRMATION": "📆✅ Vaš termin je potvrđen! 🎉🎉\nUsluga: {service}\nDatum: {date}\nVrijeme: {time}\nVeselim se Vašem dolasku 🥰"
+            },
+
+            "errors": {
+                "MESSAGE_FAILED_TO_SEND": "Neuspješno slanje poruke"
             }
         }
     }

@@ -181,6 +181,9 @@
             "NO_APPOINTMENTS_AFTER": "There are no more appointments after this date",
             "NO_APPOINTMENTS": "No appointments found",
             "APPOINTMENT_SAVED": "Appointment is saved",
+            "APPOINTMENT_CONFIRMED": "Appointment is confirmed",
+            "APPOINTMENT_UNCONFIRMED": "Appointment is unconfirmed",
+            "NOTIFY_CLIENT": "Notify client",
             
             "errors": {
                 "MISSING_SERVICE": "Please choose a service",
@@ -202,6 +205,28 @@
                 "MISSING_TIME_TO": "Please choose closing time",
                 "TIMES_NOT_IN_ORDER": "Open time must be before closing time",
                 "TIMES_OVERLAP": "Working hours must not overlap"
+            }
+        },
+
+        "client-notifications": {
+            "CLIENT_NOTIFICATIONS": "Client notifications",
+            "INSTAGRAM_API_ACCESS_TOKEN": "Instagram API access token",
+            "MESSAGE_TEMPLATES": "Message templates",
+            "MESSAGE_TEMPLATES_EXPLANATION": "These templates will be used for sending messages to clients. You can use the following placeholders that will be replaced with actual data:",
+            "MESSAGE_TEMPLATES_EXPLANATION_CLIENT_NAME": "Name of the client",
+            "MESSAGE_TEMPLATES_EXPLANATION_CLIENT_SURNAME": "Surname of the client",
+            "MESSAGE_TEMPLATES_EXPLANATION_SERVICE": "Name of the service",
+            "MESSAGE_TEMPLATES_EXPLANATION_DATE": "Date of the appointment",
+            "MESSAGE_TEMPLATES_EXPLANATION_TIME": "Time of the appointment",
+            "APPOINTMENT_CONFIRMATION": "Appointment confirmation",
+            "MESSAGE_SUCCESSFULLY_SENT": "Message was successfully sent",
+
+            "defaults": {
+                "APPOINTMENT_CONFIRMATION": "📆✅ Your appointment is confirmed! 🎉🎉\nService: {service}\nDate: {date}\nTime: {time}\nLooking forward to seeing you 🥰"
+            },
+
+            "errors": {
+                "MESSAGE_FAILED_TO_SEND": "Failed to send the message"
             }
         }
     }
