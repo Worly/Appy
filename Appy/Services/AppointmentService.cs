@@ -118,7 +118,7 @@ namespace Appy.Services
             if (service == null)
                 throw new NotFoundException("Unknown service");
 
-            var client = await context.Clients.FirstOrDefaultAsync(s => s.Id == dto.Client.Id && s.FacilityId == facilityId);
+            var client = await context.Clients.Include(c => c.Contacts).FirstOrDefaultAsync(s => s.Id == dto.Client.Id && s.FacilityId == facilityId);
             if (client == null)
                 throw new NotFoundException("Unknown client");
 
@@ -143,7 +143,7 @@ namespace Appy.Services
 
         public async Task<Appointment> SetStatus(int id, AppointmentStatus status, int facilityId)
         {
-            var appointment = await context.Appointments.Include(a => a.Client).Include(a => a.Service)
+            var appointment = await context.Appointments.Include(a => a.Client).ThenInclude(c => c.Contacts).Include(a => a.Service)
                 .FirstOrDefaultAsync(s => s.Id == id && s.FacilityId == facilityId);
             if (appointment == null)
                 throw new NotFoundException();
