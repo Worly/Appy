@@ -12,11 +12,14 @@ namespace Appy.Domain
 
         public string InstagramAPIAccessToken { get; set; }
 
+        public string AppointmentConfirmationMessageTemplate { get; set; }
+
         public ClientNotificationsSettingsDTO GetDTO()
         {
             return new ClientNotificationsSettingsDTO()
             {
-                InstagramAPIAccessToken = InstagramAPIAccessToken
+                InstagramAPIAccessToken = InstagramAPIAccessToken,
+                AppointmentConfirmationMessageTemplate = AppointmentConfirmationMessageTemplate
             };
         }
     }

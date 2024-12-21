@@ -44,6 +44,7 @@ namespace Appy.Services
                 facility.ClientNotificationsSettings = new ClientNotificationsSettings();
 
             facility.ClientNotificationsSettings.InstagramAPIAccessToken = dto.InstagramAPIAccessToken;
+            facility.ClientNotificationsSettings.AppointmentConfirmationMessageTemplate = dto.AppointmentConfirmationMessageTemplate;
 
             await context.SaveChangesAsync();
 
