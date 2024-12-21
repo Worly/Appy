@@ -1,8 +1,7 @@
-﻿
-using Appy.DTOs;
-using NUnit.Framework;
+﻿using Appy.DTOs;
 using System.ComponentModel.DataAnnotations;
-using System.Xml.Linq;
+
+#pragma warning disable CS8618
 
 namespace Appy.Domain
 {

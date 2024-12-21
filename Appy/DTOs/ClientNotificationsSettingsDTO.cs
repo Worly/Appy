@@ -1,4 +1,6 @@
-﻿namespace Appy.DTOs
+﻿#pragma warning disable CS8618
+
+namespace Appy.DTOs
 {
     public class ClientNotificationsSettingsDTO
     {

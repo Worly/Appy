@@ -1,5 +1,7 @@
 ﻿using Appy.DTOs;
 
+#pragma warning disable CS8618
+
 namespace Appy.Domain
 {
     public class Facility
