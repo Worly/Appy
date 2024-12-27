@@ -37,6 +37,8 @@ namespace Appy.Domain
         public DateTime CreatedAt { get; set; }
         public DateTime LastUpdatedAt { get; set; }
 
+        public bool WasReminded { get; set; }
+
         public AppointmentDTO GetDTO()
         {
             return new AppointmentDTO()

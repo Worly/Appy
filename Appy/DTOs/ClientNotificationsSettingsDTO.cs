@@ -6,5 +6,10 @@ namespace Appy.DTOs
     {
         public string InstagramAPIAccessToken { get; set; }
         public string AppointmentConfirmationMessageTemplate { get; set; }
+        /// <summary>
+        /// Only time part is used (together with the timezone)
+        /// </summary>
+        public DateTime? AppointmentReminderTime { get; set; }
+        public string AppointmentReminderMessageTemplate { get; set; }
     }
 }
