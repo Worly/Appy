@@ -15,9 +15,12 @@
     <div class="message-templates-explanation">
         {{"pages.client-notifications.MESSAGE_TEMPLATES_EXPLANATION" | translate}}
         <ul>
-            <li>&#123;clientName&#125; - {{'pages.client-notifications.MESSAGE_TEMPLATES_EXPLANATION_CLIENT_NAME' | translate}}</li>
-            <li>&#123;clientSurname&#125; - {{'pages.client-notifications.MESSAGE_TEMPLATES_EXPLANATION_CLIENT_SURNAME' | translate}}</li>
-            <li>&#123;service&#125; - {{'pages.client-notifications.MESSAGE_TEMPLATES_EXPLANATION_SERVICE' | translate}}</li>
+            <li>&#123;clientName&#125; - {{'pages.client-notifications.MESSAGE_TEMPLATES_EXPLANATION_CLIENT_NAME' |
+                translate}}</li>
+            <li>&#123;clientSurname&#125; - {{'pages.client-notifications.MESSAGE_TEMPLATES_EXPLANATION_CLIENT_SURNAME'
+                | translate}}</li>
+            <li>&#123;service&#125; - {{'pages.client-notifications.MESSAGE_TEMPLATES_EXPLANATION_SERVICE' | translate}}
+            </li>
             <li>&#123;date&#125; - {{'pages.client-notifications.MESSAGE_TEMPLATES_EXPLANATION_DATE' | translate}}</li>
             <li>&#123;time&#125; - {{'pages.client-notifications.MESSAGE_TEMPLATES_EXPLANATION_TIME' | translate}}</li>
         </ul>
@@ -28,6 +31,33 @@
         <textarea class="w-input message-template-textarea" type="text" [style.width]="'100%'"
             placeholder="{{'pages.client-notifications.APPOINTMENT_CONFIRMATION' | translate}}"
             [(ngModel)]="settings.appointmentConfirmationMessageTemplate"></textarea>
+    </div>
+
+    <div class="w-input-container">
+        <div class="w-toggle-switch-container">
+            <div class="w-label">{{'pages.client-notifications.APPOINTMENT_REMINDER' | translate}}</div>
+            <app-toggle-switch [value]="settings.appointmentReminderTime != null"
+                (valueChange)="setReminderTimeEnabled($event)"></app-toggle-switch>
+        </div>
+
+        <div *ngIf="settings.appointmentReminderTime != null">
+            <div class="appointment-reminder-time-container">
+                <div class="reminder-text">{{'pages.client-notifications.APPOINTMENT_REMINDER_TIME' | translate}}</div>
+                <div class="appointment-reminder-time">
+                    <app-dropdown [items]="hours" [displayFunction]="formatHourMinute" [hasIcon]="false"
+                        [value]="settings.appointmentReminderTime.hour()"
+                        (valueChange)="setReminderHour($event)"></app-dropdown>
+                    <div class="two-dots">:</div>
+                    <app-dropdown [items]="minutes" [displayFunction]="formatHourMinute" [hasIcon]="false"
+                        [value]="settings.appointmentReminderTime.minute()"
+                        (valueChange)="setReminderMinute($event)"></app-dropdown>
+                </div>
+            </div>
+
+            <textarea class="w-input message-template-textarea" type="text" [style.width]="'100%'"
+                placeholder="{{'pages.client-notifications.APPOINTMENT_REMINDER' | translate}}"
+                [(ngModel)]="settings.appointmentReminderMessageTemplate"></textarea>
+        </div>
     </div>
 
     <app-action-bar>

@@ -5,3 +5,23 @@
 .message-template-textarea {
     min-height: 130px;
 }
+
+.appointment-reminder-time-container {
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+    align-items: center;
+    
+    margin-bottom: 5px;
+
+    .reminder-text {
+        opacity: 50%;
+        font-size: 1rem;
+    }
+
+    .appointment-reminder-time {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+}

@@ -11,6 +11,7 @@ import { FormatDurationPipe } from "./pipes/format-duration.pipe";
 import { AuthHttpInterceptor } from "./services/auth/auth-http-interceptor.service";
 import { ErrorInterceptor } from "./services/errors/error-interceptor.service";
 import { ErrorTranslateInterceptor } from "./services/errors/error-translate.service";
+import { ToggleSwitchModule } from "../components/toggle-switch/toggle-switch.module";
 
 @NgModule({
     declarations: [
@@ -28,6 +29,7 @@ import { ErrorTranslateInterceptor } from "./services/errors/error-translate.ser
         TranslateModule,
         ButtonModule,
         LoadingModule,
+        ToggleSwitchModule,
 
         FilterPipe,
         FormatDurationPipe,

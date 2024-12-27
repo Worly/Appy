@@ -5,14 +5,18 @@ namespace Appy.Domain
 {
     public class MainDbContext : DbContext
     {
-        public DbSet<User> Users { get; set; }
-        public DbSet<LoginSession> LoginSessions { get; set; }
-        public DbSet<Facility> Facilities { get; set; }
-        public DbSet<Service> Services { get; set; }
-        public DbSet<Appointment> Appointments { get; set; }
-        public DbSet<WorkingHour> WorkingHours { get; set; }
-        public DbSet<Client> Clients { get; set; }
-        public DbSet<DashboardSettings> DashboardSettings { get; set; }
+        public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<LoginSession> LoginSessions { get; set; }
+        public virtual DbSet<Facility> Facilities { get; set; }
+        public virtual DbSet<Service> Services { get; set; }
+        public virtual DbSet<Appointment> Appointments { get; set; }
+        public virtual DbSet<WorkingHour> WorkingHours { get; set; }
+        public virtual DbSet<Client> Clients { get; set; }
+        public virtual DbSet<DashboardSettings> DashboardSettings { get; set; }
+        
+        public MainDbContext()
+        {
+        }
 
         public MainDbContext(DbContextOptions<MainDbContext> options) : base(options)
         {
