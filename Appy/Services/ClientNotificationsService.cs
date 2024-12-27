@@ -107,7 +107,7 @@ namespace Appy.Services
             await SendMessageTo(settings, client, message);
         }
 
-        private async Task SendMessageTo(ClientNotificationsSettings settings, Client client, string message)
+        public async Task SendMessageTo(ClientNotificationsSettings settings, Client client, string message)
         {
             if (client.Contacts == null || client.Contacts.Count == 0)
                 throw new BadRequestException("Client has no contacts");
