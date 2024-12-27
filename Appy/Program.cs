@@ -52,10 +52,32 @@ builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IWorkingHourService, WorkingHourService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IClientNotificationsService, ClientNotificationsService>();
+builder.Services.AddScoped<IAppointmentReminderService, AppointmentReminderService>();
 
 builder.Services
     .AddControllers(opts => opts.UseDateOnlyTimeOnlyStringConverters())
     .AddJsonOptions(opts => opts.UseDateOnlyTimeOnlyStringConverters());
+
+builder.Services.AddScheduler(config =>
+{
+    config.AddJob<AppointmentReminderScheduledJob>(configure: c =>
+    {
+        // Run every 30 minutes on full and half hour
+        c.CronSchedule = "0,30 * * * *";
+        c.CronTimeZone = "utc";
+        c.RunImmediately = true;
+    }); 
+
+    config.AddUnobservedTaskExceptionHandler(sp =>
+    {
+        var logger = sp.GetRequiredService<ILoggerFactory>().CreateLogger("CronJobs");
+        return (sender, args) =>
+        {
+            logger?.LogError(args.Exception?.Message);
+            args.SetObserved();
+        };
+    });
+});
 
 builder.Services.AddSpaStaticFiles(configuration =>
 {
