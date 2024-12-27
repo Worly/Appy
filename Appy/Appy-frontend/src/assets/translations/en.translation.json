@@ -219,10 +219,13 @@
             "MESSAGE_TEMPLATES_EXPLANATION_DATE": "Date of the appointment",
             "MESSAGE_TEMPLATES_EXPLANATION_TIME": "Time of the appointment",
             "APPOINTMENT_CONFIRMATION": "Appointment confirmation",
+            "APPOINTMENT_REMINDER": "Appointment reminder",
+            "APPOINTMENT_REMINDER_TIME": "The client will receive a reminder the day before the appointment at:",
             "MESSAGE_SUCCESSFULLY_SENT": "Message was successfully sent",
 
             "defaults": {
-                "APPOINTMENT_CONFIRMATION": "📆✅ Your appointment is confirmed! 🎉🎉\nService: {service}\nDate: {date}\nTime: {time}\nLooking forward to seeing you 🥰"
+                "APPOINTMENT_CONFIRMATION": "📆✅ Your appointment is confirmed! 🎉🎉\nService: {service}\nDate: {date}\nTime: {time}\nLooking forward to seeing you 🥰",
+                "APPOINTMENT_REMINDER": "📆🔔 Reminder that your appointment is tomorrow! 📢📢\nService: {service}\nDate: {date}\nTime: {time}\nLooking forward to seeing you 🥰"
             },
 
             "errors": {

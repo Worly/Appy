@@ -83,6 +83,14 @@ body {
     margin-left: 5px;
 }
 
+.w-toggle-switch-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 5px;
+}
+
 .w-input {
     background-color: rgb(var(--rgb-input-background));
     padding: 6px 15px;

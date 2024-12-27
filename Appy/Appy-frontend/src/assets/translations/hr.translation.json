@@ -219,10 +219,13 @@
             "MESSAGE_TEMPLATES_EXPLANATION_DATE": "Datum termina",
             "MESSAGE_TEMPLATES_EXPLANATION_TIME": "Vrijeme termina",
             "APPOINTMENT_CONFIRMATION": "Potvrda termina",
+            "APPOINTMENT_REMINDER": "Podsjetnik na termin",
+            "APPOINTMENT_REMINDER_TIME": "Klijent će dobiti podsjetnik dan prije termina u:",
             "MESSAGE_SUCCESSFULLY_SENT": "Poruka je uspješno poslana",
 
             "defaults": {
-                "APPOINTMENT_CONFIRMATION": "📆✅ Vaš termin je potvrđen! 🎉🎉\nUsluga: {service}\nDatum: {date}\nVrijeme: {time}\nVeselim se Vašem dolasku 🥰"
+                "APPOINTMENT_CONFIRMATION": "📆✅ Vaš termin je potvrđen! 🎉🎉\nUsluga: {service}\nDatum: {date}\nVrijeme: {time}\nVeselim se Vašem dolasku 🥰",
+                "APPOINTMENT_REMINDER": "📆🔔 Podsjetnik da je Vaš termin sutra! 📢📢\nUsluga: {service}\nDatum: {date}\nVrijeme: {time}\nVeselim se Vašem dolasku 🥰"
             },
 
             "errors": {
