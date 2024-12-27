@@ -66,7 +66,7 @@ namespace Appy.Services
                     continue;
                 }
 
-                if (now.TimeOfDay < settings.AppointmentReminderTime.Value.TimeOfDay)
+                if (now.ToUniversalTime().TimeOfDay < settings.AppointmentReminderTime.Value.ToUniversalTime().TimeOfDay)
                 {
                     continue;
                 }

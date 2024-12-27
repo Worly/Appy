@@ -62,8 +62,8 @@ builder.Services.AddScheduler(config =>
 {
     config.AddJob<AppointmentReminderScheduledJob>(configure: c =>
     {
-        // Run every 30 minutes on full and half hour
-        c.CronSchedule = "0,30 * * * *";
+        // Run every 5 minutes
+        c.CronSchedule = "*/5 * * * *";
         c.CronTimeZone = "utc";
         c.RunImmediately = true;
     }); 

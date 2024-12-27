@@ -80,7 +80,7 @@ export class ClientNotificationsSettingsComponent implements OnInit {
     if (!value)
       this.settings.appointmentReminderTime = undefined;
     else
-      this.settings.appointmentReminderTime = dayjs().startOf('day').add(10, 'hour');
+      this.settings.appointmentReminderTime = dayjs().hour(10).minute(0).second(0).millisecond(0);
   }
 
   public setReminderHour(hours: number) {
