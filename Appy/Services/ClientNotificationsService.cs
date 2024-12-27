@@ -13,6 +13,7 @@ namespace Appy.Services
         Task<ClientNotificationsSettings> UpdateSettings(int facilityId, ClientNotificationsSettingsDTO dto);
         Task<bool> CanSendAppointmentConfirmationMessage(Client client);
         Task SendAppointmentConfirmationMessage(Client client, Appointment appointment, CultureInfo cultureInfo);
+        Task SendAppointmentReminderMessage(Client client, Appointment appointment, CultureInfo cultureInfo);
     }
 
     public class ClientNotificationsService : IClientNotificationsService
@@ -47,6 +48,8 @@ namespace Appy.Services
 
             facility.ClientNotificationsSettings.InstagramAPIAccessToken = dto.InstagramAPIAccessToken;
             facility.ClientNotificationsSettings.AppointmentConfirmationMessageTemplate = dto.AppointmentConfirmationMessageTemplate;
+            facility.ClientNotificationsSettings.AppointmentReminderTime = dto.AppointmentReminderTime;
+            facility.ClientNotificationsSettings.AppointmentReminderMessageTemplate = dto.AppointmentReminderMessageTemplate;
 
             await context.SaveChangesAsync();
 
@@ -78,13 +81,30 @@ namespace Appy.Services
 
             var settings = facility.ClientNotificationsSettings;
 
-            var appointmentConfirmationMessage = settings.AppointmentConfirmationMessageTemplate;
-            if (string.IsNullOrEmpty(appointmentConfirmationMessage))
+            var message = settings.AppointmentConfirmationMessageTemplate;
+            if (string.IsNullOrEmpty(message))
                 throw new BadRequestException("Appointment confirmation message template is not set");
 
-            appointmentConfirmationMessage = FillInMessageTemplate(appointmentConfirmationMessage, cultureInfo, client, appointment);
+            message = FillInMessageTemplate(message, cultureInfo, client, appointment);
 
-            await SendMessageTo(settings, client, appointmentConfirmationMessage);
+            await SendMessageTo(settings, client, message);
+        }
+
+        public async Task SendAppointmentReminderMessage(Client client, Appointment appointment, CultureInfo cultureInfo)
+        {
+            var facility = await context.Facilities.Include(f => f.ClientNotificationsSettings).FirstOrDefaultAsync(f => f.Id == client.FacilityId);
+            if (facility == null)
+                throw new NotFoundException();
+
+            var settings = facility.ClientNotificationsSettings;
+
+            var message = settings.AppointmentReminderMessageTemplate;
+            if (string.IsNullOrEmpty(message))
+                throw new BadRequestException("Appointment reminder message template is not set");
+
+            message = FillInMessageTemplate(message, cultureInfo, client, appointment);
+
+            await SendMessageTo(settings, client, message);
         }
 
         private async Task SendMessageTo(ClientNotificationsSettings settings, Client client, string message)
