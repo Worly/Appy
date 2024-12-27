@@ -122,6 +122,13 @@ namespace Appy.Services
             if (client == null)
                 throw new NotFoundException("Unknown client");
 
+            if (appointment.Date != dto.Date ||
+                appointment.Time != dto.Time ||
+                appointment.ClientId != dto.Client.Id)
+            {
+                appointment.WasReminded = false;
+            }
+
             appointment.Date = dto.Date;
             appointment.Time = dto.Time;
             appointment.Duration = dto.Duration;
