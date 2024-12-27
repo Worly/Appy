@@ -64,6 +64,9 @@ namespace Appy.Services
 
             var settings = facility.ClientNotificationsSettings;
 
+            if (settings == null)
+                return false;
+
             var appointmentConfirmationMessage = settings.AppointmentConfirmationMessageTemplate;
             if (string.IsNullOrEmpty(appointmentConfirmationMessage))
                 return false;
@@ -81,8 +84,8 @@ namespace Appy.Services
 
             var settings = facility.ClientNotificationsSettings;
 
-            var message = settings.AppointmentConfirmationMessageTemplate;
-            if (string.IsNullOrEmpty(message))
+            var message = settings?.AppointmentConfirmationMessageTemplate;
+            if (settings == null || string.IsNullOrEmpty(message))
                 throw new BadRequestException("Appointment confirmation message template is not set");
 
             message = FillInMessageTemplate(message, cultureInfo, client, appointment);
@@ -98,8 +101,8 @@ namespace Appy.Services
 
             var settings = facility.ClientNotificationsSettings;
 
-            var message = settings.AppointmentReminderMessageTemplate;
-            if (string.IsNullOrEmpty(message))
+            var message = settings?.AppointmentReminderMessageTemplate;
+            if (settings == null || string.IsNullOrEmpty(message))
                 throw new BadRequestException("Appointment reminder message template is not set");
 
             message = FillInMessageTemplate(message, cultureInfo, client, appointment);

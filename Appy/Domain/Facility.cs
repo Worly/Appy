@@ -12,7 +12,7 @@ namespace Appy.Domain
         public int OwnerId { get; set; }
         public User Owner { get; set; }
 
-        public ClientNotificationsSettings ClientNotificationsSettings { get; set; }
+        public ClientNotificationsSettings? ClientNotificationsSettings { get; set; }
 
         public FacilityDTO GetDTO()
         {

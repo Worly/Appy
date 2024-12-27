@@ -129,7 +129,7 @@ namespace Appy.Controllers
             {
                 cultureInfo = CultureInfo.GetCultureInfo(languageCode);
             }
-            catch (CultureNotFoundException e)
+            catch (CultureNotFoundException)
             {
                 return BadRequest("Invalid language code");
             }
