@@ -47,7 +47,7 @@ import { faHandHoldingHeart } from '@fortawesome/free-solid-svg-icons/faHandHold
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faCalendarWeek } from '@fortawesome/free-solid-svg-icons/faCalendarWeek';
 import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons/faRightFromBracket';
-import { faCalendarDays } from "@fortawesome/free-regular-svg-icons/faCalendarDays";
+import { faCalendarDays } from "@fortawesome/free-solid-svg-icons/faCalendarDays";
 import { faTableList } from "@fortawesome/free-solid-svg-icons/faTableList";
 import { faFilter } from "@fortawesome/free-solid-svg-icons/faFilter";
 import { faFileLines } from "@fortawesome/free-regular-svg-icons/faFileLines";
