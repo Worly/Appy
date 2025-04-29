@@ -89,7 +89,7 @@ export class ContextMenuComponent implements OnInit, OnDestroy {
         ]),
       scrollStrategy: this.overlay.scrollStrategies.reposition(),
       minHeight: 5,
-      width: this.copyOriginWidth ? this.relativeTo?.nativeElement.offsetWidth : null
+      minWidth: this.copyOriginWidth ? this.relativeTo?.nativeElement.offsetWidth : null,
     });
     this.overlayRef.attach(new TemplatePortal(this.template as TemplateRef<any>, this.viewContainerRef));
 
