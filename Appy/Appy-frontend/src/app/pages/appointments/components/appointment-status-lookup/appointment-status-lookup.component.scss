@@ -14,7 +14,10 @@
 }
 
 .single-status-button {
-    border-top: solid 1px rgb(var(--rgb-input-border));
+
+    &:not(:first-child) {
+        border-top: solid 1px rgb(var(--rgb-input-border));
+    }
 
     &.selected {
         font-weight: bold;

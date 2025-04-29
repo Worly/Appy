@@ -43,5 +43,10 @@
             opacity: 100%;
             color: rgb(var(--rgb-warning))
         }
+
+        fa-icon.danger {
+            opacity: 100%;
+            color: rgb(var(--rgb-danger))
+        }
     }
 }

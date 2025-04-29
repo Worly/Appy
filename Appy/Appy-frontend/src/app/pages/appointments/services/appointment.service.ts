@@ -84,6 +84,13 @@ export class AppointmentService extends BaseModelService<Appointment> {
                         iconColor: "warning",
                     });
                 }
+                else if (status == "NoShow") {
+                    this.toastService.show({
+                        text: this.translateService.translate("pages.appointments.APPOINTMENT_NOSHOWED"),
+                        icon: "user-slash",
+                        iconColor: "danger",
+                    })
+                }
 
                 return appointment;
             }));

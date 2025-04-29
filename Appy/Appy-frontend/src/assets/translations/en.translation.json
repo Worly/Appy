@@ -52,10 +52,6 @@
     "FOLLOW_OS": "Follow OS",
     "SETTINGS": "Settings",
     "SETTINGS_SAVED": "Settings saved",
-
-    "UNCONFIRMED": "Unconfirmed",
-    "UNCONFIRM": "Unconfirm",
-    "CONFIRMED": "Confirmed",
     "CONFIRM": "Confirm",
 
     "pages": {
@@ -181,9 +177,14 @@
             "NO_APPOINTMENTS_AFTER": "There are no more appointments after this date",
             "NO_APPOINTMENTS": "No appointments found",
             "APPOINTMENT_SAVED": "Appointment is saved",
-            "APPOINTMENT_CONFIRMED": "Appointment is confirmed",
-            "APPOINTMENT_UNCONFIRMED": "Appointment is unconfirmed",
+            "APPOINTMENT_CONFIRMED": "Appointment is marked confirmed",
+            "APPOINTMENT_UNCONFIRMED": "Appointment is marked unconfirmed",
+            "APPOINTMENT_NOSHOWED": "Appointment is marked no-show",
             "NOTIFY_CLIENT": "Notify client",
+
+            "CONFIRMED": "Confirmed",
+            "UNCONFIRMED": "Unconfirmed",
+            "NOSHOW": "No-show",
             
             "errors": {
                 "MISSING_SERVICE": "Please choose a service",
