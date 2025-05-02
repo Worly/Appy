@@ -43,6 +43,12 @@
             <div class="appointment-service-name">
                 {{ap.source.service?.displayName}} - {{ap.source.client?.name}} {{ap.source.client?.surname}}
             </div>
+
+            <div class="appointment-status-container">
+                <fa-icon *ngIf="ap.source.notes != null && ap.source.notes != ''" [icon]="['far', 'file-lines']" [fixedWidth]="true"></fa-icon>
+                <fa-icon *ngIf="ap.source.status" class="warn" icon="question" [fixedWidth]="true"></fa-icon>
+                <fa-icon *ngIf="ap.source.status == 'NoShow'" class="danger" icon="user-slash" [fixedWidth]="true"></fa-icon>
+            </div>
         </div>
     </div>
 
