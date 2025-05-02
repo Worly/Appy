@@ -163,6 +163,31 @@
         opacity: 60%;
         border: 2px dashed rgb(var(--rgb-text));
     }
+
+    .appointment-status-container {
+        position: absolute;
+        right: 2px;
+        bottom: 2px;
+
+        display: flex;
+        gap: 2px;
+
+        filter: drop-shadow(1px 1px 0.5px rgba(0, 0, 0, 0.5));
+
+        fa-icon {
+            opacity: 50%;
+        }
+
+        fa-icon.warn {
+            opacity: 100%;
+            color: rgb(var(--rgb-warning))
+        }
+
+        fa-icon.danger {
+            opacity: 100%;
+            color: rgb(var(--rgb-danger))
+        }
+    }
 }
 
 .appointment-time {

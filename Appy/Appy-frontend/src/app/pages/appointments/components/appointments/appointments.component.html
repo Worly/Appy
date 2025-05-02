@@ -12,8 +12,7 @@
     (onClick)="goToToday()"></app-button>
 
 <app-action-bar #actionBar [floatAlways]="true">
-    <app-button [iconPrefix]="type == 'scroller' ? 'far' : 'fas'"
-        [icon]="type == 'scroller' ? 'calendar-days' : 'table-list'"
+    <app-button [icon]="type == 'scroller' ? 'calendar-days' : 'table-list'"
         (onClick)="type = (type == 'scroller' ? 'list' : 'scroller')"></app-button>
     <app-button icon="filter" look="custom"
         [customBorderColor]="hasFilters() ? 'rgb(var(--rgb-danger))' : 'rgb(var(--rgb-input-background))'"
@@ -42,7 +41,8 @@
 
         <div class="w-input-container">
             <div class="w-label">{{'STATUS' | translate}}</div>
-            <app-appointment-status-lookup #statusFilter [value]="filter.status" [showClearButton]="true"></app-appointment-status-lookup>
+            <app-appointment-status-lookup #statusFilter [isMultiSelect]="true" [values]="filter.statuses ?? []"
+                [showClearButton]="true"></app-appointment-status-lookup>
         </div>
 
         <div class="filter-action-bar">
@@ -50,8 +50,11 @@
                 (onClick)="applyFilter({})"></app-button>
             <app-button style="margin-left: auto" [text]="'CANCEL' | translate" color="danger" look="normal"
                 (onClick)="filterDialog.close()"></app-button>
-            <app-button [text]="'APPLY' | translate" color="success" look="solid"
-                (onClick)="applyFilter({client: clientFilter.value, service: serviceFilter.value, status: statusFilter.value})"></app-button>
+            <app-button [text]="'APPLY' | translate" color="success" look="solid" (onClick)="applyFilter({
+                    client: clientFilter.value, 
+                    service: serviceFilter.value, 
+                    statuses: (statusFilter.values.length > 0 ? statusFilter.values : undefined)
+                    })"></app-button>
         </div>
     </div>
 </app-dialog>

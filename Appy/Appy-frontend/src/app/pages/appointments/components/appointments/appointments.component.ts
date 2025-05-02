@@ -16,7 +16,7 @@ import { AppointmentStatus } from 'src/app/models/appointment';
 export type AppointmentsFilter = {
   client?: ClientDTO,
   service?: ServiceDTO,
-  status?: AppointmentStatus
+  statuses?: AppointmentStatus[]
 };
 
 export function appFilterToSmartFilter(filter: AppointmentsFilter): SmartFilter | undefined {
@@ -28,8 +28,14 @@ export function appFilterToSmartFilter(filter: AppointmentsFilter): SmartFilter 
   if (filter.service != null)
     fieldFilters.push(["service.id", "==", filter.service.id])
 
-  if (filter.status != null)
-    fieldFilters.push(["status", "==", filter.status])
+  if (filter.statuses != null && filter.statuses.length > 0) {
+    let statusFilters: SmartFilter[] = [];
+    for (let status of filter.statuses) {
+      statusFilters.push(["status", "==", status]);
+    }
+
+    fieldFilters.push(statusFilters.reduce((a, b) => [a, "or", b]));
+  }
 
   if (fieldFilters.length == 0) {
     return undefined;

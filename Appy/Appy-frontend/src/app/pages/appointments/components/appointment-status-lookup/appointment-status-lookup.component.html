@@ -1,15 +1,29 @@
-<app-button #buttonRef="elementRef" appElementRef width="100%"
-    [text]="value ? (value | uppercase | translate) : ('CHOOSE_STATUS' | translate)"
-    [iconPrefix]="(value | appointmentStatusInfo)?.iconPrefix ?? 'fas'" [icon]="(value | appointmentStatusInfo)?.iconName"
-    [color]="(value | appointmentStatusInfo)?.color ?? 'normal'" (onClick)="openContextMenu()"></app-button>
+<app-button #buttonRef="elementRef" appElementRef width="100%" [disabled]="disabled" [isLoading]="isLoading"
+    [color]="(value | appointmentStatusInfo)?.color ?? 'normal'" (onClick)="openContextMenu()">
+    <div *ngIf="values.length == 0">
+        {{'CHOOSE_STATUS' | translate}}
+    </div>
+    <div *ngFor="let value of values; let i = index" class="status-item">
+        <div [style.color]="'rgb(var(--rgb-' + statusesMap[value].color + '))'" class="status-item-contents">
+            <fa-icon *ngIf="!isLoading" [fixedWidth]="true"
+                [icon]="[statusesMap[value].iconPrefix, statusesMap[value].iconName]"></fa-icon>
+            {{ 'pages.appointments.' + (statusesMap[value].value | uppercase) | translate }}
+        </div>
+        <div *ngIf="i < values.length - 1">,</div>
+    </div>
+</app-button>
 
-<app-button *ngIf="showClearButton && value != null" class="clear-button" look="transparent" icon="times"
+<app-button *ngIf="showClearButton && values.length > 0" class="clear-button" look="transparent" icon="times"
     [isCircle]="true" (onClick)="clear()"></app-button>
 
-<app-context-menu #contextMenu [relativeTo]="buttonRef.elementRef" [copyOriginWidth]="true">
-    <app-button *ngFor="let status of statuses" class="single-status-button"
-        [text]="status.value | uppercase | translate" [iconPrefix]="status.iconPrefix" [icon]="status.iconName"
-        [color]="status.color" [ngClass]="{'selected': status.value == value}" (onClick)="selectStatus(status.value)"
-        width="100%">
+<app-context-menu #contextMenu [relativeTo]="buttonRef.elementRef" [copyOriginWidth]="true"
+    [closeOnButtonClick]="!isMultiSelect">
+    <app-button *ngFor="let status of statuses" class="single-status-button" [color]="status.color"
+        [ngClass]="{'selected': values.includes(status.value)}" (onClick)="selectStatus(status.value)" width="100%">
+        <fa-icon *ngIf="isMultiSelect && values.includes(status.value)" icon="caret-right"
+            style="width: 10px"></fa-icon>
+        <div *ngIf="isMultiSelect && !values.includes(status.value)" style="width: 10px;"></div>
+        <fa-icon [fixedWidth]="true" [icon]="[status.iconPrefix, status.iconName]"></fa-icon>
+        {{ 'pages.appointments.' + (status.value | uppercase) | translate }}
     </app-button>
 </app-context-menu>

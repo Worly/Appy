@@ -2,75 +2,61 @@
     display: block;
 }
 
-.title {
-    font-size: 1.4rem;
-    font-weight: bold;
-    margin-bottom: 15px;
-}
-
-.service {
-    font-size: 1rem;
+.header {
     display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
     gap: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 25px;
 
-    .service-name {
+    .title {
+        font-size: 1.4rem;
         font-weight: bold;
+    }
+
+    .status {
+        margin-left: auto;
     }
 }
 
-.date-time {
-    font-size: 1.1rem;
+.date {
     display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-    font-weight: bold;
+    gap: 15px;
+    font-size: 1rem;
+    margin-bottom: 10px;
+}
+
+.time {
+    display: flex;
+    gap: 15px;
+    font-size: 1rem;
+    margin-bottom: 25px;
 }
 
 .client-button {
-    margin-bottom: 15px;
     width: 100%;
-}
+    margin-bottom: 25px;
 
-.client {
-    font-size: 1rem;
-    width: 100%;
+    .client {
+        font-size: 1rem;
+        width: 100%;
 
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-
-    .client-column {
         display: flex;
-        flex-direction: column;
-        justify-content: center;
-
-        .phone-number, .email {
-            text-align: end;
-        }
-    }
-}
-
-.status {
-    .status-title {
-        font-size: 1.1rem;
-        font-weight: bold;
-    }
-
-    .status-content {
-        display: flex;
-        align-items: center;
         justify-content: space-between;
+        gap: 10px;
 
-        .status-display {
+        .client-column {
             display: flex;
-            align-items: center;
-            font-size: 1rem;
-            gap: 5px;
-        }
+            flex-direction: column;
+            justify-content: center;
 
+            .phone-number,
+            .email {
+                text-align: end;
+            }
+        }
     }
-    margin-bottom: 15px;
 }
 
 .notes {
@@ -78,11 +64,14 @@
         font-size: 1.1rem;
         font-weight: bold;
     }
+
     .notes-body {
         font-size: 1rem;
         margin-left: 5px;
+        white-space: pre-wrap;
     }
-    margin-bottom: 15px;
+
+    margin-bottom: 25px;
 }
 
 .created-updated-at {
@@ -90,7 +79,7 @@
     flex-direction: column;
     align-items: flex-end;
 
-    margin-bottom: 15px;
+    margin-bottom: 25px;
 
     &>div {
         display: flex;

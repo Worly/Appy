@@ -26,6 +26,8 @@ import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontaweso
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faCaretDown } from "@fortawesome/free-solid-svg-icons/faCaretDown";
 import { faCaretUp } from "@fortawesome/free-solid-svg-icons/faCaretUp";
+import { faCaretLeft } from "@fortawesome/free-solid-svg-icons/faCaretLeft";
+import { faCaretRight } from "@fortawesome/free-solid-svg-icons/faCaretRight";
 import { faAngleUp } from "@fortawesome/free-solid-svg-icons/faAngleUp";
 import { faArrowUp } from "@fortawesome/free-solid-svg-icons/faArrowUp";
 import { faAngleDown } from "@fortawesome/free-solid-svg-icons/faAngleDown";
@@ -47,7 +49,8 @@ import { faHandHoldingHeart } from '@fortawesome/free-solid-svg-icons/faHandHold
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faCalendarWeek } from '@fortawesome/free-solid-svg-icons/faCalendarWeek';
 import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons/faRightFromBracket';
-import { faCalendarDays } from "@fortawesome/free-regular-svg-icons/faCalendarDays";
+import { faCalendarDays } from "@fortawesome/free-solid-svg-icons/faCalendarDays";
+import { faClock } from "@fortawesome/free-solid-svg-icons/faClock";
 import { faTableList } from "@fortawesome/free-solid-svg-icons/faTableList";
 import { faFilter } from "@fortawesome/free-solid-svg-icons/faFilter";
 import { faFileLines } from "@fortawesome/free-regular-svg-icons/faFileLines";
@@ -62,6 +65,7 @@ import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 import { faBell } from "@fortawesome/free-solid-svg-icons/faBell";
 import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
+import { faUserSlash } from '@fortawesome/free-solid-svg-icons';
 
 import dayjs from "dayjs";
 import "dayjs/locale/hr";
@@ -140,14 +144,14 @@ export class AppModule {
       faSpinner,
       faAngleUp, faAngleDown, faAngleLeft, faAngleRight,
       faTimes, faPlus,
-      faCaretDown, faCaretUp, faArrowUp,
+      faCaretDown, faCaretUp, faCaretLeft, faCaretRight, faArrowUp,
       faTrash, faPen,
       faEllipsisV, faGear,
       faBusinessTime,
       faBoxArchive,
       faCircleCheck, farCircleCheck, faQuestion, faCheck, faTriangleExclamation,
-      faHouse, faHandHoldingHeart, faUsers, faCalendarWeek, faRightFromBracket,
-      faCalendarDays, faTableList, faFilter, faFileLines,
+      faHouse, faHandHoldingHeart, faUsers, faCalendarWeek, faRightFromBracket, faUserSlash,
+      faCalendarDays, faClock, faTableList, faFilter, faFileLines,
       faWhatsapp, faInstagram,
       faMoon, faSun, faCircleHalfStroke, faStar, faBell, faEnvelope
     );

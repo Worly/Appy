@@ -8,7 +8,7 @@ import { ClientDTO } from "./client";
 import { IconName, IconPrefix } from "@fortawesome/fontawesome-svg-core";
 import { Color } from "../components/button/button.component";
 
-export type AppointmentStatus = "Confirmed" | "Unconfirmed";
+export type AppointmentStatus = "Confirmed" | "Unconfirmed" | "NoShow";
 
 export type AppointmentStatusInfo = {
     value: AppointmentStatus,
@@ -29,6 +29,12 @@ export const AppointmentStatusMap: { [key: string]: AppointmentStatusInfo } = {
         color: "success",
         iconPrefix: "fas",
         iconName: "check"
+    },
+    "NoShow": {
+        value: "NoShow",
+        color: "danger",
+        iconPrefix: "fas",
+        iconName: "user-slash"
     }
 }
 

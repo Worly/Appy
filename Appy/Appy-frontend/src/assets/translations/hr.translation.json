@@ -52,10 +52,6 @@
     "FOLLOW_OS": "Prati OS",
     "SETTINGS": "Opcije",
     "SETTINGS_SAVED": "Opcije spremljene",
-
-    "UNCONFIRMED": "Nepotvrđeno",
-    "UNCONFIRM": "Nepotvrdi",
-    "CONFIRMED": "Potvrđeno",
     "CONFIRM": "Potvrdi",
 
     "pages": {
@@ -181,9 +177,14 @@
             "NO_APPOINTMENTS_AFTER": "Nema više termina nakon ovog datuma",
             "NO_APPOINTMENTS": "Nema pronađenih termina",
             "APPOINTMENT_SAVED": "Termin je spremljen",
-            "APPOINTMENT_CONFIRMED": "Termin je potvrđen",
-            "APPOINTMENT_UNCONFIRMED": "Termin je nepotvrđen",
+            "APPOINTMENT_CONFIRMED": "Termin je označen potvrđen",
+            "APPOINTMENT_UNCONFIRMED": "Termin je označen nepotvrđen",
+            "APPOINTMENT_NOSHOWED": "Termin je označen propušten",
             "NOTIFY_CLIENT": "Obavijesti klijenta",
+
+            "CONFIRMED": "Potvrđen",
+            "UNCONFIRMED": "Nepotvrđen",
+            "NOSHOW": "Propušten",
             
             "errors": {
                 "MISSING_SERVICE": "Molim odaberite uslugu",

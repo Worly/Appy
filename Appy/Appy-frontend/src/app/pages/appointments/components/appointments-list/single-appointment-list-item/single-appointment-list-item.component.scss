@@ -33,7 +33,7 @@
         margin-top: auto;
 
         display: flex;
-        gap: 10px;
+        gap: 5px;
 
         fa-icon {
             opacity: 50%;
@@ -42,6 +42,11 @@
         fa-icon.warn {
             opacity: 100%;
             color: rgb(var(--rgb-warning))
+        }
+
+        fa-icon.danger {
+            opacity: 100%;
+            color: rgb(var(--rgb-danger))
         }
     }
 }

@@ -10,7 +10,8 @@ namespace Appy.Domain
     public enum AppointmentStatus
     {
         Unconfirmed,
-        Confirmed
+        Confirmed,
+        NoShow,
     }
 
     public class Appointment
