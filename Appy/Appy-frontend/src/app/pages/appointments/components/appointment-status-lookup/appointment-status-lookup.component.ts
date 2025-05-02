@@ -9,44 +9,64 @@ import { AppointmentStatus, AppointmentStatusInfo, AppointmentStatusMap } from '
 })
 export class AppointmentStatusLookupComponent {
   @ViewChild(ContextMenuComponent) contextMenu?: ContextMenuComponent;
-  
+
+  @Input() isMultiSelect: boolean = false;
+
   private _value?: AppointmentStatus;
   @Input() set value(v: AppointmentStatus | undefined) {
     if (this._value == v)
       return;
 
     this._value = v;
+
+    if (this._value != undefined) {
+      this._values = [this._value];
+    }
+    else {
+      this._values = [];
+    }
   }
   get value(): AppointmentStatus | undefined {
     return this._value;
   }
   @Output() valueChange: EventEmitter<AppointmentStatus> = new EventEmitter();
 
-  // private _values: AppointmentStatus[] = [];
-  // @Input() set values(v: AppointmentStatus[]) {
-  //   if (this._values == v)
-  //     return;
-
-  //   this._values = v;
-  // }
-  // get values(): AppointmentStatus[] {
-  //   return this._values;
-  // }
+  private _values: AppointmentStatus[] = [];
+  @Input() set values(v: AppointmentStatus[]) {
+    this._values = [...v];
+  }
+  get values(): AppointmentStatus[] {
+    return [...this._values];
+  }
+  @Output() valuesChange: EventEmitter<AppointmentStatus[]> = new EventEmitter();
 
   @Input() showClearButton: boolean = false;
   @Input() disabled: boolean = false;
   @Input() isLoading: boolean = false;
 
   public statuses: AppointmentStatusInfo[];
+  public statusesMap: { [key: string]: AppointmentStatusInfo } = AppointmentStatusMap;
 
   constructor() {
     this.statuses = Object.values(AppointmentStatusMap);
   }
 
   selectStatus(value: AppointmentStatus) {
-    if (this.value != value) {
-      this.value = value;
-      this.valueChange.emit(value);
+    if (this.isMultiSelect) {
+      if (this.values.includes(value)) {
+        this._values.splice(this.values.indexOf(value), 1);
+      }
+      else {
+        this._values.push(value);
+      }
+
+      this.valuesChange.emit(this.values);
+    }
+    else {
+      if (this.value != value) {
+        this.value = value;
+        this.valueChange.emit(value);
+      }
     }
   }
 
@@ -56,6 +76,15 @@ export class AppointmentStatusLookupComponent {
   }
 
   clear() {
-    this.value = undefined;
+    if (this.value != undefined) {
+      this.value = undefined;
+      this.valueChange.emit(this.value);
+    }
+
+    if (this.values.length > 0) {
+      this._values = [];
+      this.valuesChange.emit(this.values);
+    }
   }
 }
+

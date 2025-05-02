@@ -23,7 +23,7 @@ export class ContextMenuComponent implements OnInit, OnDestroy {
           button.curvedTopLeft = false;
           button.curvedTopRight = false;
           button.width = "100%"
-          this.subs.push(button.onClick.subscribe(() => this.close()));
+          this.subs.push(button.onClick.subscribe(() => this.closeOnButtonClick && this.close()));
         }
         if (buttons.length > 0) {
           buttons.first.curvedTopLeft = true;
@@ -39,6 +39,7 @@ export class ContextMenuComponent implements OnInit, OnDestroy {
   @Input() relativeTo?: ElementRef;
   @Input() copyOriginWidth: boolean = false;
   @Input() viewportMargin: number = 0;
+  @Input() closeOnButtonClick: boolean = true;
 
   overlayRef?: OverlayRef;
   keepOpen: boolean = false;

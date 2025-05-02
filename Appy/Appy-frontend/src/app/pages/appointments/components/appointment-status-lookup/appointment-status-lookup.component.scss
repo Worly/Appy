@@ -7,6 +7,17 @@
     border-radius: var(--default-border-radius);
 }
 
+.status-item {
+    display: flex;
+    gap: 2px;
+    margin-right: 5px;
+
+    .status-item-contents {
+        display: flex;
+        gap: 5px;
+    }
+}
+
 .clear-button {
     position: absolute;
     right: 2px;

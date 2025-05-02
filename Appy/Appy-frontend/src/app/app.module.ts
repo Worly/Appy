@@ -26,6 +26,8 @@ import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontaweso
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faCaretDown } from "@fortawesome/free-solid-svg-icons/faCaretDown";
 import { faCaretUp } from "@fortawesome/free-solid-svg-icons/faCaretUp";
+import { faCaretLeft } from "@fortawesome/free-solid-svg-icons/faCaretLeft";
+import { faCaretRight } from "@fortawesome/free-solid-svg-icons/faCaretRight";
 import { faAngleUp } from "@fortawesome/free-solid-svg-icons/faAngleUp";
 import { faArrowUp } from "@fortawesome/free-solid-svg-icons/faArrowUp";
 import { faAngleDown } from "@fortawesome/free-solid-svg-icons/faAngleDown";
@@ -142,7 +144,7 @@ export class AppModule {
       faSpinner,
       faAngleUp, faAngleDown, faAngleLeft, faAngleRight,
       faTimes, faPlus,
-      faCaretDown, faCaretUp, faArrowUp,
+      faCaretDown, faCaretUp, faCaretLeft, faCaretRight, faArrowUp,
       faTrash, faPen,
       faEllipsisV, faGear,
       faBusinessTime,

@@ -41,7 +41,7 @@
 
         <div class="w-input-container">
             <div class="w-label">{{'STATUS' | translate}}</div>
-            <app-appointment-status-lookup #statusFilter [value]="filter.status"
+            <app-appointment-status-lookup #statusFilter [isMultiSelect]="true" [values]="filter.statuses ?? []"
                 [showClearButton]="true"></app-appointment-status-lookup>
         </div>
 
@@ -50,8 +50,11 @@
                 (onClick)="applyFilter({})"></app-button>
             <app-button style="margin-left: auto" [text]="'CANCEL' | translate" color="danger" look="normal"
                 (onClick)="filterDialog.close()"></app-button>
-            <app-button [text]="'APPLY' | translate" color="success" look="solid"
-                (onClick)="applyFilter({client: clientFilter.value, service: serviceFilter.value, status: statusFilter.value})"></app-button>
+            <app-button [text]="'APPLY' | translate" color="success" look="solid" (onClick)="applyFilter({
+                    client: clientFilter.value, 
+                    service: serviceFilter.value, 
+                    statuses: (statusFilter.values.length > 0 ? statusFilter.values : undefined)
+                    })"></app-button>
         </div>
     </div>
 </app-dialog>
