@@ -12,9 +12,7 @@
 
         <div class="client">{{renderedAppointment.client}}</div>
     </div>
-    <div class="status-icon-container">
-        <fa-icon *ngIf="renderedAppointment.hasNotes" [icon]="['far', 'file-lines']" [fixedWidth]="true"></fa-icon>
-        <fa-icon *ngIf="renderedAppointment.status == 'Unconfirmed'" class="warn" icon="question" [fixedWidth]="true"></fa-icon>
-        <fa-icon *ngIf="renderedAppointment.status == 'NoShow'" class="danger" icon="user-slash" [fixedWidth]="true"></fa-icon>
-    </div>
+    <app-appointment-status-icons class="status-icons" [hasNotes]="renderedAppointment.hasNotes"
+        [status]="renderedAppointment.status" [previousNoShow]="renderedAppointment.previousNoShow"
+        [isFirstAppointment]="renderedAppointment.isFirstAppointment"></app-appointment-status-icons>
 </div>

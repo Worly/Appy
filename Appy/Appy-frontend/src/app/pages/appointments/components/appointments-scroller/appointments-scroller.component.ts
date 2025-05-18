@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angu
 import dayjs, { Dayjs, unix } from 'dayjs';
 import _ from 'lodash';
 import { Subscription } from 'rxjs';
-import { Appointment } from 'src/app/models/appointment';
+import { Appointment, AppointmentView } from 'src/app/models/appointment';
 import { CalendarDay } from 'src/app/models/calendar-day';
 import { FreeTime } from 'src/app/models/free-time';
 import { Data, DateSmartCaching } from 'src/app/utils/smart-caching';
@@ -179,7 +179,7 @@ export class AppointmentsScrollerComponent implements OnInit, OnDestroy {
     return data.show == true;
   }
 
-  notInHiddenFilter(ap: Appointment): boolean {
+  notInHiddenFilter(ap: AppointmentView): boolean {
     return this.hiddenAppointmentIds == null || !this.hiddenAppointmentIds.includes(ap.id);
   }
 

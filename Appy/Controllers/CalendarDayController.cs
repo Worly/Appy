@@ -25,13 +25,13 @@ namespace Appy.Controllers
         [Authorize]
         public async Task<ActionResult<CalendarDayDTO>> GetAll([FromQuery] DateOnly date, [FromQuery] SmartFilter? filter)
         {
-            var appointments = await this.appointmentService.GetAll(date, HttpContext.SelectedFacility(), filter);
+            var appointments = await this.appointmentService.GetAll(date, HttpContext.SelectedFacility(), findPrevious: true, filter);
             var workingHours = await this.workingHourService.GetWorkingHours(date, HttpContext.SelectedFacility());
 
             return Ok(new CalendarDayDTO()
             {
                 Date = date,
-                Appointments = appointments.Select(a => a.GetDTO()).ToList(),
+                Appointments = appointments,
                 WorkingHours = workingHours.Select(w => w.GetDTO()).ToList()
             });
         }

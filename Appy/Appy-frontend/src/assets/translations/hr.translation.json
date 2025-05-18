@@ -27,6 +27,8 @@
     "FRIDAY": "Petak",
     "SATURDAY": "Subota",
     "SUNDAY": "Nedjelja",
+    "DAY": "dan",
+    "DAYS": "dana",
     "HOUR": "sat",
     "HOURS": "sata",
     "MINUTE": "minuta",
@@ -53,6 +55,8 @@
     "SETTINGS": "Opcije",
     "SETTINGS_SAVED": "Opcije spremljene",
     "CONFIRM": "Potvrdi",
+    "PREVIOUS": "Prethodni",
+    "EARLIER": "Ranije",
 
     "pages": {
         "dashboard": {
@@ -181,6 +185,7 @@
             "APPOINTMENT_UNCONFIRMED": "Termin je označen nepotvrđen",
             "APPOINTMENT_NOSHOWED": "Termin je označen propušten",
             "NOTIFY_CLIENT": "Obavijesti klijenta",
+            "FIRST_APPOINTMENT_WARNING": "Prvi termin ovog klijenta",
 
             "CONFIRMED": "Potvrđen",
             "UNCONFIRMED": "Nepotvrđen",

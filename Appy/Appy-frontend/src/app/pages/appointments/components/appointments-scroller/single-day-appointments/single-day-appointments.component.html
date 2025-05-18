@@ -5,16 +5,16 @@
     </div>
     <div *ngIf="showDateControls" [style.height]="'100%'">
         <div class="date-controls">
-            <app-button class="arrow-button" icon="angle-left" alignContent="center" [curved]="false"
-                look="transparent" [curvedBottomLeft]="true" [curvedTopLeft]="true" [curvedBottomRight]="false"
-                [curvedTopRight]="false" (onClick)="dateControlPrevious.emit()">
+            <app-button class="arrow-button" icon="angle-left" alignContent="center" [curved]="false" look="transparent"
+                [curvedBottomLeft]="true" [curvedTopLeft]="true" [curvedBottomRight]="false" [curvedTopRight]="false"
+                (onClick)="dateControlPrevious.emit()">
             </app-button>
             <app-button class="date-button" [text]="date?.format('ddd DD.MM.YY') ?? ''" alignContent="center"
                 look="transparent" [curved]="false" (onClick)="calendarDialog.open()">
             </app-button>
-            <app-button class="arrow-button" icon="angle-right" alignContent="center" 
-                [curved]="false" look="transparent" [curvedBottomLeft]="false" [curvedTopLeft]="false"
-                [curvedBottomRight]="true" [curvedTopRight]="true" (onClick)="dateControlNext.emit()">
+            <app-button class="arrow-button" icon="angle-right" alignContent="center" [curved]="false"
+                look="transparent" [curvedBottomLeft]="false" [curvedTopLeft]="false" [curvedBottomRight]="true"
+                [curvedTopRight]="true" (onClick)="dateControlNext.emit()">
             </app-button>
         </div>
 
@@ -41,14 +41,14 @@
                 {{ap.time}}
             </div>
             <div class="appointment-service-name">
-                {{ap.source.service?.displayName}} - {{ap.source.client?.name}} {{ap.source.client?.surname}}
+                {{ap.source.service.displayName}} - {{ap.source.client.name}} {{ap.source.client.surname}}
             </div>
 
-            <div class="appointment-status-container">
-                <fa-icon *ngIf="ap.source.notes != null && ap.source.notes != ''" [icon]="['far', 'file-lines']" [fixedWidth]="true"></fa-icon>
-                <fa-icon *ngIf="ap.source.status" class="warn" icon="question" [fixedWidth]="true"></fa-icon>
-                <fa-icon *ngIf="ap.source.status == 'NoShow'" class="danger" icon="user-slash" [fixedWidth]="true"></fa-icon>
-            </div>
+            <app-appointment-status-icons class="appointment-status-icons"
+                [hasNotes]="ap.source.notes != null && ap.source.notes != ''" [status]="ap.source.status"
+                [previousNoShow]="ap.source.previousAppointment != null && ap.source.previousAppointment.status == 'NoShow'"
+                [isFirstAppointment]="ap.source.previousAppointment == null"
+                [increaseContrast]="true"></app-appointment-status-icons>
         </div>
     </div>
 
@@ -75,6 +75,6 @@
 <app-loading *ngIf="appointments == null"></app-loading>
 
 <app-dialog #appointmentDialog>
-    <app-single-appointment *ngIf="appointmentDialog.isOpen" [id]="viewAppointmentId" [editable]="appointmentsEditable"
-        (onDone)="closeAppointmentDialog()"></app-single-appointment>
+    <app-single-appointment *ngIf="appointmentDialog.isOpen" [(id)]="viewAppointmentId"
+        [editable]="appointmentsEditable" (onDone)="closeAppointmentDialog()"></app-single-appointment>
 </app-dialog>

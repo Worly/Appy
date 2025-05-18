@@ -1,4 +1,4 @@
-import { Model, REQUIRED_VALIDATION, Validation } from "./base-model";
+import { EditModel, REQUIRED_VALIDATION, Validation } from "./base-model";
 import { Duration } from "dayjs/plugin/duration";
 import { parseDuration } from "../utils/time-utils";
 
@@ -11,7 +11,7 @@ export class ServiceDTO {
     public isArchived?: boolean;
 }
 
-export class Service extends Model<Service> {
+export class Service extends EditModel<Service> {
     public static readonly ENTITY_TYPE: string = "service";
 
     public id: number;

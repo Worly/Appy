@@ -2,7 +2,7 @@ import { HttpClient, HttpContext } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { catchError, map, Observable, of } from "rxjs";
 import { appConfig } from "src/app/app.config";
-import { Appointment, AppointmentDTO } from "src/app/models/appointment";
+import { AppointmentView, AppointmentViewDTO } from "src/app/models/appointment";
 import { DashboardSettings, DashboardSettingsDTO } from "src/app/models/dashboard-settings";
 import { IGNORE_NOT_FOUND } from "src/app/shared/services/errors/error-interceptor.service";
 
@@ -30,9 +30,9 @@ export class DashboardService {
         return this.httpClient.get<number>(`${appConfig.apiUrl}${this.controllerName}/bookedToday`);
     }
 
-    public getUpcomingUnconfirmed(numberOfDays: number): Observable<Appointment[]> {
-        return this.httpClient.get<AppointmentDTO[]>(`${appConfig.apiUrl}${this.controllerName}/upcomingUnconfirmed`, {
+    public getUpcomingUnconfirmed(numberOfDays: number): Observable<AppointmentView[]> {
+        return this.httpClient.get<AppointmentViewDTO[]>(`${appConfig.apiUrl}${this.controllerName}/upcomingUnconfirmed`, {
             params: { numberOfDays }
-        }).pipe(map(aps => aps.map(a => new Appointment(a))));
+        }).pipe(map(aps => aps.map(a => new AppointmentView(a))));
     }
 }

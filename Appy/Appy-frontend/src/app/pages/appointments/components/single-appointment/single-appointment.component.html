@@ -1,30 +1,36 @@
 <app-loading *ngIf="isLoading"></app-loading>
 <div *ngIf="!isLoading && appointment != null">
     <div class="header">
-        <div class="title">{{appointment.service?.name}}</div>
+        <div class="title">{{appointment.service.name}}</div>
         <app-appointment-status-lookup class="status" [value]="appointment.status"
             (valueChange)="onChangeStatus($event)" [disabled]="isLoadingStatusChange"
             [isLoading]="isLoadingStatusChange"></app-appointment-status-lookup>
     </div>
 
+    <div *ngIf="appointment.previousAppointment == null" class="first-appointment-warning">
+        <fa-icon [icon]="['fas', 'user-plus']" [fixedWidth]="true"></fa-icon>
+        <div>
+            {{'pages.appointments.FIRST_APPOINTMENT_WARNING' | translate}}
+        </div>
+    </div>
+
     <div class="date">
         <fa-icon icon="calendar-days" [fixedWidth]="true"></fa-icon>
         <div>
-            {{appointment.date?.format("DD.MM.YYYY - dddd")}}
+            {{appointment.date.format("DD.MM.YYYY - dddd")}}
         </div>
     </div>
 
     <div class="time">
         <fa-icon icon="clock" [fixedWidth]="true"></fa-icon>
         <div>
-            {{appointment.time?.format("HH:mm")}} -
-            {{appointment.time?.add($any(appointment.duration))?.format("HH:mm")}}
-            ({{$any(appointment.duration) | formatDuration}})
+            {{appointment.time.format("HH:mm")}} -
+            {{appointment.time.add(appointment.duration).format("HH:mm")}}
+            ({{appointment.duration | formatDuration}})
         </div>
     </div>
 
-    <app-button *ngIf="appointment.client != null" class="client-button"
-        (onClick)="goToClient($any(appointment.client.id))">
+    <app-button *ngIf="appointment.client != null" class="client-button" (onClick)="goToClient(appointment.client.id)">
         <div class="client">
             <div class="client-column">
                 <div class="full-name">{{appointment.client.name}} {{appointment.client.surname}}</div>
@@ -45,14 +51,54 @@
     <div class="created-updated-at">
         <div>
             <div>{{'CREATED_AT' | translate}}:</div>
-            <div>{{appointment.createdAt?.format("DD.MM.YYYY HH:mm")}}</div>
+            <div>{{appointment.createdAt.format("DD.MM.YYYY HH:mm")}}</div>
         </div>
         <div>
             <div>{{'LAST_UPDATED_AT' | translate}}:</div>
-            <div>{{appointment.lastUpdatedAt?.format("DD.MM.YYYY HH:mm")}}</div>
+            <div>{{appointment.lastUpdatedAt.format("DD.MM.YYYY HH:mm")}}</div>
         </div>
     </div>
-    
+
+    <div *ngIf="appointment.previousAppointment != null">
+        <div class="previous-appointment-label">
+            {{"PREVIOUS" | translate}}:
+        </div>
+        <app-button (onClick)="goToPreviousAppointment()">
+            <div class="previous-appointment-button">
+                <fa-icon icon="arrow-left"></fa-icon>
+                <div class="previous-appointment-color"
+                    [style.backgroundColor]="serviceColorsService.get(appointment.previousAppointment.service.colorId)">
+                </div>
+                <div class="previous-appointment-details">
+                    <div class="previous-appointment-date">
+                        <div>{{appointment.previousAppointment.date.format("DD.MM.YYYY")}}</div>
+                        <div class="date-diff"
+                            *ngIf="appointment.date.isAfter(appointment.previousAppointment.date); else timeDiff">
+                            ({{appointment.date.diff(appointment.previousAppointment.date, "days") | toDuration:'days' |
+                            formatDuration}} {{"EARLIER" | translate | lowercase}})
+                        </div>
+                        <ng-template #timeDiff>
+                            <div class="date-diff">
+                                ({{appointment.time.diff(appointment.previousAppointment.time) |
+                                toDuration:'milliseconds' |
+                                formatDuration}} {{"EARLIER" | translate | lowercase}})
+                            </div>
+                        </ng-template>
+                    </div>
+                    <div class="previous-appointment-bottom-row">
+                        <div>
+                            {{appointment.previousAppointment.service.name}}
+                        </div>
+                        <app-appointment-status-icons
+                            [hasNotes]="appointment.previousAppointment.notes != null && appointment.previousAppointment.notes != ''"
+                            [status]="appointment.previousAppointment.status"></app-appointment-status-icons>
+                    </div>
+                </div>
+            </div>
+        </app-button>
+    </div>
+
+
     <div *ngIf="editable" class="action-bar">
         <app-button icon="trash" color="danger" look="solid" text="{{'DELETE' | translate}}"
             [disabled]="isLoadingDelete" [isLoading]="isLoadingDelete" (onClick)="onDelete()">

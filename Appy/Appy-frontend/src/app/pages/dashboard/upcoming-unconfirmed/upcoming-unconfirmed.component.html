@@ -24,7 +24,7 @@
 </div>
 
 <app-dialog #appointmentDialog>
-    <app-single-appointment *ngIf="appointmentDialog.isOpen" [id]="viewingAppointmentId"
+    <app-single-appointment *ngIf="appointmentDialog.isOpen" [(id)]="viewingAppointmentId"
         (onDone)="appointmentDialog.close()"></app-single-appointment>
 </app-dialog>
 

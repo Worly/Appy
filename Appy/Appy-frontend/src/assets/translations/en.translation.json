@@ -27,6 +27,8 @@
     "FRIDAY": "Friday",
     "SATURDAY": "Saturday",
     "SUNDAY": "Sunday",
+    "DAY": "day",
+    "DAYS": "days",
     "HOUR": "hour",
     "HOURS": "hours",
     "MINUTE": "minute",
@@ -53,6 +55,8 @@
     "SETTINGS": "Settings",
     "SETTINGS_SAVED": "Settings saved",
     "CONFIRM": "Confirm",
+    "PREVIOUS": "Previous",
+    "EARLIER": "Earlier",
 
     "pages": {
         "dashboard": {
@@ -181,6 +185,7 @@
             "APPOINTMENT_UNCONFIRMED": "Appointment is marked unconfirmed",
             "APPOINTMENT_NOSHOWED": "Appointment is marked no-show",
             "NOTIFY_CLIENT": "Notify client",
+            "FIRST_APPOINTMENT_WARNING": "First appointment of this client",
 
             "CONFIRMED": "Confirmed",
             "UNCONFIRMED": "Unconfirmed",

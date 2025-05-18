@@ -15,6 +15,11 @@ export class FormatDurationPipe implements PipeTransform {
         if (!duration || duration.toISOString() === "P0D")
             return "";
 
+        if (duration.asDays() >= 1) {
+            const days = Math.floor(duration.asDays());
+            parts.push(days + " " + (days > 1 ? this.translateService.translate("DAYS") : this.translateService.translate("DAY")));
+        }
+
         if (duration.hours() >= 1) {
             const hours = Math.floor(duration.hours());
             parts.push(hours + " " + (hours > 1 ? this.translateService.translate("HOURS") : this.translateService.translate("HOUR")));

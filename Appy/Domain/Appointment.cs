@@ -40,9 +40,9 @@ namespace Appy.Domain
 
         public bool WasReminded { get; set; }
 
-        public AppointmentDTO GetDTO()
+        public AppointmentViewDTO ToViewDTO(AppointmentViewDTO? previousAppointment)
         {
-            return new AppointmentDTO()
+            return new AppointmentViewDTO()
             {
                 Id = Id,
                 Date = Date,
@@ -54,6 +54,7 @@ namespace Appy.Domain
                 Notes = Notes,
                 CreatedAt = CreatedAt,
                 LastUpdatedAt = LastUpdatedAt,
+                PreviousAppointment = previousAppointment,
             };
         }
 

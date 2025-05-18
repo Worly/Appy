@@ -1,4 +1,4 @@
-import { Model, REQUIRED_VALIDATION, Validation } from "./base-model";
+import { BaseModel, EditModel, REQUIRED_VALIDATION, Validation } from "./base-model";
 import { ServiceDTO } from "./service";
 import dayjs from "dayjs";
 import { Dayjs } from "dayjs";
@@ -38,6 +38,64 @@ export const AppointmentStatusMap: { [key: string]: AppointmentStatusInfo } = {
     }
 }
 
+export class AppointmentViewDTO {
+    public id: number = 0;
+    public date!: string;
+    public time!: string;
+    public duration!: string;
+
+    public service!: ServiceDTO;
+    public client!: ClientDTO;
+
+    public status!: AppointmentStatus;
+
+    public notes?: string;
+
+    public createdAt!: string;
+    public lastUpdatedAt!: string;
+
+    public previousAppointment?: AppointmentViewDTO;
+}
+
+export class AppointmentView extends BaseModel {
+    public static readonly ENTITY_TYPE: string = "appointment";
+
+    public id: number;
+    public date: Dayjs;
+    public time: Dayjs;
+    public duration: Duration;
+
+    public service: ServiceDTO;
+    public client: ClientDTO;
+
+    public status: AppointmentStatus;
+
+    public notes?: string;
+
+    public createdAt: Dayjs;
+    public lastUpdatedAt: Dayjs;
+
+    public previousAppointment?: AppointmentView;
+
+    constructor(dto: AppointmentViewDTO = new AppointmentViewDTO()) {
+        super();
+
+        this.id = dto.id;
+        this.date = dayjs(dto.date);
+        this.time = dayjs(dto.time, "HH:mm:ss");
+        this.duration = parseDuration(dto.duration);
+        this.service = dto.service;
+        this.client = dto.client;
+        this.status = dto.status;
+        this.notes = dto.notes;
+        this.createdAt = dayjs(dto.createdAt);
+        this.lastUpdatedAt = dayjs(dto.lastUpdatedAt);
+        this.previousAppointment = dto.previousAppointment ? new AppointmentView(dto.previousAppointment) : undefined;
+
+        this.initProperties();
+    }
+}
+
 export class AppointmentDTO {
     public id: number = 0;
     public date?: string;
@@ -55,9 +113,7 @@ export class AppointmentDTO {
     public lastUpdatedAt?: string;
 }
 
-export class Appointment extends Model<Appointment> {
-    public static readonly ENTITY_TYPE: string = "appointment";
-
+export class Appointment extends EditModel<Appointment> {
     public id: number;
     public date?: Dayjs;
     public time?: Dayjs;

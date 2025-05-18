@@ -3,11 +3,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { NotifyDialogService } from 'src/app/components/notify-dialog/notify-dialog.service';
 import { TranslateService } from 'src/app/components/translate/translate.service';
-import { Appointment, AppointmentStatus } from 'src/app/models/appointment';
+import { AppointmentStatus, AppointmentView } from 'src/app/models/appointment';
 import { AppointmentService } from '../../services/appointment.service';
 import { getClientContactTypeIcon, openClientContactApp } from 'src/app/pages/clients/clients.module';
 import { IconName } from '@fortawesome/fontawesome-svg-core';
 import { ClientContactDTO, ClientContactType } from 'src/app/models/client';
+import { ServiceColorsService } from 'src/app/pages/services/services/service-colors.service';
 
 @Component({
   selector: 'app-single-appointment',
@@ -29,11 +30,13 @@ export class SingleAppointmentComponent implements OnInit, OnDestroy {
     return this._id;
   }
 
+  @Output() idChange: EventEmitter<number | undefined> = new EventEmitter();
+
   @Input() editable: boolean = true;
 
   @Output() onDone: EventEmitter<void> = new EventEmitter();
 
-  appointment?: Appointment;
+  appointment?: AppointmentView;
 
   isLoading: boolean = false;
   isLoadingDelete: boolean = false;
@@ -46,10 +49,10 @@ export class SingleAppointmentComponent implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
-    private activatedRoute: ActivatedRoute,
     private appointmentService: AppointmentService,
     private notifyDialogService: NotifyDialogService,
     private translateService: TranslateService,
+    public serviceColorsService: ServiceColorsService
   ) { }
 
   ngOnInit(): void {
@@ -108,6 +111,17 @@ export class SingleAppointmentComponent implements OnInit, OnDestroy {
   goToClient(clientId: number) {
     this.router.navigate(["clients", "edit", clientId]);
     this.onDone.next();
+  }
+
+  goToPreviousAppointment() {
+    if (this.appointment == null)
+      return;
+    
+    if (this.appointment.previousAppointment == null)
+      return;
+
+    this.id = this.appointment.previousAppointment.id;
+    this.idChange.emit(this.id);
   }
 
   public openContact(contact: ClientContactDTO) {

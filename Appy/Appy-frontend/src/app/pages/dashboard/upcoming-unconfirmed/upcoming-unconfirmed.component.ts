@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DashboardService } from '../services/dashboard.service';
-import { Appointment } from 'src/app/models/appointment';
+import { AppointmentView } from 'src/app/models/appointment';
 import { TranslateService } from 'src/app/components/translate/translate.service';
 import { Router } from '@angular/router';
 import { EntityChangeNotifyService } from 'src/app/shared/services/entity-change-notify.service';
@@ -28,10 +28,10 @@ export class UpcomingUnconfirmedComponent {
 
   numberOfAppointmentsToShow = 3;
 
-  appointments?: Appointment[];
+  appointments?: AppointmentView[];
   viewMoreText?: string;
 
-  viewingAppointmentId: number = 0;
+  viewingAppointmentId: number | undefined;
 
   private subs: Subscription[] = [];
 
@@ -42,7 +42,7 @@ export class UpcomingUnconfirmedComponent {
     private entityChangeNotifyService: EntityChangeNotifyService
   ) {
     this.subs.push(
-      ...this.entityChangeNotifyService.for<Appointment>(Appointment.ENTITY_TYPE).subscribeAll({
+      ...this.entityChangeNotifyService.for<AppointmentView>(AppointmentView.ENTITY_TYPE).subscribeAll({
         onAdded: () => this.load(),
         onDeleted: () => this.load(),
         onUpdated: () => this.load()

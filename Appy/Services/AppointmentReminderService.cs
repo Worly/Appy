@@ -97,7 +97,7 @@ namespace Appy.Services
 
                 try
                 {
-                    await this.clientNotificationsService.SendAppointmentReminderMessage(appointment.Client, appointment, cultureInfo);
+                    await this.clientNotificationsService.SendAppointmentReminderMessage(appointment.Client.Id, appointment.ToViewDTO(null), cultureInfo);
 
                     appointment.WasReminded = true;
                 }

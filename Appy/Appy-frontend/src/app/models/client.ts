@@ -1,4 +1,4 @@
-import { Children, Model, REQUIRED_VALIDATION, Validation } from "./base-model";
+import { Children, EditModel, REQUIRED_VALIDATION, Validation } from "./base-model";
 
 export type ClientContactType = "Instagram" | "WhatsApp";
 
@@ -24,7 +24,7 @@ export class ClientDTO {
     }
 }
 
-export class ClientContact extends Model<ClientContact> {
+export class ClientContact extends EditModel<ClientContact> {
     public static readonly ENTITY_TYPE: string = "clientContact";
 
     public id: number;
@@ -59,7 +59,7 @@ export class ClientContact extends Model<ClientContact> {
     }
 }
 
-export class Client extends Model<Client> {
+export class Client extends EditModel<Client> {
     public static readonly ENTITY_TYPE: string = "client";
 
     public id: number;

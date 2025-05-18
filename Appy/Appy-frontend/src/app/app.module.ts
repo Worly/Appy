@@ -63,9 +63,12 @@ import { faSun } from "@fortawesome/free-solid-svg-icons/faSun";
 import { faCircleHalfStroke } from "@fortawesome/free-solid-svg-icons/faCircleHalfStroke";
 import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 import { faBell } from "@fortawesome/free-solid-svg-icons/faBell";
-import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
-import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
-import { faUserSlash } from '@fortawesome/free-solid-svg-icons';
+import { faEnvelope } from '@fortawesome/free-solid-svg-icons/faEnvelope';
+import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons/faTriangleExclamation';
+import { faUserSlash } from '@fortawesome/free-solid-svg-icons/faUserSlash';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons/faArrowLeft';
+import { faReply } from '@fortawesome/free-solid-svg-icons/faReply';
+import { faUserPlus } from '@fortawesome/free-solid-svg-icons/faUserPlus';
 
 import dayjs from "dayjs";
 import "dayjs/locale/hr";
@@ -144,11 +147,11 @@ export class AppModule {
       faSpinner,
       faAngleUp, faAngleDown, faAngleLeft, faAngleRight,
       faTimes, faPlus,
-      faCaretDown, faCaretUp, faCaretLeft, faCaretRight, faArrowUp,
-      faTrash, faPen,
+      faCaretDown, faCaretUp, faCaretLeft, faCaretRight, faArrowUp, faArrowLeft,
+      faTrash, faPen, faReply,
       faEllipsisV, faGear,
       faBusinessTime,
-      faBoxArchive,
+      faBoxArchive, faUserPlus,
       faCircleCheck, farCircleCheck, faQuestion, faCheck, faTriangleExclamation,
       faHouse, faHandHoldingHeart, faUsers, faCalendarWeek, faRightFromBracket, faUserSlash,
       faCalendarDays, faClock, faTableList, faFilter, faFileLines,

@@ -1,10 +1,10 @@
 import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { Appointment } from 'src/app/models/appointment';
+import { Appointment, AppointmentView } from 'src/app/models/appointment';
 import { FreeTime } from 'src/app/models/free-time';
 import { invertTimesCustom } from 'src/app/utils/invert-times';
 import { WorkingHour } from 'src/app/models/working-hours';
-import { getRenderedAppointments, getRenderedIntervals, RenderedInterval } from 'src/app/utils/rendered-interval';
+import { getRenderedAppointments, getRenderedAppointmentViews, getRenderedIntervals, RenderedInterval } from 'src/app/utils/rendered-interval';
 import { DialogComponent } from 'src/app/components/dialog/dialog.component';
 import dayjs, { Dayjs, unix } from 'dayjs';
 import { ServiceColorsService } from 'src/app/pages/services/services/service-colors.service';
@@ -19,15 +19,15 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
   @ViewChild("timeBackground", { read: ElementRef }) timeBackground?: ElementRef<HTMLElement>;
   @ViewChild("appointmentDialog", { read: DialogComponent }) appointmentDialog?: DialogComponent;
 
-  private _appointments: Appointment[] | null = null;
-  @Input() set appointments(value: Appointment[] | null) {
+  private _appointments: AppointmentView[] | null = null;
+  @Input() set appointments(value: AppointmentView[] | null) {
     if (this._appointments == value)
       return;
 
     this._appointments = value;
     this.renderAppointments();
   }
-  public get appointments(): Appointment[] | null {
+  public get appointments(): AppointmentView[] | null {
     return this._appointments;
   }
 
@@ -110,7 +110,7 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
   @Output() onCalendarClick: EventEmitter<Dayjs> = new EventEmitter();
 
   public currentTimeIndicatorTop: number = 0;
-  public renderedAppointments: RenderedInterval<Appointment>[] = [];
+  public renderedAppointments: RenderedInterval<AppointmentView>[] = [];
   public renderedShadowAppointments: RenderedInterval<Appointment>[] = [];
   public renderedTimeStatuses: RenderedInterval<string>[] = [];
 
@@ -140,7 +140,7 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
   }
 
   public renderAppointments(): void {
-    this.renderedAppointments = getRenderedAppointments(this.date as Dayjs, this.timeFrom, this.timeTo, this.appointments, this.serviceColorsService, {
+    this.renderedAppointments = getRenderedAppointmentViews(this.date as Dayjs, this.timeFrom, this.timeTo, this.appointments, this.serviceColorsService, {
       crop: true,
       removeTopOverflow: true,
       layout: true
@@ -240,7 +240,7 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
     this.onCalendarClick.next(time);
   }
 
-  onAppointmentClick(ap: Appointment) {
+  onAppointmentClick(ap: AppointmentView) {
     this.viewAppointmentId = ap.id;
     this.appointmentDialog?.open();
   }

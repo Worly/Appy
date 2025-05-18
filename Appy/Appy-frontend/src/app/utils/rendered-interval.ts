@@ -1,6 +1,6 @@
-import dayjs, { Dayjs } from "dayjs";
+import { Dayjs } from "dayjs";
 import { Duration } from "dayjs/plugin/duration";
-import { Appointment } from "../models/appointment";
+import { Appointment, AppointmentView } from "../models/appointment";
 import { ServiceColorsService } from "../pages/services/services/service-colors.service";
 
 export interface RenderedInterval<T> {
@@ -19,7 +19,38 @@ export type RenderOptions = {
     layout?: boolean
 };
 
-export function getRenderedAppointments(date: Dayjs, timeFrom: Dayjs, timeTo: Dayjs, appointments: Appointment[] | null, serviceColorsService: ServiceColorsService, options?: RenderOptions): RenderedInterval<Appointment>[] {
+export function getRenderedAppointments(
+    date: Dayjs, 
+    timeFrom: Dayjs, 
+    timeTo: Dayjs, 
+    appointments: Appointment[] | null, 
+    serviceColorsService: ServiceColorsService, 
+    options?: RenderOptions
+): RenderedInterval<Appointment>[] {
+    if (appointments == null) {
+        return [];
+    }
+
+    return getRenderedIntervals(timeFrom, timeTo, appointments
+        .filter(ap => ap.date?.isSame(date, "date"))
+        .map(ap => {
+            return {
+                source: ap,
+                time: ap.time as Dayjs,
+                duration: ap.duration as Duration,
+                color: serviceColorsService.get(ap.service?.colorId)
+            };
+        }), options);
+}
+
+export function getRenderedAppointmentViews(
+    date: Dayjs, 
+    timeFrom: Dayjs, 
+    timeTo: Dayjs, 
+    appointments: AppointmentView[] | null, 
+    serviceColorsService: ServiceColorsService, 
+    options?: RenderOptions
+): RenderedInterval<AppointmentView>[] {
     if (appointments == null) {
         return [];
     }

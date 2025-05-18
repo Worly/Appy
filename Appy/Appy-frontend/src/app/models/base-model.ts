@@ -4,17 +4,30 @@ const brokenValidationsSymbol = Symbol("#S-brokenValidations")
 const onPropertyChangedSymbol = Symbol("#S-onPropertyChanged");
 const childrensKeysSymbol = Symbol("#S-childrensKeys")
 
-export function Children(target: BaseModel, propertyKey: string) {
+export function Children(target: BaseEditModel, propertyKey: string) {
     if (target[childrensKeysSymbol] == null)
         target[childrensKeysSymbol] = [];
 
     target[childrensKeysSymbol].push(propertyKey);
 }
 
-abstract class BaseModel {
+export interface IIdentifiable {
+    getId(): any;
+}
 
+export interface IPropertyUpdateable {
+    getPropertyNames(): string[];
+    getPropertyValue(propertyName: string): any;
+    setPropertyValue(propertyName: string, value: any): void;
+}
+
+export abstract class BaseModel implements IIdentifiable, IPropertyUpdateable {
     [onPropertyChangedSymbol]: Subject<string> = new Subject();
     [childrensKeysSymbol]: string[] | undefined;
+
+    public getId(): any {
+        return (this as any).id;
+    }
 
     initProperties() {
         for (let p in this) {
@@ -63,13 +76,13 @@ abstract class BaseModel {
     }
 
     private assertChildType(child: any) {
-        if (!(child instanceof BaseModel))
+        if (!(child instanceof BaseEditModel))
             throw new Error("Child type must be a BaseModel");
     }
 
-    private initChildren(children: BaseModel[]): BaseModel[] {
+    private initChildren(children: BaseEditModel[]): BaseEditModel[] {
         var proxyHandler = {
-            set: (target: BaseModel[], prop: any, value: any) => {
+            set: (target: BaseEditModel[], prop: any, value: any) => {
                 let index = parseInt(prop);
                 if (!isNaN(index)) {
                     this.assertChildType(value);
@@ -87,15 +100,7 @@ abstract class BaseModel {
         return proxy;
     }
 
-    public getId(): any {
-        return (this as any).id;
-    }
-
-    public abstract getDTO(): any;
-
     protected propertyChanged(propertyName: string) {
-        this.validateProperty(propertyName);
-
         this[onPropertyChangedSymbol].next(propertyName);
     }
 
@@ -103,12 +108,38 @@ abstract class BaseModel {
         return this[onPropertyChangedSymbol];
     }
 
+    public getPropertyNames(): string[] {
+        let symbols = Object.getOwnPropertySymbols(this);
+
+        return symbols
+            .filter(s => s.description != null && !s.description.startsWith("#S-"))
+            .map(s => s.description!);
+    }
+
+    public getPropertyValue(propertyName: string): any {
+        return (this as any)[propertyName];
+    }
+
+    public setPropertyValue(propertyName: string, value: any): void {
+        (this as any)[propertyName] = value;
+    }
+}
+
+abstract class BaseEditModel extends BaseModel {
+    public abstract getDTO(): any;
+
+    protected override propertyChanged(propertyName: string) {
+        this.validateProperty(propertyName);
+
+        super.propertyChanged(propertyName);
+    }
+
     public abstract validateProperty(propertyName: string): void;
     public abstract validate(): boolean;
     public abstract applyServerValidationErrors(errors: ServerValidationErrors): void;
 }
 
-export abstract class Model<ModelT> extends BaseModel {
+export abstract class EditModel<ModelT> extends BaseEditModel {
     protected validations: Validation<ModelT>[] = [];
 
     [brokenValidationsSymbol]: {
@@ -137,7 +168,7 @@ export abstract class Model<ModelT> extends BaseModel {
 
         if (this[childrensKeysSymbol] != null) {
             for (let childrenKey of this[childrensKeysSymbol]) {
-                let children = (this as any)[childrenKey] as BaseModel[];
+                let children = (this as any)[childrenKey] as BaseEditModel[];
 
                 for (let child of children) {
                     isValid = child.validate() && isValid;
@@ -177,7 +208,7 @@ export abstract class Model<ModelT> extends BaseModel {
                     throw new Error("Server validation errors for children must be an array, got " + typeof errors[propertyName]);
                 }
 
-                let children = (this as any)[propertyName] as BaseModel[];
+                let children = (this as any)[propertyName] as BaseEditModel[];
                 let childrenErrors = errors[propertyName] as ServerValidationErrors[];
 
                 if (childrenErrors.length > children.length) {

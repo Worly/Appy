@@ -1,16 +1,12 @@
 import { Injectable } from "@angular/core";
 import { Subject, Subscription } from "rxjs";
-import { Model } from "src/app/models/base-model";
+import { EditModel, BaseModel } from "src/app/models/base-model";
 
 @Injectable({ providedIn: "root" })
 export class EntityChangeNotifyService {
     private subjects: { [entityType: string]: EntitySubjects } = {}
 
-    constructor() {
-        console.log("CONSTRUCTOR!");
-    }
-
-    subscribeAdded<T extends Model<T>>(entityType: string, pred: (entity: T) => void): Subscription {
+    subscribeAdded<T extends BaseModel>(entityType: string, pred: (entity: T) => void): Subscription {
         var subjects = this.getOrCreateSubjects(entityType);
 
         return subjects.added.subscribe({
@@ -20,7 +16,7 @@ export class EntityChangeNotifyService {
         })
     }
 
-    subscribeDeleted<T extends Model<T>>(entityType: string, pred: (id: any) => void): Subscription {
+    subscribeDeleted<T extends BaseModel>(entityType: string, pred: (id: any) => void): Subscription {
         var subjects = this.getOrCreateSubjects(entityType);
 
         return subjects.deleted.subscribe({
@@ -30,7 +26,7 @@ export class EntityChangeNotifyService {
         })
     }
 
-    subscribeUpdated<T extends Model<T>>(entityType: string, pred: (entity: T) => void): Subscription {
+    subscribeUpdated<T extends BaseModel>(entityType: string, pred: (entity: T) => void): Subscription {
         var subjects = this.getOrCreateSubjects(entityType);
 
         return subjects.updated.subscribe({
@@ -40,7 +36,7 @@ export class EntityChangeNotifyService {
         })
     }
 
-    subscribeAll<T extends Model<T>>(entityType: string, preds: EntityChangeNotifyPredicates<T>): Subscription[] {
+    subscribeAll<T extends BaseModel>(entityType: string, preds: EntityChangeNotifyPredicates<T>): Subscription[] {
         return [
             this.subscribeAdded(entityType, preds.onAdded), 
             this.subscribeDeleted(entityType, preds.onDeleted), 
@@ -48,7 +44,7 @@ export class EntityChangeNotifyService {
         ];
     }
 
-    notifyAdded<T extends Model<T>>(entityType: string, entity: T) {
+    notifyAdded<T extends BaseModel>(entityType: string, entity: T) {
         var subjects = this.subjects[entityType];
         if (subjects == null)
             return;
@@ -64,7 +60,7 @@ export class EntityChangeNotifyService {
         subjects.deleted.next(id);
     }
 
-    notifyUpdated<T extends Model<T>>(entityType: string, entity: T) {
+    notifyUpdated<T extends BaseModel>(entityType: string, entity: T) {
         var subjects = this.subjects[entityType];
         if (subjects == null)
             return;
@@ -72,7 +68,7 @@ export class EntityChangeNotifyService {
         subjects.updated.next(entity);
     }
 
-    for<T extends Model<T>>(entityType: string): EntityChangeNotifyFns<T> {
+    for<T extends BaseModel>(entityType: string): EntityChangeNotifyFns<T> {
         return {
             subscribeAdded: pred => this.subscribeAdded(entityType, pred),
             subscribeDeleted: pred => this.subscribeDeleted(entityType, pred),
@@ -99,13 +95,13 @@ class EntitySubjects {
     updated: Subject<any> = new Subject<any>();
 }
 
-export type EntityChangeNotifyPredicates<T extends Model<T>> = {
+export type EntityChangeNotifyPredicates<T extends BaseModel> = {
     onAdded: (entity: T) => void,
     onDeleted: (id: any) => void,
     onUpdated: (entity: T) => void
 }
 
-export type EntityChangeNotifyFns<T extends Model<T>> = {
+export type EntityChangeNotifyFns<T extends BaseModel> = {
     subscribeAdded: (pred: (entity: T) => void) => Subscription;
     subscribeDeleted: (pred: (id: any) => void) => Subscription;
     subscribeUpdated: (pred: (entity: T) => void) => Subscription;
