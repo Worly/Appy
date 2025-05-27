@@ -79,7 +79,8 @@
               "browserTarget": "Appy-frontend:build:production"
             },
             "development": {
-              "browserTarget": "Appy-frontend:build:development"
+              "browserTarget": "Appy-frontend:build:development",
+              "host": "0.0.0.0"
             }
           },
           "defaultConfiguration": "development"
@@ -108,11 +109,46 @@
             ],
             "scripts": []
           }
+        },
+        "cypress-run": {
+          "builder": "@cypress/schematic:cypress",
+          "options": {
+            "devServerTarget": "Appy-frontend:serve"
+          },
+          "configurations": {
+            "production": {
+              "devServerTarget": "Appy-frontend:serve:production"
+            }
+          }
+        },
+        "cypress-open": {
+          "builder": "@cypress/schematic:cypress",
+          "options": {
+            "watch": true,
+            "headless": false
+          }
+        },
+        "e2e": {
+          "builder": "@cypress/schematic:cypress",
+          "options": {
+            "devServerTarget": "Appy-frontend:serve",
+            "watch": true,
+            "headless": false
+          },
+          "configurations": {
+            "production": {
+              "devServerTarget": "Appy-frontend:serve:production"
+            }
+          }
         }
       }
     }
   },
   "cli": {
-    "analytics": false
+    "analytics": false,
+    "schematicCollections": [
+      "@cypress/schematic",
+      "@schematics/angular"
+    ]
   }
 }

@@ -53,6 +53,7 @@ builder.Services.AddScoped<IWorkingHourService, WorkingHourService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IClientNotificationsService, ClientNotificationsService>();
 builder.Services.AddScoped<IAppointmentReminderService, AppointmentReminderService>();
+builder.Services.AddScoped<ITestingService, TestingService>();
 
 builder.Services
     .AddControllers(opts => opts.UseDateOnlyTimeOnlyStringConverters())

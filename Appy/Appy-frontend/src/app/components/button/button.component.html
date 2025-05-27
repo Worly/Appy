@@ -5,10 +5,12 @@
     [ngClass]="['color-' + color, 'look-' + look, 'border-' + borderStyle, 'align-' + alignContent, 'text-align-' + textAlign, 'icon-placement-' + iconPlacement]"
     [style]="'--custom-button-color: ' + customColor + '; --custom-text-color: ' + customTextColor + '; --custom-border-color: ' + customBorderColor + '; --border-width: ' + borderWidth + '; --width: ' + width"
     (click)="onClicked($event)" tabindex="0">
-
-    <fa-icon *ngIf="isLoading || icon != null" class="my-icon"
-        [icon]="[iconPrefix, isLoading ? loadingIcon : $any(icon)]" [fixedWidth]="true" [spin]="spinIcon || isLoading">
-    </fa-icon>
-    {{text}}
-    <ng-content></ng-content>
+    <div class="button-content">
+        <fa-icon *ngIf="isLoading || icon != null" class="my-icon"
+            [icon]="[iconPrefix, isLoading ? loadingIcon : $any(icon)]" [fixedWidth]="true"
+            [spin]="spinIcon || isLoading">
+        </fa-icon>
+        {{text}}
+        <ng-content></ng-content>
+    </div>
 </div>

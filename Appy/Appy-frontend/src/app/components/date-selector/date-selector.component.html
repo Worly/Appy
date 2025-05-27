@@ -1,13 +1,13 @@
 <div class="my-container" [ngClass]="{'compact' : compact}">
-    <app-button icon="angle-left" alignContent="center" [curved]="false" [curvedBottomLeft]="true"
-        [curvedTopLeft]="true" [curvedBottomRight]="false" [curvedTopRight]="false"
+    <app-button data-test="date-selector-previous-button" icon="angle-left" alignContent="center" [curved]="false"
+        [curvedBottomLeft]="true" [curvedTopLeft]="true" [curvedBottomRight]="false" [curvedTopRight]="false"
         (onClick)="date = date.add(-1, 'days')">
     </app-button>
     <app-button class="date-button" [text]="compact ? date.format('DD.MM.YY') : date.format('DD.MM.YYYY')"
         alignContent="center" [curved]="false" (onClick)="calendarDialog.open()">
     </app-button>
-    <app-button icon="angle-right" alignContent="center" [curved]="false" [curvedBottomLeft]="false"
-        [curvedTopLeft]="false" [curvedBottomRight]="true" [curvedTopRight]="true"
+    <app-button data-test="date-selector-next-button" icon="angle-right" alignContent="center" [curved]="false"
+        [curvedBottomLeft]="false" [curvedTopLeft]="false" [curvedBottomRight]="true" [curvedTopRight]="true"
         (onClick)="date = date.add(1, 'days')">
     </app-button>
 </div>

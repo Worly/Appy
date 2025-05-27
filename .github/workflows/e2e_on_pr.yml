@@ -1,0 +1,113 @@
+name: E2E Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: Appy
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      ASPNETCORE_ENVIRONMENT: Development
+      POSTGRES_HOSTNAME: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      NO_FRONTEND: true
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # ✅ Set up Node
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      # ✅ Set up .NET
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
+
+      # ✅ Cache NuGet packages (for faster dotnet restore)
+      - name: Cache NuGet packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      # ✅ Restore backend dependencies
+      - name: Install backend dependencies
+        run: dotnet restore ./Appy/Appy.csproj
+
+      - name: Build backend
+        run: dotnet build ./Appy/Appy.csproj --no-restore
+
+      - name: Run backend
+        run: dotnet run --project ./Appy/Appy.csproj &
+        shell: bash
+
+      - name: Wait for backend to be ready
+        run: |
+          until curl --silent http://localhost:5000/health; do
+            echo "Waiting for backend..."
+            sleep 2
+          done
+
+      # ✅ Cache npm (faster install)
+      - name: Cache Node.js modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      # ✅ Cache Cypress binary (optional but helps)
+      - name: Cache Cypress binary
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/Cypress
+          key: ${{ runner.os }}-cypress-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-cypress-
+
+      - name: Install frontend dependencies
+        run: npm install
+        working-directory: ./Appy/Appy-frontend
+
+      - name: Start frontend
+        run: npm run start &
+        working-directory: ./Appy/Appy-frontend
+        shell: bash
+
+      - name: Wait for frontend
+        run: |
+          until curl --silent http://localhost:4200; do
+            echo "Waiting for frontend..."
+            sleep 2
+          done
+
+      - name: Run Cypress tests
+        run: npx cypress run
+        working-directory: ./Appy/Appy-frontend
