@@ -23,15 +23,7 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
-
-    env:
-      POSTGRES_HOSTNAME: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      NO_FRONTEND: true
-      ENABLE_TEST_SEEDING: true
-
+          
     steps:
       - uses: actions/checkout@v3
 
@@ -62,6 +54,13 @@ jobs:
       - name: Run backend
         run: dotnet run --project ./Appy/Appy.csproj &
         shell: bash
+        env:  
+          POSTGRES_HOSTNAME: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          NO_FRONTEND: true
+          ENABLE_TEST_SEEDING: true
 
       - name: Wait for backend to be ready
         run: |
