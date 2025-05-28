@@ -1,4 +1,4 @@
-<app-dialog>
-    <mat-calendar [(selected)]="date" [headerComponent]="calendarTodayHeaderComponent"
+<app-dialog #appDialog>
+    <mat-calendar *ngIf="appDialog.isOpen" [(selected)]="date" [startAt]="date" [headerComponent]="calendarTodayHeaderComponent"
         (selectedChange)="close()"></mat-calendar>
 </app-dialog>

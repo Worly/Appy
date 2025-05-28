@@ -4,20 +4,21 @@
 
         <div class="w-input-container">
             <div class="w-label">{{'EMAIL' | translate}}</div>
-            <input class="w-input" type="text" placeholder="{{'EMAIL' | translate}}" [(ngModel)]="email">
+            <input data-test="email-input" class="w-input" type="text" placeholder="{{'EMAIL' | translate}}"
+                [(ngModel)]="email">
             <div class="w-validation-message">{{ validationErrors['email'] | translate }}</div>
         </div>
 
         <div class="w-input-container">
             <div class="w-label">{{'pages.login-register.PASSWORD' | translate}}</div>
-            <input class="w-input" type="password" placeholder="{{'pages.login-register.PASSWORD' | translate}}"
-                [(ngModel)]="password">
+            <input data-test="password-input" class="w-input" type="password"
+                placeholder="{{'pages.login-register.PASSWORD' | translate}}" [(ngModel)]="password">
             <div class="w-validation-message">{{ validationErrors['password'] | translate }}</div>
             <div class="w-validation-message">{{ validationErrors['other'] | translate }}</div>
         </div>
 
-        <app-button text="{{'LOGIN' | translate}}" color="success" look="solid" width="100%" alignContent="center"
-            [disabled]="isLoading" [isLoading]="isLoading" (onClick)="login()"></app-button>
+        <app-button data-test="login-button" text="{{'LOGIN' | translate}}" color="success" look="solid" width="100%"
+            alignContent="center" [disabled]="isLoading" [isLoading]="isLoading" (onClick)="login()"></app-button>
 
         <div class="register">{{'pages.login-register.NEW_HERE' | translate}}? <a
                 routerLink="/register">{{'pages.login-register.REGISTER' | translate}}</a></div>

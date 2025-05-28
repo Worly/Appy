@@ -13,30 +13,26 @@ var builder = WebApplication.CreateBuilder(args);
 var spaPath = "Appy-frontend/build";
 
 // Add services to the container.
-
-builder.Services.AddDbContext<MainDbContext>(options =>
+var connectionString = builder.Configuration.GetConnectionString("Main");
+if (Environment.GetEnvironmentVariable("POSTGRES_HOSTNAME") != null)
 {
-    var connectionString = builder.Configuration.GetConnectionString("Main");
-    if (builder.Environment.IsProduction() && Environment.GetEnvironmentVariable("POSTGRES_HOSTNAME") != null)
-    {
-        var hostname = Environment.GetEnvironmentVariable("POSTGRES_HOSTNAME");
-        var port = Environment.GetEnvironmentVariable("POSTGRES_PORT");
-        if (port == null)
-            throw new ArgumentNullException("POSTGRES_PORT");
+    var hostname = Environment.GetEnvironmentVariable("POSTGRES_HOSTNAME");
+    var port = Environment.GetEnvironmentVariable("POSTGRES_PORT");
+    if (port == null)
+        throw new ArgumentNullException("POSTGRES_PORT");
 
-        var user = Environment.GetEnvironmentVariable("POSTGRES_USER");
-        if (user == null)
-            throw new ArgumentNullException("POSTGRES_USER");
+    var user = Environment.GetEnvironmentVariable("POSTGRES_USER");
+    if (user == null)
+        throw new ArgumentNullException("POSTGRES_USER");
 
-        var password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
-        if (password == null)
-            throw new ArgumentNullException("POSTGRES_PASSWORD");
+    var password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
+    if (password == null)
+        throw new ArgumentNullException("POSTGRES_PASSWORD");
 
-        connectionString = $"Server={hostname};Port={port};Database=Appy;Userid={user};Password={password}";
-    }
+    connectionString = $"Server={hostname};Port={port};Database=Appy;Userid={user};Password={password}";
+}
 
-    options.UseNpgsql(connectionString);
-});
+builder.Services.AddDbContext<MainDbContext>(options => options.UseNpgsql(connectionString));
 
 builder.Services.AddSingleton<IConfigurationService, ConfigurationService>();
 builder.Services.AddSingleton<IJwtService, JwtService>();
@@ -53,6 +49,7 @@ builder.Services.AddScoped<IWorkingHourService, WorkingHourService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IClientNotificationsService, ClientNotificationsService>();
 builder.Services.AddScoped<IAppointmentReminderService, AppointmentReminderService>();
+builder.Services.AddScoped<ITestingService, TestingService>();
 
 builder.Services
     .AddControllers(opts => opts.UseDateOnlyTimeOnlyStringConverters())
