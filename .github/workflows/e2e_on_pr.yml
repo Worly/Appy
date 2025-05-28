@@ -31,7 +31,6 @@ jobs:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       NO_FRONTEND: true
-      ENABLE_TEST_SEEDING: true
           
     steps:
       - uses: actions/checkout@v3
@@ -92,7 +91,7 @@ jobs:
         working-directory: ./Appy/Appy-frontend
 
       - name: Start frontend
-        run: ng serve --host 0.0.0.0 &
+        run: ng serve &
         working-directory: ./Appy/Appy-frontend
         shell: bash
 
