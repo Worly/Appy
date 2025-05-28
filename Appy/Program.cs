@@ -13,8 +13,6 @@ var builder = WebApplication.CreateBuilder(args);
 var spaPath = "Appy-frontend/build";
 
 // Add services to the container.
-
-Console.WriteLine("POSTGRES_HOSTNAME: " + (Environment.GetEnvironmentVariable("POSTGRES_HOSTNAME") ?? "Not set"));
 var connectionString = builder.Configuration.GetConnectionString("Main");
 if (Environment.GetEnvironmentVariable("POSTGRES_HOSTNAME") != null)
 {
