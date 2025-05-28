@@ -27,7 +27,7 @@ namespace Appy.Services
 
         public async Task Seed()
         {
-            if (environment.IsProduction() && Environment.GetEnvironmentVariable("ENABLE_TEST_SEEDING") != "true")
+            if (environment.IsProduction())
             {
                 throw new HttpException(System.Net.HttpStatusCode.Forbidden, "Test seeding is not allowed in production environment.");
             }

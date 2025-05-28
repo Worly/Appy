@@ -16,8 +16,10 @@ var spaPath = "Appy-frontend/build";
 
 builder.Services.AddDbContext<MainDbContext>(options =>
 {
+    Console.WriteLine("POSTGRES_HOSTNAME: " + Environment.GetEnvironmentVariable("POSTGRES_HOSTNAME") ?? "Not set");
+
     var connectionString = builder.Configuration.GetConnectionString("Main");
-    if (builder.Environment.IsProduction() && Environment.GetEnvironmentVariable("POSTGRES_HOSTNAME") != null)
+    if (Environment.GetEnvironmentVariable("POSTGRES_HOSTNAME") != null)
     {
         var hostname = Environment.GetEnvironmentVariable("POSTGRES_HOSTNAME");
         var port = Environment.GetEnvironmentVariable("POSTGRES_PORT");
