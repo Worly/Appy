@@ -14,31 +14,27 @@ var spaPath = "Appy-frontend/build";
 
 // Add services to the container.
 
-builder.Services.AddDbContext<MainDbContext>(options =>
+Console.WriteLine("POSTGRES_HOSTNAME: " + (Environment.GetEnvironmentVariable("POSTGRES_HOSTNAME") ?? "Not set"));
+var connectionString = builder.Configuration.GetConnectionString("Main");
+if (Environment.GetEnvironmentVariable("POSTGRES_HOSTNAME") != null)
 {
-    Console.WriteLine("POSTGRES_HOSTNAME: " + Environment.GetEnvironmentVariable("POSTGRES_HOSTNAME") ?? "Not set");
+    var hostname = Environment.GetEnvironmentVariable("POSTGRES_HOSTNAME");
+    var port = Environment.GetEnvironmentVariable("POSTGRES_PORT");
+    if (port == null)
+        throw new ArgumentNullException("POSTGRES_PORT");
 
-    var connectionString = builder.Configuration.GetConnectionString("Main");
-    if (Environment.GetEnvironmentVariable("POSTGRES_HOSTNAME") != null)
-    {
-        var hostname = Environment.GetEnvironmentVariable("POSTGRES_HOSTNAME");
-        var port = Environment.GetEnvironmentVariable("POSTGRES_PORT");
-        if (port == null)
-            throw new ArgumentNullException("POSTGRES_PORT");
+    var user = Environment.GetEnvironmentVariable("POSTGRES_USER");
+    if (user == null)
+        throw new ArgumentNullException("POSTGRES_USER");
 
-        var user = Environment.GetEnvironmentVariable("POSTGRES_USER");
-        if (user == null)
-            throw new ArgumentNullException("POSTGRES_USER");
+    var password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
+    if (password == null)
+        throw new ArgumentNullException("POSTGRES_PASSWORD");
 
-        var password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
-        if (password == null)
-            throw new ArgumentNullException("POSTGRES_PASSWORD");
+    connectionString = $"Server={hostname};Port={port};Database=Appy;Userid={user};Password={password}";
+}
 
-        connectionString = $"Server={hostname};Port={port};Database=Appy;Userid={user};Password={password}";
-    }
-
-    options.UseNpgsql(connectionString);
-});
+builder.Services.AddDbContext<MainDbContext>(options => options.UseNpgsql(connectionString));
 
 builder.Services.AddSingleton<IConfigurationService, ConfigurationService>();
 builder.Services.AddSingleton<IJwtService, JwtService>();
