@@ -11,12 +11,13 @@
                     [customBorderColor]="showAnyHour ? 'rgb(var(--rgb-text))' : 'rgb(var(--rgb-input-background))'"
                     (onClick)="toggleShowAnyHour()">
                 </app-button>
-                <app-date-selector flex-splitter [(date)]="date" [compact]="true"></app-date-selector>
+                <app-date-selector data-test="date-selector" flex-splitter [(date)]="date"
+                    [compact]="true"></app-date-selector>
                 <app-button flex-splitter text="{{'CANCEL' | translate}}" color="danger" look="normal"
                     (onClick)="cancel()">
                 </app-button>
-                <app-button text="{{'OK' | translate}}" color="success" look="solid" (onClick)="ok()"
-                    [disabled]="time == null"></app-button>
+                <app-button data-test="date-time-picker-ok-button" text="{{'OK' | translate}}" color="success"
+                    look="solid" (onClick)="ok()" [disabled]="time == null"></app-button>
             </app-action-bar>
         </div>
         <div *ngIf="calendarDay?.workingHours?.length != 0 && hoursData != null && displayHoursData != null && minutesData != null"
@@ -28,7 +29,8 @@
                     <!-- This hidden icon is used for flex spacing, so that selectedHours text is centered and dropdown icon is aligned right -->
                     <fa-icon style="visibility: hidden;" [icon]="['fas', 'caret-down']" [fixedWidth]="true"></fa-icon>
 
-                    <div>{{selectedHours == null ? ('pages.appointments.CHOOSE_HOUR' | translate) : selectedHours.toString().padStart(2, '0')}}</div>
+                    <div>{{selectedHours == null ? ('pages.appointments.CHOOSE_HOUR' | translate) :
+                        selectedHours.toString().padStart(2, '0')}}</div>
                     <fa-icon [icon]="['fas', 'caret-down']" [fixedWidth]="true"></fa-icon>
                 </app-button>
 
@@ -42,13 +44,13 @@
                     </div>
                 </app-context-menu>
             </div>
-            <div *ngIf="!showAnyHour" class="hour-buttons">
+            <div *ngIf="!showAnyHour" data-test="date-time-picker-hour-buttons" class="hour-buttons">
                 <app-time-button *ngFor="let h of displayHoursData" [data]="h" [selected]="selectedHours == h.time"
                     [containsSelection]="getContainsSelection(h.time, 0)" (click)="selectHours(h.time)">
                 </app-time-button>
             </div>
             <div class="minutes-buttons-container">
-                <div class="minutes-buttons">
+                <div data-test="date-time-picker-minute-buttons" class="minutes-buttons">
                     <app-time-button *ngFor="let m of minutesData[$any(selectedHours)]" [data]="m"
                         [selected]="selectedMinutes == m.time"
                         [containsSelection]="getContainsSelection($any(selectedHours), m.time)"

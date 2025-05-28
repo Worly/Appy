@@ -6,11 +6,11 @@
             <div class="date" *ngIf="showDate">
                 {{renderedAppointment.dateFormatted}}
             </div>
-            <div class="time">{{renderedAppointment.time}}</div>
-            <div class="service">{{renderedAppointment.service}}</div>
+            <div data-test="single-appointment-time" class="time">{{renderedAppointment.time}}</div>
+            <div data-test="single-appointment-service" class="service">{{renderedAppointment.service}}</div>
         </div>
 
-        <div class="client">{{renderedAppointment.client}}</div>
+        <div data-test="single-appointment-client" class="client">{{renderedAppointment.client}}</div>
     </div>
     <app-appointment-status-icons class="status-icons" [hasNotes]="renderedAppointment.hasNotes"
         [status]="renderedAppointment.status" [previousNoShow]="renderedAppointment.previousNoShow"

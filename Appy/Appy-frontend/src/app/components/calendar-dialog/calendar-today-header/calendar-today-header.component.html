@@ -1,5 +1,6 @@
 <div class="calendar-header">
-    <app-button [text]="periodLabel" (onClick)="periodLabelClick()" look="transparent" alignContent="center">
+    <app-button data-test="calendar-period-button" [text]="periodLabel" (onClick)="periodLabelClick()"
+        look="transparent" alignContent="center">
     </app-button>
 
     <app-button [ngClass]="{'bold-button': isTodaySelected()}" [style.marginLeft]="'auto'"
@@ -7,9 +8,9 @@
     </app-button>
 
     <div>
-        <app-button class="arrow-button" icon="angle-left" look="transparent" alignContent="center"
-            (onClick)="previousClick()"></app-button>
-        <app-button class="arrow-button" icon="angle-right" look="transparent" alignContent="center"
-            (onClick)="nextClick()"></app-button>
+        <app-button data-test="calendar-previous-button" class="arrow-button" icon="angle-left" look="transparent"
+            alignContent="center" (onClick)="previousClick()"></app-button>
+        <app-button data-test="calendar-next-button" class="arrow-button" icon="angle-right" look="transparent"
+            alignContent="center" (onClick)="nextClick()"></app-button>
     </div>
 </div>

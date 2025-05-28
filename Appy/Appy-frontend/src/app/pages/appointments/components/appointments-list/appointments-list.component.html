@@ -1,9 +1,9 @@
 <app-loading *ngIf="appointments == null" [style.height.vh]="100"></app-loading>
 
-<div class="current-date">
+<div data-test="appointments-list-current-date" class="current-date">
     {{getCurrentDate()?.format("DD.MM.YYYY - dddd")}}
 </div>
-<div>
+<div data-test="appointments-list">
     <div *ngIf="isReachedTop() && appointments?.length != 0" class="no-appointments">
         {{"pages.appointments.NO_APPOINTMENTS_BEFORE" | translate}}
     </div>
@@ -11,7 +11,8 @@
         <app-loading [hasShadow]="false"></app-loading>
     </div>
 
-    <div *ngFor="let i of renderedItems; let index = index" class="item">
+    <div *ngFor="let i of renderedItems; let index = index" data-test="appointments-list-item"
+        [attr.data-test-data]="i.type" class="item">
         <div #dateElement *ngIf="i.type == 'date'" class="date" [attr.data-date]="i.dateISO"
             [ngClass]="{'empty-date': i.isEmptyDate}">
             {{i.dateFormatted}} {{i.isEmptyDate ? " - " + ("pages.appointments.NO_APPOINTMENTS" | translate) : ""}}

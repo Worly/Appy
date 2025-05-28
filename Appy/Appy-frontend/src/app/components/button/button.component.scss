@@ -4,10 +4,6 @@
 
 .my-button {
     display: inline-flex;
-    align-items: center;
-    gap: 4px;
-
-    overflow: auto;
 
     position: relative;
 
@@ -19,6 +15,7 @@
     &:not(.icon-only) {
         padding: 6px 15px;
     }
+
     &.icon-only {
         padding: 0px;
     }
@@ -36,6 +33,7 @@
 
     &:not(.my-disabled) {
         transition: box-shadow 0.1s;
+
         &::before {
             content: "";
             position: absolute;
@@ -47,10 +45,12 @@
 
             transition: opacity 0.1s;
         }
+
         &:hover::before {
             background-color: rgb(var(--rgb-text));
             opacity: 0.08;
         }
+
         &:active::before {
             background-color: rgb(var(--rgb-text));
             opacity: 0.15;
@@ -65,6 +65,15 @@
     --inside-border-radius: calc(var(--default-border-radius) - var(--border-width));
 }
 
+.button-content {
+    display: inline-flex;
+    position: relative;
+    align-items: center;
+    gap: 4px;
+
+    overflow: auto;
+}
+
 .curved.circle {
     --border-radius: 1000px;
     --inside-border-radius: 1000px;
@@ -72,6 +81,7 @@
 
 .curved {
     border-radius: var(--border-radius);
+
     &::before {
         border-radius: var(--border-radius);
     }
@@ -83,6 +93,7 @@
 
 .curved-top-left {
     border-top-left-radius: var(--border-radius);
+
     &::before {
         border-top-left-radius: var(--border-radius);
     }
@@ -94,6 +105,7 @@
 
 .curved-top-right {
     border-top-right-radius: var(--border-radius);
+
     &::before {
         border-top-right-radius: var(--border-radius);
     }
@@ -105,6 +117,7 @@
 
 .curved-bottom-left {
     border-bottom-left-radius: var(--border-radius);
+
     &::before {
         border-bottom-left-radius: var(--border-radius);
     }
@@ -116,6 +129,7 @@
 
 .curved-bottom-right {
     border-bottom-right-radius: var(--border-radius);
+
     &::before {
         border-bottom-right-radius: var(--border-radius);
     }
@@ -131,21 +145,25 @@
         color: rgb(var(--rgb-success));
         border-color: rgb(var(--rgb-success));
     }
+
     &-danger {
         background-color: rgb(var(--rgb-danger));
         color: rgb(var(--rgb-danger));
         border-color: rgb(var(--rgb-danger));
     }
+
     &-warning {
         background-color: rgb(var(--rgb-warning));
         color: rgb(var(--rgb-warning));
         border-color: rgb(var(--rgb-warning));
     }
+
     &-normal {
         background-color: rgb(var(--rgb-normal));
         color: rgb(var(--rgb-normal));
         border-color: rgb(var(--rgb-input-border));
     }
+
     &-inherit {
         background-color: inherit;
         color: inherit;
@@ -165,33 +183,42 @@
             &-success {
                 color: rgb(var(--rgb-text-on-success));
             }
+
             &-danger {
                 color: rgb(var(--rgb-text-on-danger));
             }
+
             &-warning {
                 color: rgb(var(--rgb-text-on-warning));
             }
+
             &-normal {
                 color: rgb(var(--rgb-text-on-normal));
             }
+
             &-inherit {
                 color: inherit;
             }
         }
+
         border-width: 0px;
     }
+
     &-outlined {
         background-color: rgb(var(--rgb-input-background));
         border-width: var(--border-width);
     }
+
     &-normal {
         background-color: rgb(var(--rgb-input-background));
         border-width: 0px;
     }
+
     &-transparent {
         background-color: transparent;
         border-width: 0px;
     }
+
     &-custom {
         background-color: var(--custom-button-color);
         color: var(--custom-text-color);
@@ -204,12 +231,15 @@
     &-solid {
         border-style: solid;
     }
+
     &-dashed {
         border-style: dashed;
     }
+
     &-dotted {
         border-style: dotted;
     }
+
     &-double {
         border-style: double;
     }
@@ -219,9 +249,11 @@
     &-left {
         justify-content: left;
     }
+
     &-center {
         justify-content: center;
     }
+
     &-right {
         justify-content: right;
     }
@@ -231,9 +263,11 @@
     &-left {
         text-align: left;
     }
+
     &-center {
         text-align: center;
     }
+
     &-right {
         text-align: right;
     }
@@ -243,6 +277,7 @@
     &-left {
         flex-direction: row;
     }
+
     &-right {
         flex-direction: row-reverse;
     }
@@ -252,6 +287,6 @@
     vertical-align: middle;
 }
 
-.my-button.icon-only > .my-icon {
+.my-button.icon-only>.button-content>.my-icon {
     margin: 4px 6px;
 }
