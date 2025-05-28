@@ -91,7 +91,7 @@ jobs:
         working-directory: ./Appy/Appy-frontend
 
       - name: Start frontend
-        run: ng serve &
+        run: npx ng serve --host 0.0.0.0 &
         working-directory: ./Appy/Appy-frontend
         shell: bash
 
