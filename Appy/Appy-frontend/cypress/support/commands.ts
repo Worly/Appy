@@ -42,7 +42,6 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
-import { forEach } from "cypress/types/lodash";
 import { appConfig } from "src/app/app.config";
 
 export function getElement(dataTestAttr: string) {
@@ -71,24 +70,18 @@ export function login(user: string) {
     })
 }
 
-export function expectURL(url: string) {
-    if (url.startsWith("/")) {
-        url = url.substring(1);
+export function expectURL(url: RegExp | string) {
+    if (typeof(url) == "string") {
+        url = new RegExp(url);
     }
-    
-    cy.url().should(currentUrl => {
-        if (currentUrl.includes("?")) {
-            currentUrl = currentUrl.split("?")[0];
-        }
 
-        expect(currentUrl).to.equal(`${Cypress.config().baseUrl}${url}`);
-    })
+    expectURLs(url);
 }
 
-export function expectURLs(...url: string[]) {
+export function expectURLs(...url: RegExp[]) {
     for (let i = 0; i < url.length; i++) {
-        if (url[i].startsWith("/")) {
-            url[i] = url[i].substring(1);
+        if (url[i].source.startsWith("\\/")) {
+            url[i] = new RegExp(url[i].source.substring(2));
         }
     }
 
@@ -96,10 +89,16 @@ export function expectURLs(...url: string[]) {
         if (currentUrl.includes("?")) {
             currentUrl = currentUrl.split("?")[0];
         }
+
+        if (currentUrl.indexOf(Cypress.config().baseUrl!) == -1) {
+            throw new Error("Current url should start with baseUrl")
+        }
+
+        currentUrl = currentUrl.slice(Cypress.config().baseUrl!.length);
 
         let found = false;
         for (let i = 0; i < url.length; i++) {
-            if (currentUrl === `${Cypress.config().baseUrl}${url[i]}`) {
+            if (currentUrl.match(url[i])) {
                 found = true;
                 break;
             }

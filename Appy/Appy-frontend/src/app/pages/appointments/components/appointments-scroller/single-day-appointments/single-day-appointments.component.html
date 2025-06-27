@@ -35,8 +35,9 @@
 
     <div *ngIf="appointments != null">
         <div *ngFor="let ap of renderedAppointments" class="single-appointment" data-test="single-appointment"
-            [style.top.%]="ap.top" [style.left.%]="ap.left" [style.height.%]="ap.height" [style.width.%]="ap.width"
-            [style.backgroundColor]="ap.color" (click)="onAppointmentClick(ap.source)">
+            [attr.data-appId]="ap.source.id" [style.top.%]="ap.top" [style.left.%]="ap.left"
+            [style.height.%]="ap.height" [style.width.%]="ap.width" [style.backgroundColor]="ap.color"
+            (click)="onAppointmentClick(ap.source)">
             <div class="appointment-time" data-test="appointment-time">
                 {{ap.time}}
             </div>

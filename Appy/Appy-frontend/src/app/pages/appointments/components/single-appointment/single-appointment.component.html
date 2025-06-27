@@ -103,7 +103,8 @@
         <app-button icon="trash" color="danger" look="solid" text="{{'DELETE' | translate}}"
             [disabled]="isLoadingDelete" [isLoading]="isLoadingDelete" (onClick)="onDelete()">
         </app-button>
-        <app-button style="margin-left: auto" icon="pen" text="{{'EDIT' | translate}}" (onClick)="goToEdit()">
+        <app-button data-test="appointment-edit-button" style="margin-left: auto" icon="pen"
+            text="{{'EDIT' | translate}}" (onClick)="goToEdit()">
         </app-button>
     </div>
 </div>

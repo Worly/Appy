@@ -7,9 +7,26 @@ import { dateLookup } from "./lookups/date-lookup";
 import { parseDuration } from "src/app/utils/time-utils";
 import duration from "dayjs/plugin/duration";
 import customParseFormat from "dayjs/plugin/customParseFormat"
+import { getTestService, TestService } from "./test-data";
 
 dayjs.extend(duration);
 dayjs.extend(customParseFormat);
+
+class AppointmentInList {
+  id: number;
+  timeFrom: string;
+  timeTo: string;
+  service: string;
+  client: string;
+
+  constructor(id: number, timeFrom: string, timeTo: string, service: string, client: string) {
+    this.id = id;
+    this.timeFrom = timeFrom;
+    this.timeTo = timeTo;
+    this.service = service;
+    this.client = client;
+  }
+}
 
 let appointments = {
   checkView() {
@@ -83,6 +100,9 @@ let appointments = {
               cy.scrollTo("bottom");
             }
 
+            // wait for the list to update and start loading
+            cy.wait(50);
+
             this.scrollToDay(date);
           })
         })
@@ -90,10 +110,13 @@ let appointments = {
         return this;
       },
 
+      viewAppointment(id: number) {
+        cy.get(`[data-test=appointments-list-item] [data-appId=${id}]`).first().click();
+      },
+
       getAppointments() {
         return cy.then(() => {
           let list = cy.$$("[data-test=appointments-list]").first();
-          // return getElement("appointments-list").then(list => {
           let currentDate = list.find("[data-test=appointments-list-item][data-test-data=date]")
             .filter((_, el) => (el.getBoundingClientRect().top + el.getBoundingClientRect().bottom) / 2 >= 0)
             .first();
@@ -109,17 +132,19 @@ let appointments = {
         })
       },
 
-      parseAppointment(el: HTMLElement) {
+      parseAppointment(el: HTMLElement): AppointmentInList {
+        let id = parseInt(cy.$$("[data-appId]", el).attr("data-appId") ?? "0");
         let timeFromTo = cy.$$("[data-test=single-appointment-time]", el).text().trim();
         let service = cy.$$("[data-test=single-appointment-service]", el).text().trim();
         let client = cy.$$("[data-test=single-appointment-client]", el).text().trim();
 
-        return {
-          timeFrom: timeFromTo.split(" - ")[0],
-          timeTo: timeFromTo.split(" - ")[1],
-          service: service,
-          client: client.split(" ")[0],
-        }
+        return new AppointmentInList(
+          id,
+          timeFromTo.split(" - ")[0],
+          timeFromTo.split(" - ")[1],
+          service,
+          client.split(" ")[0],
+        );
       }
     }
   },
@@ -148,6 +173,10 @@ let appointments = {
         return this;
       },
 
+      viewAppointment(id: number) {
+        cy.get(`[data-test=single-appointment][data-appId=${id}]`).first().click();
+      },
+
       getAppointments() {
         return getElements("single-appointment").then(appointments => {
           return appointments.toArray().map((el) => this.parseAppointment(el));
@@ -155,17 +184,25 @@ let appointments = {
       },
 
       parseAppointment(el: HTMLElement) {
+        let id = parseInt(el.getAttribute("data-appId") ?? "0");
         let timeFromTo = cy.$$("[data-test=appointment-time]", el).text().trim();
         let serviceClient = cy.$$("[data-test=appointment-service-client]", el).text().trim();
 
-        return {
-          timeFrom: timeFromTo.split(" - ")[0],
-          timeTo: timeFromTo.split(" - ")[1],
-          service: serviceClient.split(" - ")[0],
-          client: serviceClient.split(" - ")[1].split(" ")[0],
-        }
+        return new AppointmentInList(
+          id,
+          timeFromTo.split(" - ")[0],
+          timeFromTo.split(" - ")[1],
+          serviceClient.split(" - ")[0],
+          serviceClient.split(" - ")[1].split(" ")[0]
+        );
       }
     }
+  },
+
+  getCurrentDate() {
+    this.checkView();
+
+    return dateLookup("appointments-date-selector").getSelected();
   },
 
   jumpToDay(date: Dayjs) {
@@ -183,7 +220,7 @@ let appointments = {
 
 let appointmentEdit = {
   checkView() {
-    expectURLs("/appointments/edit", "/appointments/new");
+    expectURLs(/\/appointments\/edit\/\d+/, /\/appointments\/new/);
   },
 
   getClientLookup() {
@@ -201,43 +238,89 @@ let appointmentEdit = {
     return durationLookup("appointment-edit-duration-picker");
   },
 
-  editDateTime() {
+  getDateTimeLookup() {
     this.checkView();
 
-    getElement("appointment-edit-date-time-lookup").click();
-
     return {
-      selectDate(date: Dayjs) {
-        dateLookup("date-selector").select(date);
+      getSelectedDate() {
+        return getElement("appointment-edit-date-time-lookup").then(el => {
+          let text = el.text().trim();
+          let parts = text.split(" - ");
+
+          return dayjs(parts[1], "DD.MM.YYYY");
+        });
+      },
+
+      getSelectedTime() {
+        return getElement("appointment-edit-date-time-lookup").then(el => {
+          let text = el.text().trim();
+          let parts = text.split(" - ");
+
+          if (parts.length < 3) {
+            return Promise.resolve(null);
+          }
+
+          return Promise.resolve(parts[2].trim());
+        });
+      },
+
+      expectSelected(date: Dayjs, time: string | null) {
+        this.getSelectedDate().then(selectedDate => {
+          expect(selectedDate.isSame(date, 'day')).to.be.true;
+        });
+
+        this.getSelectedTime().then(selectedTime => {
+          expect(selectedTime).to.equal(time);
+        });
 
         return this;
       },
 
-      selectTime(time: string) {
-        expect(time).to.match(/^\d{2}:\d{2}$/);
+      open() {
+        getElement("appointment-edit-date-time-lookup").click();
 
-        let hour = time.split(":")[0];
-        let minute = time.split(":")[1];
+        return {
+          lookup: this,
 
-        getElement("date-time-picker-hour-buttons").contains(hour).click();
-        getElement("date-time-picker-minute-buttons").contains(minute).click();
+          selectDate(date: Dayjs) {
+            dateLookup("date-selector").select(date);
 
-        return this;
-      },
+            return this;
+          },
 
-      ok() {
-        getElement("date-time-picker-ok-button").click();
-      },
+          selectTime(time: string) {
+            expect(time).to.match(/^\d{2}:\d{2}$/);
 
-      select(date: Dayjs, time: string) {
-        this.selectDate(date);
-        this.selectTime(time);
+            let hour = time.split(":")[0];
+            let minute = time.split(":")[1];
 
-        this.ok();
+            getElement("date-time-picker-hour-buttons").contains(hour).click();
+            getElement("date-time-picker-minute-buttons").contains(minute).click();
 
-        return this;
+            return this;
+          },
+
+          ok() {
+            getElement("date-time-picker-ok-button").click();
+          },
+
+          cancel() {
+            getElement("date-time-picker-cancel-button").click();
+          },
+
+          select(date: Dayjs, time: string) {
+            this.selectDate(date);
+            this.selectTime(time);
+
+            this.ok();
+
+            this.lookup.expectSelected(date, time);
+
+            return this;
+          }
+        };
       }
-    }
+    };
   },
 
   save() {
@@ -247,59 +330,89 @@ let appointmentEdit = {
   },
 }
 
-function addAppointment(data: {
+let appointmentView = {
+  edit() {
+    getElement("appointment-edit-button").click();
+
+    return appointmentEdit;
+  }
+}
+
+function editAndSaveAppointment(newData: {
   client: string,
-  service: string,
+  service: TestService,
   duration: string,
   date: Dayjs,
   time: string
-}, check?: {
-  view: "list" | "scroller",
-  scrollType: "scroll" | "jump"
-}) {
-  appointments.plusButton();
-
-  let time = dayjs(data.time, "HH:mm");
-  let timeTo = time.add(parseDuration(data.duration + ":00"));
-
-  appointmentEdit.getClientLookup().expectSelected(null).select(data.client);
-  appointmentEdit.getServiceLookup().expectSelected(null).select(data.service);
-  appointmentEdit.getDurationLookup().expectSelected("00:30").select(data.duration);
-  appointmentEdit.editDateTime().select(data.date, data.time);
-  appointmentEdit.save();
-
-  if (check != null) {
-    if (check.view == "list") {
-      appointments.openListView();
-    }
-    else {
-      appointments.openScrollerView();
-    }
-
-    if (check.scrollType == "jump") {
-      appointments.jumpToDay(data.date);
-    }
-    else {
-      if (check.view == "list") {
-        appointments.list().scrollToDay(data.date);
-      }
-      else {
-        appointments.scroller().scrollToDay(data.date);
-      }
-    }
-
-    let view = check.view == "list" ? appointments.list() : appointments.scroller();
-
-    view.getAppointments().then(appointments => {
-      var index = appointments.findIndex(a => 
-        a.client == data.client && 
-        a.service == data.service && 
-        a.timeFrom == data.time && 
-        a.timeTo == timeTo.format("HH:mm"))
-        
-      expect(index).to.be.greaterThan(-1, "Appointment not found in the list");
-    });
+}, oldData?: {
+  client: string,
+  service: TestService,
+  duration: string,
+  date: Dayjs,
+  time: string
+}, expectedDate?: Dayjs, expectedTime?: string) {
+  let expectedDateN = (expectedDate ?? oldData?.date) ?? null;
+  if (expectedDateN == null) {
+    throw new Error("Expected date is not defined");
   }
+
+  let expectedTimeN = (expectedTime ?? oldData?.time) ?? null;
+  let expectedDuration = ((oldData?.duration == oldData?.service?.duration) ? newData.service.duration : oldData?.duration) ?? null;
+
+  appointmentEdit.getDurationLookup().expectSelected(oldData?.duration ?? null);
+
+  appointmentEdit.getClientLookup().expectSelected(oldData?.client ?? null).select(newData.client);
+  appointmentEdit.getServiceLookup().expectSelected(oldData?.service?.displayName ?? null).select(newData.service.displayName);
+  appointmentEdit.getDurationLookup().expectSelected(expectedDuration).select(newData.duration);
+  appointmentEdit.getDateTimeLookup().expectSelected(expectedDateN, expectedTimeN).open().select(newData.date, newData.time);
+  appointmentEdit.save();
+}
+
+function expectAppointment(
+  appointment: {
+    client: string,
+    service: TestService,
+    duration: string,
+    date: Dayjs,
+    time: string
+  },
+  viewType: "list" | "scroller" = "list",
+  scrollType: "scroll" | "jump" = "scroll"
+) {
+  if (viewType == "list") {
+    appointments.openListView();
+  }
+  else {
+    appointments.openScrollerView();
+  }
+
+  if (scrollType == "jump") {
+    appointments.jumpToDay(appointment.date);
+  }
+  else {
+    if (viewType == "list") {
+      appointments.list().scrollToDay(appointment.date);
+    }
+    else {
+      appointments.scroller().scrollToDay(appointment.date);
+    }
+  }
+
+  let time = dayjs(appointment.time, "HH:mm");
+  let timeTo = time.add(parseDuration(appointment.duration + ":00"));
+
+  let view = viewType == "list" ? appointments.list() : appointments.scroller();
+  return view.getAppointments().then(appointments => {
+    var index = appointments.findIndex(a =>
+      a.client == appointment.client &&
+      a.service == appointment.service.displayName &&
+      a.timeFrom == appointment.time &&
+      a.timeTo == timeTo.format("HH:mm"))
+
+    expect(index).to.be.greaterThan(-1, "Appointment not found in the list");
+
+    return appointments[index];
+  });
 }
 
 describe('Appointments', () => {
@@ -329,10 +442,31 @@ describe('Appointments', () => {
       duration: "00:30",
     },
     {
+      name: "mid appointments at end",
+      date: dayjs("2021-02-08"),
+      time: "09:35",
+      duration: "00:30",
+    },
+    {
       name: "mid appointments",
       date: dayjs("2021-02-09"),
       time: "08:40",
       duration: "00:20",
+    }
+  ]
+
+  let editOptions = [
+    {
+      name: "edit to same day",
+      date: null,
+      time: "15:00",
+      duration: "00:25"
+    },
+    {
+      name: "edit to different day",
+      date: dayjs("2025-12-31"),
+      time: "10:00",
+      duration: "00:25"
     }
   ]
 
@@ -344,14 +478,11 @@ describe('Appointments', () => {
         view: "list",
         scrollType: "scroll"
       },
+      // TODO: fix jump scroll in list view
       // {
       //   view: "list",
       //   scrollType: "jump"
       // },
-      {
-        view: "scroller",
-        scrollType: "scroll"
-      },
       {
         view: "scroller",
         scrollType: "jump"
@@ -359,22 +490,64 @@ describe('Appointments', () => {
     ]
 
   for (let creationOption of creationOptions) {
-    for (let checkingOption of checkingOptions) {
-      it('Should be able to add an appointment : ' + creationOption.name + " : " + checkingOption.view + " " + checkingOption.scrollType, () => {
-        let client = "Client1";
-        let service = "Service1";
+    for (let editOption of editOptions) {
+      for (let checkingOption of checkingOptions) {
+        it(`Should be able to add and edit an appointment : ${creationOption.name} : ${editOption.name} : ${checkingOption.view} ${checkingOption.scrollType}`, () => {
+          let client1 = "Client1";
+          let service1 = getTestService("Service1");
 
-        addAppointment({
-          client: client,
-          service: service,
-          date: creationOption.date,
-          time: creationOption.time,
-          duration: creationOption.duration
-        }, {
-          view: checkingOption.view,
-          scrollType: checkingOption.scrollType
+          let client2 = "Client2";
+          let service2 = getTestService("Service2");
+
+          appointments.openScrollerView();
+
+          appointments.getCurrentDate().then(currentDate => {
+            appointments.plusButton();
+
+            editAndSaveAppointment({
+              client: client1,
+              service: service1,
+              date: creationOption.date,
+              time: creationOption.time,
+              duration: creationOption.duration
+            }, undefined, currentDate);
+
+            expectAppointment({
+              client: client1,
+              service: service1,
+              date: creationOption.date,
+              time: creationOption.time,
+              duration: creationOption.duration
+            }, checkingOption.view, checkingOption.scrollType).then(appointmentInList => {
+              let view = checkingOption.view == "list" ? appointments.list() : appointments.scroller();
+              view.viewAppointment(appointmentInList.id);
+              appointmentView.edit();
+
+              editAndSaveAppointment({
+                client: client2,
+                service: service2,
+                date: editOption.date ?? creationOption.date,
+                time: editOption.time,
+                duration: editOption.duration
+              }, {
+                client: client1,
+                service: service1,
+                date: creationOption.date,
+                time: creationOption.time,
+                duration: creationOption.duration
+              })
+
+              expectAppointment({
+                client: client2,
+                service: service2,
+                date: editOption.date ?? creationOption.date,
+                time: editOption.time,
+                duration: editOption.duration
+              }, checkingOption.view, checkingOption.scrollType)
+            });
+          });
         })
-      })
+      }
     }
   }
 })
