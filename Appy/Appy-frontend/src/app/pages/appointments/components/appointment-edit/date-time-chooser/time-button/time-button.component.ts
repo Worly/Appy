@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Appointment } from 'src/app/models/appointment';
+import { AppointmentView } from 'src/app/models/appointment';
 import { RenderedInterval } from 'src/app/utils/rendered-interval';
 
 @Component({
@@ -32,5 +32,5 @@ export type TimeData = {
   isWorkingHour: boolean;
   isFreeTime: boolean;
   isFreeTimeIncluding: boolean;
-  renderedAppointments: RenderedInterval<Appointment>[];
+  renderedAppointments: RenderedInterval<AppointmentView>[];
 }

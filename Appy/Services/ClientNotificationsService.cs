@@ -11,9 +11,9 @@ namespace Appy.Services
     {
         Task<ClientNotificationsSettings> GetSettings(int facilityId);
         Task<ClientNotificationsSettings> UpdateSettings(int facilityId, ClientNotificationsSettingsDTO dto);
-        Task<bool> CanSendAppointmentConfirmationMessage(Client client);
-        Task SendAppointmentConfirmationMessage(Client client, Appointment appointment, CultureInfo cultureInfo);
-        Task SendAppointmentReminderMessage(Client client, Appointment appointment, CultureInfo cultureInfo);
+        Task<bool> CanSendAppointmentConfirmationMessage(int clientId);
+        Task SendAppointmentConfirmationMessage(int clientId, AppointmentViewDTO appointment, CultureInfo cultureInfo);
+        Task SendAppointmentReminderMessage(int clientId, AppointmentViewDTO appointment, CultureInfo cultureInfo);
     }
 
     public class ClientNotificationsService : IClientNotificationsService
@@ -56,8 +56,12 @@ namespace Appy.Services
             return facility.ClientNotificationsSettings;
         }
 
-        public async Task<bool> CanSendAppointmentConfirmationMessage(Client client)
+        public async Task<bool> CanSendAppointmentConfirmationMessage(int clientId)
         {
+            var client = await context.Clients.FirstOrDefaultAsync(c => c.Id == clientId);
+            if (client == null)
+                throw new NotFoundException();
+
             var facility = await context.Facilities.Include(f => f.ClientNotificationsSettings).FirstOrDefaultAsync(f => f.Id == client.FacilityId);
             if (facility == null)
                 throw new NotFoundException();
@@ -76,8 +80,12 @@ namespace Appy.Services
                 !string.IsNullOrEmpty(messagingServiceManager.GetAccessToken(c.Type, settings)));
         }
 
-        public async Task SendAppointmentConfirmationMessage(Client client, Appointment appointment, CultureInfo cultureInfo)
+        public async Task SendAppointmentConfirmationMessage(int clientId, AppointmentViewDTO appointment, CultureInfo cultureInfo)
         {
+            var client = await context.Clients.FirstOrDefaultAsync(c => c.Id == clientId);
+            if (client == null)
+                throw new NotFoundException();
+
             var facility = await context.Facilities.Include(f => f.ClientNotificationsSettings).FirstOrDefaultAsync(f => f.Id == client.FacilityId);
             if (facility == null)
                 throw new NotFoundException();
@@ -93,8 +101,12 @@ namespace Appy.Services
             await SendMessageTo(settings, client, message);
         }
 
-        public async Task SendAppointmentReminderMessage(Client client, Appointment appointment, CultureInfo cultureInfo)
+        public async Task SendAppointmentReminderMessage(int clientId, AppointmentViewDTO appointment, CultureInfo cultureInfo)
         {
+            var client = await context.Clients.FirstOrDefaultAsync(c => c.Id == clientId);
+            if (client == null)
+                throw new NotFoundException();
+
             var facility = await context.Facilities.Include(f => f.ClientNotificationsSettings).FirstOrDefaultAsync(f => f.Id == client.FacilityId);
             if (facility == null)
                 throw new NotFoundException();
@@ -147,7 +159,7 @@ namespace Appy.Services
             throw new BadRequestException("pages.client-notifications.errors.MESSAGE_FAILED_TO_SEND");
         }
 
-        private string FillInMessageTemplate(string template, CultureInfo cultureInfo, Client client, Appointment appointment)
+        private string FillInMessageTemplate(string template, CultureInfo cultureInfo, Client client, AppointmentViewDTO appointment)
         {
             return template
                 .Replace("{clientName}", client.Name)

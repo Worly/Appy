@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Duration } from 'dayjs/plugin/duration';
-import { Appointment, AppointmentStatus } from 'src/app/models/appointment';
+import { AppointmentView, AppointmentStatus } from 'src/app/models/appointment';
 import { ClientDTO } from 'src/app/models/client';
 import { ServiceColorsService } from 'src/app/pages/services/services/service-colors.service';
 
@@ -11,6 +11,8 @@ type RenderedAppointment = {
   serviceColor: string;
   status: AppointmentStatus;
   hasNotes: boolean;
+  previousNoShow: boolean;
+  isFirstAppointment: boolean;
   client: string;
   dateISO: string;
   dateFormatted: string;
@@ -23,7 +25,7 @@ type RenderedAppointment = {
 })
 export class SingleAppointmentListItemComponent {
   @Input()
-  set appointment(value: Appointment) {
+  set appointment(value: AppointmentView) {
     this.render(value);
   }
 
@@ -37,7 +39,7 @@ export class SingleAppointmentListItemComponent {
 
   constructor(private serviceColorsService: ServiceColorsService) {}
 
-  private render(ap: Appointment) {
+  private render(ap: AppointmentView) {
     this.renderedAppointment = {
       id: ap.id,
       time: `${ap.time?.format("HH:mm")} - ${ap.time?.add(ap.duration as Duration).format("HH:mm")}`,
@@ -45,6 +47,8 @@ export class SingleAppointmentListItemComponent {
       serviceColor: this.serviceColorsService.get(ap.service?.colorId),
       status: ap.status!,
       hasNotes: ap.notes != null && ap.notes != "",
+      previousNoShow: ap.previousAppointment != null && ap.previousAppointment.status === "NoShow",
+      isFirstAppointment: ap.previousAppointment == null,
       client: ClientDTO.getFullname(ap.client!) as string,
       dateISO: ap.date?.format("YYYY-MM-DD") ?? "",
       dateFormatted: ap.date?.format("DD.MM.YYYY") ?? "",

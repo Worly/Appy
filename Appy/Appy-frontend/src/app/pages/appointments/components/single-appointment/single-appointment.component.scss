@@ -20,6 +20,15 @@
     }
 }
 
+.first-appointment-warning {
+    display: flex;
+    gap: 15px;
+    font-size: 1rem;
+    margin-bottom: 15px;
+
+    color: rgb(var(--rgb-success))
+}
+
 .date {
     display: flex;
     gap: 15px;
@@ -92,4 +101,36 @@
     display: flex;
     gap: 5px;
     margin-top: 20px;
+}
+
+.previous-appointment-label {
+    margin-bottom: 5px;
+    opacity: 50%;
+}
+
+.previous-appointment-button {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+.previous-appointment-color {
+    width: 10px;
+    height: 40px;
+}
+
+.previous-appointment-date {
+    display: flex;
+    gap: 5px;
+
+    .date-diff {
+        opacity: 50%;
+    }
+}
+
+.previous-appointment-bottom-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }

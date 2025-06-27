@@ -27,26 +27,9 @@
     &.last {
         margin-bottom: 40px;
     }
+}
 
-    .status-icon-container {
-        margin-left: auto;
-        margin-top: auto;
-
-        display: flex;
-        gap: 5px;
-
-        fa-icon {
-            opacity: 50%;
-        }
-
-        fa-icon.warn {
-            opacity: 100%;
-            color: rgb(var(--rgb-warning))
-        }
-
-        fa-icon.danger {
-            opacity: 100%;
-            color: rgb(var(--rgb-danger))
-        }
-    }
+.status-icons {
+    margin-left: auto;
+    margin-top: auto;
 }

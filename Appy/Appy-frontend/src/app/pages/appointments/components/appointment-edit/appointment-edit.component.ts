@@ -3,7 +3,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Data, ParamMap, Router } from '@angular/router';
 import { combineLatest, debounceTime, Observable, Subscription } from 'rxjs';
 import { NotifyDialogService } from 'src/app/components/notify-dialog/notify-dialog.service';
-import { Appointment, AppointmentStatus } from 'src/app/models/appointment';
+import { Appointment, AppointmentStatus, AppointmentView } from 'src/app/models/appointment';
 import { ServiceDTO } from 'src/app/models/service';
 import { DateTimeChooserResult } from './date-time-chooser/date-time-chooser.component';
 import { setUrlParams } from 'src/app/utils/dynamic-url-params';
@@ -107,7 +107,7 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
 
     this.isLoadingSave = true;
 
-    let action: Observable<{ model: Appointment, headers: HttpHeaders }>;
+    let action: Observable<{ model: AppointmentView, headers: HttpHeaders }>;
 
     if (this.isNew)
       action = this.appointmentService.addNewWithHeaders(this.appointment as Appointment, { ignoreTimeNotAvailable });
@@ -115,7 +115,7 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
       action = this.appointmentService.saveWithHeaders(this.appointment as Appointment, { ignoreTimeNotAvailable });
 
     this.subs.push(action.subscribe({
-      next: (r: { model: Appointment, headers: HttpHeaders }) => {
+      next: (r: { model: AppointmentView, headers: HttpHeaders }) => {
         this.notifySaved(r.model.id, r.model.status as AppointmentStatus, r.headers.get("X-Can-Notify-Client") == "true");
         this.goBack();
       },

@@ -1,13 +1,13 @@
 import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { min, Subscription } from 'rxjs';
-import { Appointment } from 'src/app/models/appointment';
+import { Subscription } from 'rxjs';
+import { Appointment, AppointmentView } from 'src/app/models/appointment';
 import { CalendarDay } from 'src/app/models/calendar-day';
 import { FreeTime } from 'src/app/models/free-time';
 import { WorkingHour } from 'src/app/models/working-hours';
 import { DateSmartCaching } from 'src/app/utils/smart-caching';
 import { AppointmentsScrollerComponent } from '../../appointments-scroller/appointments-scroller.component';
 import { Router } from '@angular/router';
-import { cropRenderedInterval, getIntervalHeight, getIntervalTop, getRenderedAppointments, RenderedInterval } from 'src/app/utils/rendered-interval';
+import { cropRenderedInterval, getIntervalHeight, getIntervalTop, getRenderedAppointmentViews, RenderedInterval } from 'src/app/utils/rendered-interval';
 import { overlap, timeOnly } from 'src/app/utils/time-utils';
 import dayjs from "dayjs";
 import { Dayjs } from "dayjs";
@@ -226,7 +226,7 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
 
     let appointments = this.calendarDay.appointments?.filter(a => a.id != this.appointment?.id);
 
-    let renderedAppointments = getRenderedAppointments(this.date, dayjs({ hours: 0 }), dayjs({ hours: 23 }), appointments ?? null, this.serviceColorsService, { layout: true });
+    let renderedAppointments = getRenderedAppointmentViews(this.date, dayjs({ hours: 0 }), dayjs({ hours: 23 }), appointments ?? null, this.serviceColorsService, { layout: true });
 
     for (let h = 0; h < 24; h++) {
       this.minutesData[h] = [];
@@ -245,7 +245,7 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
         let isFreeMinute = isFreeHour && this.freeTimesSmartCaching.singleData.some(f => time.isBetween(f.from, f.to, null, "[]"));
         let isFreeMinuteIncluding = isFreeHourIncluding && this.freeTimesSmartCaching.singleData.some(f => time.isBetween(f.from, f.toIncludingDuration, null, "[)"));
 
-        let localRenderedAppointments: RenderedInterval<Appointment>[] = [];
+        let localRenderedAppointments: RenderedInterval<AppointmentView>[] = [];
         for (let ap of renderedAppointments) {
           let ri = { ...ap };
           ri.top = getIntervalTop(time, endTime, ap.source.time as Dayjs);
@@ -266,7 +266,7 @@ export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewIni
         this.minutesData[h].push(minutesData);
       }
 
-      let localRenderedAppointments: RenderedInterval<Appointment>[] = [];
+      let localRenderedAppointments: RenderedInterval<AppointmentView>[] = [];
       for (let ap of renderedAppointments) {
         let ri = { ...ap };
         ri.top = getIntervalTop(time, time.add(1, "hour"), ap.source.time as Dayjs);

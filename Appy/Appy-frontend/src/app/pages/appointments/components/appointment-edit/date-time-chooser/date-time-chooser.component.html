@@ -13,8 +13,8 @@
                 </app-button>
                 <app-date-selector data-test="date-selector" flex-splitter [(date)]="date"
                     [compact]="true"></app-date-selector>
-                <app-button flex-splitter text="{{'CANCEL' | translate}}" color="danger" look="normal"
-                    (onClick)="cancel()">
+                <app-button data-test="date-time-picker-cancel-button" flex-splitter text="{{'CANCEL' | translate}}"
+                    color="danger" look="normal" (onClick)="cancel()">
                 </app-button>
                 <app-button data-test="date-time-picker-ok-button" text="{{'OK' | translate}}" color="success"
                     look="solid" (onClick)="ok()" [disabled]="time == null"></app-button>

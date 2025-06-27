@@ -2,7 +2,21 @@
 
 namespace Appy.DTOs
 {
-    public class AppointmentDTO
+    public class AppointmentEditDTO
+    {
+        public DateOnly Date { get; set; }
+        public TimeOnly Time { get; set; }
+        public TimeSpan Duration { get; set; }
+
+        public ServiceDTO Service { get; set; }
+        public ClientDTO Client { get; set; }
+
+        public AppointmentStatus Status { get; set; }
+
+        public string? Notes { get; set; }
+    }
+
+    public class AppointmentViewDTO
     {
         public int Id { get; set; }
 
@@ -16,9 +30,11 @@ namespace Appy.DTOs
         public AppointmentStatus Status { get; set; }
 
         public string? Notes { get; set; }
-        
-        public DateTime CreatedAt { get; set; } 
+
+        public DateTime CreatedAt { get; set; }
         public DateTime LastUpdatedAt { get; set; }
+
+        public AppointmentViewDTO? PreviousAppointment { get; set; }
     }
 
     public class FreeTimeDTO

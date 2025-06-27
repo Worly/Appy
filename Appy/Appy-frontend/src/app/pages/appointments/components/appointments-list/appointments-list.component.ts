@@ -1,15 +1,12 @@
 import { ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import dayjs, { Dayjs } from 'dayjs';
-import { Duration } from 'dayjs/plugin/duration';
 import _ from 'lodash';
-import { DialogComponent } from 'src/app/components/dialog/dialog.component';
-import { Appointment } from 'src/app/models/appointment';
+import { AppointmentView } from 'src/app/models/appointment';
 import { ServiceColorsService } from 'src/app/pages/services/services/service-colors.service';
 import { BeforeAttach, BeforeDetach } from 'src/app/services/attach-detach-hooks.service';
-import { PageableListDatasource } from 'src/app/shared/services/base-model-service';
 import { AppointmentService } from '../../services/appointment.service';
 import { appFilterToSmartFilter, AppointmentsFilter } from '../appointments/appointments.component';
-import { ClientDTO } from 'src/app/models/client';
+import { PageableListDatasource } from 'src/app/shared/services/datasource';
 
 @Component({
   selector: 'app-appointments-list',
@@ -47,16 +44,16 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
 
   private startDate: Dayjs = dayjs();
 
-  private datasource?: PageableListDatasource<Appointment>;
+  private datasource?: PageableListDatasource<AppointmentView>;
 
-  public appointments: Appointment[] | null = null;
+  public appointments: AppointmentView[] | null = null;
 
   public renderedItems: (RenderedType & (RenderedAppointment | RenderedDate))[] = [];
 
   keptScrollPosition: number | null = null;
   keptScrollElement: (() => HTMLElement | undefined) | null = null;
   
-  viewingAppointmentId: number = 0;
+  viewingAppointmentId: number | undefined;
 
   private detaching: boolean = false;
 
@@ -350,7 +347,7 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
   }
 }
 
-function appointmentSort(a: Appointment, b: Appointment): number {
+function appointmentSort(a: AppointmentView, b: AppointmentView): number {
   let dateDiff = a.date?.diff(b.date, "date") as number;
   if (dateDiff != 0)
     return dateDiff;
@@ -371,7 +368,7 @@ export type RenderedAppointment = {
   type: "appointment";
   id: number;
   dateISO: string;
-  appointment: Appointment;
+  appointment: AppointmentView;
   isLast: boolean;
 }
 

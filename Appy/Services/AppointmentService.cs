@@ -3,21 +3,23 @@ using Appy.DTOs;
 using Appy.Exceptions;
 using Appy.Services.SmartFiltering;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 
 namespace Appy.Services
 {
     public interface IAppointmentService
     {
-        Task<List<Appointment>> GetAll(DateOnly date, int facilityId, SmartFilter? filter);
-        Task<List<Appointment>> GetList(DateOnly date, Direction direction, int skip, int take, SmartFilter? filter, int facilityId);
-        Task<Appointment> GetById(int id, int facilityId);
-        Task<Appointment> AddNew(AppointmentDTO dto, int facilityId, bool ignoreTimeNotAvailable);
-        Task<Appointment> Edit(int id, AppointmentDTO dto, int facilityId, bool ignoreTimeNotAvailable);
-        Task<Appointment> SetStatus(int id, AppointmentStatus status, int facilityId);
+        Task<List<AppointmentViewDTO>> GetAll(DateOnly date, int facilityId, bool findPrevious, SmartFilter? filter);
+        Task<List<AppointmentViewDTO>> GetList(DateOnly date, Direction direction, int skip, int take, SmartFilter? filter, int facilityId);
+        Task<AppointmentViewDTO> GetById(int id, int facilityId);
+        Task<AppointmentViewDTO> AddNew(AppointmentEditDTO dto, int facilityId, bool ignoreTimeNotAvailable);
+        Task<AppointmentViewDTO> Edit(int id, AppointmentEditDTO dto, int facilityId, bool ignoreTimeNotAvailable);
+        Task<AppointmentViewDTO> SetStatus(int id, AppointmentStatus status, int facilityId);
         Task Delete(int id, int facilityId);
 
-        List<FreeTimeDTO> GetFreeTimes(List<Appointment> appointmentsOfTheDay, List<WorkingHour> workingHours, Service service, TimeSpan duration);
-        bool IsAppointmentTimeOk(List<Appointment> appointmentsOfTheDay, List<WorkingHour> workingHours, Appointment appointment);
+        List<FreeTimeDTO> GetFreeTimes(List<AppointmentViewDTO> appointmentsOfTheDay, List<WorkingHour> workingHours, ServiceDTO service, TimeSpan duration);
+        bool IsAppointmentTimeOk(List<AppointmentViewDTO> appointmentsOfTheDay, List<WorkingHour> workingHours, AppointmentEditDTO appointment);
 
         Task<int> GetNumberOfAppointmentsCreatedToday(int facilityId);
     }
@@ -34,17 +36,38 @@ namespace Appy.Services
             this.workingHourService = workingHourService;
         }
 
-        public Task<List<Appointment>> GetAll(DateOnly date, int facilityId, SmartFilter? filter)
+        public Task<List<AppointmentViewDTO>> GetAll(DateOnly date, int facilityId, bool findPrevious, SmartFilter? filter)
         {
-            return context.Appointments
+            var appointments = context.Appointments
                 .Include(a => a.Service)
                 .Include(a => a.Client)
                 .Where(s => s.FacilityId == facilityId && s.Date == date)
-                .ApplySmartFilter(filter)
-                .ToListAsync();
+                .ApplySmartFilter(filter);
+
+            if (findPrevious)
+                return appointments
+                    .Select(a => new
+                    {
+                        app = a,
+                        previous = context.Appointments
+                            .Include(a => a.Service)
+                            .Include(a => a.Client)
+                            .Where(s => s.FacilityId == a.FacilityId && s.ClientId == a.ClientId && (s.Date < a.Date || (s.Date == a.Date && s.Time < a.Time)))
+                            .OrderByDescending(s => s.Date)
+                            .ThenByDescending(s => s.Time)
+                            .ThenByDescending(s => s.Duration)
+                            .Select(a => a.ToViewDTO(null))
+                            .FirstOrDefault()
+                    })
+                    .Select(a => a.app.ToViewDTO(a.previous))
+                    .ToListAsync();
+            else
+                return appointments
+                    .Select(a => a.ToViewDTO(null))
+                    .ToListAsync();
         }
 
-        public Task<List<Appointment>> GetList(DateOnly date, Direction direction, int skip, int take, SmartFilter? filter, int facilityId)
+        public Task<List<AppointmentViewDTO>> GetList(DateOnly date, Direction direction, int skip, int take, SmartFilter? filter, int facilityId)
         {
             var appointments = context.Appointments
                 .Include(a => a.Service)
@@ -57,10 +80,27 @@ namespace Appy.Services
             else
                 appointments = appointments.Where(s => s.Date < date).OrderByDescending(s => s.Date).ThenByDescending(s => s.Time).ThenByDescending(s => s.Duration);
 
-            return appointments.Skip(skip).Take(take).ToListAsync();
+            return appointments
+                .Skip(skip)
+                .Take(take)
+                .Select(a => new
+                {
+                    app = a,
+                    previous = context.Appointments
+                        .Include(a => a.Service)
+                        .Include(a => a.Client)
+                        .Where(s => s.FacilityId == a.FacilityId && s.ClientId == a.ClientId && (s.Date < a.Date || (s.Date == a.Date && s.Time < a.Time)))
+                        .OrderByDescending(s => s.Date)
+                        .ThenByDescending(s => s.Time)
+                        .ThenByDescending(s => s.Duration)
+                        .Select(a => a.ToViewDTO(null))
+                        .FirstOrDefault()
+                })
+                .Select(a => a.app.ToViewDTO(a.previous))
+                .ToListAsync();
         }
 
-        public async Task<Appointment> GetById(int id, int facilityId)
+        public async Task<AppointmentViewDTO> GetById(int id, int facilityId)
         {
             var appointment = await context.Appointments
                 .Include(a => a.Service)
@@ -70,10 +110,12 @@ namespace Appy.Services
             if (appointment == null)
                 throw new NotFoundException();
 
-            return appointment;
+            var previous = await GetPreviousAppointment(appointment);
+
+            return appointment.ToViewDTO(previous);
         }
 
-        public async Task<Appointment> AddNew(AppointmentDTO dto, int facilityId, bool ignoreTimeNotAvailable)
+        public async Task<AppointmentViewDTO> AddNew(AppointmentEditDTO dto, int facilityId, bool ignoreTimeNotAvailable)
         {
             var service = await context.Services.FirstOrDefaultAsync(s => s.Id == dto.Service.Id && s.FacilityId == facilityId);
             if (service == null)
@@ -97,18 +139,20 @@ namespace Appy.Services
                 LastUpdatedAt = DateTime.UtcNow,
             };
 
-            var sameDayAppointments = await GetAll(dto.Date, facilityId, null);
+            var sameDayAppointments = await GetAll(dto.Date, facilityId, findPrevious: false, filter: null);
             var workingHours = await workingHourService.GetWorkingHours(dto.Date, facilityId);
-            if (!ignoreTimeNotAvailable && !IsAppointmentTimeOk(sameDayAppointments, workingHours, appointment))
-                throw new ValidationException(nameof(AppointmentDTO.Time), "pages.appointments.errors.TIME_NOT_AVAILABLE");
+            if (!ignoreTimeNotAvailable && !IsAppointmentTimeOk(sameDayAppointments, workingHours, dto))
+                throw new ValidationException(nameof(AppointmentEditDTO.Time), "pages.appointments.errors.TIME_NOT_AVAILABLE");
 
             context.Appointments.Add(appointment);
             await context.SaveChangesAsync();
 
-            return appointment;
+            var previous = await GetPreviousAppointment(appointment);
+
+            return appointment.ToViewDTO(previous);
         }
 
-        public async Task<Appointment> Edit(int id, AppointmentDTO dto, int facilityId, bool ignoreTimeNotAvailable)
+        public async Task<AppointmentViewDTO> Edit(int id, AppointmentEditDTO dto, int facilityId, bool ignoreTimeNotAvailable)
         {
             var appointment = await context.Appointments.FirstOrDefaultAsync(s => s.Id == id && s.FacilityId == facilityId);
             if (appointment == null)
@@ -138,17 +182,21 @@ namespace Appy.Services
             appointment.Notes = dto.Notes;
             appointment.LastUpdatedAt = DateTime.UtcNow;
 
-            var sameDayAppointments = (await GetAll(dto.Date, facilityId, null)).Where(a => a.Id != appointment.Id).ToList();
+            var sameDayAppointments = (await GetAll(dto.Date, facilityId, findPrevious: false, filter: null))
+                .Where(a => a.Id != appointment.Id)
+                .ToList();
             var workingHours = await workingHourService.GetWorkingHours(dto.Date, facilityId);
-            if (!ignoreTimeNotAvailable && !IsAppointmentTimeOk(sameDayAppointments, workingHours, appointment))
-                throw new ValidationException(nameof(AppointmentDTO.Time), "pages.appointments.errors.TIME_NOT_AVAILABLE");
+            if (!ignoreTimeNotAvailable && !IsAppointmentTimeOk(sameDayAppointments, workingHours, dto))
+                throw new ValidationException(nameof(AppointmentEditDTO.Time), "pages.appointments.errors.TIME_NOT_AVAILABLE");
 
             await context.SaveChangesAsync();
 
-            return appointment;
+            var previous = await GetPreviousAppointment(appointment);
+
+            return appointment.ToViewDTO(previous);
         }
 
-        public async Task<Appointment> SetStatus(int id, AppointmentStatus status, int facilityId)
+        public async Task<AppointmentViewDTO> SetStatus(int id, AppointmentStatus status, int facilityId)
         {
             var appointment = await context.Appointments.Include(a => a.Client).Include(a => a.Service)
                 .FirstOrDefaultAsync(s => s.Id == id && s.FacilityId == facilityId);
@@ -160,7 +208,9 @@ namespace Appy.Services
 
             await context.SaveChangesAsync();
 
-            return appointment;
+            var previous = await GetPreviousAppointment(appointment);
+
+            return appointment.ToViewDTO(previous);
         }
 
         public async Task Delete(int id, int facilityId)
@@ -173,7 +223,7 @@ namespace Appy.Services
             await context.SaveChangesAsync();
         }
 
-        public List<FreeTimeDTO> GetFreeTimes(List<Appointment> appointmentsOfTheDay, List<WorkingHour> workingHours, Service service, TimeSpan duration)
+        public List<FreeTimeDTO> GetFreeTimes(List<AppointmentViewDTO> appointmentsOfTheDay, List<WorkingHour> workingHours, ServiceDTO service, TimeSpan duration)
         {
             var result = new List<FreeTimeDTO>();
 
@@ -228,7 +278,7 @@ namespace Appy.Services
             return result;
         }
 
-        public bool IsAppointmentTimeOk(List<Appointment> appointmentsOfTheDay, List<WorkingHour> workingHours, Appointment appointment)
+        public bool IsAppointmentTimeOk(List<AppointmentViewDTO> appointmentsOfTheDay, List<WorkingHour> workingHours, AppointmentEditDTO appointment)
         {
             var freeTimes = GetFreeTimes(appointmentsOfTheDay, workingHours, appointment.Service, appointment.Duration);
 
@@ -254,6 +304,19 @@ namespace Appy.Services
         private bool Contains(TimeOnly startOuter, TimeOnly endOuter, TimeOnly startInner, TimeOnly endInner)
         {
             return startOuter <= startInner && endOuter >= endInner;
+        }
+
+        private Task<AppointmentViewDTO?> GetPreviousAppointment(Appointment a)
+        {
+            return context.Appointments
+                .Include(a => a.Service)
+                .Include(a => a.Client)
+                .Where(s => s.FacilityId == a.FacilityId && s.ClientId == a.ClientId && (s.Date < a.Date || (s.Date == a.Date && s.Time < a.Time)))
+                .OrderByDescending(s => s.Date)
+                .ThenByDescending(s => s.Time)
+                .ThenByDescending(s => s.Duration)
+                .Select(a => a.ToViewDTO(null))
+                .FirstOrDefaultAsync();
         }
     }
 }

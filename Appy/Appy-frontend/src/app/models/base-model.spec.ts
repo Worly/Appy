@@ -1,4 +1,4 @@
-import { Model as _BaseModel, Children, Validation } from "./base-model";
+import { EditModel as _BaseModel, Children, Validation } from "./base-model";
 
 class BaseModel extends _BaseModel<BaseModel> {
     public id: number = 0;

@@ -6,22 +6,23 @@ import { catchError, map, Observable, tap, throwError } from "rxjs";
 import { appConfig } from "src/app/app.config";
 import { ToastAction, ToastService } from "src/app/components/toast/toast.service";
 import { TranslateService } from "src/app/components/translate/translate.service";
-import { Appointment, AppointmentDTO, AppointmentStatus } from "src/app/models/appointment";
+import { Appointment, AppointmentStatus, AppointmentView, AppointmentViewDTO } from "src/app/models/appointment";
 import { FreeTime, FreeTimeDTO } from "src/app/models/free-time";
-import { BaseModelService, PageableListDatasource } from "src/app/shared/services/base-model-service";
+import { BaseModelService } from "src/app/shared/services/base-model-service";
+import { PageableListDatasource } from "src/app/shared/services/datasource";
 import { SmartFilter } from "src/app/shared/services/smart-filter";
 
 @Injectable({ providedIn: "root" })
-export class AppointmentService extends BaseModelService<Appointment> {
+export class AppointmentService extends BaseModelService<Appointment, AppointmentView> {
     constructor(
         injector: Injector,
         private translateService: TranslateService,
         private toastService: ToastService
     ) {
-        super(injector, Appointment.ENTITY_TYPE, Appointment);
+        super(injector, AppointmentView.ENTITY_TYPE, Appointment, AppointmentView);
     }
 
-    public override getAll(date?: Dayjs): Observable<Appointment[]> {
+    public override getAll(date?: Dayjs): Observable<AppointmentView[]> {
         if (date == null)
             throw "Date cannot be null";
 
@@ -30,7 +31,7 @@ export class AppointmentService extends BaseModelService<Appointment> {
         }, e => e.date?.isSame(date, "date") == true);
     }
 
-    public getList(date: Dayjs, filter: SmartFilter | undefined, sortPredicate: (a: Appointment, b: Appointment) => number): PageableListDatasource<Appointment> {
+    public getList(date: Dayjs, filter: SmartFilter | undefined, sortPredicate: (a: AppointmentView, b: AppointmentView) => number): PageableListDatasource<AppointmentView> {
         return this.getListAdvanced({
             date: date.format("YYYY-MM-DD")
         }, sortPredicate, filter);
@@ -53,14 +54,14 @@ export class AppointmentService extends BaseModelService<Appointment> {
         );
     }
 
-    public setStatus(appointmentId: number, status: AppointmentStatus): Observable<Appointment> {
-        return this.httpClient.put<AppointmentDTO>(`${appConfig.apiUrl}${this.controllerName}/setStatus/${appointmentId}`,
+    public setStatus(appointmentId: number, status: AppointmentStatus): Observable<AppointmentView> {
+        return this.httpClient.put<AppointmentViewDTO>(`${appConfig.apiUrl}${this.controllerName}/setStatus/${appointmentId}`,
             null, {
             observe: "response",
             params: { status }
         }).pipe(
             map(r => {
-                let appointment = new Appointment(r.body!);
+                let appointment = new AppointmentView(r.body!);
 
                 this.entityChangeNotifyService.notifyUpdated(appointment);
 

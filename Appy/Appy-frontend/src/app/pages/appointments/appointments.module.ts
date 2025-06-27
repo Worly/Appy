@@ -21,6 +21,7 @@ import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { AppointmentStatusLookupComponent } from './components/appointment-status-lookup/appointment-status-lookup.component';
 import { AppointmentStatusInfoPipe } from "./services/appointment-status-info.pipe";
 import { SingleAppointmentListItemComponent } from "./components/appointments-list/single-appointment-list-item/single-appointment-list-item.component";
+import { AppointmentStatusIconsComponent } from './components/appointment-status-icons/appointment-status-icons.component';
 
 @NgModule({
     declarations: [
@@ -34,7 +35,8 @@ import { SingleAppointmentListItemComponent } from "./components/appointments-li
         AppointmentsListComponent,
         AppointmentStatusLookupComponent,
         AppointmentStatusInfoPipe,
-        SingleAppointmentListItemComponent
+        SingleAppointmentListItemComponent,
+        AppointmentStatusIconsComponent
     ],
     imports: [
         AppointmentsRoutingModule,

@@ -1,0 +1,35 @@
+.status-icon-container {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+
+    height: 1rem;
+    font-size: 0.9rem;
+
+    &.drop-shadow{
+        filter: drop-shadow(1px 1px 0.5px rgba(0, 0, 0, 0.5));
+    }
+
+    .fa-layers {
+        height: unset;
+    }
+
+    &>fa-icon {
+        opacity: 50%;
+    }
+
+    fa-icon.success {
+        opacity: 100%;
+        color: rgb(var(--rgb-success))
+    }
+
+    fa-icon.warn {
+        opacity: 100%;
+        color: rgb(var(--rgb-warning))
+    }
+
+    fa-icon.danger {
+        opacity: 100%;
+        color: rgb(var(--rgb-danger))
+    }
+}

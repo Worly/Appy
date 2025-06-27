@@ -34,65 +34,65 @@ namespace Appy.Controllers
 
         [HttpGet("getAll")]
         [Authorize]
-        public async Task<ActionResult<List<AppointmentDTO>>> GetAll([FromQuery] DateOnly date, [FromQuery] SmartFilter? filter)
+        public async Task<ActionResult<List<AppointmentViewDTO>>> GetAll([FromQuery] DateOnly date, [FromQuery] SmartFilter? filter)
         {
-            var result = await this.appointmentService.GetAll(date, HttpContext.SelectedFacility(), filter);
+            var result = await this.appointmentService.GetAll(date, HttpContext.SelectedFacility(), findPrevious: true, filter);
 
-            return Ok(result.Select(o => o.GetDTO()));
+            return Ok(result);
         }
 
         [HttpGet("getList")]
         [Authorize]
-        public async Task<ActionResult<List<AppointmentDTO>>> GetList(
+        public async Task<ActionResult<List<AppointmentViewDTO>>> GetList(
             [FromQuery] DateOnly date, [FromQuery] Direction direction, [FromQuery] int skip, [FromQuery] int take, [FromQuery] SmartFilter? filter)
         {
             var result = await this.appointmentService.GetList(date, direction, skip, take, filter, HttpContext.SelectedFacility());
 
-            return Ok(result.Select(o => o.GetDTO()));
+            return Ok(result);
         }
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public async Task<ActionResult<AppointmentDTO>> Get(int id)
+        public async Task<ActionResult<AppointmentViewDTO>> Get(int id)
         {
             var result = await this.appointmentService.GetById(id, HttpContext.SelectedFacility());
 
-            return Ok(result.GetDTO());
+            return Ok(result);
         }
 
         [HttpPost("addNew")]
         [Authorize]
-        public async Task<ActionResult<AppointmentDTO>> AddNew(AppointmentDTO dto, [FromQuery] bool ignoreTimeNotAvailable = false)
+        public async Task<ActionResult<AppointmentViewDTO>> AddNew(AppointmentEditDTO dto, [FromQuery] bool ignoreTimeNotAvailable = false)
         {
             var result = await this.appointmentService.AddNew(dto, HttpContext.SelectedFacility(), ignoreTimeNotAvailable);
 
-            return Ok(result.GetDTO());
+            return Ok(result);
         }
 
         [HttpPut("edit/{id}")]
         [Authorize]
-        public async Task<ActionResult<AppointmentDTO>> Edit(int id, AppointmentDTO dto, [FromQuery] bool ignoreTimeNotAvailable = false)
+        public async Task<ActionResult<AppointmentViewDTO>> Edit(int id, AppointmentEditDTO dto, [FromQuery] bool ignoreTimeNotAvailable = false)
         {
             var result = await this.appointmentService.Edit(id, dto, HttpContext.SelectedFacility(), ignoreTimeNotAvailable);
 
-            var canNotifyClient = await this.clientNotificationsService.CanSendAppointmentConfirmationMessage(result.Client);
+            var canNotifyClient = await this.clientNotificationsService.CanSendAppointmentConfirmationMessage(result.Client.Id);
             if (canNotifyClient)
                 Response.Headers.AddCustom("X-Can-Notify-Client", "true");
 
-            return Ok(result.GetDTO());
+            return Ok(result);
         }
 
         [HttpPut("setStatus/{id}")]
         [Authorize]
-        public async Task<ActionResult<AppointmentDTO>> SetStatus(int id, AppointmentStatus status)
+        public async Task<ActionResult<AppointmentViewDTO>> SetStatus(int id, AppointmentStatus status)
         {
             var result = await this.appointmentService.SetStatus(id, status, HttpContext.SelectedFacility());
 
-            var canNotifyClient = await this.clientNotificationsService.CanSendAppointmentConfirmationMessage(result.Client);
+            var canNotifyClient = await this.clientNotificationsService.CanSendAppointmentConfirmationMessage(result.Client.Id);
             if (canNotifyClient)
                 Response.Headers.AddCustom("X-Can-Notify-Client", "true");
 
-            return Ok(result.GetDTO());
+            return Ok(result);
         }
 
         [HttpDelete("delete/{id}")]
@@ -109,13 +109,13 @@ namespace Appy.Controllers
         public async Task<ActionResult<List<FreeTimeDTO>>> GetFreeTimes([FromQuery] DateOnly date, [FromQuery] int serviceId, [FromQuery] TimeSpan duration, [FromQuery] int? ignoreAppointmentId)
         {
             var service = await this.serviceService.GetById(serviceId, HttpContext.SelectedFacility());
-            var appointmentsOfTheDay = await this.appointmentService.GetAll(date, HttpContext.SelectedFacility(), null);
+            var appointmentsOfTheDay = await this.appointmentService.GetAll(date, HttpContext.SelectedFacility(), findPrevious: false, null);
             var workingHours = await this.workingHourService.GetWorkingHours(date, HttpContext.SelectedFacility());
 
             if (ignoreAppointmentId.HasValue)
                 appointmentsOfTheDay = appointmentsOfTheDay.Where(o => o.Id != ignoreAppointmentId).ToList();
 
-            return this.appointmentService.GetFreeTimes(appointmentsOfTheDay, workingHours, service, duration);
+            return this.appointmentService.GetFreeTimes(appointmentsOfTheDay, workingHours, service.GetDTO(), duration);
         }
 
         [HttpPost("notifyClient/{id}")]
@@ -134,7 +134,7 @@ namespace Appy.Controllers
                 return BadRequest("Invalid language code");
             }
 
-            await this.clientNotificationsService.SendAppointmentConfirmationMessage(appointment.Client, appointment, cultureInfo);
+            await this.clientNotificationsService.SendAppointmentConfirmationMessage(appointment.Client.Id, appointment, cultureInfo);
 
             return Ok();
         }

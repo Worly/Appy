@@ -35,22 +35,21 @@
 
     <div *ngIf="appointments != null">
         <div *ngFor="let ap of renderedAppointments" class="single-appointment" data-test="single-appointment"
-            [style.top.%]="ap.top" [style.left.%]="ap.left" [style.height.%]="ap.height" [style.width.%]="ap.width"
-            [style.backgroundColor]="ap.color" (click)="onAppointmentClick(ap.source)">
+            [attr.data-appId]="ap.source.id" [style.top.%]="ap.top" [style.left.%]="ap.left"
+            [style.height.%]="ap.height" [style.width.%]="ap.width" [style.backgroundColor]="ap.color"
+            (click)="onAppointmentClick(ap.source)">
             <div class="appointment-time" data-test="appointment-time">
                 {{ap.time}}
             </div>
             <div class="appointment-service-name" data-test="appointment-service-client">
-                {{ap.source.service?.displayName}} - {{ap.source.client?.name}} {{ap.source.client?.surname}}
+                {{ap.source.service.displayName}} - {{ap.source.client.name}} {{ap.source.client.surname}}
             </div>
 
-            <div class="appointment-status-container">
-                <fa-icon *ngIf="ap.source.notes != null && ap.source.notes != ''" [icon]="['far', 'file-lines']"
-                    [fixedWidth]="true"></fa-icon>
-                <fa-icon *ngIf="ap.source.status" class="warn" icon="question" [fixedWidth]="true"></fa-icon>
-                <fa-icon *ngIf="ap.source.status == 'NoShow'" class="danger" icon="user-slash"
-                    [fixedWidth]="true"></fa-icon>
-            </div>
+            <app-appointment-status-icons class="appointment-status-icons"
+                [hasNotes]="ap.source.notes != null && ap.source.notes != ''" [status]="ap.source.status"
+                [previousNoShow]="ap.source.previousAppointment != null && ap.source.previousAppointment.status == 'NoShow'"
+                [isFirstAppointment]="ap.source.previousAppointment == null"
+                [increaseContrast]="true"></app-appointment-status-icons>
         </div>
     </div>
 
@@ -77,6 +76,6 @@
 <app-loading *ngIf="appointments == null"></app-loading>
 
 <app-dialog #appointmentDialog>
-    <app-single-appointment *ngIf="appointmentDialog.isOpen" [id]="viewAppointmentId" [editable]="appointmentsEditable"
-        (onDone)="closeAppointmentDialog()"></app-single-appointment>
+    <app-single-appointment *ngIf="appointmentDialog.isOpen" [(id)]="viewAppointmentId"
+        [editable]="appointmentsEditable" (onDone)="closeAppointmentDialog()"></app-single-appointment>
 </app-dialog>

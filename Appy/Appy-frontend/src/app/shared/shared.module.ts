@@ -12,11 +12,13 @@ import { AuthHttpInterceptor } from "./services/auth/auth-http-interceptor.servi
 import { ErrorInterceptor } from "./services/errors/error-interceptor.service";
 import { ErrorTranslateInterceptor } from "./services/errors/error-translate.service";
 import { ToggleSwitchModule } from "../components/toggle-switch/toggle-switch.module";
+import { ToDurationPipe } from "./pipes/to-duration.pipe";
 
 @NgModule({
     declarations: [
         FilterPipe,
         FormatDurationPipe,
+        ToDurationPipe,
         InvokeDirective
     ],
     imports: [
@@ -33,6 +35,7 @@ import { ToggleSwitchModule } from "../components/toggle-switch/toggle-switch.mo
 
         FilterPipe,
         FormatDurationPipe,
+        ToDurationPipe,
         InvokeDirective
     ],
     providers: [

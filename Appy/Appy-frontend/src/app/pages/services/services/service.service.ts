@@ -5,9 +5,9 @@ import { Service } from "src/app/models/service";
 import { BaseModelService } from "src/app/shared/services/base-model-service";
 
 @Injectable({ providedIn: "root" })
-export class ServiceService extends BaseModelService<Service> {
+export class ServiceService extends BaseModelService<Service, Service> {
     constructor(injector: Injector) {
-        super(injector, Service.ENTITY_TYPE, Service);
+        super(injector, Service.ENTITY_TYPE, Service, Service);
     }
 
     public override getAll(archived?: boolean): Observable<Service[]> {

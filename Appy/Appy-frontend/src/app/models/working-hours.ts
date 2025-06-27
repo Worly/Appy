@@ -1,4 +1,4 @@
-import { Model, REQUIRED_VALIDATION, Validation } from "./base-model";
+import { EditModel, REQUIRED_VALIDATION, Validation } from "./base-model";
 import dayjs from "dayjs";
 import { Dayjs } from "dayjs";
 
@@ -8,7 +8,7 @@ export class WorkingHourDTO {
     public timeTo?: string;
 }
 
-export class WorkingHour extends Model<WorkingHour> {
+export class WorkingHour extends EditModel<WorkingHour> {
     public static readonly ENTITY_TYPE: string = "workingHour";
 
     public dayOfWeek?: DayOfWeek;

@@ -1,0 +1,10 @@
+<div class="status-icon-container" [ngClass]="{'drop-shadow': increaseContrast}">
+    <fa-layers *ngIf="previousNoShow" [fixedWidth]="true">
+        <fa-icon class="danger" [icon]="['fas', 'user-slash']"></fa-icon>
+        <fa-icon [icon]="['fas', 'reply']" transform="shrink-4 left-6 down-5"></fa-icon>
+    </fa-layers>
+    <fa-icon *ngIf="isFirstAppointment" [icon]="['fas', 'user-plus']" class="success"></fa-icon>
+    <fa-icon *ngIf="hasNotes" [icon]="['far', 'file-lines']" [fixedWidth]="true"></fa-icon>
+    <fa-icon *ngIf="status == 'Unconfirmed'" class="warn" icon="question" [fixedWidth]="true"></fa-icon>
+    <fa-icon *ngIf="status == 'NoShow'" class="danger" icon="user-slash" [fixedWidth]="true"></fa-icon>
+</div>
