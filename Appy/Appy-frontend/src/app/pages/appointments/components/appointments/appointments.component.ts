@@ -156,9 +156,12 @@ export class AppointmentsComponent implements OnInit, OnDestroy, BeforeDetach, B
     if (date == null)
       date = this.date;
 
-    let params: any = {
-      date: date.format("YYYY-MM-DD")
-    }
+    let params: any = {}
+
+    // From clients experience, we don't want to pass the current date
+    // from the list view, as it can be unexpected.
+    if (this.type == "scroller")
+      params.date = date.format("YYYY-MM-DD")
 
     if (clickedTime)
       params.time = clickedTime.format("HH:00:00")
