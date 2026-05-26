@@ -6,35 +6,18 @@ using Appy.Services.MessagingServices;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using WappChatAnalyzer.Services;
-
 var builder = WebApplication.CreateBuilder(args);
+
+var jwtSecret = builder.Configuration["JwtSecret"];
+if (string.IsNullOrEmpty(jwtSecret))
+    throw new InvalidOperationException(
+        "JwtSecret is not configured. Set it via User Secrets (dev) or the JwtSecret environment variable (CI/prod).");
 
 var spaPath = "Appy-frontend/build";
 
 // Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("Main");
-if (Environment.GetEnvironmentVariable("POSTGRES_HOSTNAME") != null)
-{
-    var hostname = Environment.GetEnvironmentVariable("POSTGRES_HOSTNAME");
-    var port = Environment.GetEnvironmentVariable("POSTGRES_PORT");
-    if (port == null)
-        throw new ArgumentNullException("POSTGRES_PORT");
-
-    var user = Environment.GetEnvironmentVariable("POSTGRES_USER");
-    if (user == null)
-        throw new ArgumentNullException("POSTGRES_USER");
-
-    var password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
-    if (password == null)
-        throw new ArgumentNullException("POSTGRES_PASSWORD");
-
-    connectionString = $"Server={hostname};Port={port};Database=Appy;Userid={user};Password={password}";
-}
-
-builder.Services.AddDbContext<MainDbContext>(options => options.UseNpgsql(connectionString));
-
-builder.Services.AddSingleton<IConfigurationService, ConfigurationService>();
+builder.Services.AddDbContext<MainDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("Main")));
 builder.Services.AddSingleton<IJwtService, JwtService>();
 
 builder.Services.AddSingleton<InstagramMessagingService>();
