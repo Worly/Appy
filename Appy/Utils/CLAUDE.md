@@ -2,11 +2,11 @@
 
 Small utility classes that don't belong to a specific domain concept.
 
-## ConfigurationService
+## Configuration
 
-Abstracts environment-specific configuration loading so services reference the same property names regardless of environment:
+Configuration is handled by ASP.NET Core's built-in `IConfiguration` pipeline:
 
-- **Development** (`ASPNETCORE_ENVIRONMENT=Development`): reads from `appsettings.json`
-- **Production**: reads from environment variables in UPPER_SNAKE_CASE (`JWT_SECRET`, `POSTGRES_HOSTNAME`, etc.)
+- **Development** (`ASPNETCORE_ENVIRONMENT=Development`): reads from `appsettings.json` and User Secrets
+- **Production**: reads from environment variables (UPPER_SNAKE_CASE — `JWT_SECRET`, `POSTGRES_HOSTNAME`, etc.)
 
-Inject `ConfigurationService` wherever configuration values are needed. Do not inject `IConfiguration` directly in services, as the mapping logic lives here.
+Inject `IConfiguration` directly in services and call `configuration["KeyName"]` to retrieve values.
