@@ -26,10 +26,8 @@ jobs:
 
     env:
       ASPNETCORE_ENVIRONMENT: Development
-      POSTGRES_HOSTNAME: localhost
-      POSTGRES_PORT: 5432
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      JwtSecret: "ci-throwaway-secret-not-used-in-production"
+      ConnectionStrings__Main: "Server=localhost;Port=5432;Database=Appy;Userid=postgres;Password=password"
       NO_FRONTEND: true
           
     steps:
