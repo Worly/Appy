@@ -13,7 +13,7 @@ JWT-based authentication with stateful refresh tokens supporting multi-device lo
 
 | File | Role |
 |------|------|
-| `JwtService` | Generates and validates JWTs using `HS256` and `JwtSecret` from `ConfigurationService` |
+| `JwtService` | Generates and validates JWTs using `HS256` and `JwtSecret` from `IConfiguration` |
 | `JwtMiddleware` | Runs on every request; validates the Bearer token from the `Authorization` header and attaches the `User` entity to `HttpContext.Items["User"]` |
 | `AuthorizeAttribute` | Action filter — returns 401 if no user is attached to the context |
 | `AuthExtensions` | Adds a `CurrentUser()` extension method to `HttpContext` for retrieving the attached user |
