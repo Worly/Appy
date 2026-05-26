@@ -1,6 +1,6 @@
 # CLAUDE.md — Backend (Appy/)
 
-ASP.NET Core 6 Web API. Serves the REST API and, in production, also serves the Angular frontend as static files.
+ASP.NET Core 8 Web API. Serves the REST API and, in production, also serves the Angular frontend as static files.
 
 ## Child CLAUDE.md Files
 

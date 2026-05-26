@@ -1,4 +1,5 @@
 using Appy.Domain;
+using Appy.DTOs;
 using Appy.Services;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -28,12 +29,13 @@ namespace Appy.Tests.Services
             InstagramAPIAccessToken = "Token"
         };
 
-        private Client client1 = new() { Id = 1 };
-        private Client client2 = new() { Id = 2 };
+        private Client client1 = new() { Id = 1, Contacts = new() };
+        private Client client2 = new() { Id = 2, Contacts = new() };
 
         private Service service1 = new() { Id = 1 };
 
         private List<Appointment> appointments = new List<Appointment>();
+        private int _nextId = 1;
 
         public AppointmentReminderServiceTests()
         {
@@ -57,6 +59,7 @@ namespace Appy.Tests.Services
         {
             var ap = new Appointment()
             {
+                Id = _nextId++,
                 FacilityId = facilityId,
                 Date = date,
                 Client = client,
@@ -88,7 +91,7 @@ namespace Appy.Tests.Services
 
             // Assert
             clientNotificationsServiceMock.Verify(
-                x => x.SendAppointmentReminderMessage(client1, appointment1, It.IsAny<CultureInfo>()), shouldRemind ? Times.Once : Times.Never);
+                x => x.SendAppointmentReminderMessage(client1.Id, It.Is<AppointmentViewDTO>(d => d.Id == appointment1.Id), It.IsAny<CultureInfo>()), shouldRemind ? Times.Once : Times.Never);
         }
 
         [Fact]
@@ -102,7 +105,7 @@ namespace Appy.Tests.Services
 
             // Assert
             clientNotificationsServiceMock.Verify(
-                x => x.SendAppointmentReminderMessage(client1, appointment1, It.IsAny<CultureInfo>()), Times.Once);
+                x => x.SendAppointmentReminderMessage(client1.Id, It.Is<AppointmentViewDTO>(d => d.Id == appointment1.Id), It.IsAny<CultureInfo>()), Times.Once);
 
             Assert.True(appointment1.WasReminded);
 
@@ -120,7 +123,7 @@ namespace Appy.Tests.Services
 
             // Assert
             clientNotificationsServiceMock.Verify(
-                x => x.SendAppointmentReminderMessage(It.IsAny<Client>(), appointment1, It.IsAny<CultureInfo>()), Times.Never);
+                x => x.SendAppointmentReminderMessage(It.IsAny<int>(), It.Is<AppointmentViewDTO>(d => d.Id == appointment1.Id), It.IsAny<CultureInfo>()), Times.Never);
         }
 
         [Fact]
@@ -135,7 +138,7 @@ namespace Appy.Tests.Services
 
             // Assert
             clientNotificationsServiceMock.Verify(
-                x => x.SendAppointmentReminderMessage(It.IsAny<Client>(), appointment1, It.IsAny<CultureInfo>()), Times.Never);
+                x => x.SendAppointmentReminderMessage(It.IsAny<int>(), It.Is<AppointmentViewDTO>(d => d.Id == appointment1.Id), It.IsAny<CultureInfo>()), Times.Never);
         }
 
         [Fact]
@@ -151,7 +154,7 @@ namespace Appy.Tests.Services
 
             // Assert
             clientNotificationsServiceMock.Verify(
-                x => x.SendAppointmentReminderMessage(It.IsAny<Client>(), appointment1, It.IsAny<CultureInfo>()), Times.Never);
+                x => x.SendAppointmentReminderMessage(It.IsAny<int>(), It.Is<AppointmentViewDTO>(d => d.Id == appointment1.Id), It.IsAny<CultureInfo>()), Times.Never);
         }
 
         [Fact]
@@ -167,7 +170,7 @@ namespace Appy.Tests.Services
 
             // Assert
             clientNotificationsServiceMock.Verify(
-                x => x.SendAppointmentReminderMessage(It.IsAny<Client>(), appointment1, It.IsAny<CultureInfo>()), Times.Never);
+                x => x.SendAppointmentReminderMessage(It.IsAny<int>(), It.Is<AppointmentViewDTO>(d => d.Id == appointment1.Id), It.IsAny<CultureInfo>()), Times.Never);
         }
 
         [Fact]
@@ -183,7 +186,7 @@ namespace Appy.Tests.Services
 
             // Assert
             clientNotificationsServiceMock.Verify(
-                x => x.SendAppointmentReminderMessage(It.IsAny<Client>(), appointment1, It.IsAny<CultureInfo>()), Times.Never);
+                x => x.SendAppointmentReminderMessage(It.IsAny<int>(), It.Is<AppointmentViewDTO>(d => d.Id == appointment1.Id), It.IsAny<CultureInfo>()), Times.Never);
         }
 
         [Fact]
@@ -202,15 +205,15 @@ namespace Appy.Tests.Services
 
             // Assert
             clientNotificationsServiceMock.Verify(
-                x => x.SendAppointmentReminderMessage(client1, appointment1, It.IsAny<CultureInfo>()), Times.Once);
+                x => x.SendAppointmentReminderMessage(client1.Id, It.Is<AppointmentViewDTO>(d => d.Id == appointment1.Id), It.IsAny<CultureInfo>()), Times.Once);
             clientNotificationsServiceMock.Verify(
-                x => x.SendAppointmentReminderMessage(It.IsAny<Client>(), appointment2, It.IsAny<CultureInfo>()), Times.Never);
+                x => x.SendAppointmentReminderMessage(It.IsAny<int>(), It.Is<AppointmentViewDTO>(d => d.Id == appointment2.Id), It.IsAny<CultureInfo>()), Times.Never);
             clientNotificationsServiceMock.Verify(
-                x => x.SendAppointmentReminderMessage(It.IsAny<Client>(), appointment3, It.IsAny<CultureInfo>()), Times.Never);
+                x => x.SendAppointmentReminderMessage(It.IsAny<int>(), It.Is<AppointmentViewDTO>(d => d.Id == appointment3.Id), It.IsAny<CultureInfo>()), Times.Never);
             clientNotificationsServiceMock.Verify(
-                x => x.SendAppointmentReminderMessage(client2, appointment4, It.IsAny<CultureInfo>()), Times.Once);
+                x => x.SendAppointmentReminderMessage(client2.Id, It.Is<AppointmentViewDTO>(d => d.Id == appointment4.Id), It.IsAny<CultureInfo>()), Times.Once);
             clientNotificationsServiceMock.Verify(
-                x => x.SendAppointmentReminderMessage(It.IsAny<Client>(), appointment5, It.IsAny<CultureInfo>()), Times.Never);
+                x => x.SendAppointmentReminderMessage(It.IsAny<int>(), It.Is<AppointmentViewDTO>(d => d.Id == appointment5.Id), It.IsAny<CultureInfo>()), Times.Never);
         }
 
         [Fact]
@@ -220,7 +223,7 @@ namespace Appy.Tests.Services
             var appointment1 = AddAppointment(today, client1, AppointmentStatus.Confirmed);
             var appointment2 = AddAppointment(today, client2, AppointmentStatus.Confirmed);
 
-            clientNotificationsServiceMock.Setup(x => x.SendAppointmentReminderMessage(client1, appointment1, It.IsAny<CultureInfo>()))
+            clientNotificationsServiceMock.Setup(x => x.SendAppointmentReminderMessage(client1.Id, It.Is<AppointmentViewDTO>(d => d.Id == appointment1.Id), It.IsAny<CultureInfo>()))
                 .Throws(new Exception());
 
             // Act
@@ -228,9 +231,9 @@ namespace Appy.Tests.Services
 
             // Assert
             clientNotificationsServiceMock.Verify(
-                x => x.SendAppointmentReminderMessage(client1, appointment1, It.IsAny<CultureInfo>()), Times.Once);
+                x => x.SendAppointmentReminderMessage(client1.Id, It.Is<AppointmentViewDTO>(d => d.Id == appointment1.Id), It.IsAny<CultureInfo>()), Times.Once);
             clientNotificationsServiceMock.Verify(
-                x => x.SendAppointmentReminderMessage(client2, appointment2, It.IsAny<CultureInfo>()), Times.Once);
+                x => x.SendAppointmentReminderMessage(client2.Id, It.Is<AppointmentViewDTO>(d => d.Id == appointment2.Id), It.IsAny<CultureInfo>()), Times.Once);
 
             Assert.False(appointment1.WasReminded); // because an exception was thrown
             Assert.True(appointment2.WasReminded);

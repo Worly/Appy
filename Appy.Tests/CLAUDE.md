@@ -1,6 +1,6 @@
 # CLAUDE.md — Unit Tests (Appy.Tests/)
 
-xUnit unit tests for backend service logic. Targets **.NET 8.0** (the main project targets .NET 6.0 — this discrepancy is intentional; tests run on the newer runtime).
+xUnit unit tests for backend service logic. Targets **.NET 8.0**, same as the main project.
 
 ## What Is Tested
 
