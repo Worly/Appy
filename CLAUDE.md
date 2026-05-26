@@ -61,7 +61,17 @@ npx cypress run      # Headless E2E
 | Global App Services | `Appy/Appy-frontend/src/app/services/CLAUDE.md` |
 | Shared (Services, Pipes, Directives) | `Appy/Appy-frontend/src/app/shared/CLAUDE.md` |
 | Reusable UI Components | `Appy/Appy-frontend/src/app/components/CLAUDE.md` |
-| Feature Pages | `Appy/Appy-frontend/src/app/pages/CLAUDE.md` |
+| Feature Pages (index) | `Appy/Appy-frontend/src/app/pages/CLAUDE.md` |
+| Page: Login | `Appy/Appy-frontend/src/app/pages/login/CLAUDE.md` |
+| Page: Register | `Appy/Appy-frontend/src/app/pages/register/CLAUDE.md` |
+| Page: Error | `Appy/Appy-frontend/src/app/pages/error/CLAUDE.md` |
+| Page: Dashboard | `Appy/Appy-frontend/src/app/pages/dashboard/CLAUDE.md` |
+| Page: Facilities | `Appy/Appy-frontend/src/app/pages/facilities/CLAUDE.md` |
+| Page: Appointments | `Appy/Appy-frontend/src/app/pages/appointments/CLAUDE.md` |
+| Page: Clients | `Appy/Appy-frontend/src/app/pages/clients/CLAUDE.md` |
+| Page: Services | `Appy/Appy-frontend/src/app/pages/services/CLAUDE.md` |
+| Page: Working Hours | `Appy/Appy-frontend/src/app/pages/working-hours/CLAUDE.md` |
+| Page: Client Notifications | `Appy/Appy-frontend/src/app/pages/client-notifications/CLAUDE.md` |
 | Frontend Utilities | `Appy/Appy-frontend/src/app/utils/CLAUDE.md` |
 | Theming & Global Styles | `Appy/Appy-frontend/src/styles/CLAUDE.md` |
 | E2E Tests (Cypress) | `Appy/Appy-frontend/cypress/CLAUDE.md` |
