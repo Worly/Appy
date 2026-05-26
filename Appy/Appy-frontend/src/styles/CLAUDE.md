@@ -32,6 +32,10 @@ Variables store raw RGB channels: `--rgb-primary: 79, 117, 155`. Components use 
 | `.no-select` | Disables text selection |
 | `.display-none` | `display: none` |
 
+## Design Approach
+
+**Mobile is the primary target.** The app is designed and used on mobile; desktop is secondary and not actively used. When building or adjusting layouts, optimize for mobile screens first. Desktop appearance is a nice-to-have, not a requirement.
+
 ## Navigation Bar Layout
 
 - **Desktop** (>991px): fixed top bar, height controlled by `--navigation-bar-height: 64px`
