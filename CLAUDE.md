@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (and other LLMs) when working with co
 
 Appointment management system for service businesses (salons, spas, beauty studios). Business owners manage facilities, services, clients, appointments, and working hours — with optional client notification via Instagram DMs.
 
-**Stack**: ASP.NET Core 6 backend + Angular 16 frontend + PostgreSQL
+**Stack**: ASP.NET Core 8 backend + Angular 16 frontend + PostgreSQL
 
 ## Project Structure
 
