@@ -127,7 +127,13 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
   }
 
   private keepScroll() {
-    this.changeDetector.detectChanges();
+    // Do NOT call detectChanges() here. We want to measure element positions against the
+    // currently-rendered DOM (which may include a loading-more spinner). If we force a
+    // detectChange before measuring, Angular would hide the spinner early (the datasource
+    // sets isLoadingPrevious/Next to false before notifying subscribers), shifting all
+    // element offsetTops by the spinner height before we have a chance to read them.
+    // The single detectChanges() at the end of renderAppointments() atomically applies
+    // both the spinner removal and the new items, so restoreScroll() gets the right reference.
     let firstVisibleApp = this.getFirstVisibleAppointmentElement();
     if (firstVisibleApp != null) {
       this.keptScrollPosition = firstVisibleApp.getBoundingClientRect().top;
