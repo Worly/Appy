@@ -366,6 +366,12 @@ function editAndSaveAppointment(newData: {
   appointmentEdit.getDurationLookup().expectSelected(expectedDuration).select(newData.duration);
   appointmentEdit.getDateTimeLookup().expectSelected(expectedDateN, expectedTimeN).open().select(newData.date, newData.time);
   appointmentEdit.save();
+
+  // After saving, should land on /appointments with the date selector showing the saved appointment's date
+  appointments.checkView();
+  appointments.getCurrentDate().then(date => {
+    expect(date.isSame(newData.date, 'date')).to.be.true;
+  });
 }
 
 function expectAppointment(
