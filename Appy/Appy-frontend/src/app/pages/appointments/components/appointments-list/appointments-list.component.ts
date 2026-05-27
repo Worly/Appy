@@ -56,6 +56,15 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
   viewingAppointmentId: number | undefined;
 
   private detaching: boolean = false;
+  // Suppresses updateDate() in onScroll() while the list is restoring scroll position
+  // after a page load. window.scrollTo() fires scroll events asynchronously in Chromium,
+  // so we keep the flag set for a short window after the call to catch those deferred events.
+  private isRestoringScroll: boolean = false;
+  private restoringScrollTimer: ReturnType<typeof setTimeout> | null = null;
+  // When true, the next renderAppointments() call with non-null data will scroll the
+  // viewport to startDate. This ensures that after a fresh load() the date selector
+  // reflects startDate instead of whatever early date happens to be at scrollY=0.
+  private needsScrollToStartDate: boolean = false;
 
   constructor(
     private changeDetector: ChangeDetectorRef,
@@ -84,7 +93,24 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
     this.datasource?.dispose();
     this.datasource = undefined;
 
+    // Suppress updateDate() from the moment the list is cleared until the viewport
+    // has been positioned at startDate by scrollToStartDate(). When appointments=null,
+    // the DOM height drops, window.scrollY may clamp to 0, and a scroll event fires.
+    // Without suppression that event would corrupt _date (setting it to whatever early
+    // date is at scrollY=0), triggering a reload loop that never resolves.
+    // scrollToStartDate() (queued after the first page renders) will move the viewport
+    // to startDate; the restoreScroll() timer chain then takes over.
+    this.isRestoringScroll = true;
+    if (this.restoringScrollTimer != null) {
+      clearTimeout(this.restoringScrollTimer);
+    }
+    this.restoringScrollTimer = setTimeout(() => {
+      this.isRestoringScroll = false;
+      this.restoringScrollTimer = null;
+    }, 300);
+
     this.keptScrollElement = this.keptScrollPosition = null;
+    this.needsScrollToStartDate = true;
     this.appointments = null;
     this.renderAppointments();
 
@@ -123,7 +149,9 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
       return;
 
     this.checkShouldLoad();
-    this.updateDate();
+    if (!this.isRestoringScroll) {
+      this.updateDate();
+    }
   }
 
   private keepScroll() {
@@ -161,10 +189,22 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
 
     let element = this.keptScrollElement();
     if (element != null) {
+      this.isRestoringScroll = true;
+      if (this.restoringScrollTimer != null) {
+        clearTimeout(this.restoringScrollTimer);
+        this.restoringScrollTimer = null;
+      }
       window.scrollTo({
         top: element.offsetTop - this.keptScrollPosition,
         behavior: "auto"
-      })
+      });
+      // window.scrollTo() with behavior:"auto" fires scroll events ASYNCHRONOUSLY
+      // in Chromium/Electron, so we cannot reset the flag synchronously here.
+      // Use a short timer to keep the flag set until after those deferred events fire.
+      this.restoringScrollTimer = setTimeout(() => {
+        this.isRestoringScroll = false;
+        this.restoringScrollTimer = null;
+      }, 50);
     }
 
     this.keptScrollElement = this.keptScrollPosition = null;
@@ -232,6 +272,21 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
 
     this.changeDetector.detectChanges();
     this.restoreScroll();
+
+    // On the first render after a fresh load(), scroll the viewport to startDate
+    // before checkShouldLoad() runs. This prevents the reload loop where
+    // checkShouldLoad() anchors the viewport to scrollY=0 (an early date), which
+    // fires a scroll event that overwrites _date with the early date, which triggers
+    // another load(), and so on indefinitely. Queueing this before checkShouldLoad()
+    // (which is queued from the datasource subscriber after renderAppointments returns)
+    // ensures the viewport is at startDate when checkShouldLoad() evaluates.
+    if (this.needsScrollToStartDate) {
+      this.needsScrollToStartDate = false;
+      setTimeout(() => {
+        let element = this.getDateElementWithDate(this.startDate.format("YYYY-MM-DD"));
+        element?.scrollIntoView({ block: 'start' });
+      });
+    }
   }
 
   isReachedBottom(): boolean {

@@ -33,7 +33,7 @@ Both are read/written reactively so the URL is always shareable and bookmarkable
 
 - **`SingleDayAppointmentsComponent`**: Renders one day's appointments as a positioned grid inside the scroller.
 
-- **`AppointmentsListComponent`**: List view container. Uses `AppointmentService.getList()` with `PageableListDatasource`.
+- **`AppointmentsListComponent`**: List view container. Uses `AppointmentService.getList()` with `PageableListDatasource`. Scroll-position management (`keepScroll`/`restoreScroll`) preserves the visible anchor when new pages are prepended/appended. Three coordinated mechanisms prevent `updateDate()` from corrupting the date selector with a stale early date: (1) `isRestoringScroll` flag (with a 50ms timer reset per `restoreScroll()` call) suppresses `updateDate()` while async scroll events from `window.scrollTo()` are in flight; (2) `load()` sets the same flag for 300ms to cover the DOM-clear phase and the first-page render; (3) `scrollToStartDate()` fires after the first page renders and positions the viewport at `startDate`, so `updateDate()` eventually resolves to the correct date instead of whatever early date is at `scrollY=0`.
 
 - **`SingleAppointmentListItemComponent`**: One row in the list view.
 

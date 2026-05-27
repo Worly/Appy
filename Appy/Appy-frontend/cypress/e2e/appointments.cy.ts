@@ -401,6 +401,14 @@ function expectAppointment(
 
   if (scrollType == "jump") {
     appointments.jumpToDay(appointment.date);
+
+    if (viewType == "list") {
+      // jumpToDay navigates the date selector (potentially triggering a list reload)
+      // but does not scroll the list viewport to the target date.
+      // scrollToDay handles both: it waits for the list to finish loading and
+      // scrolls to the target date header so getAppointments() reads the right section.
+      appointments.list().scrollToDay(appointment.date);
+    }
   }
   else {
     if (viewType == "list") {
@@ -491,11 +499,10 @@ describe('Appointments', () => {
         view: "list",
         scrollType: "scroll"
       },
-      // TODO: fix jump scroll in list view
-      // {
-      //   view: "list",
-      //   scrollType: "jump"
-      // },
+      {
+        view: "list",
+        scrollType: "jump"
+      },
       {
         view: "scroller",
         scrollType: "jump"

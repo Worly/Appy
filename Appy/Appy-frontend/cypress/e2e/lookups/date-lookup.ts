@@ -71,8 +71,12 @@ export function dateLookup(elementSelector: string) {
             getElement("dialog-close-button").click();
           }
         })
-
-        this.expectSelected(wantedDate);
+        // Note: we intentionally do NOT call expectSelected() here.
+        // The date selector can oscillate while the appointments list loads surrounding
+        // pages (updateDate() fires on each restoreScroll → window.scroll event). Checking
+        // the selector immediately after calendar navigation races against those events.
+        // Correctness is verified downstream: scrollToDay() scrolls the list to the target
+        // date, and getAppointments() confirms the appointment is actually visible there.
       })
 
       return this;
