@@ -88,23 +88,30 @@ let appointments = {
             return;
           }
 
-          getElement("appointments-list-current-date").then(currentDateElement => {
-            let currentDateText = currentDateElement.text().trim().split(" ")[0];
-            let currentDate = dayjs(currentDateText, "DD.MM.YYYY");
-            expect(currentDate.isValid()).to.be.true;
+          // Wait until the current-date element shows a valid date before reading it.
+          // The list loads asynchronously; reading too early yields empty text and an invalid dayjs.
+          // .should() retries until the assertion passes, then .then() safely reads the value.
+          getElement("appointments-list-current-date")
+            .should(el => {
+              let text = el.text().trim().split(" ")[0];
+              expect(dayjs(text, "DD.MM.YYYY").isValid()).to.be.true;
+            })
+            .then(currentDateElement => {
+              let currentDateText = currentDateElement.text().trim().split(" ")[0];
+              let currentDate = dayjs(currentDateText, "DD.MM.YYYY");
 
-            if (date.isBefore(currentDate)) {
-              cy.scrollTo("top");
-            }
-            else {
-              cy.scrollTo("bottom");
-            }
+              if (date.isBefore(currentDate)) {
+                cy.scrollTo("top");
+              }
+              else {
+                cy.scrollTo("bottom");
+              }
 
-            // wait for the list to update and start loading
-            cy.wait(50);
+              // wait for the list to update and start loading
+              cy.wait(50);
 
-            this.scrollToDay(date);
-          })
+              this.scrollToDay(date);
+            })
         })
 
         return this;
@@ -367,11 +374,11 @@ function editAndSaveAppointment(newData: {
   appointmentEdit.getDateTimeLookup().expectSelected(expectedDateN, expectedTimeN).open().select(newData.date, newData.time);
   appointmentEdit.save();
 
-  // After saving, should land on /appointments with the date selector showing the saved appointment's date
+  // After saving, should land on /appointments with the date selector showing the saved appointment's date.
+  // Uses .should() (not .then()) so Cypress retries until the date updates — Angular processes the new
+  // query param asynchronously after navigation, so a plain .then() would read a stale value.
   appointments.checkView();
-  appointments.getCurrentDate().then(date => {
-    expect(date.isSame(newData.date, 'date')).to.be.true;
-  });
+  getElement("appointments-date-selector").should("contain", newData.date.format("DD.MM.YY"));
 }
 
 function expectAppointment(

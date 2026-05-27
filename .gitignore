@@ -38,3 +38,6 @@ msbuild.wrn
 
 # Playwright MCP session output
 .playwright-mcp/
+
+# Local Claude Code notes (machine-specific, not for PRs)
+.claude/
