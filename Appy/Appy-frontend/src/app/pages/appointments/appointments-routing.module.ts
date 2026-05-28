@@ -6,18 +6,16 @@ import { AppointmentsComponent } from "./components/appointments/appointments.co
 const routes: Routes = [
     {
         path: "",
-        component: AppointmentsComponent,
-        data: { shouldDetach: true, detachGroup: "appointments" }
+        component: AppointmentsComponent
       },
       {
         path: "edit/:id",
-        component: AppointmentEditComponent,
-        data: { detachGroup: "appointments" }
+        component: AppointmentEditComponent
       },
       {
         path: "new",
         component: AppointmentEditComponent,
-        data: { isNew: true, detachGroup: "appointments" }
+        data: { isNew: true }
       },
 ];
 

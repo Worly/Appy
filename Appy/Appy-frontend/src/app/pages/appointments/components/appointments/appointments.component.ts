@@ -3,7 +3,6 @@ import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import dayjs, { Dayjs } from 'dayjs';
 import { Subscription } from 'rxjs';
-import { AfterAttach, BeforeAttach, BeforeDetach } from 'src/app/services/attach-detach-hooks.service';
 import { ClientDTO } from 'src/app/models/client';
 import { ServiceDTO } from 'src/app/models/service';
 import { setUrlParams } from 'src/app/utils/dynamic-url-params';
@@ -49,7 +48,7 @@ export function appFilterToSmartFilter(filter: AppointmentsFilter): SmartFilter 
   templateUrl: './appointments.component.html',
   styleUrls: ['./appointments.component.scss']
 })
-export class AppointmentsComponent implements OnInit, OnDestroy, BeforeDetach, BeforeAttach, AfterAttach {
+export class AppointmentsComponent implements OnInit, OnDestroy {
   @ViewChild(AppointmentsListComponent) appointmentListComponent?: AppointmentsListComponent;
 
   @ViewChild("filterDialog") filterDialog?: DialogComponent;
@@ -123,18 +122,6 @@ export class AppointmentsComponent implements OnInit, OnDestroy, BeforeDetach, B
 
   ngOnDestroy(): void {
     this.subs.forEach(s => s.unsubscribe());
-  }
-
-  ngBeforeDetach(): void {
-    this.appointmentListComponent?.ngBeforeDetach();
-  }
-
-  ngBeforeAttach(): void {
-    this.appointmentListComponent?.ngBeforeAttach();
-  }
-
-  ngAfterAttach(): void {
-    this.appointmentListComponent?.ngAfterAttach();
   }
 
   private updateUrl() {
