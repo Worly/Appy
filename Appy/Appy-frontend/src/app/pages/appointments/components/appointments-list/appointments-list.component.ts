@@ -102,6 +102,16 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
     // already shows _date. A plain re-scroll races that restoration and loses. A fresh load()
     // re-anchors on _date and re-runs scrollToStartDate after the data renders (well after
     // restoration settles), so the list reliably lands on the navigated date.
+    //
+    // Also realign startDate with _date: the user may have scrolled to a different day (which
+    // updateDate() writes into _date and the URL, but never into startDate); if save's
+    // router.navigate then pushes a URL whose date equals that post-scroll _date, the date
+    // input setter early-returns on the isSame(_date, value) check and leaves startDate stuck
+    // at the original navigated-to date. load() then fetches from _date but scrollToDate snaps
+    // to the stale startDate, landing the viewport on the wrong day even though the URL is correct.
+    if (!this.startDate.isSame(this._date, "date")) {
+      this.startDate = this._date;
+    }
     this.load();
   }
 
@@ -299,10 +309,26 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
 
   // Scrolls the viewport so the given date's header sits at the top. Programmatic, so it resets
   // userScrolling to stop the resulting async scroll echo from moving the date selector.
+  //
+  // Re-snaps on the next animation frame: between the sync scrollIntoView and the next paint
+  // the viewport can drift to the day after — Angular's scrollPositionRestoration runs a
+  // setTimeout(0) of its own, a late cached-datasource emission can fire a stray renderAppointments
+  // whose keepScroll/restoreScroll lands on a later-day anchor, and browser layout adjustments
+  // settle async. The rAF re-snap runs before the next paint so the user never sees the wrong
+  // position. Gated on needsScrollToStartDate so the moment the user scrolls it stops fighting them.
   private scrollToDate(date: Dayjs) {
-    this.userScrolling = false;
-    let element = this.getDateElementWithDate(date.format("YYYY-MM-DD"));
-    element?.scrollIntoView({ block: 'start' });
+    const dateStr = date.format("YYYY-MM-DD");
+    const snap = () => {
+      let element = this.getDateElementWithDate(dateStr);
+      if (element == null) return;
+      this.userScrolling = false;
+      element.scrollIntoView({ block: 'start' });
+    };
+    snap();
+    requestAnimationFrame(() => {
+      if (!this.needsScrollToStartDate) return;
+      snap();
+    });
   }
 
   isReachedBottom(): boolean {
