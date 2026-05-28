@@ -212,10 +212,26 @@ let appointments = {
     return dateLookup("appointments-date-selector").getSelected();
   },
 
+  expectCurrentDate(date: Dayjs) {
+    this.checkView();
+
+    dateLookup("appointments-date-selector").expectSelected(date);
+  },
+
   jumpToDay(date: Dayjs) {
     this.checkView();
 
     dateLookup("appointments-date-selector").select(date);
+
+    // A jump must bring the day into view on its own — the test never scrolls in the jump path.
+    // In list view, wait until the list has actually positioned itself at the target day before
+    // returning, so callers can read it directly. (The current-date element exists only in list
+    // view; the scroller renders the selected day directly and needs no extra wait.)
+    this.getCurrentView().then(view => {
+      if (view == "list") {
+        getElement("appointments-list-current-date").should("contain", date.format("DD.MM.YYYY"));
+      }
+    });
   },
 
   plusButton() {
@@ -374,11 +390,10 @@ function editAndSaveAppointment(newData: {
   appointmentEdit.getDateTimeLookup().expectSelected(expectedDateN, expectedTimeN).open().select(newData.date, newData.time);
   appointmentEdit.save();
 
-  // After saving, should land on /appointments with the date selector showing the saved appointment's date.
-  // Uses .should() (not .then()) so Cypress retries until the date updates — Angular processes the new
-  // query param asynchronously after navigation, so a plain .then() would read a stale value.
-  appointments.checkView();
-  getElement("appointments-date-selector").should("contain", newData.date.format("DD.MM.YY"));
+  // After saving, should land on /appointments with the date selector showing the saved
+  // appointment's date. expectCurrentDate() retries (re-reading the selector each attempt)
+  // until the date updates — Angular processes the new query param asynchronously after navigation.
+  appointments.expectCurrentDate(newData.date);
 }
 
 function expectAppointment(
@@ -401,14 +416,6 @@ function expectAppointment(
 
   if (scrollType == "jump") {
     appointments.jumpToDay(appointment.date);
-
-    if (viewType == "list") {
-      // jumpToDay navigates the date selector (potentially triggering a list reload)
-      // but does not scroll the list viewport to the target date.
-      // scrollToDay handles both: it waits for the list to finish loading and
-      // scrolls to the target date header so getAppointments() reads the right section.
-      appointments.list().scrollToDay(appointment.date);
-    }
   }
   else {
     if (viewType == "list") {

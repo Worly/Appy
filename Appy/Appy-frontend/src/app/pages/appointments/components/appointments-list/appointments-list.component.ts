@@ -3,7 +3,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import _ from 'lodash';
 import { AppointmentView } from 'src/app/models/appointment';
 import { ServiceColorsService } from 'src/app/pages/services/services/service-colors.service';
-import { BeforeAttach, BeforeDetach } from 'src/app/services/attach-detach-hooks.service';
+import { AfterAttach, BeforeAttach, BeforeDetach } from 'src/app/services/attach-detach-hooks.service';
 import { AppointmentService } from '../../services/appointment.service';
 import { appFilterToSmartFilter, AppointmentsFilter } from '../appointments/appointments.component';
 import { PageableListDatasource } from 'src/app/shared/services/datasource';
@@ -13,7 +13,7 @@ import { PageableListDatasource } from 'src/app/shared/services/datasource';
   templateUrl: './appointments-list.component.html',
   styleUrls: ['./appointments-list.component.scss']
 })
-export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetach, BeforeAttach {
+export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetach, BeforeAttach, AfterAttach {
   @ViewChildren("appointmentElement", { read: ElementRef }) appointmentElements?: QueryList<ElementRef<HTMLElement>>;
   @ViewChildren("dateElement") dateElements?: QueryList<ElementRef<HTMLElement>>;
 
@@ -56,7 +56,8 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
   viewingAppointmentId: number | undefined;
 
   private detaching: boolean = false;
-  // True only while the user is physically scrolling (mouse wheel / touch drag). updateDate()
+  // True only while the user is physically scrolling (mouse wheel / touch drag / middle-button
+  // autoscroll). updateDate()
   // is gated on this so the date selector tracks the USER's scroll position and is never moved
   // by a programmatic scroll — pagination's restoreScroll(), scrollToStartDate(), the router's
   // scroll restoration, or the scrollY=0 clamp when the list is cleared. Emitting a date from
@@ -64,9 +65,11 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
   // loop. Programmatic scrolls reset this to false right before scrolling so their async scroll
   // echoes are ignored.
   private userScrolling: boolean = false;
-  // When true, the next renderAppointments() with non-null data positions the viewport at
-  // startDate (one-shot, set by load()). Purely visual: it makes the list show the date the
-  // user navigated to after a fresh load instead of resting at scrollY=0 on an earlier date.
+  // When true, every renderAppointments() with non-null data re-positions the viewport at
+  // startDate. Set by load() and stays true until the user physically scrolls, so backwards
+  // pagination triggered by the initial near-top auto-load doesn't drift the visible anchor
+  // away from startDate. Once the user scrolls (wheel/touch/middle-button), this is cleared
+  // and keepScroll/restoreScroll takes over for preserving the user's chosen anchor.
   private needsScrollToStartDate: boolean = false;
 
   constructor(
@@ -90,6 +93,16 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
 
   ngBeforeAttach(): void {
     this.detaching = false;
+  }
+
+  ngAfterAttach(): void {
+    // On re-attach (e.g. navigating back after saving) the viewport can be left on an earlier day
+    // — Angular's scrollPositionRestoration restores a stale offset on NavigationEnd and the
+    // resulting backward pagination drags the top away from _date, even though the date selector
+    // already shows _date. A plain re-scroll races that restoration and loses. A fresh load()
+    // re-anchors on _date and re-runs scrollToStartDate after the data renders (well after
+    // restoration settles), so the list reliably lands on the navigated date.
+    this.load();
   }
 
   load() {
@@ -130,12 +143,25 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
     }
   }
 
-  // A real user scroll is always preceded by a wheel or touch-drag input event; a programmatic
-  // scroll is not. Marking userScrolling here lets onScroll() tell the two apart.
+  // A real user scroll is always preceded by an input event (wheel, touch-drag, or a middle-button
+  // press that starts autoscroll/panning); a programmatic scroll is not. Marking userScrolling here
+  // lets onScroll() tell the two apart. Also clears needsScrollToStartDate so the user's chosen
+  // scroll position takes over from the post-load snap-to-startDate behavior.
   @HostListener('window:wheel')
   @HostListener('window:touchmove')
   onUserScrollInput() {
     this.userScrolling = true;
+    this.needsScrollToStartDate = false;
+  }
+
+  // Middle-button autoscroll (panning) emits plain scroll events with no wheel/touch, so catch the
+  // initiating middle-button press here. The whole pan is then treated as user scrolling.
+  @HostListener('window:mousedown', ['$event'])
+  onMouseDown(event: MouseEvent) {
+    if (event.button === 1) {
+      this.userScrolling = true;
+      this.needsScrollToStartDate = false;
+    }
   }
 
   @HostListener('window:scroll', ['$event']) // for window scroll events
@@ -257,16 +283,26 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
     this.changeDetector.detectChanges();
     this.restoreScroll();
 
-    // On the first render after a fresh load(), position the viewport at startDate so the list
-    // visually shows the date the user navigated to (it would otherwise rest at scrollY=0 on an
-    // earlier date). This is a programmatic scroll, so reset userScrolling first to keep its
-    // async scroll echo from moving the date selector.
+    // After a fresh load(), position the viewport at startDate so the list visually shows the
+    // date the user navigated to (it would otherwise rest at scrollY=0 on an earlier date).
+    // We re-snap on EVERY render until the user scrolls — otherwise the initial near-top
+    // auto-load of the previous page (triggered by checkShouldLoad immediately after the first
+    // scrollToDate) drifts the visible anchor: keepScroll/restoreScroll preserves the first
+    // visible appointment at its current viewport offset (which isn't top=0 because of the
+    // sticky current-date header and loading spinner), leaving startDate below the visible top
+    // and the previous date at the top instead. The flag is cleared in onUserScrollInput /
+    // onMouseDown so the user's chosen anchor takes over once they scroll.
     if (this.needsScrollToStartDate) {
-      this.needsScrollToStartDate = false;
-      this.userScrolling = false;
-      let element = this.getDateElementWithDate(this.startDate.format("YYYY-MM-DD"));
-      element?.scrollIntoView({ block: 'start' });
+      this.scrollToDate(this.startDate);
     }
+  }
+
+  // Scrolls the viewport so the given date's header sits at the top. Programmatic, so it resets
+  // userScrolling to stop the resulting async scroll echo from moving the date selector.
+  private scrollToDate(date: Dayjs) {
+    this.userScrolling = false;
+    let element = this.getDateElementWithDate(date.format("YYYY-MM-DD"));
+    element?.scrollIntoView({ block: 'start' });
   }
 
   isReachedBottom(): boolean {
