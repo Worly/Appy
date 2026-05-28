@@ -15,8 +15,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Validate and extract version
+        env:
+          TAG: ${{ github.ref_name }}
         run: |
-          TAG="${{ github.ref_name }}"
           if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "ERROR: Tag '$TAG' does not match expected format v<major>.<minor>.<patch> (e.g. v3.3.0)"
             exit 1
@@ -65,4 +66,4 @@ jobs:
 
       - name: Notify Watchtower
         run: |
-          curl -H "Authorization: Bearer ${{ secrets.WATCHTOWER_TOKEN }}" http://worly.ddnsfree.com:9898/v1/update
+          curl --fail -H "Authorization: Bearer ${{ secrets.WATCHTOWER_TOKEN }}" http://worly.ddnsfree.com:9898/v1/update
