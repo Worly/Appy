@@ -1,6 +1,6 @@
 # Dockerfile
 
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:6.0 AS build-env
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
 WORKDIR /app
 RUN apt-get update -yq \
     && apt-get install curl gnupg -yq \
@@ -16,7 +16,7 @@ COPY . .
 RUN dotnet publish -c Release -o out
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:6.0
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 RUN apt-get update -yq \
     && apt-get install curl -yq
