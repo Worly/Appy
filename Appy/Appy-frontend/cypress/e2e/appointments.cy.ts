@@ -353,11 +353,38 @@ let appointmentEdit = {
   },
 }
 
+let toast = {
+  expectVisible() {
+    cy.get("app-toast").should("be.visible");
+    return this;
+  },
+
+  expectConfirmAction() {
+    cy.get("app-toast [data-test=toast-action-check]").should("exist");
+    return this;
+  },
+
+  expectNoConfirmAction() {
+    cy.get("app-toast [data-test=toast-action-check]").should("not.exist");
+    return this;
+  },
+
+  clickConfirm() {
+    cy.get("app-toast [data-test=toast-action-check]").click();
+    return this;
+  }
+}
+
 let appointmentView = {
   edit() {
     getElement("appointment-edit-button").click();
 
     return appointmentEdit;
+  },
+
+  expectStatus(status: "Unconfirmed" | "Confirmed" | "NoShow") {
+    getElement("appointment-status-value-" + status).should("exist");
+    return this;
   }
 }
 
@@ -578,3 +605,100 @@ describe('Appointments', () => {
     }
   }
 })
+
+describe('Editing reverts confirmed status', () => {
+  beforeEach(() => {
+    login("appointments");
+    cy.visit("/appointments");
+    appointments.openListView();
+  });
+
+  // Create a fresh appointment and confirm it via the post-save toast.
+  // Lands the user back on /appointments after the save toast's confirm action.
+  function createAndConfirm(): { date: Dayjs, time: string, duration: string, client: string, service: TestService } {
+    const data = {
+      client: "Client1",
+      service: getTestService("Service1"),
+      date: dayjs("2025-12-15"),
+      time: "10:00",
+      duration: "00:30"
+    };
+
+    appointments.plusButton();
+    editAndSaveAppointment(data);
+
+    toast.expectVisible().expectConfirmAction().clickConfirm();
+
+    return data;
+  }
+
+  // Open the just-edited appointment's detail panel from the list view
+  // and confirm its current status is Confirmed before continuing.
+  function openConfirmedAppointment(appointmentDate: Dayjs, client: string, service: TestService, time: string, duration: string) {
+    appointments.list().scrollToDay(appointmentDate);
+    return expectAppointment({ client, service, date: appointmentDate, time, duration }).then(item => {
+      appointments.list().viewAppointment(item.id);
+      appointmentView.expectStatus("Confirmed");
+    });
+  }
+
+  it('reverts Confirmed to Unconfirmed when date changes, toast shows Confirm action', () => {
+    const created = createAndConfirm();
+
+    openConfirmedAppointment(created.date, created.client, created.service, created.time, created.duration).then(() => {
+      appointmentView.edit();
+      appointmentEdit.getDateTimeLookup().open().select(dayjs("2025-12-22"), created.time);
+      appointmentEdit.save();
+
+      toast.expectVisible().expectConfirmAction();
+    });
+  });
+
+  it('reverts Confirmed to Unconfirmed when time changes, toast shows Confirm action', () => {
+    const created = createAndConfirm();
+
+    openConfirmedAppointment(created.date, created.client, created.service, created.time, created.duration).then(() => {
+      appointmentView.edit();
+      appointmentEdit.getDateTimeLookup().open().select(created.date, "11:00");
+      appointmentEdit.save();
+
+      toast.expectVisible().expectConfirmAction();
+    });
+  });
+
+  it('reverts Confirmed to Unconfirmed when service changes, toast shows Confirm action', () => {
+    const created = createAndConfirm();
+
+    openConfirmedAppointment(created.date, created.client, created.service, created.time, created.duration).then(() => {
+      appointmentView.edit();
+      appointmentEdit.getServiceLookup().select(getTestService("Service2").displayName);
+      appointmentEdit.save();
+
+      toast.expectVisible().expectConfirmAction();
+    });
+  });
+
+  it('reverts Confirmed to Unconfirmed when client changes, toast shows Confirm action', () => {
+    const created = createAndConfirm();
+
+    openConfirmedAppointment(created.date, created.client, created.service, created.time, created.duration).then(() => {
+      appointmentView.edit();
+      appointmentEdit.getClientLookup().select("Client2");
+      appointmentEdit.save();
+
+      toast.expectVisible().expectConfirmAction();
+    });
+  });
+
+  it('keeps Confirmed status when only duration changes, toast has no Confirm action', () => {
+    const created = createAndConfirm();
+
+    openConfirmedAppointment(created.date, created.client, created.service, created.time, created.duration).then(() => {
+      appointmentView.edit();
+      appointmentEdit.getDurationLookup().select("00:45");
+      appointmentEdit.save();
+
+      toast.expectVisible().expectNoConfirmAction();
+    });
+  });
+});
