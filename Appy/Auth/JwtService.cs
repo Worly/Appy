@@ -15,10 +15,12 @@ namespace Appy.Services
     public class JwtService : IJwtService
     {
         private string jwtSecret;
+        private readonly ILogger<JwtService> logger;
 
-        public JwtService(IConfiguration configuration)
+        public JwtService(IConfiguration configuration, ILogger<JwtService> logger)
         {
             this.jwtSecret = configuration["JwtSecret"]!;
+            this.logger = logger;
         }
 
         public async Task<(bool valid, JwtSecurityToken? token)> ValidateToken(string token, bool validateLifetime = true)
@@ -38,12 +40,22 @@ namespace Appy.Services
                 });
 
                 if (!result.IsValid)
+                {
+                    if (result.Exception != null)
+                        logger.LogDebug(result.Exception, "JWT validation failed");
                     return (false, null);
+                }
 
                 return (true, result.SecurityToken as JwtSecurityToken);
             }
-            catch
+            catch (SecurityTokenException e)
             {
+                logger.LogDebug(e, "JWT validation rejected token");
+                return (false, null);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Unexpected exception while validating JWT");
                 return (false, null);
             }
         }
@@ -55,8 +67,14 @@ namespace Appy.Services
                 var tokenHandler = new JwtSecurityTokenHandler();
                 return tokenHandler.ReadJwtToken(token);
             }
-            catch (Exception)
+            catch (ArgumentException e)
             {
+                logger.LogDebug(e, "Failed to parse JWT: malformed input");
+                return null;
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Unexpected exception while parsing JWT");
                 return null;
             }
         }
