@@ -624,6 +624,7 @@ describe('Editing reverts confirmed status', () => {
       duration: "00:30"
     };
 
+    appointments.openScrollerView();
     appointments.getCurrentDate().then(currentDate => {
       appointments.plusButton();
       editAndSaveAppointment(data, undefined, currentDate);
