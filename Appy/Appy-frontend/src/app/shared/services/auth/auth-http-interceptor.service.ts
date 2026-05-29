@@ -12,7 +12,6 @@ export class AuthHttpInterceptor implements HttpInterceptor {
   private tokenRefreshedSubject: Subject<void> = new Subject();
 
   constructor(private authService: AuthService) {
-    console.log("constructor");
   }
 
   intercept(httpRequest: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
@@ -47,13 +46,10 @@ export class AuthHttpInterceptor implements HttpInterceptor {
 
   private startRefreshingToken() {
     this.isRefreshing = true;
-    console.log("Refreshing token!");
 
     this.authService.refreshTokens().subscribe({
       next: () => {
         this.isRefreshing = false;
-
-        console.log("Refreshed token!");
 
         this.tokenRefreshedSubject.next();
       },
@@ -67,11 +63,9 @@ export class AuthHttpInterceptor implements HttpInterceptor {
   }
 
   private waitOnRefreshToken(httpRequest: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    console.log("Waiting on refresh token! " + httpRequest.urlWithParams);
     return this.tokenRefreshedSubject.pipe(
       take(1),
       switchMap(() => {
-        console.log("Done waiting, now sending " + httpRequest.urlWithParams);
         return next.handle(this.addAccessToken(httpRequest, this.authService.getAccessToken() as string));
       })
     )

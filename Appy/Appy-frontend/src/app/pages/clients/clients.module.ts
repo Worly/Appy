@@ -71,9 +71,6 @@ function openInstagram(contactInfo: string) {
 
 function openWhatsApp(contactInfo: string) {
     let phoneNumber = parsePhoneNumber(contactInfo, "HR")
-    if (!phoneNumber.isValid()) {
-        console.log("Invalid phone number!");
-    }
 
     // substr removes '+' sign at the begging
     let normalized = phoneNumber.format("E.164").substring(1);

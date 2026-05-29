@@ -33,9 +33,8 @@ export class TranslateService {
                         s.next();
                     },
                     error: (e: any) => {
-                        console.log("Error while loading the language", e);
+                        console.error("Error while loading the language", e);
                         if (languageCode != "en") {
-                            console.log("Retrying with english");
                             languageCode = "en";
 
                             this.loadSpecificLanguage(languageCode).subscribe({
