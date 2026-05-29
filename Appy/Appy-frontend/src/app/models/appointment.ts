@@ -105,8 +105,6 @@ export class AppointmentDTO {
     public service?: ServiceDTO;
     public client?: ClientDTO;
 
-    public status?: AppointmentStatus;
-
     public notes?: string;
 
     public createdAt?: string;
@@ -121,8 +119,6 @@ export class Appointment extends EditModel<Appointment> {
 
     public service?: ServiceDTO;
     public client?: ClientDTO;
-
-    public status?: AppointmentStatus;
 
     public notes?: string;
 
@@ -166,7 +162,6 @@ export class Appointment extends EditModel<Appointment> {
         this.duration = dto.duration ? parseDuration(dto.duration) : undefined;
         this.service = dto.service;
         this.client = dto.client;
-        this.status = dto.status;
         this.notes = dto.notes;
         this.createdAt = dto.createdAt ? dayjs(dto.createdAt) : undefined;
         this.lastUpdatedAt = dto.lastUpdatedAt ? dayjs(dto.lastUpdatedAt) : undefined;
@@ -182,7 +177,6 @@ export class Appointment extends EditModel<Appointment> {
         dto.duration = this.duration ? this.duration.format("HH:mm:ss") : undefined;
         dto.service = this.service;
         dto.client = this.client;
-        dto.status = this.status;
         dto.notes = this.notes;
 
         return dto;
