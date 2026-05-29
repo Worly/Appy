@@ -4,18 +4,16 @@ import dayjs, { Dayjs } from "dayjs";
 export function dateLookup(elementSelector: string) {
   return {
     getSelected() {
-      return getElement(elementSelector).then(el => {
-        let text = el.text().trim();
-        let split = text.split(".")
-
-        return dayjs(`20${split[2]}-${split[1]}-${split[0]}`);
-      })
+      return getElement(elementSelector).then(el => parseSelectedDate(el.text()));
     },
 
     expectSelected(date: Dayjs) {
-      this.getSelected().then(selected => {
-        expect(selected.isSame(date, 'day')).to.be.true;
-      })
+      // .should() re-reads the element text on each retry, so this tolerates the brief async
+      // gap between navigation and the selector updating. (A getSelected().then() read would
+      // not retry — .then() captures the value once.)
+      getElement(elementSelector).should(el => {
+        expect(parseSelectedDate(el.text()).isSame(date, 'day')).to.be.true;
+      });
 
       return this;
     },
@@ -78,4 +76,9 @@ export function dateLookup(elementSelector: string) {
       return this;
     }
   };
+}
+
+function parseSelectedDate(text: string): Dayjs {
+  let split = text.trim().split(".");
+  return dayjs(`20${split[2]}-${split[1]}-${split[0]}`);
 }

@@ -33,7 +33,7 @@ Both are read/written reactively so the URL is always shareable and bookmarkable
 
 - **`SingleDayAppointmentsComponent`**: Renders one day's appointments as a positioned grid inside the scroller.
 
-- **`AppointmentsListComponent`**: List view container. Uses `AppointmentService.getList()` with `PageableListDatasource`.
+- **`AppointmentsListComponent`**: List view container. Bidirectional pagination via `PageableListDatasource`; `keepScroll`/`restoreScroll` preserves the visible anchor when pages are prepended/appended. The component is not route-reused — going to edit destroys it, going back rebuilds it from the URL date — so there's no detach/attach state to manage. Two flags guard the post-load scroll position: (1) `userScrolling`, set by `window:wheel`/`touchmove`/middle-mousedown and cleared by programmatic scrolls, gates `updateDate()` so a programmatic-scroll echo never rewrites the URL with a stale date and triggers a reload. (2) `needsScrollToStartDate`, set by `load()` and cleared on the same user-input events, makes every render re-snap to `startDate` until the user scrolls — needed because both auto-paginate-back (which fires when the first snap lands near the top) and Angular's `scrollPositionRestoration` scrolling to `(0, 0)` on forward navigation can drag the viewport off the URL's date after the initial snap.
 
 - **`SingleAppointmentListItemComponent`**: One row in the list view.
 

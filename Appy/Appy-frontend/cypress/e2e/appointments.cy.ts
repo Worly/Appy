@@ -88,23 +88,30 @@ let appointments = {
             return;
           }
 
-          getElement("appointments-list-current-date").then(currentDateElement => {
-            let currentDateText = currentDateElement.text().trim().split(" ")[0];
-            let currentDate = dayjs(currentDateText, "DD.MM.YYYY");
-            expect(currentDate.isValid()).to.be.true;
+          // Wait until the current-date element shows a valid date before reading it.
+          // The list loads asynchronously; reading too early yields empty text and an invalid dayjs.
+          // .should() retries until the assertion passes, then .then() safely reads the value.
+          getElement("appointments-list-current-date")
+            .should(el => {
+              let text = el.text().trim().split(" ")[0];
+              expect(dayjs(text, "DD.MM.YYYY").isValid()).to.be.true;
+            })
+            .then(currentDateElement => {
+              let currentDateText = currentDateElement.text().trim().split(" ")[0];
+              let currentDate = dayjs(currentDateText, "DD.MM.YYYY");
 
-            if (date.isBefore(currentDate)) {
-              cy.scrollTo("top");
-            }
-            else {
-              cy.scrollTo("bottom");
-            }
+              if (date.isBefore(currentDate)) {
+                cy.scrollTo("top");
+              }
+              else {
+                cy.scrollTo("bottom");
+              }
 
-            // wait for the list to update and start loading
-            cy.wait(50);
+              // wait for the list to update and start loading
+              cy.wait(50);
 
-            this.scrollToDay(date);
-          })
+              this.scrollToDay(date);
+            })
         })
 
         return this;
@@ -205,10 +212,26 @@ let appointments = {
     return dateLookup("appointments-date-selector").getSelected();
   },
 
+  expectCurrentDate(date: Dayjs) {
+    this.checkView();
+
+    dateLookup("appointments-date-selector").expectSelected(date);
+  },
+
   jumpToDay(date: Dayjs) {
     this.checkView();
 
     dateLookup("appointments-date-selector").select(date);
+
+    // A jump must bring the day into view on its own — the test never scrolls in the jump path.
+    // In list view, wait until the list has actually positioned itself at the target day before
+    // returning, so callers can read it directly. (The current-date element exists only in list
+    // view; the scroller renders the selected day directly and needs no extra wait.)
+    this.getCurrentView().then(view => {
+      if (view == "list") {
+        getElement("appointments-list-current-date").should("contain", date.format("DD.MM.YYYY"));
+      }
+    });
   },
 
   plusButton() {
@@ -366,6 +389,11 @@ function editAndSaveAppointment(newData: {
   appointmentEdit.getDurationLookup().expectSelected(expectedDuration).select(newData.duration);
   appointmentEdit.getDateTimeLookup().expectSelected(expectedDateN, expectedTimeN).open().select(newData.date, newData.time);
   appointmentEdit.save();
+
+  // After saving, should land on /appointments with the date selector showing the saved
+  // appointment's date. expectCurrentDate() retries (re-reading the selector each attempt)
+  // until the date updates — Angular processes the new query param asynchronously after navigation.
+  appointments.expectCurrentDate(newData.date);
 }
 
 function expectAppointment(
@@ -478,11 +506,10 @@ describe('Appointments', () => {
         view: "list",
         scrollType: "scroll"
       },
-      // TODO: fix jump scroll in list view
-      // {
-      //   view: "list",
-      //   scrollType: "jump"
-      // },
+      {
+        view: "list",
+        scrollType: "jump"
+      },
       {
         view: "scroller",
         scrollType: "jump"

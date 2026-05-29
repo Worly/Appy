@@ -1,9 +1,7 @@
-import { ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, QueryList, ViewChildren } from '@angular/core';
 import dayjs, { Dayjs } from 'dayjs';
 import _ from 'lodash';
 import { AppointmentView } from 'src/app/models/appointment';
-import { ServiceColorsService } from 'src/app/pages/services/services/service-colors.service';
-import { BeforeAttach, BeforeDetach } from 'src/app/services/attach-detach-hooks.service';
 import { AppointmentService } from '../../services/appointment.service';
 import { appFilterToSmartFilter, AppointmentsFilter } from '../appointments/appointments.component';
 import { PageableListDatasource } from 'src/app/shared/services/datasource';
@@ -13,7 +11,7 @@ import { PageableListDatasource } from 'src/app/shared/services/datasource';
   templateUrl: './appointments-list.component.html',
   styleUrls: ['./appointments-list.component.scss']
 })
-export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetach, BeforeAttach {
+export class AppointmentsListComponent implements OnInit, OnDestroy {
   @ViewChildren("appointmentElement", { read: ElementRef }) appointmentElements?: QueryList<ElementRef<HTMLElement>>;
   @ViewChildren("dateElement") dateElements?: QueryList<ElementRef<HTMLElement>>;
 
@@ -50,17 +48,28 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
 
   public renderedItems: (RenderedType & (RenderedAppointment | RenderedDate))[] = [];
 
-  keptScrollPosition: number | null = null;
-  keptScrollElement: (() => HTMLElement | undefined) | null = null;
-  
+  private keptScrollPosition: number | null = null;
+  private keptScrollElement: (() => HTMLElement | undefined) | null = null;
+
   viewingAppointmentId: number | undefined;
 
-  private detaching: boolean = false;
+  // While true, every render scrolls the viewport to startDate. Set by load() and cleared when
+  // the user physically scrolls. Re-snapping on every render (not just the first) is needed
+  // because two later events can drag the viewport away from startDate after the initial snap:
+  // the auto-paginate-back triggered when snap lands near the top, and Angular's
+  // scrollPositionRestoration scrolling to (0, 0) on forward navigation via its own setTimeout.
+  private needsScrollToStartDate: boolean = false;
+
+  // True only while the user is physically scrolling (wheel / touch drag / middle-button autoscroll).
+  // updateDate() is gated on this so the date selector tracks the USER's position and is never
+  // moved by a programmatic scroll. (URL writes from programmatic-scroll echoes would trigger
+  // stale reloads.) The user-scroll listeners also clear needsScrollToStartDate so the snap loop
+  // stops fighting the user's chosen position.
+  private userScrolling: boolean = false;
 
   constructor(
     private changeDetector: ChangeDetectorRef,
     private appointmentService: AppointmentService,
-    private serviceColorsService: ServiceColorsService,
   ) { }
 
   ngOnInit(): void {
@@ -72,19 +81,12 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
     this.datasource?.dispose();
   }
 
-  ngBeforeDetach(): void {
-    this.detaching = true;
-  }
-
-  ngBeforeAttach(): void {
-    this.detaching = false;
-  }
-
   load() {
     this.datasource?.dispose();
     this.datasource = undefined;
 
     this.keptScrollElement = this.keptScrollPosition = null;
+    this.needsScrollToStartDate = true;
     this.appointments = null;
     this.renderAppointments();
 
@@ -117,17 +119,38 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
     }
   }
 
-  @HostListener('window:scroll', ['$event']) // for window scroll events
-  onScroll() {
-    if (this.detaching)
-      return;
+  // A real user scroll is always preceded by an input event (wheel, touch-drag, or a middle-button
+  // press that starts autoscroll). Programmatic scrolls (scrollIntoView, scrollTo) are not.
+  @HostListener('window:wheel')
+  @HostListener('window:touchmove')
+  onUserScrollInput() {
+    this.userScrolling = true;
+    this.needsScrollToStartDate = false;
+  }
 
+  @HostListener('window:mousedown', ['$event'])
+  onMouseDown(event: MouseEvent) {
+    if (event.button === 1) {
+      this.userScrolling = true;
+      this.needsScrollToStartDate = false;
+    }
+  }
+
+  @HostListener('window:scroll')
+  onScroll() {
     this.checkShouldLoad();
-    this.updateDate();
+    if (this.userScrolling)
+      this.updateDate();
   }
 
   private keepScroll() {
-    this.changeDetector.detectChanges();
+    // Do NOT call detectChanges() here. We want to measure element positions against the
+    // currently-rendered DOM (which may include a loading-more spinner). If we force a
+    // detectChange before measuring, Angular would hide the spinner early (the datasource
+    // sets isLoadingPrevious/Next to false before notifying subscribers), shifting all
+    // element offsetTops by the spinner height before we have a chance to read them.
+    // The single detectChanges() at the end of renderAppointments() atomically applies
+    // both the spinner removal and the new items, so restoreScroll() gets the right reference.
     let firstVisibleApp = this.getFirstVisibleAppointmentElement();
     if (firstVisibleApp != null) {
       this.keptScrollPosition = firstVisibleApp.getBoundingClientRect().top;
@@ -155,10 +178,11 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
 
     let element = this.keptScrollElement();
     if (element != null) {
+      this.userScrolling = false;
       window.scrollTo({
         top: element.offsetTop - this.keptScrollPosition,
         behavior: "auto"
-      })
+      });
     }
 
     this.keptScrollElement = this.keptScrollPosition = null;
@@ -226,6 +250,17 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
 
     this.changeDetector.detectChanges();
     this.restoreScroll();
+
+    if (this.needsScrollToStartDate)
+      this.scrollToDate(this.startDate);
+  }
+
+  // Scrolls the viewport so the given date's header sits at the top. Programmatic, so it resets
+  // userScrolling to stop the resulting async scroll echo from moving the date selector.
+  private scrollToDate(date: Dayjs) {
+    this.userScrolling = false;
+    let element = this.getDateElementWithDate(date.format("YYYY-MM-DD"));
+    element?.scrollIntoView({ block: 'start' });
   }
 
   isReachedBottom(): boolean {
@@ -244,7 +279,6 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
     return this.datasource?.isLoadingPrevious() == true;
   }
 
-  //#region AppointmentElements
   getFirstVisibleAppointmentElement(): HTMLElement | undefined {
     if (this.appointmentElements == null || this.appointmentElements.length == 0)
       return undefined;
@@ -284,9 +318,7 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
     else
       return undefined;
   }
-  //#endregion
 
-  //#region DateElements
   getFirstVisibleDateElement(): HTMLElement | undefined {
     if (this.dateElements == null || this.dateElements.length == 0)
       return undefined;
@@ -326,7 +358,6 @@ export class AppointmentsListComponent implements OnInit, OnDestroy, BeforeDetac
     else
       return undefined;
   }
-  //#endregion
 
   getCurrentDate(): Dayjs | undefined {
     let firstVisibleAppointment = this.getFirstVisibleAppointmentElement();

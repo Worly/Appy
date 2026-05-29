@@ -117,7 +117,7 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
     this.subs.push(action.subscribe({
       next: (r: { model: AppointmentView, headers: HttpHeaders }) => {
         this.notifySaved(r.model.id, r.model.status as AppointmentStatus, r.headers.get("X-Can-Notify-Client") == "true");
-        this.goBack();
+        this.router.navigate(['/appointments'], { queryParams: { date: r.model.date.format('YYYY-MM-DD') } });
       },
       error: (e: HttpErrorResponse) => {
         this.isLoadingSave = false;
