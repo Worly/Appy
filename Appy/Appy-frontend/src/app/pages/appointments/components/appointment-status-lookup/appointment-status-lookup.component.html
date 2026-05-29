@@ -1,9 +1,10 @@
 <app-button #buttonRef="elementRef" appElementRef width="100%" [disabled]="disabled" [isLoading]="isLoading"
-    [color]="(value | appointmentStatusInfo)?.color ?? 'normal'" (onClick)="openContextMenu()">
+    [color]="(value | appointmentStatusInfo)?.color ?? 'normal'" (onClick)="openContextMenu()"
+    data-cy="appointment-status-lookup">
     <div *ngIf="values.length == 0">
         {{'CHOOSE_STATUS' | translate}}
     </div>
-    <div *ngFor="let value of values; let i = index" class="status-item">
+    <div *ngFor="let value of values; let i = index" class="status-item" [attr.data-cy]="'appointment-status-value-' + value">
         <div [style.color]="'rgb(var(--rgb-' + statusesMap[value].color + '))'" class="status-item-contents">
             <fa-icon *ngIf="!isLoading" [fixedWidth]="true"
                 [icon]="[statusesMap[value].iconPrefix, statusesMap[value].iconName]"></fa-icon>
