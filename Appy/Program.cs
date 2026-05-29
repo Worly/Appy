@@ -20,7 +20,10 @@ builder.Services.AddDbContext<MainDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Main")));
 builder.Services.AddSingleton<IJwtService, JwtService>();
 
-builder.Services.AddSingleton<InstagramMessagingService>();
+builder.Services.AddHttpClient<InstagramMessagingService>(client =>
+{
+    client.BaseAddress = new Uri("https://graph.instagram.com/v21.0");
+});
 builder.Services.AddScoped<IMessagingServiceManager, MessagingServiceManager>();
 
 builder.Services.AddScoped<IUserService, UserService>();
