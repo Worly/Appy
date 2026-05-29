@@ -624,10 +624,11 @@ describe('Editing reverts confirmed status', () => {
       duration: "00:30"
     };
 
-    appointments.plusButton();
-    editAndSaveAppointment(data);
-
-    toast.expectVisible().expectConfirmAction().clickConfirm();
+    appointments.getCurrentDate().then(currentDate => {
+      appointments.plusButton();
+      editAndSaveAppointment(data, undefined, currentDate);
+      toast.expectVisible().expectConfirmAction().clickConfirm();
+    });
 
     return data;
   }
