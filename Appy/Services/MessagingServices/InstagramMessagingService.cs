@@ -91,7 +91,7 @@ namespace Appy.Services.MessagingServices
             }
             catch (Exception e)
             {
-                logger.LogError("Exception while trying to HTTP GET from Instagram API on {0}, message: {1}", url, e.Message);
+                logger.LogError(e, "Exception while trying to HTTP GET from Instagram API on {0}", url);
 
                 return null;
             }
@@ -122,7 +122,7 @@ namespace Appy.Services.MessagingServices
             }
             catch (Exception e)
             {
-                logger.LogError("Exception while trying to HTTP POST to Instagram API on {0}, message: {1}", url, e.Message);
+                logger.LogError(e, "Exception while trying to HTTP POST to Instagram API on {0}", url);
 
                 return null;
             }
