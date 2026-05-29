@@ -11,8 +11,6 @@ namespace Appy.DTOs
         public ServiceDTO Service { get; set; }
         public ClientDTO Client { get; set; }
 
-        public AppointmentStatus Status { get; set; }
-
         public string? Notes { get; set; }
     }
 
