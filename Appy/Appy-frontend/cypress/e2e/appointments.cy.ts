@@ -8,6 +8,7 @@ import { parseDuration } from "src/app/utils/time-utils";
 import duration from "dayjs/plugin/duration";
 import customParseFormat from "dayjs/plugin/customParseFormat"
 import { getTestService, TestService } from "./test-data";
+import { toast } from "./toast";
 
 dayjs.extend(duration);
 dayjs.extend(customParseFormat);
@@ -353,28 +354,6 @@ let appointmentEdit = {
   },
 }
 
-let toast = {
-  expectVisible() {
-    cy.get("app-toast").should("be.visible");
-    return this;
-  },
-
-  expectConfirmAction() {
-    cy.get("app-toast [data-test=toast-action-check]").should("exist");
-    return this;
-  },
-
-  expectNoConfirmAction() {
-    cy.get("app-toast [data-test=toast-action-check]").should("not.exist");
-    return this;
-  },
-
-  clickConfirm() {
-    cy.get("app-toast [data-test=toast-action-check]").click();
-    return this;
-  }
-}
-
 let appointmentView = {
   edit() {
     getElement("appointment-edit-button").click();
@@ -628,7 +607,7 @@ describe('Editing reverts confirmed status', () => {
     appointments.getCurrentDate().then(currentDate => {
       appointments.plusButton();
       editAndSaveAppointment(data, undefined, currentDate);
-      toast.expectVisible().expectConfirmAction().clickConfirm();
+      toast.expectVisible().expectAction("check").clickAction("check");
     });
 
     return data;
@@ -652,7 +631,7 @@ describe('Editing reverts confirmed status', () => {
       appointmentEdit.getDateTimeLookup().open().select(dayjs("2025-12-22"), created.time);
       appointmentEdit.save();
 
-      toast.expectVisible().expectConfirmAction();
+      toast.expectVisible().expectAction("check");
     });
   });
 
@@ -664,7 +643,7 @@ describe('Editing reverts confirmed status', () => {
       appointmentEdit.getDateTimeLookup().open().select(created.date, "11:00");
       appointmentEdit.save();
 
-      toast.expectVisible().expectConfirmAction();
+      toast.expectVisible().expectAction("check");
     });
   });
 
@@ -676,7 +655,7 @@ describe('Editing reverts confirmed status', () => {
       appointmentEdit.getServiceLookup().select(getTestService("Service2").displayName);
       appointmentEdit.save();
 
-      toast.expectVisible().expectConfirmAction();
+      toast.expectVisible().expectAction("check");
     });
   });
 
@@ -688,7 +667,7 @@ describe('Editing reverts confirmed status', () => {
       appointmentEdit.getClientLookup().select("Client2");
       appointmentEdit.save();
 
-      toast.expectVisible().expectConfirmAction();
+      toast.expectVisible().expectAction("check");
     });
   });
 
@@ -700,7 +679,7 @@ describe('Editing reverts confirmed status', () => {
       appointmentEdit.getDurationLookup().select("00:45");
       appointmentEdit.save();
 
-      toast.expectVisible().expectNoConfirmAction();
+      toast.expectVisible().expectNoAction("check");
     });
   });
 });

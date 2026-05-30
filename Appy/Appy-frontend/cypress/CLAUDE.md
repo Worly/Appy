@@ -28,6 +28,10 @@ Tests call the backend's `/testing/seed` endpoint at the start of each suite to 
 
 Reusable interaction abstractions for common UI widgets: client lookup, service lookup, duration picker, date picker. These keep test code focused on behavior rather than DOM structure.
 
+## Component Helpers (cypress/e2e/)
+
+`toast.ts` exports a generic `toast` helper for the global `app-toast` popup (`expectVisible`/`expectText`/`expectAction`/`expectNoAction`/`clickAction`). It is toast-agnostic: action buttons are addressed by their FontAwesome icon name, matching the `[data-test=toast-action-<icon>]` attribute the toast renders (e.g. the confirm button uses `"check"`).
+
 ## Test Coverage
 
 `appointments.cy.ts` is the primary test file and covers appointment CRUD, both Scroller and List views, date/time picker interactions, status changes, and filter behavior.
