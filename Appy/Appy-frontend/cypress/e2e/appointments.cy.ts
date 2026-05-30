@@ -363,10 +363,12 @@ let appointmentView = {
   },
 
   expectStatus(status: AppointmentStatus) {
-    // Constant data-test hook + data-test-data carrying the status value (the same pattern
-    // the list view uses for its date dividers). The value lives in data-test-data rather
-    // than the rendered label so the assertion does not depend on translated status text.
-    cy.get(`[data-test=appointment-status-lookup-value][data-test-data=${status}]`).should("exist");
+    // Read the status off the single status element's data-test-data attribute (not the
+    // rendered label, which is translated) and assert it equals the expected value.
+    // .should() retries the read so it tolerates the detail panel rendering asynchronously.
+    getElement("appointment-status-lookup-value").should(el => {
+      expect(el.attr("data-test-data")).to.equal(status);
+    });
     return this;
   }
 }
