@@ -5,7 +5,8 @@ import { Observable, of, delay } from 'rxjs';
 @Component({
   selector: 'app-toast',
   templateUrl: './toast.component.html',
-  styleUrls: ['./toast.component.scss']
+  styleUrls: ['./toast.component.scss'],
+  host: { 'data-test': 'toast' }
 })
 export class ToastComponent implements OnInit {
   text: string = "";

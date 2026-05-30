@@ -133,7 +133,6 @@ namespace Appy.Services
                 Duration = dto.Duration,
                 Service = service,
                 Client = client,
-                Status = dto.Status,
                 Notes = dto.Notes,
                 CreatedAt = DateTime.UtcNow,
                 LastUpdatedAt = DateTime.UtcNow,
@@ -173,12 +172,20 @@ namespace Appy.Services
                 appointment.WasReminded = false;
             }
 
+            if (appointment.Status == AppointmentStatus.Confirmed &&
+                (appointment.Date != dto.Date ||
+                 appointment.Time != dto.Time ||
+                 appointment.ServiceId != dto.Service.Id ||
+                 appointment.ClientId != dto.Client.Id))
+            {
+                appointment.Status = AppointmentStatus.Unconfirmed;
+            }
+
             appointment.Date = dto.Date;
             appointment.Time = dto.Time;
             appointment.Duration = dto.Duration;
             appointment.ServiceId = service.Id;
             appointment.ClientId = client.Id;
-            appointment.Status = dto.Status;
             appointment.Notes = dto.Notes;
             appointment.LastUpdatedAt = DateTime.UtcNow;
 

@@ -103,3 +103,14 @@ jobs:
       - name: Run Cypress tests
         run: npx cypress run
         working-directory: ./Appy/Appy-frontend
+
+      - name: Upload Cypress artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-artifacts
+          path: |
+            Appy/Appy-frontend/cypress/screenshots
+            Appy/Appy-frontend/cypress/videos
+          if-no-files-found: ignore
+          retention-days: 7

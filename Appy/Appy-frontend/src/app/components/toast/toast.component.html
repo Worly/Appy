@@ -3,8 +3,8 @@
 
 {{text}}
 
-<div *ngIf="actions != null" class="actions">
+<div *ngIf="actions != null" class="actions" data-test="toast-actions">
     <app-button *ngFor="let action of actions" [text]="action.text" (onClick)="action.onClick()" look="transparent" [icon]="action.icon"
-        [isLoading]="action.isLoading" [disabled]="action.isLoading">
+        [isLoading]="action.isLoading" [disabled]="action.isLoading" [attr.data-test]="'toast-action-' + action.icon">
     </app-button>
 </div>

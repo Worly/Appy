@@ -8,6 +8,8 @@ import { parseDuration } from "src/app/utils/time-utils";
 import duration from "dayjs/plugin/duration";
 import customParseFormat from "dayjs/plugin/customParseFormat"
 import { getTestService, TestService } from "./test-data";
+import { toast } from "./toast";
+import { AppointmentStatus } from "src/app/models/appointment";
 
 dayjs.extend(duration);
 dayjs.extend(customParseFormat);
@@ -358,6 +360,16 @@ let appointmentView = {
     getElement("appointment-edit-button").click();
 
     return appointmentEdit;
+  },
+
+  expectStatus(status: AppointmentStatus) {
+    // Read the status off the single status element's data-test-data attribute (not the
+    // rendered label, which is translated) and assert it equals the expected value.
+    // .should() retries the read so it tolerates the detail panel rendering asynchronously.
+    getElement("appointment-status-lookup-value").should(el => {
+      expect(el.attr("data-test-data")).to.equal(status);
+    });
+    return this;
   }
 }
 
@@ -406,7 +418,7 @@ function expectAppointment(
   },
   viewType: "list" | "scroller" = "list",
   scrollType: "scroll" | "jump" = "scroll"
-) {
+): Cypress.Chainable<AppointmentInList> {
   if (viewType == "list") {
     appointments.openListView();
   }
@@ -429,18 +441,34 @@ function expectAppointment(
   let time = dayjs(appointment.time, "HH:mm");
   let timeTo = time.add(parseDuration(appointment.duration + ":00"));
 
+  let matches = (a: AppointmentInList) =>
+    a.client == appointment.client &&
+    a.service == appointment.service.displayName &&
+    a.timeFrom == appointment.time &&
+    a.timeTo == timeTo.format("HH:mm");
+
+  // The scroller/list render reactively (CalendarDayService feeds a Datasource that re-emits on
+  // entity changes), so right after an edit the moved appointment can land a beat after navigation
+  // settles. Re-read until it shows up instead of asserting on the first — possibly pre-update —
+  // snapshot, which otherwise flakes in CI where everything is slower.
   let view = viewType == "list" ? appointments.list() : appointments.scroller();
-  return view.getAppointments().then(appointments => {
-    var index = appointments.findIndex(a =>
-      a.client == appointment.client &&
-      a.service == appointment.service.displayName &&
-      a.timeFrom == appointment.time &&
-      a.timeTo == timeTo.format("HH:mm"))
+  let attemptFind = (attemptsLeft: number): any => {
+    return view.getAppointments().then(found => {
+      let index = found.findIndex(matches);
 
-    expect(index).to.be.greaterThan(-1, "Appointment not found in the list");
+      if (index > -1)
+        return found[index];
 
-    return appointments[index];
-  });
+      if (attemptsLeft <= 0) {
+        expect(index).to.be.greaterThan(-1, "Appointment not found in the list");
+        return undefined;
+      }
+
+      return cy.wait(200).then(() => attemptFind(attemptsLeft - 1));
+    });
+  };
+
+  return attemptFind(40);
 }
 
 describe('Appointments', () => {
@@ -576,5 +604,59 @@ describe('Appointments', () => {
         })
       }
     }
+  }
+  // --- Editing a Confirmed appointment reverts its status ---
+  // A status-affecting edit (date, time, service or client) reverts a Confirmed appointment
+  // back to Unconfirmed; the post-save toast then offers a re-confirm ("check") action.
+  // A duration-only edit keeps it Confirmed, so that toast has no confirm action.
+  let confirmedAppointment = {
+    client: "Client1",
+    service: getTestService("Service1"),
+    date: dayjs("2025-12-15"),
+    time: "10:00",
+    duration: "00:30"
+  };
+
+  // Create a fresh appointment, confirm it via the post-save toast, then open its detail
+  // panel from the list with the status asserted as Confirmed — the shared starting point
+  // for every status-revert scenario below.
+  function createConfirmAndOpen() {
+    appointments.openScrollerView();
+    appointments.getCurrentDate().then(currentDate => {
+      appointments.plusButton();
+      editAndSaveAppointment(confirmedAppointment, undefined, currentDate);
+      toast.expectVisible().expectAction("check").clickAction("check");
+    });
+
+    return expectAppointment(confirmedAppointment).then(item => {
+      appointments.list().viewAppointment(item.id);
+      appointmentView.expectStatus("Confirmed");
+    });
+  }
+
+  let statusRevertOptions: { name: string, revertsStatus: boolean, edit: () => void }[] = [
+    { name: "date changes", revertsStatus: true, edit: () => appointmentEdit.getDateTimeLookup().open().select(dayjs("2025-12-22"), confirmedAppointment.time) },
+    { name: "time changes", revertsStatus: true, edit: () => appointmentEdit.getDateTimeLookup().open().select(confirmedAppointment.date, "11:00") },
+    { name: "service changes", revertsStatus: true, edit: () => appointmentEdit.getServiceLookup().select("Service2") },
+    { name: "client changes", revertsStatus: true, edit: () => appointmentEdit.getClientLookup().select("Client2") },
+    { name: "only duration changes", revertsStatus: false, edit: () => appointmentEdit.getDurationLookup().select("00:45") },
+  ];
+
+  for (let option of statusRevertOptions) {
+    it(`Should ${option.revertsStatus ? "revert Confirmed to Unconfirmed" : "keep Confirmed status"} when ${option.name}`, () => {
+      createConfirmAndOpen().then(() => {
+        appointmentView.edit();
+        option.edit();
+        appointmentEdit.save();
+
+        toast.expectVisible();
+        if (option.revertsStatus) {
+          toast.expectAction("check");
+        }
+        else {
+          toast.expectNoAction("check");
+        }
+      });
+    });
   }
 })
