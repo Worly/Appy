@@ -418,7 +418,7 @@ function expectAppointment(
   },
   viewType: "list" | "scroller" = "list",
   scrollType: "scroll" | "jump" = "scroll"
-) {
+): Cypress.Chainable<AppointmentInList> {
   if (viewType == "list") {
     appointments.openListView();
   }
@@ -441,18 +441,34 @@ function expectAppointment(
   let time = dayjs(appointment.time, "HH:mm");
   let timeTo = time.add(parseDuration(appointment.duration + ":00"));
 
+  let matches = (a: AppointmentInList) =>
+    a.client == appointment.client &&
+    a.service == appointment.service.displayName &&
+    a.timeFrom == appointment.time &&
+    a.timeTo == timeTo.format("HH:mm");
+
+  // The scroller/list render reactively (CalendarDayService feeds a Datasource that re-emits on
+  // entity changes), so right after an edit the moved appointment can land a beat after navigation
+  // settles. Re-read until it shows up instead of asserting on the first — possibly pre-update —
+  // snapshot, which otherwise flakes in CI where everything is slower.
   let view = viewType == "list" ? appointments.list() : appointments.scroller();
-  return view.getAppointments().then(appointments => {
-    var index = appointments.findIndex(a =>
-      a.client == appointment.client &&
-      a.service == appointment.service.displayName &&
-      a.timeFrom == appointment.time &&
-      a.timeTo == timeTo.format("HH:mm"))
+  let attemptFind = (attemptsLeft: number): any => {
+    return view.getAppointments().then(found => {
+      let index = found.findIndex(matches);
 
-    expect(index).to.be.greaterThan(-1, "Appointment not found in the list");
+      if (index > -1)
+        return found[index];
 
-    return appointments[index];
-  });
+      if (attemptsLeft <= 0) {
+        expect(index).to.be.greaterThan(-1, "Appointment not found in the list");
+        return undefined;
+      }
+
+      return cy.wait(200).then(() => attemptFind(attemptsLeft - 1));
+    });
+  };
+
+  return attemptFind(40);
 }
 
 describe('Appointments', () => {
