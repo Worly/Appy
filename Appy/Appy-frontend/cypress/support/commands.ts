@@ -44,8 +44,8 @@
 
 import { appConfig } from "src/app/app.config";
 
-export function getElement(dataTestAttr: string) {
-    return cy.get(`[data-test=${dataTestAttr}]`).should("have.length", 1);
+export function getElement(dataTestAttr: string, options?: { timeout?: number }) {
+    return cy.get(`[data-test=${dataTestAttr}]`, options).should("have.length", 1);
 }
 
 export function getElements(dataTestAttr: string) {
