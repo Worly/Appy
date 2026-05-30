@@ -4,15 +4,12 @@ namespace Appy.Services.MessagingServices
 {
     public class InstagramMessagingService : IMessagingService
     {
-        private static HttpClient httpClient = new HttpClient()
-        {
-            BaseAddress = new Uri("https://graph.instagram.com/v21.0"),
-        };
-
+        private readonly HttpClient httpClient;
         private readonly ILogger<InstagramMessagingService> logger;
 
-        public InstagramMessagingService(ILogger<InstagramMessagingService> logger)
+        public InstagramMessagingService(HttpClient httpClient, ILogger<InstagramMessagingService> logger)
         {
+            this.httpClient = httpClient;
             this.logger = logger;
         }
 
