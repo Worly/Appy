@@ -362,7 +362,10 @@ let appointmentView = {
   },
 
   expectStatus(status: "Unconfirmed" | "Confirmed" | "NoShow") {
-    getElement("appointment-status-value-" + status).should("exist");
+    // Constant data-test hook + data-test-data carrying the status value (the same pattern
+    // the list view uses for its date dividers). The value lives in data-test-data rather
+    // than the rendered label so the assertion does not depend on translated status text.
+    cy.get(`[data-test=appointment-status-lookup-value][data-test-data=${status}]`).should("exist");
     return this;
   }
 }
