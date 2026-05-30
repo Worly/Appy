@@ -130,7 +130,7 @@ namespace Appy.Tests.Services
         {
             var appointment = AddAppointment(AppointmentStatus.Confirmed);
             var dto = DtoMatching(appointment);
-            dto.Duration = TimeSpan.FromMinutes(45);
+            dto.Duration = dto.Duration.Add(TimeSpan.FromMinutes(45));
 
             await service.Edit(appointment.Id, dto, FacilityId, ignoreTimeNotAvailable: false);
 
