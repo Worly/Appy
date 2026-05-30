@@ -14,6 +14,10 @@
 // ***********************************************************
 
 import { appConfig } from "../../src/app/app.config";
+import { register as registerCypressGrep } from "@cypress/grep";
+
+// Enables test filtering by title/tag, e.g. `npx cypress run --env grep="when date changes"`.
+registerCypressGrep();
 
 // When a command from ./commands is ready to use, import with `import './commands'` syntax
 // import './commands';
