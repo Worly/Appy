@@ -586,103 +586,58 @@ describe('Appointments', () => {
       }
     }
   }
-})
+  // --- Editing a Confirmed appointment reverts its status ---
+  // A status-affecting edit (date, time, service or client) reverts a Confirmed appointment
+  // back to Unconfirmed; the post-save toast then offers a re-confirm ("check") action.
+  // A duration-only edit keeps it Confirmed, so that toast has no confirm action.
+  let confirmedAppointment = {
+    client: "Client1",
+    service: getTestService("Service1"),
+    date: dayjs("2025-12-15"),
+    time: "10:00",
+    duration: "00:30"
+  };
 
-describe('Editing reverts confirmed status', () => {
-  beforeEach(() => {
-    login("appointments");
-    cy.visit("/appointments");
-    appointments.openListView();
-  });
-
-  // Create a fresh appointment and confirm it via the post-save toast.
-  // Lands the user back on /appointments after the save toast's confirm action.
-  function createAndConfirm(): { date: Dayjs, time: string, duration: string, client: string, service: TestService } {
-    const data = {
-      client: "Client1",
-      service: getTestService("Service1"),
-      date: dayjs("2025-12-15"),
-      time: "10:00",
-      duration: "00:30"
-    };
-
+  // Create a fresh appointment, confirm it via the post-save toast, then open its detail
+  // panel from the list with the status asserted as Confirmed — the shared starting point
+  // for every status-revert scenario below.
+  function createConfirmAndOpen() {
     appointments.openScrollerView();
     appointments.getCurrentDate().then(currentDate => {
       appointments.plusButton();
-      editAndSaveAppointment(data, undefined, currentDate);
+      editAndSaveAppointment(confirmedAppointment, undefined, currentDate);
       toast.expectVisible().expectAction("check").clickAction("check");
     });
 
-    return data;
-  }
-
-  // Open the just-edited appointment's detail panel from the list view
-  // and confirm its current status is Confirmed before continuing.
-  function openConfirmedAppointment(appointmentDate: Dayjs, client: string, service: TestService, time: string, duration: string) {
-    appointments.list().scrollToDay(appointmentDate);
-    return expectAppointment({ client, service, date: appointmentDate, time, duration }).then(item => {
+    return expectAppointment(confirmedAppointment).then(item => {
       appointments.list().viewAppointment(item.id);
       appointmentView.expectStatus("Confirmed");
     });
   }
 
-  it('reverts Confirmed to Unconfirmed when date changes, toast shows Confirm action', () => {
-    const created = createAndConfirm();
+  let statusRevertOptions: { name: string, revertsStatus: boolean, edit: () => void }[] = [
+    { name: "date changes", revertsStatus: true, edit: () => appointmentEdit.getDateTimeLookup().open().select(dayjs("2025-12-22"), confirmedAppointment.time) },
+    { name: "time changes", revertsStatus: true, edit: () => appointmentEdit.getDateTimeLookup().open().select(confirmedAppointment.date, "11:00") },
+    { name: "service changes", revertsStatus: true, edit: () => appointmentEdit.getServiceLookup().select(getTestService("Service2").displayName) },
+    { name: "client changes", revertsStatus: true, edit: () => appointmentEdit.getClientLookup().select("Client2") },
+    { name: "only duration changes", revertsStatus: false, edit: () => appointmentEdit.getDurationLookup().select("00:45") },
+  ];
 
-    openConfirmedAppointment(created.date, created.client, created.service, created.time, created.duration).then(() => {
-      appointmentView.edit();
-      appointmentEdit.getDateTimeLookup().open().select(dayjs("2025-12-22"), created.time);
-      appointmentEdit.save();
+  for (let option of statusRevertOptions) {
+    it(`Should ${option.revertsStatus ? "revert Confirmed to Unconfirmed" : "keep Confirmed status"} when ${option.name}`, () => {
+      createConfirmAndOpen().then(() => {
+        appointmentView.edit();
+        option.edit();
+        appointmentEdit.save();
 
-      toast.expectVisible().expectAction("check");
+        toast.expectVisible();
+        if (option.revertsStatus) {
+          toast.expectAction("check");
+        }
+        else {
+          toast.expectNoAction("check");
+        }
+      });
     });
-  });
-
-  it('reverts Confirmed to Unconfirmed when time changes, toast shows Confirm action', () => {
-    const created = createAndConfirm();
-
-    openConfirmedAppointment(created.date, created.client, created.service, created.time, created.duration).then(() => {
-      appointmentView.edit();
-      appointmentEdit.getDateTimeLookup().open().select(created.date, "11:00");
-      appointmentEdit.save();
-
-      toast.expectVisible().expectAction("check");
-    });
-  });
-
-  it('reverts Confirmed to Unconfirmed when service changes, toast shows Confirm action', () => {
-    const created = createAndConfirm();
-
-    openConfirmedAppointment(created.date, created.client, created.service, created.time, created.duration).then(() => {
-      appointmentView.edit();
-      appointmentEdit.getServiceLookup().select(getTestService("Service2").displayName);
-      appointmentEdit.save();
-
-      toast.expectVisible().expectAction("check");
-    });
-  });
-
-  it('reverts Confirmed to Unconfirmed when client changes, toast shows Confirm action', () => {
-    const created = createAndConfirm();
-
-    openConfirmedAppointment(created.date, created.client, created.service, created.time, created.duration).then(() => {
-      appointmentView.edit();
-      appointmentEdit.getClientLookup().select("Client2");
-      appointmentEdit.save();
-
-      toast.expectVisible().expectAction("check");
-    });
-  });
-
-  it('keeps Confirmed status when only duration changes, toast has no Confirm action', () => {
-    const created = createAndConfirm();
-
-    openConfirmedAppointment(created.date, created.client, created.service, created.time, created.duration).then(() => {
-      appointmentView.edit();
-      appointmentEdit.getDurationLookup().select("00:45");
-      appointmentEdit.save();
-
-      toast.expectVisible().expectNoAction("check");
-    });
-  });
-});
+  }
+})
