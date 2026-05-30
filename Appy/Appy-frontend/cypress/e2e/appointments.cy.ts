@@ -9,6 +9,7 @@ import duration from "dayjs/plugin/duration";
 import customParseFormat from "dayjs/plugin/customParseFormat"
 import { getTestService, TestService } from "./test-data";
 import { toast } from "./toast";
+import { AppointmentStatus } from "src/app/models/appointment";
 
 dayjs.extend(duration);
 dayjs.extend(customParseFormat);
@@ -361,7 +362,7 @@ let appointmentView = {
     return appointmentEdit;
   },
 
-  expectStatus(status: "Unconfirmed" | "Confirmed" | "NoShow") {
+  expectStatus(status: AppointmentStatus) {
     // Constant data-test hook + data-test-data carrying the status value (the same pattern
     // the list view uses for its date dividers). The value lives in data-test-data rather
     // than the rendered label so the assertion does not depend on translated status text.
@@ -618,7 +619,7 @@ describe('Appointments', () => {
   let statusRevertOptions: { name: string, revertsStatus: boolean, edit: () => void }[] = [
     { name: "date changes", revertsStatus: true, edit: () => appointmentEdit.getDateTimeLookup().open().select(dayjs("2025-12-22"), confirmedAppointment.time) },
     { name: "time changes", revertsStatus: true, edit: () => appointmentEdit.getDateTimeLookup().open().select(confirmedAppointment.date, "11:00") },
-    { name: "service changes", revertsStatus: true, edit: () => appointmentEdit.getServiceLookup().select(getTestService("Service2").displayName) },
+    { name: "service changes", revertsStatus: true, edit: () => appointmentEdit.getServiceLookup().select("Service2") },
     { name: "client changes", revertsStatus: true, edit: () => appointmentEdit.getClientLookup().select("Client2") },
     { name: "only duration changes", revertsStatus: false, edit: () => appointmentEdit.getDurationLookup().select("00:45") },
   ];
