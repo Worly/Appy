@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import { dateDayDiff, getDateRelation, RelativeDatePipe } from './relative-date.pipe';
+import { DateRelationPipe } from './date-relation.pipe';
 import { TranslateService } from 'src/app/components/translate/translate.service';
 
 const EN: { [key: string]: string } = {
@@ -46,15 +47,14 @@ describe('RelativeDatePipe', () => {
   it('N days ago', () => expect(pipe.transform(dayjs().subtract(4, 'day'))).toBe('4 days ago'));
 });
 
-import { DateRelationPipe } from './date-relation.pipe';
-
 describe('DateRelationPipe', () => {
   let pipe: DateRelationPipe;
   beforeEach(() => (pipe = new DateRelationPipe()));
 
-  it('returns null for null/undefined', () => {
+  it('returns null for null/undefined/invalid', () => {
     expect(pipe.transform(null)).toBeNull();
     expect(pipe.transform(undefined)).toBeNull();
+    expect(pipe.transform(dayjs('not-a-date'))).toBeNull();
   });
   it('today', () => expect(pipe.transform(dayjs())).toBe('today'));
   it('future', () => expect(pipe.transform(dayjs().add(2, 'day'))).toBe('future'));
