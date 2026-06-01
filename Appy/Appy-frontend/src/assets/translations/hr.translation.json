@@ -17,6 +17,13 @@
     "NO": "Ne",
     "SEARCH": "Traži",
     "TODAY": "Danas",
+    "relativeDate": {
+        "TODAY": "Danas",
+        "TOMORROW": "Sutra",
+        "YESTERDAY": "Jučer",
+        "IN_DAYS": "za {n} dana",
+        "DAYS_AGO": "prije {n} dana"
+    },
     "LOADING_PLEASE_WAIT": "Učitavanje, molim pričekajte...",
     "OK": "Ok",
     "SELECT": "Odaberi",

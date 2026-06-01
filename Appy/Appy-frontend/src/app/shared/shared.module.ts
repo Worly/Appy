@@ -13,12 +13,16 @@ import { ErrorInterceptor } from "./services/errors/error-interceptor.service";
 import { ErrorTranslateInterceptor } from "./services/errors/error-translate.service";
 import { ToggleSwitchModule } from "../components/toggle-switch/toggle-switch.module";
 import { ToDurationPipe } from "./pipes/to-duration.pipe";
+import { RelativeDatePipe } from "./pipes/relative-date.pipe";
+import { DateRelationPipe } from "./pipes/date-relation.pipe";
 
 @NgModule({
     declarations: [
         FilterPipe,
         FormatDurationPipe,
         ToDurationPipe,
+        RelativeDatePipe,
+        DateRelationPipe,
         InvokeDirective
     ],
     imports: [
@@ -36,6 +40,8 @@ import { ToDurationPipe } from "./pipes/to-duration.pipe";
         FilterPipe,
         FormatDurationPipe,
         ToDurationPipe,
+        RelativeDatePipe,
+        DateRelationPipe,
         InvokeDirective
     ],
     providers: [

@@ -17,6 +17,13 @@
     "NO": "No",
     "SEARCH": "Search",
     "TODAY": "Today",
+    "relativeDate": {
+        "TODAY": "Today",
+        "TOMORROW": "Tomorrow",
+        "YESTERDAY": "Yesterday",
+        "IN_DAYS": "in {n} days",
+        "DAYS_AGO": "{n} days ago"
+    },
     "LOADING_PLEASE_WAIT": "Loading, please wait...",
     "OK": "Ok",
     "SELECT": "Select",
