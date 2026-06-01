@@ -45,3 +45,18 @@ describe('RelativeDatePipe', () => {
   it('in N days', () => expect(pipe.transform(dayjs().add(5, 'day'))).toBe('in 5 days'));
   it('N days ago', () => expect(pipe.transform(dayjs().subtract(4, 'day'))).toBe('4 days ago'));
 });
+
+import { DateRelationPipe } from './date-relation.pipe';
+
+describe('DateRelationPipe', () => {
+  let pipe: DateRelationPipe;
+  beforeEach(() => (pipe = new DateRelationPipe()));
+
+  it('returns null for null/undefined', () => {
+    expect(pipe.transform(null)).toBeNull();
+    expect(pipe.transform(undefined)).toBeNull();
+  });
+  it('today', () => expect(pipe.transform(dayjs())).toBe('today'));
+  it('future', () => expect(pipe.transform(dayjs().add(2, 'day'))).toBe('future'));
+  it('past', () => expect(pipe.transform(dayjs().subtract(2, 'day'))).toBe('past'));
+});
