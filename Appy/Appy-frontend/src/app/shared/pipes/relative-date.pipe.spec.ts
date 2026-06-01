@@ -12,7 +12,10 @@ const EN: { [key: string]: string } = {
 const fakeTranslate = { translate: (k: string) => EN[k] ?? k } as unknown as TranslateService;
 
 describe('dateDayDiff', () => {
-  it('is 0 for today', () => expect(dateDayDiff(dayjs())).toBe(0));
+  it('is 0 for today', () => {
+    const now = dayjs();
+    expect(dateDayDiff(now, now)).toBe(0);
+  });
   it('ignores time of day', () =>
     expect(dateDayDiff(dayjs().endOf('day'), dayjs().startOf('day'))).toBe(0));
   it('is +3 three days ahead', () => expect(dateDayDiff(dayjs().add(3, 'day'))).toBe(3));
@@ -29,9 +32,10 @@ describe('RelativeDatePipe', () => {
   let pipe: RelativeDatePipe;
   beforeEach(() => (pipe = new RelativeDatePipe(fakeTranslate)));
 
-  it('returns null for null/undefined', () => {
+  it('returns null for null/undefined/invalid', () => {
     expect(pipe.transform(null)).toBeNull();
     expect(pipe.transform(undefined)).toBeNull();
+    expect(pipe.transform(dayjs('not-a-date'))).toBeNull();
   });
   it('today', () => expect(pipe.transform(dayjs())).toBe('Today'));
   it('late today still reads Today', () =>
