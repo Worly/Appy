@@ -1,7 +1,10 @@
 <app-loading *ngIf="appointments == null" [style.height.vh]="100"></app-loading>
 
 <div data-test="appointments-list-current-date" class="current-date">
-    {{getCurrentDate()?.format("DD.MM.YYYY - dddd")}}
+    <ng-container *ngIf="getCurrentDate() as cd">
+        <span class="date-absolute">{{cd.format("DD.MM.YYYY - dddd")}}</span>
+        <span class="date-relative" [ngClass]="cd | dateRelation">{{cd | relativeDate}}</span>
+    </ng-container>
 </div>
 <div data-test="appointments-list">
     <div *ngIf="isReachedTop() && appointments?.length != 0" class="no-appointments">
@@ -15,7 +18,8 @@
         [attr.data-test-data]="i.type" class="item">
         <div #dateElement *ngIf="i.type == 'date'" class="date" [attr.data-date]="i.dateISO"
             [ngClass]="{'empty-date': i.isEmptyDate}">
-            {{i.dateFormatted}} {{i.isEmptyDate ? " - " + ("pages.appointments.NO_APPOINTMENTS" | translate) : ""}}
+            <span class="date-absolute">{{i.dateFormatted}}{{i.isEmptyDate ? " - " + ("pages.appointments.NO_APPOINTMENTS" | translate) : ""}}</span>
+            <span class="date-relative" [ngClass]="i.date | dateRelation">{{i.date | relativeDate}}</span>
         </div>
 
         <app-single-appointment-list-item #appointmentElement *ngIf="i.type == 'appointment'"
