@@ -43,5 +43,43 @@ namespace Appy.Tests.Utils
 
             Assert.Contains("  Jane  ", json); // value written untrimmed
         }
+
+        [Fact]
+        public void Deserialize_TrimsAllFields_ButPreservesRegisterPassword()
+        {
+            var json = """
+            {
+                "email": "  a@b.com  ",
+                "name": "  Jane  ",
+                "surname": "  Doe  ",
+                "password": "  s3cr3t  "
+            }
+            """;
+
+            var dto = JsonSerializer.Deserialize<RegisterDTO>(json, OptionsWithTrimming());
+
+            Assert.NotNull(dto);
+            Assert.Equal("a@b.com", dto!.Email);
+            Assert.Equal("Jane", dto.Name);
+            Assert.Equal("Doe", dto.Surname);
+            Assert.Equal("  s3cr3t  ", dto.Password); // password NOT trimmed
+        }
+
+        [Fact]
+        public void Deserialize_TrimsEmail_ButPreservesLogInPassword()
+        {
+            var json = """
+            {
+                "email": "  a@b.com  ",
+                "password": "  pw  "
+            }
+            """;
+
+            var dto = JsonSerializer.Deserialize<LogInDTO>(json, OptionsWithTrimming());
+
+            Assert.NotNull(dto);
+            Assert.Equal("a@b.com", dto!.Email);
+            Assert.Equal("  pw  ", dto.Password); // password NOT trimmed
+        }
     }
 }

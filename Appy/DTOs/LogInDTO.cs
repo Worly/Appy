@@ -1,8 +1,13 @@
-﻿namespace Appy.DTOs
+using System.Text.Json.Serialization;
+using Appy.Utils;
+
+namespace Appy.DTOs
 {
     public class LogInDTO
     {
         public string Email { get; set; }
+
+        [JsonConverter(typeof(NoTrimStringConverter))]
         public string Password { get; set; }
     }
 
