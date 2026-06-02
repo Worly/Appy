@@ -3,8 +3,6 @@ using Appy.DTOs;
 using Appy.Exceptions;
 using Appy.Services.SmartFiltering;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
 
 namespace Appy.Services
 {
@@ -310,6 +308,7 @@ namespace Appy.Services
             var candidates = await context.Appointments
                 .Include(a => a.Service)
                 .Include(a => a.Client)
+                // s.Date <= maxDate only narrows the fetch; the per-row predicate below selects the actual previous appointment.
                 .Where(s => s.FacilityId == facilityId && clientIds.Contains(s.ClientId) && s.Date <= maxDate)
                 .ToListAsync();
 
