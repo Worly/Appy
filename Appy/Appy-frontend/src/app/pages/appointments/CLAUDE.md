@@ -16,7 +16,7 @@ The main `AppointmentsComponent` supports two switchable views, persisted in Loc
 
 **Scroller view** (`appointments-scroller/`): A calendar-style single-day view. Shows time lanes from 8am–8pm. Appointments are rendered as positioned blocks using pixel calculations from `rendered-interval.ts`. Uses smart caching so adjacent dates load instantly. Tween animations handle smooth time-range transitions. The sticky day header shows a contextual relative-date label inline (e.g. "· Today", "· in 3 days") via the shared `relativeDate`/`dateRelation` pipes.
 
-**List view** (`appointments-list/`): A chronological list with date dividers. Paginated via `PageableListDatasource` — loads 20 items per page, supports infinite scroll both forwards and backwards from the current date anchor. Maintains scroll position when loading more items. Each date divider and the sticky current-date header show a stacked relative-date label (Today / Tomorrow / in N days / N days ago) under the absolute date, coloured by past/today/future via the shared `relativeDate`/`dateRelation` pipes (the absolute date is compacted so the divider height is unchanged).
+**List view** (`appointments-list/`): A chronological list with date dividers. Paginated via `PageableListDatasource` — loads 20 items per page, supports infinite scroll both forwards and backwards from the current date anchor. Maintains scroll position when loading more items. Each date divider and the sticky current-date header also show a relative-date label (Today / Tomorrow / in N days / N days ago), coloured by past/today/future via the shared `relativeDate`/`dateRelation` pipes.
 
 ## URL State
 
