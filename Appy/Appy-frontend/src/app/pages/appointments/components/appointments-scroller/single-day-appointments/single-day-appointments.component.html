@@ -2,6 +2,7 @@
     <div *ngIf="!showDateControls" class="date-container">
         <div>{{date?.format("ddd")}}</div>
         <div>{{date?.format("D.M.YY")}}</div>
+        <div *ngIf="date" class="date-relative" [ngClass]="date | dateRelation">· {{date | relativeDate}}</div>
     </div>
     <div *ngIf="showDateControls" [style.height]="'100%'">
         <div class="date-controls">

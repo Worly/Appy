@@ -35,6 +35,10 @@
     align-items: center;
     gap: 10px;
     height: 100%;
+
+    .date-relative {
+        font-size: 1rem;
+    }
 }
 
 .date-controls {
