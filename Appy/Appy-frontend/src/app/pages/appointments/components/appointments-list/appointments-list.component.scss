@@ -11,8 +11,8 @@
     flex-direction: column;
 
     padding-left: 20px;
-    padding-top: 8px;
-    padding-bottom: 5px;
+    padding-top: 3px;
+    padding-bottom: 3px;
 
     border-bottom-left-radius: var(--default-border-radius);
     border-bottom-right-radius: var(--default-border-radius);
@@ -22,7 +22,7 @@
     .date-absolute {
         font-size: 1.1rem;
         font-weight: bold;
-        line-height: 1.2;
+        line-height: 1.15;
     }
 
     .date-relative {
@@ -56,6 +56,10 @@
         .date-absolute {
             font-size: 1rem;
             font-weight: normal;
+            opacity: 0.4;
+        }
+
+        .date-relative {
             opacity: 0.4;
         }
     }
