@@ -127,3 +127,17 @@ body {
 .display-none {
     display: none !important;
 }
+
+// Relative-date label colour by relation to today (used in the appointments list + scroller).
+// The `today` / `future` / `past` class comes from the `dateRelation` pipe.
+.date-relative {
+    &.today {
+        color: rgb(var(--rgb-accent));
+        font-weight: bold;
+        opacity: 1;
+    }
+    &.future, &.past {
+        color: rgb(var(--rgb-text));
+        opacity: 0.65;
+    }
+}

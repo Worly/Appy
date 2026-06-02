@@ -4,7 +4,7 @@
         [freeTimes]="freeTimesSmartCaching.singleData" (onCalendarClick)="onCalendarClick($event)">
     </app-appointments-scroller>
 
-    <div class="right-side">
+    <div class="right-side" [style.height]="appointmentScroller?.getHeight()">
         <div class="action-buttons">
             <app-action-bar [style.width.%]="100" [compact]="true">
                 <app-button icon="business-time" look="custom"

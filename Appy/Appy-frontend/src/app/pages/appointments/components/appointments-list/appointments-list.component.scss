@@ -7,30 +7,61 @@
     margin-top: -0.5rem;
     margin-bottom: 10px;
 
-    font-size: 1.3rem;
-    font-weight: bold;
+    display: flex;
+    flex-direction: column;
+
     padding-left: 20px;
-    padding-top: 10px;
+    padding-top: 5px;
     padding-bottom: 5px;
 
     border-bottom-left-radius: var(--default-border-radius);
     border-bottom-right-radius: var(--default-border-radius);
     background-color: rgb(var(--rgb-input-background));
     box-shadow: 0 4px 9px 0px rgba(0, 0, 0, 0.3);
+
+    .date-absolute {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.15;
+    }
+
+    .date-relative {
+        font-size: 0.8rem;
+        line-height: 1.1;
+    }
 }
 
 .date {
-    font-size: 1.3rem;
-    font-weight: bold;
-    padding-top: 15px;
-    padding-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    padding-top: 8px;
+    padding-bottom: 8px;
     margin-left: 20px;
 
-    &.empty-date {
+    .date-absolute {
         font-size: 1.1rem;
-        padding-top: 30px;
-        padding-bottom: 30px;
-        opacity: 0.4;
+        font-weight: bold;
+        line-height: 1.15;
+    }
+
+    .date-relative {
+        font-size: 0.8rem;
+        line-height: 1.1;
+    }
+
+    &.empty-date {
+        padding-top: 24px;
+        padding-bottom: 24px;
+
+        .date-absolute {
+            font-size: 1rem;
+            font-weight: normal;
+            opacity: 0.4;
+        }
+
+        .date-relative {
+            opacity: 0.4;
+        }
     }
 }
 

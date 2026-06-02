@@ -42,6 +42,8 @@ npx cypress run      # Headless E2E
 
 **Every logical unit has its own CLAUDE.md. You MUST read it before editing any file in that unit. Every change to any file must be accompanied by an update to that unit's CLAUDE.md if the change affects what the CLAUDE.md describes.**
 
+**Keep CLAUDE.md entries concise.** Document *what* a unit does and *where* things live — enough to navigate and understand the code at a high level. Do NOT document low-level implementation or layout minutiae (exact pixel math, CSS height/spacing tricks, internal state-flag mechanics, "X is compacted so Y is unchanged"). That detail belongs in code comments next to the code, not here — it bloats the map and goes stale fast.
+
 | Unit | CLAUDE.md |
 |------|-----------|
 | Backend (ASP.NET Core) | `Appy/CLAUDE.md` |

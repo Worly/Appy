@@ -52,6 +52,8 @@ Adds the `facility-id: <id>` header to all API requests, reading the selected fa
 | `FormatDurationPipe` | dayjs Duration → `"1h 30m"` |
 | `ToDurationPipe` | String → dayjs Duration |
 | `FilterPipe` | Filters an array by a property value |
+| `RelativeDatePipe` | dayjs date → localized relative label ("Today", "Tomorrow", "in 3 days", "2 days ago"); impure |
+| `DateRelationPipe` | dayjs date → `'today' \| 'future' \| 'past'` token for `[ngClass]`; impure |
 
 ## Shared Directives (directives/)
 
