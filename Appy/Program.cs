@@ -39,7 +39,11 @@ builder.Services.AddScoped<ITestingService, TestingService>();
 
 builder.Services
     .AddControllers(opts => opts.UseDateOnlyTimeOnlyStringConverters())
-    .AddJsonOptions(opts => opts.UseDateOnlyTimeOnlyStringConverters());
+    .AddJsonOptions(opts =>
+    {
+        opts.UseDateOnlyTimeOnlyStringConverters();
+        opts.JsonSerializerOptions.Converters.Add(new Appy.Utils.TrimmingStringConverter());
+    });
 
 builder.Services.AddScheduler(config =>
 {

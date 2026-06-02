@@ -4,7 +4,9 @@ xUnit unit tests for backend service logic. Targets **.NET 8.0**, same as the ma
 
 ## What Is Tested
 
-Tests live in `Services/` and cover three services:
+Tests live in `Services/` and `Utils/`. The `Services/` tests cover three services:
+
+- **TrimmingStringConverterTests** (`Utils/`): verifies the global request-body string-trimming converter — leading/trailing whitespace is trimmed across top-level, nested, and collection string properties; `null` is preserved; whitespace-only becomes empty; and serialization (Write) is a passthrough that does not trim.
 
 - **AppointmentReminderServiceTests**: verifies time-based reminder logic — which appointments get reminded based on date and time, that only `Confirmed` appointments trigger reminders, that the `WasReminded` flag prevents duplicate sends, and that an exception on one appointment does not stop reminders for others.
 
