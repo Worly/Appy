@@ -50,37 +50,26 @@ namespace Appy.Services
             return appointments.Select(a => a.ToViewDTO(previousById.GetValueOrDefault(a.Id))).ToList();
         }
 
-        public Task<List<AppointmentViewDTO>> GetList(DateOnly date, Direction direction, int skip, int take, SmartFilter? filter, int facilityId)
+        public async Task<List<AppointmentViewDTO>> GetList(DateOnly date, Direction direction, int skip, int take, SmartFilter? filter, int facilityId)
         {
-            var appointments = context.Appointments
+            IQueryable<Appointment> query = context.Appointments
                 .Include(a => a.Service)
                 .Include(a => a.Client)
                 .Where(s => s.FacilityId == facilityId)
                 .ApplySmartFilter(filter);
 
             if (direction == Direction.Forwards)
-                appointments = appointments.Where(s => s.Date >= date).OrderBy(s => s.Date).ThenBy(s => s.Time).ThenBy(s => s.Duration);
+                query = query.Where(s => s.Date >= date).OrderBy(s => s.Date).ThenBy(s => s.Time).ThenBy(s => s.Duration);
             else
-                appointments = appointments.Where(s => s.Date < date).OrderByDescending(s => s.Date).ThenByDescending(s => s.Time).ThenByDescending(s => s.Duration);
+                query = query.Where(s => s.Date < date).OrderByDescending(s => s.Date).ThenByDescending(s => s.Time).ThenByDescending(s => s.Duration);
 
-            return appointments
+            var appointments = await query
                 .Skip(skip)
                 .Take(take)
-                .Select(a => new
-                {
-                    app = a,
-                    previous = context.Appointments
-                        .Include(a => a.Service)
-                        .Include(a => a.Client)
-                        .Where(s => s.FacilityId == a.FacilityId && s.ClientId == a.ClientId && (s.Date < a.Date || (s.Date == a.Date && s.Time < a.Time)))
-                        .OrderByDescending(s => s.Date)
-                        .ThenByDescending(s => s.Time)
-                        .ThenByDescending(s => s.Duration)
-                        .Select(a => a.ToViewDTO(null))
-                        .FirstOrDefault()
-                })
-                .Select(a => a.app.ToViewDTO(a.previous))
                 .ToListAsync();
+
+            var previousById = await GetPreviousAppointments(appointments, facilityId);
+            return appointments.Select(a => a.ToViewDTO(previousById.GetValueOrDefault(a.Id))).ToList();
         }
 
         public async Task<AppointmentViewDTO> GetById(int id, int facilityId)

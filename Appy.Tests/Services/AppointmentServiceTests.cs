@@ -290,5 +290,45 @@ namespace Appy.Tests.Services
             // The old correlated-subquery implementation read the DbSet once per row (N+1).
             dbContextMock.VerifyGet(x => x.Appointments, Times.AtMost(2));
         }
+
+        [Fact]
+        public async Task GetList_Forwards_AttachesPrevious()
+        {
+            Seed(1, new DateOnly(2030, 1, 10), new TimeOnly(10, 0), client1);
+            Seed(2, new DateOnly(2030, 1, 20), new TimeOnly(10, 0), client1);
+
+            var result = await service.GetList(new DateOnly(2030, 1, 15), Direction.Forwards, skip: 0, take: 10, filter: null, facilityId: FacilityId);
+
+            var view = Assert.Single(result);
+            Assert.Equal(2, view.Id);
+            Assert.NotNull(view.PreviousAppointment);
+            Assert.Equal(1, view.PreviousAppointment!.Id);
+        }
+
+        [Fact]
+        public async Task GetList_Backwards_NullWhenNoEarlier()
+        {
+            Seed(1, new DateOnly(2030, 1, 10), new TimeOnly(10, 0), client1);
+
+            var result = await service.GetList(new DateOnly(2030, 1, 15), Direction.Backwards, skip: 0, take: 10, filter: null, facilityId: FacilityId);
+
+            var view = Assert.Single(result);
+            Assert.Equal(1, view.Id);
+            Assert.Null(view.PreviousAppointment);
+        }
+
+        [Fact]
+        public async Task GetList_DoesNotQueryPerRow()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                var client = new Client { Id = 100 + i, FacilityId = FacilityId, Name = $"C{i}", Contacts = new() };
+                Seed(200 + i, new DateOnly(2030, 1, 20), new TimeOnly(10, 0), client);
+            }
+
+            await service.GetList(new DateOnly(2030, 1, 15), Direction.Forwards, skip: 0, take: 50, filter: null, facilityId: FacilityId);
+
+            dbContextMock.VerifyGet(x => x.Appointments, Times.AtMost(2));
+        }
     }
 }
