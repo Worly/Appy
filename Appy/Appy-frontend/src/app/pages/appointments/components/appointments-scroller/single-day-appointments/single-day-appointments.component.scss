@@ -1,6 +1,6 @@
 :host {
     display: grid;
-    grid-template-rows: 50px minmax(10px, 1fr);
+    grid-template-rows: 60px minmax(10px, 1fr);
     grid-template-columns: minmax(0, 1fr);
     position: relative;
 
@@ -33,7 +33,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px;
+    gap: 5px;
     height: 100%;
 
     .date-relative {
@@ -41,16 +41,24 @@
     }
 }
 
+.date-controls-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
 .date-controls {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100%;
+    height: 30px;
 }
 
 :host::ng-deep {
     app-button.date-button {
         width: max-content;
+
         .my-button {
             padding-left: 1px;
             padding-right: 1px;
@@ -60,7 +68,7 @@
     }
 
     app-button.arrow-button {
-        .my-button.icon-only > .my-icon {
+        .my-button.icon-only>.my-icon {
             margin-left: 4px;
             margin-right: 4px;
         }
@@ -111,7 +119,8 @@
 
     &.free-time {
         --status-color: rgb(var(--rgb-success));
-        & > div {
+
+        &>div {
             display: none;
         }
     }
@@ -124,7 +133,7 @@
         --status-color: rgb(var(--rgb-input-border));
     }
 
-    & > div {
+    &>div {
         opacity: 30%;
         width: 100%;
         height: 100%;
@@ -148,7 +157,7 @@
 .single-appointment {
     position: absolute;
     width: 100%;
-    
+
     border-radius: var(--default-border-radius);
     border: 1px solid rgb(var(--rgb-anti-text));
     padding-left: 2px;

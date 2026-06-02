@@ -4,7 +4,7 @@
         <div>{{date?.format("D.M.YY")}}</div>
         <div *ngIf="date" class="date-relative" [ngClass]="date | dateRelation">· {{date | relativeDate}}</div>
     </div>
-    <div *ngIf="showDateControls" [style.height]="'100%'">
+    <div *ngIf="showDateControls" [style.height]="'100%'" class="date-controls-container">
         <div class="date-controls">
             <app-button class="arrow-button" icon="angle-left" alignContent="center" [curved]="false" look="transparent"
                 [curvedBottomLeft]="true" [curvedTopLeft]="true" [curvedBottomRight]="false" [curvedTopRight]="false"
@@ -18,6 +18,8 @@
                 [curvedTopRight]="true" (onClick)="dateControlNext.emit()">
             </app-button>
         </div>
+
+        <div *ngIf="date" class="date-relative" [ngClass]="date | dateRelation">{{date | relativeDate}}</div>
 
         <app-calendar-dialog #calendarDialog [date]="$any(date)" (dateChange)="dateControlSelect.emit($event)">
         </app-calendar-dialog>

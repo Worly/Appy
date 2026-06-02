@@ -11,8 +11,8 @@
     flex-direction: column;
 
     padding-left: 20px;
-    padding-top: 3px;
-    padding-bottom: 3px;
+    padding-top: 5px;
+    padding-bottom: 5px;
 
     border-bottom-left-radius: var(--default-border-radius);
     border-bottom-right-radius: var(--default-border-radius);
@@ -34,8 +34,8 @@
 .date {
     display: flex;
     flex-direction: column;
-    padding-top: 10px;
-    padding-bottom: 6px;
+    padding-top: 8px;
+    padding-bottom: 8px;
     margin-left: 20px;
 
     .date-absolute {
