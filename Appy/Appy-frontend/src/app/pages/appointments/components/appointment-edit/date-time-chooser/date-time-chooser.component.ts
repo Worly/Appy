@@ -24,7 +24,10 @@ import { ServiceColorsService } from 'src/app/pages/services/services/service-co
 })
 export class DateTimeChooserComponent implements OnInit, OnDestroy, AfterViewInit {
 
-  @ViewChild(AppointmentsScrollerComponent) appointmentScroller?: AppointmentsScrollerComponent;
+  // static: true so the scroller is resolved before the first change-detection pass.
+  // The right-side height binds to its getHeight(); a late (null -> value) resolution
+  // would otherwise trigger NG0100 ExpressionChangedAfterItHasBeenChecked.
+  @ViewChild(AppointmentsScrollerComponent, { static: true }) appointmentScroller?: AppointmentsScrollerComponent;
   @ViewChild("hoursContextMenu", { read: ContextMenuComponent }) hoursContextMenu?: ContextMenuComponent;
   @ViewChildren("hoursContextMenuButtons", { read: ElementRef<HTMLElement> }) hoursButtons?: QueryList<ElementRef<HTMLElement>>;
 
