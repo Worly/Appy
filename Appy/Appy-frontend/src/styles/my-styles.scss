@@ -132,7 +132,7 @@ body {
 // The `today` / `future` / `past` class comes from the `dateRelation` pipe.
 .date-relative {
     &.today {
-        color: rgb(var(--rgb-primary));
+        color: rgb(var(--rgb-today-accent));
         font-weight: bold;
         opacity: 1;
     }
