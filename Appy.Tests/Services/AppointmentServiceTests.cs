@@ -318,6 +318,21 @@ namespace Appy.Tests.Services
         }
 
         [Fact]
+        public async Task GetList_Backwards_AttachesPrevious()
+        {
+            Seed(1, new DateOnly(2030, 1, 5), new TimeOnly(10, 0), client1);
+            Seed(2, new DateOnly(2030, 1, 10), new TimeOnly(10, 0), client1);
+
+            var result = await service.GetList(new DateOnly(2030, 1, 15), Direction.Backwards, skip: 0, take: 10, filter: null, facilityId: FacilityId);
+
+            var earlierView = result.Single(a => a.Id == 1);
+            var laterView = result.Single(a => a.Id == 2);
+            Assert.Null(earlierView.PreviousAppointment);
+            Assert.NotNull(laterView.PreviousAppointment);
+            Assert.Equal(1, laterView.PreviousAppointment!.Id);
+        }
+
+        [Fact]
         public async Task GetList_DoesNotQueryPerRow()
         {
             for (int i = 0; i < 10; i++)
