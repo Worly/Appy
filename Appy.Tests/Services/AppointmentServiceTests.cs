@@ -251,6 +251,20 @@ namespace Appy.Tests.Services
         }
 
         [Fact]
+        public async Task GetAll_FindPrevious_ResolvesDistinctPreviousPerRowSameDay()
+        {
+            Seed(1, new DateOnly(2030, 1, 15), new TimeOnly(9, 0), client1);
+            Seed(2, new DateOnly(2030, 1, 15), new TimeOnly(11, 0), client1);
+            Seed(3, new DateOnly(2030, 1, 15), new TimeOnly(13, 0), client1);
+
+            var result = await service.GetAll(new DateOnly(2030, 1, 15), FacilityId, findPrevious: true, filter: null);
+
+            Assert.Null(result.Single(a => a.Id == 1).PreviousAppointment);
+            Assert.Equal(1, result.Single(a => a.Id == 2).PreviousAppointment!.Id);
+            Assert.Equal(2, result.Single(a => a.Id == 3).PreviousAppointment!.Id);
+        }
+
+        [Fact]
         public async Task GetAll_FindPrevious_IsolatesByClient()
         {
             Seed(1, new DateOnly(2030, 1, 10), new TimeOnly(10, 0), client1);
