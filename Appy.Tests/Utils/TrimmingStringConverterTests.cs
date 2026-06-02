@@ -8,7 +8,7 @@ namespace Appy.Tests.Utils
     {
         private static JsonSerializerOptions OptionsWithTrimming()
         {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
             options.Converters.Add(new TrimmingStringConverter());
             return options;
         }
@@ -32,6 +32,16 @@ namespace Appy.Tests.Utils
             Assert.Null(dto.Surname);                  // null preserved
             Assert.Equal("", dto.Notes);               // whitespace-only -> empty
             Assert.Equal("+123", dto.Contacts[0].Value); // nested collection trimmed
+        }
+
+        [Fact]
+        public void Serialize_DoesNotTrim_WriteIsPassthrough()
+        {
+            var client = new ClientDTO { Name = "  Jane  ", Contacts = new List<ClientContactDTO>() };
+
+            var json = JsonSerializer.Serialize(client, OptionsWithTrimming());
+
+            Assert.Contains("  Jane  ", json); // value written untrimmed
         }
     }
 }
