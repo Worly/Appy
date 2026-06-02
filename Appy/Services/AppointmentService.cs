@@ -291,35 +291,52 @@ namespace Appy.Services
             if (appointments.Count == 0)
                 return result;
 
-            var clientIds = appointments.Select(a => a.ClientId).Distinct().ToList();
-            var maxDate = appointments.Max(a => a.Date);
+            var anchorIds = appointments.Select(a => a.Id).ToList();
 
-            var candidates = await context.Appointments
-                .Include(a => a.Service)
-                .Include(a => a.Client)
-                // s.Date <= maxDate only narrows the fetch; the per-row predicate below selects the actual previous appointment.
-                .Where(s => s.FacilityId == facilityId && clientIds.Contains(s.ClientId) && s.Date <= maxDate)
+            // Capture the DbSet once: the correlated lookup below references it per row, and re-reading the
+            // property each time would defeat the batching the N+1 guard tests assert (see AppointmentServiceTests).
+            var appointmentsSet = context.Appointments;
+
+            // For each appointment in the page, fetch only the id of its immediately-preceding appointment for
+            // the same client. Npgsql translates the correlated FirstOrDefault into a LATERAL join, so we read at
+            // most one previous-id per row instead of every client's entire history (the prior fetch loaded all of it).
+            var links = await appointmentsSet
+                .Where(anchor => anchorIds.Contains(anchor.Id))
+                .Select(anchor => new
+                {
+                    AnchorId = anchor.Id,
+                    PreviousId = appointmentsSet
+                        .Where(s => s.FacilityId == facilityId
+                            && s.ClientId == anchor.ClientId
+                            && (s.Date < anchor.Date || (s.Date == anchor.Date && s.Time < anchor.Time)))
+                        .OrderByDescending(s => s.Date)
+                        .ThenByDescending(s => s.Time)
+                        .ThenByDescending(s => s.Duration)
+                        .Select(s => (int?)s.Id)
+                        .FirstOrDefault()
+                })
                 .ToListAsync();
 
-            var byClient = candidates
-                .GroupBy(c => c.ClientId)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.OrderByDescending(s => s.Date)
-                          .ThenByDescending(s => s.Time)
-                          .ThenByDescending(s => s.Duration)
-                          .ToList());
+            var previousIds = links
+                .Where(l => l.PreviousId != null)
+                .Select(l => l.PreviousId!.Value)
+                .Distinct()
+                .ToList();
 
-            foreach (var a in appointments)
+            var previousById = previousIds.Count == 0
+                ? new Dictionary<int, AppointmentViewDTO>()
+                : (await appointmentsSet
+                        .Include(a => a.Service)
+                        .Include(a => a.Client)
+                        .Where(a => previousIds.Contains(a.Id))
+                        .ToListAsync())
+                    .ToDictionary(a => a.Id, a => a.ToViewDTO(null));
+
+            foreach (var link in links)
             {
-                AppointmentViewDTO? previous = null;
-                if (byClient.TryGetValue(a.ClientId, out var clientAppointments))
-                {
-                    var prev = clientAppointments.FirstOrDefault(s =>
-                        s.Date < a.Date || (s.Date == a.Date && s.Time < a.Time));
-                    previous = prev?.ToViewDTO(null);
-                }
-                result[a.Id] = previous;
+                result[link.AnchorId] = link.PreviousId != null
+                    ? previousById.GetValueOrDefault(link.PreviousId.Value)
+                    : null;
             }
 
             return result;
