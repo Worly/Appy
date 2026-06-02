@@ -67,6 +67,25 @@ namespace Appy.Tests.Services
             return appointment;
         }
 
+        private Appointment Seed(int id, DateOnly date, TimeOnly time, Client client)
+        {
+            var appointment = new Appointment
+            {
+                Id = id,
+                FacilityId = FacilityId,
+                Date = date,
+                Time = time,
+                Duration = TimeSpan.FromMinutes(30),
+                ServiceId = service1.Id,
+                Service = service1,
+                ClientId = client.Id,
+                Client = client,
+                Status = AppointmentStatus.Unconfirmed,
+            };
+            appointments.Add(appointment);
+            return appointment;
+        }
+
         private AppointmentEditDTO DtoMatching(Appointment a) => new AppointmentEditDTO
         {
             Date = a.Date,
@@ -200,6 +219,76 @@ namespace Appy.Tests.Services
             var result = await service.AddNew(dto, FacilityId, ignoreTimeNotAvailable: false);
 
             Assert.Equal(AppointmentStatus.Unconfirmed, result.Status);
+        }
+
+        [Fact]
+        public async Task GetAll_FindPrevious_AttachesMostRecentEarlierAppointment()
+        {
+            Seed(1, new DateOnly(2030, 1, 10), new TimeOnly(10, 0), client1);
+            Seed(2, new DateOnly(2030, 1, 15), new TimeOnly(10, 0), client1);
+
+            var result = await service.GetAll(new DateOnly(2030, 1, 15), FacilityId, findPrevious: true, filter: null);
+
+            var view = Assert.Single(result);
+            Assert.Equal(2, view.Id);
+            Assert.NotNull(view.PreviousAppointment);
+            Assert.Equal(1, view.PreviousAppointment!.Id);
+        }
+
+        [Fact]
+        public async Task GetAll_FindPrevious_ResolvesSameDayEarlierTime()
+        {
+            Seed(1, new DateOnly(2030, 1, 15), new TimeOnly(9, 0), client1);
+            Seed(2, new DateOnly(2030, 1, 15), new TimeOnly(11, 0), client1);
+
+            var result = await service.GetAll(new DateOnly(2030, 1, 15), FacilityId, findPrevious: true, filter: null);
+
+            var firstView = result.Single(a => a.Id == 1);
+            var secondView = result.Single(a => a.Id == 2);
+            Assert.Null(firstView.PreviousAppointment);
+            Assert.NotNull(secondView.PreviousAppointment);
+            Assert.Equal(1, secondView.PreviousAppointment!.Id);
+        }
+
+        [Fact]
+        public async Task GetAll_FindPrevious_IsolatesByClient()
+        {
+            Seed(1, new DateOnly(2030, 1, 10), new TimeOnly(10, 0), client1);
+            Seed(2, new DateOnly(2030, 1, 15), new TimeOnly(10, 0), client2);
+            Seed(3, new DateOnly(2030, 1, 15), new TimeOnly(10, 0), client1);
+
+            var result = await service.GetAll(new DateOnly(2030, 1, 15), FacilityId, findPrevious: true, filter: null);
+
+            var client1View = result.Single(a => a.Id == 3);
+            var client2View = result.Single(a => a.Id == 2);
+            Assert.Equal(1, client1View.PreviousAppointment!.Id);
+            Assert.Null(client2View.PreviousAppointment);
+        }
+
+        [Fact]
+        public async Task GetAll_FindPrevious_NullWhenNoEarlierAppointment()
+        {
+            Seed(1, new DateOnly(2030, 1, 15), new TimeOnly(10, 0), client1);
+
+            var result = await service.GetAll(new DateOnly(2030, 1, 15), FacilityId, findPrevious: true, filter: null);
+
+            Assert.Null(Assert.Single(result).PreviousAppointment);
+        }
+
+        [Fact]
+        public async Task GetAll_FindPrevious_DoesNotQueryPerRow()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                var client = new Client { Id = 100 + i, FacilityId = FacilityId, Name = $"C{i}", Contacts = new() };
+                Seed(200 + i, new DateOnly(2030, 1, 15), new TimeOnly(10, 0), client);
+            }
+
+            await service.GetAll(new DateOnly(2030, 1, 15), FacilityId, findPrevious: true, filter: null);
+
+            // One query for the page + one batched query for previous appointments.
+            // The old correlated-subquery implementation read the DbSet once per row (N+1).
+            dbContextMock.VerifyGet(x => x.Appointments, Times.AtMost(2));
         }
     }
 }

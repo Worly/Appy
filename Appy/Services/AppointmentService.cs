@@ -36,35 +36,20 @@ namespace Appy.Services
             this.workingHourService = workingHourService;
         }
 
-        public Task<List<AppointmentViewDTO>> GetAll(DateOnly date, int facilityId, bool findPrevious, SmartFilter? filter)
+        public async Task<List<AppointmentViewDTO>> GetAll(DateOnly date, int facilityId, bool findPrevious, SmartFilter? filter)
         {
-            var appointments = context.Appointments
+            var appointments = await context.Appointments
                 .Include(a => a.Service)
                 .Include(a => a.Client)
                 .Where(s => s.FacilityId == facilityId && s.Date == date)
-                .ApplySmartFilter(filter);
+                .ApplySmartFilter(filter)
+                .ToListAsync();
 
-            if (findPrevious)
-                return appointments
-                    .Select(a => new
-                    {
-                        app = a,
-                        previous = context.Appointments
-                            .Include(a => a.Service)
-                            .Include(a => a.Client)
-                            .Where(s => s.FacilityId == a.FacilityId && s.ClientId == a.ClientId && (s.Date < a.Date || (s.Date == a.Date && s.Time < a.Time)))
-                            .OrderByDescending(s => s.Date)
-                            .ThenByDescending(s => s.Time)
-                            .ThenByDescending(s => s.Duration)
-                            .Select(a => a.ToViewDTO(null))
-                            .FirstOrDefault()
-                    })
-                    .Select(a => a.app.ToViewDTO(a.previous))
-                    .ToListAsync();
-            else
-                return appointments
-                    .Select(a => a.ToViewDTO(null))
-                    .ToListAsync();
+            if (!findPrevious)
+                return appointments.Select(a => a.ToViewDTO(null)).ToList();
+
+            var previousById = await GetPreviousAppointments(appointments, facilityId);
+            return appointments.Select(a => a.ToViewDTO(previousById.GetValueOrDefault(a.Id))).ToList();
         }
 
         public Task<List<AppointmentViewDTO>> GetList(DateOnly date, Direction direction, int skip, int take, SmartFilter? filter, int facilityId)
@@ -311,6 +296,45 @@ namespace Appy.Services
         private bool Contains(TimeOnly startOuter, TimeOnly endOuter, TimeOnly startInner, TimeOnly endInner)
         {
             return startOuter <= startInner && endOuter >= endInner;
+        }
+
+        private async Task<Dictionary<int, AppointmentViewDTO?>> GetPreviousAppointments(List<Appointment> appointments, int facilityId)
+        {
+            var result = new Dictionary<int, AppointmentViewDTO?>();
+            if (appointments.Count == 0)
+                return result;
+
+            var clientIds = appointments.Select(a => a.ClientId).Distinct().ToList();
+            var maxDate = appointments.Max(a => a.Date);
+
+            var candidates = await context.Appointments
+                .Include(a => a.Service)
+                .Include(a => a.Client)
+                .Where(s => s.FacilityId == facilityId && clientIds.Contains(s.ClientId) && s.Date <= maxDate)
+                .ToListAsync();
+
+            var byClient = candidates
+                .GroupBy(c => c.ClientId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.OrderByDescending(s => s.Date)
+                          .ThenByDescending(s => s.Time)
+                          .ThenByDescending(s => s.Duration)
+                          .ToList());
+
+            foreach (var a in appointments)
+            {
+                AppointmentViewDTO? previous = null;
+                if (byClient.TryGetValue(a.ClientId, out var clientAppointments))
+                {
+                    var prev = clientAppointments.FirstOrDefault(s =>
+                        s.Date < a.Date || (s.Date == a.Date && s.Time < a.Time));
+                    previous = prev?.ToViewDTO(null);
+                }
+                result[a.Id] = previous;
+            }
+
+            return result;
         }
 
         private Task<AppointmentViewDTO?> GetPreviousAppointment(Appointment a)
