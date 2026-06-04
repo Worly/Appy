@@ -44,6 +44,7 @@ npx cypress run      # Headless E2E (used in CI)
 /clients                  → LoggedInGuard + SelectedFacilityGuard (lazy)
 /services                 → LoggedInGuard + SelectedFacilityGuard (lazy)
 /working-hours            → LoggedInGuard + SelectedFacilityGuard (lazy)
+/time-off                 → LoggedInGuard + SelectedFacilityGuard (lazy)
 /client-notifications     → LoggedInGuard + SelectedFacilityGuard (lazy)
 **                        → redirects to /appointments (via appConfig.homePage)
 ```

@@ -22,6 +22,8 @@ TypeScript classes representing domain data on the frontend. Split into two tier
 | `Service` | `ServiceDTO` | Service offering |
 | `Facility` | (inline) | Simple id/name pair |
 | `WorkingHour` | `WorkingHourDTO` | Operating range for one day of the week |
+| `TimeOff` | `TimeOffDTO` | Blocked availability rule with recurrence and optional bounds |
+| `TimeOffOccurrence` | `TimeOffOccurrenceDTO` | Single expanded on-date time-off instance |
 | `FreeTime` | `FreeTimeDTO` | Available booking slot (from/to/toIncludingDuration) |
 | `CalendarDay` | `CalendarDayDTO` | A date bundled with its appointments and working hours |
 | `ClientNotificationsSettings` | (settings DTO) | Instagram config and message templates |

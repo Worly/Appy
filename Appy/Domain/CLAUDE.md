@@ -14,6 +14,7 @@ EF Core entity classes that map directly to PostgreSQL tables. These are the can
 | `ClientContact` | A single notification channel for a Client (Instagram username or WhatsApp number) |
 | `Appointment` | A booking linking one Client + one Service at a specific date/time, with status |
 | `WorkingHour` | Operating hours for a Facility on a specific day of the week (one time range per day) |
+| `TimeOff` | Blocked availability (recurrence: OneOff/Weekly/Monthly; all-day or time range; optional bounds) |
 | `DashboardSettings` | Per-user per-facility UI preferences stored as a JSON blob |
 | `ClientNotificationsSettings` | Instagram API config and message templates for a Facility |
 

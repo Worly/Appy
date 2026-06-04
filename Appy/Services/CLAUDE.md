@@ -28,7 +28,7 @@ Business logic layer. Each service corresponds to one domain concept and is cons
 ## Key Business Rules (enforced here, not in controllers)
 
 - **Service/Client deletion blocked** if any `Appointment` references them — caller must archive instead
-- **Appointment time validation**: the slot must fall within a `WorkingHour` range for that day-of-week and must not overlap an existing appointment. Pass `ignoreTimeNotAvailable=true` to bypass
+- **Appointment time validation**: the slot must fall within a `WorkingHour` range for that day-of-week, must not overlap an existing appointment, and must not overlap a time-off interval. Pass `ignoreTimeNotAvailable=true` to bypass
 - **Free-time generation**: 5-minute-interval slots within working hours, minus slots that would overlap existing appointments (and optionally ignoring one appointment ID for edit scenarios)
 - **Reminder deduplication**: `AppointmentReminderService` only reminds once per appointment (`WasReminded` flag prevents repeats across scheduler ticks)
 - **Contact name uniqueness**: `ClientService` enforces case-insensitive name + surname uniqueness per facility

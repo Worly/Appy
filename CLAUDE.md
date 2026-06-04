@@ -73,6 +73,7 @@ npx cypress run      # Headless E2E
 | Page: Clients | `Appy/Appy-frontend/src/app/pages/clients/CLAUDE.md` |
 | Page: Services | `Appy/Appy-frontend/src/app/pages/services/CLAUDE.md` |
 | Page: Working Hours | `Appy/Appy-frontend/src/app/pages/working-hours/CLAUDE.md` |
+| Page: Time Off | `Appy/Appy-frontend/src/app/pages/time-off/CLAUDE.md` |
 | Page: Client Notifications | `Appy/Appy-frontend/src/app/pages/client-notifications/CLAUDE.md` |
 | Frontend Utilities | `Appy/Appy-frontend/src/app/utils/CLAUDE.md` |
 | Theming & Global Styles | `Appy/Appy-frontend/src/styles/CLAUDE.md` |
