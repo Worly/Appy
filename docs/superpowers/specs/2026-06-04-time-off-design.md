@@ -33,6 +33,7 @@ TimeOff
   Id          int
   FacilityId  int                 // tenant scope (every entity except User/LoginSession)
   Label       string              // REQUIRED, non-empty after trim
+  Notes       string?             // optional free-text, auto-trimmed (like Appointment.Notes)
 
   Recurrence  TimeOffRecurrence
 
@@ -86,7 +87,7 @@ Straight mirror of `ServiceController` / `ServiceService`.
   - `GetOccurrencesForRange(DateOnly from, DateOnly to, facilityId) → List<TimeOffOccurrence>`
 - **DTOs:**
   - `TimeOffDTO` — the raw rule (all fields above), for CRUD
-  - `TimeOffOccurrenceDTO { Date, Label, IsAllDay, TimeFrom, TimeTo }` — the **expanded, on-date** shape consumed by the views; distinct from the rule
+  - `TimeOffOccurrenceDTO { Date, Label, Notes, IsAllDay, TimeFrom, TimeTo }` — the **expanded, on-date** shape consumed by the views; distinct from the rule
 
 Backend owns expansion entirely — one implementation feeds booking and both views, so there is no second (TypeScript) copy of the predicate that could drift.
 
@@ -120,7 +121,7 @@ Time-off is just one more reason a slot is unavailable, alongside "outside worki
   - **One-off** → start + end date pickers (Material dayjs adapter)
   - **Weekly** → weekday dropdown + optional effective from/until
   - **Monthly** → day-of-month (1–31) + optional effective from/until
-  - **All three** → required label text, all-day toggle, and time-from/time-to (hour/minute dropdowns, à la Working Hours) when not all-day
+  - **All three** → required label text, optional notes textarea, all-day toggle, and time-from/time-to (hour/minute dropdowns, à la Working Hours) when not all-day
 
 ## Frontend — Scroller Display
 
