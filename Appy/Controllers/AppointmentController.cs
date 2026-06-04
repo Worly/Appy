@@ -19,17 +19,20 @@ namespace Appy.Controllers
         private IServiceService serviceService;
         private IWorkingHourService workingHourService;
         private IClientNotificationsService clientNotificationsService;
+        private ITimeOffService timeOffService;
 
         public AppointmentController(
             IAppointmentService appointmentService,
             IServiceService serviceService,
             IWorkingHourService workingHourService,
-            IClientNotificationsService clientNotificationsService)
+            IClientNotificationsService clientNotificationsService,
+            ITimeOffService timeOffService)
         {
             this.appointmentService = appointmentService;
             this.serviceService = serviceService;
             this.workingHourService = workingHourService;
             this.clientNotificationsService = clientNotificationsService;
+            this.timeOffService = timeOffService;
         }
 
         [HttpGet("getAll")]
@@ -115,7 +118,12 @@ namespace Appy.Controllers
             if (ignoreAppointmentId.HasValue)
                 appointmentsOfTheDay = appointmentsOfTheDay.Where(o => o.Id != ignoreAppointmentId).ToList();
 
-            return this.appointmentService.GetFreeTimes(appointmentsOfTheDay, workingHours, service.GetDTO(), duration);
+            var occurrences = await this.timeOffService.GetOccurrencesForDate(date, HttpContext.SelectedFacility());
+            var blockedIntervals = occurrences.Select(o => o.IsAllDay
+                ? (new TimeOnly(0, 0, 0), new TimeOnly(23, 59, 59))
+                : (o.TimeFrom!.Value, o.TimeTo!.Value)).ToList();
+
+            return this.appointmentService.GetFreeTimes(appointmentsOfTheDay, workingHours, blockedIntervals, service.GetDTO(), duration);
         }
 
         [HttpPost("notifyClient/{id}")]

@@ -1,5 +1,6 @@
 using Appy.Domain;
 using Appy.DTOs;
+using Appy.Exceptions;
 using Appy.Services;
 using Moq;
 using Moq.EntityFrameworkCore;
@@ -12,6 +13,7 @@ namespace Appy.Tests.Services
 
         private readonly Mock<MainDbContext> dbContextMock;
         private readonly Mock<IWorkingHourService> workingHourServiceMock;
+        private readonly Mock<ITimeOffService> timeOffServiceMock;
         private readonly AppointmentService service;
 
         private readonly Service service1 = new() { Id = 1, FacilityId = FacilityId, Name = "S1", DisplayName = "S1", Duration = TimeSpan.FromMinutes(30) };
@@ -26,6 +28,10 @@ namespace Appy.Tests.Services
         {
             dbContextMock = new Mock<MainDbContext>();
             workingHourServiceMock = new Mock<IWorkingHourService>();
+            timeOffServiceMock = new Mock<ITimeOffService>();
+            timeOffServiceMock
+                .Setup(x => x.GetOccurrencesForDate(It.IsAny<DateOnly>(), FacilityId))
+                .ReturnsAsync(new List<TimeOffOccurrenceDTO>());
 
             dbContextMock.Setup(x => x.Appointments).ReturnsDbSet(appointments);
             dbContextMock.Setup(x => x.Services).ReturnsDbSet(new List<Service> { service1, service2 });
@@ -44,7 +50,7 @@ namespace Appy.Tests.Services
                 .Setup(x => x.GetWorkingHours(It.IsAny<DateOnly>(), FacilityId))
                 .ReturnsAsync(allDays);
 
-            service = new AppointmentService(dbContextMock.Object, workingHourServiceMock.Object);
+            service = new AppointmentService(dbContextMock.Object, workingHourServiceMock.Object, timeOffServiceMock.Object);
         }
 
         private Appointment AddAppointment(AppointmentStatus status)
@@ -200,6 +206,52 @@ namespace Appy.Tests.Services
             var result = await service.AddNew(dto, FacilityId, ignoreTimeNotAvailable: false);
 
             Assert.Equal(AppointmentStatus.Unconfirmed, result.Status);
+        }
+
+        [Fact]
+        public async Task AddNew_Throws_WhenSlotOverlapsAllDayTimeOff()
+        {
+            timeOffServiceMock
+                .Setup(x => x.GetOccurrencesForDate(It.IsAny<DateOnly>(), FacilityId))
+                .ReturnsAsync(new List<TimeOffOccurrenceDTO>
+                {
+                    new() { Date = new DateOnly(2030, 1, 15), Label = "Closed", IsAllDay = true }
+                });
+
+            var dto = new AppointmentEditDTO
+            {
+                Date = new DateOnly(2030, 1, 15),
+                Time = new TimeOnly(10, 0),
+                Duration = TimeSpan.FromMinutes(30),
+                Service = new ServiceDTO { Id = service1.Id },
+                Client = new ClientDTO { Id = client1.Id },
+            };
+
+            await Assert.ThrowsAsync<ValidationException>(() => service.AddNew(dto, FacilityId, ignoreTimeNotAvailable: false));
+        }
+
+        [Fact]
+        public async Task AddNew_Succeeds_OverTimeOff_WhenIgnoreFlagSet()
+        {
+            timeOffServiceMock
+                .Setup(x => x.GetOccurrencesForDate(It.IsAny<DateOnly>(), FacilityId))
+                .ReturnsAsync(new List<TimeOffOccurrenceDTO>
+                {
+                    new() { Date = new DateOnly(2030, 1, 15), Label = "Closed", IsAllDay = true }
+                });
+
+            var dto = new AppointmentEditDTO
+            {
+                Date = new DateOnly(2030, 1, 15),
+                Time = new TimeOnly(10, 0),
+                Duration = TimeSpan.FromMinutes(30),
+                Service = new ServiceDTO { Id = service1.Id },
+                Client = new ClientDTO { Id = client1.Id },
+            };
+
+            var result = await service.AddNew(dto, FacilityId, ignoreTimeNotAvailable: true);
+
+            Assert.Equal(new TimeOnly(10, 0), result.Time);
         }
     }
 }

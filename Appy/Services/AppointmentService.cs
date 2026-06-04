@@ -18,8 +18,8 @@ namespace Appy.Services
         Task<AppointmentViewDTO> SetStatus(int id, AppointmentStatus status, int facilityId);
         Task Delete(int id, int facilityId);
 
-        List<FreeTimeDTO> GetFreeTimes(List<AppointmentViewDTO> appointmentsOfTheDay, List<WorkingHour> workingHours, ServiceDTO service, TimeSpan duration);
-        bool IsAppointmentTimeOk(List<AppointmentViewDTO> appointmentsOfTheDay, List<WorkingHour> workingHours, AppointmentEditDTO appointment);
+        List<FreeTimeDTO> GetFreeTimes(List<AppointmentViewDTO> appointmentsOfTheDay, List<WorkingHour> workingHours, List<(TimeOnly From, TimeOnly To)> blockedIntervals, ServiceDTO service, TimeSpan duration);
+        bool IsAppointmentTimeOk(List<AppointmentViewDTO> appointmentsOfTheDay, List<WorkingHour> workingHours, List<(TimeOnly From, TimeOnly To)> blockedIntervals, AppointmentEditDTO appointment);
 
         Task<int> GetNumberOfAppointmentsCreatedToday(int facilityId);
     }
@@ -29,11 +29,13 @@ namespace Appy.Services
         private MainDbContext context;
 
         private IWorkingHourService workingHourService;
+        private ITimeOffService timeOffService;
 
-        public AppointmentService(MainDbContext context, IWorkingHourService workingHourService)
+        public AppointmentService(MainDbContext context, IWorkingHourService workingHourService, ITimeOffService timeOffService)
         {
             this.context = context;
             this.workingHourService = workingHourService;
+            this.timeOffService = timeOffService;
         }
 
         public Task<List<AppointmentViewDTO>> GetAll(DateOnly date, int facilityId, bool findPrevious, SmartFilter? filter)
@@ -140,7 +142,8 @@ namespace Appy.Services
 
             var sameDayAppointments = await GetAll(dto.Date, facilityId, findPrevious: false, filter: null);
             var workingHours = await workingHourService.GetWorkingHours(dto.Date, facilityId);
-            if (!ignoreTimeNotAvailable && !IsAppointmentTimeOk(sameDayAppointments, workingHours, dto))
+            var blockedIntervals = await GetBlockedIntervals(dto.Date, facilityId);
+            if (!ignoreTimeNotAvailable && !IsAppointmentTimeOk(sameDayAppointments, workingHours, blockedIntervals, dto))
                 throw new ValidationException(nameof(AppointmentEditDTO.Time), "pages.appointments.errors.TIME_NOT_AVAILABLE");
 
             context.Appointments.Add(appointment);
@@ -193,7 +196,8 @@ namespace Appy.Services
                 .Where(a => a.Id != appointment.Id)
                 .ToList();
             var workingHours = await workingHourService.GetWorkingHours(dto.Date, facilityId);
-            if (!ignoreTimeNotAvailable && !IsAppointmentTimeOk(sameDayAppointments, workingHours, dto))
+            var blockedIntervals = await GetBlockedIntervals(dto.Date, facilityId);
+            if (!ignoreTimeNotAvailable && !IsAppointmentTimeOk(sameDayAppointments, workingHours, blockedIntervals, dto))
                 throw new ValidationException(nameof(AppointmentEditDTO.Time), "pages.appointments.errors.TIME_NOT_AVAILABLE");
 
             await context.SaveChangesAsync();
@@ -230,7 +234,7 @@ namespace Appy.Services
             await context.SaveChangesAsync();
         }
 
-        public List<FreeTimeDTO> GetFreeTimes(List<AppointmentViewDTO> appointmentsOfTheDay, List<WorkingHour> workingHours, ServiceDTO service, TimeSpan duration)
+        public List<FreeTimeDTO> GetFreeTimes(List<AppointmentViewDTO> appointmentsOfTheDay, List<WorkingHour> workingHours, List<(TimeOnly From, TimeOnly To)> blockedIntervals, ServiceDTO service, TimeSpan duration)
         {
             var result = new List<FreeTimeDTO>();
 
@@ -253,6 +257,9 @@ namespace Appy.Services
                     ok = false;
                 // if none of working hours contains the appointment set ok to false
                 else if (!workingHours.Any(wh => Contains(wh.TimeFrom, wh.TimeTo, time, time.Add(duration))))
+                    ok = false;
+                // if the slot overlaps any time-off block set ok to false
+                else if (blockedIntervals.Any(b => Overlap(time, time.Add(duration), b.From, b.To)))
                     ok = false;
 
                 // if current time is ok and currentFreeTime has not begun, then start it
@@ -285,9 +292,9 @@ namespace Appy.Services
             return result;
         }
 
-        public bool IsAppointmentTimeOk(List<AppointmentViewDTO> appointmentsOfTheDay, List<WorkingHour> workingHours, AppointmentEditDTO appointment)
+        public bool IsAppointmentTimeOk(List<AppointmentViewDTO> appointmentsOfTheDay, List<WorkingHour> workingHours, List<(TimeOnly From, TimeOnly To)> blockedIntervals, AppointmentEditDTO appointment)
         {
-            var freeTimes = GetFreeTimes(appointmentsOfTheDay, workingHours, appointment.Service, appointment.Duration);
+            var freeTimes = GetFreeTimes(appointmentsOfTheDay, workingHours, blockedIntervals, appointment.Service, appointment.Duration);
 
             foreach (var freeTime in freeTimes)
             {
@@ -311,6 +318,14 @@ namespace Appy.Services
         private bool Contains(TimeOnly startOuter, TimeOnly endOuter, TimeOnly startInner, TimeOnly endInner)
         {
             return startOuter <= startInner && endOuter >= endInner;
+        }
+
+        private async Task<List<(TimeOnly From, TimeOnly To)>> GetBlockedIntervals(DateOnly date, int facilityId)
+        {
+            var occurrences = await timeOffService.GetOccurrencesForDate(date, facilityId);
+            return occurrences.Select(o => o.IsAllDay
+                ? (new TimeOnly(0, 0, 0), new TimeOnly(23, 59, 59))
+                : (o.TimeFrom!.Value, o.TimeTo!.Value)).ToList();
         }
 
         private Task<AppointmentViewDTO?> GetPreviousAppointment(Appointment a)
