@@ -27,4 +27,9 @@ describe('timeBetweenMs', () => {
   it('handles multi-hour gaps (2h30m)', () => {
     expect(timeBetweenMs(at("09:00"), mins(60), at("12:30"))).toBe(150 * 60 * 1000);
   });
+
+  it('is negative for a fully-contained overlap (next starts inside a long prev)', () => {
+    // 10:00 + 120m ends 12:00; next starts 10:30 → overlaps 90m
+    expect(timeBetweenMs(at("10:00"), mins(120), at("10:30"))).toBe(-90 * 60 * 1000);
+  });
 });
