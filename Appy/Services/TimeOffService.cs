@@ -119,9 +119,48 @@ namespace Appy.Services
             t.TimeTo = dto.IsAllDay ? null : dto.TimeTo;
         }
 
-        // --- Expansion (implemented in Task 5) ---
-        public bool AppliesOn(TimeOff timeOff, DateOnly date) => throw new NotImplementedException();
-        public Task<List<TimeOffOccurrenceDTO>> GetOccurrencesForDate(DateOnly date, int facilityId) => throw new NotImplementedException();
-        public Task<List<TimeOffOccurrenceDTO>> GetOccurrencesForRange(DateOnly from, DateOnly to, int facilityId) => throw new NotImplementedException();
+        public bool AppliesOn(TimeOff t, DateOnly date)
+        {
+            switch (t.Recurrence)
+            {
+                case TimeOffRecurrence.OneOff:
+                    return t.StartDate <= date && date <= t.EndDate;
+                case TimeOffRecurrence.Weekly:
+                    return t.DayOfWeek == date.DayOfWeek
+                        && (t.StartDate == null || date >= t.StartDate)
+                        && (t.EndDate == null || date <= t.EndDate);
+                case TimeOffRecurrence.Monthly:
+                    return t.DayOfMonth == date.Day
+                        && (t.StartDate == null || date >= t.StartDate)
+                        && (t.EndDate == null || date <= t.EndDate);
+                default:
+                    return false;
+            }
+        }
+
+        public async Task<List<TimeOffOccurrenceDTO>> GetOccurrencesForDate(DateOnly date, int facilityId)
+        {
+            var all = await GetAll(facilityId);
+            return all.Where(t => AppliesOn(t, date)).Select(t => ToOccurrence(t, date)).ToList();
+        }
+
+        public async Task<List<TimeOffOccurrenceDTO>> GetOccurrencesForRange(DateOnly from, DateOnly to, int facilityId)
+        {
+            var all = await GetAll(facilityId);
+            var result = new List<TimeOffOccurrenceDTO>();
+            for (var d = from; d <= to; d = d.AddDays(1))
+                result.AddRange(all.Where(t => AppliesOn(t, d)).Select(t => ToOccurrence(t, d)));
+            return result;
+        }
+
+        private static TimeOffOccurrenceDTO ToOccurrence(TimeOff t, DateOnly date) => new()
+        {
+            Date = date,
+            Label = t.Label,
+            Notes = t.Notes,
+            IsAllDay = t.IsAllDay,
+            TimeFrom = t.IsAllDay ? null : t.TimeFrom,
+            TimeTo = t.IsAllDay ? null : t.TimeTo,
+        };
     }
 }
