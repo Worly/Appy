@@ -24,8 +24,13 @@
 
         <app-single-appointment-list-item #appointmentElement *ngIf="i.type == 'appointment'"
             [attr.data-date]="i.dateISO" [ngClass]="{'last': i.isLast}" [attr.data-appId]="i.id"
-            [appointment]="i.appointment"
+            [appointment]="i.appointment" [isOverlapping]="i.isOverlapping"
             (onOpenView)="this.viewingAppointmentId = i.id; appointmentDialog.open();"></app-single-appointment-list-item>
+
+        <div *ngIf="i.type == 'gap'" class="gap" [class.overlap]="i.isOverlap" data-test="appointment-gap">
+            <fa-icon *ngIf="i.isOverlap" [icon]="['fas', 'triangle-exclamation']"></fa-icon>
+            <span>{{ i.duration | formatDuration }}</span>
+        </div>
     </div>
 
     <div *ngIf="isReachedBottom() && appointments?.length != 0" class="no-appointments big">
