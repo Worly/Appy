@@ -32,6 +32,9 @@ export class SingleAppointmentListItemComponent {
   @Input()
   showDate: boolean = false;
 
+  @Input()
+  isOverlapping: boolean = false;
+
   @Output()
   onOpenView: EventEmitter<void> = new EventEmitter();
 

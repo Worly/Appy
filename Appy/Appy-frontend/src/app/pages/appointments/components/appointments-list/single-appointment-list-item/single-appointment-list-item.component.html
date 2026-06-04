@@ -1,5 +1,6 @@
-<div *ngIf="renderedAppointment != null" class="appointment" [attr.data-date]="renderedAppointment.dateISO"
-    [attr.data-appId]="renderedAppointment.id" (click)="onOpenView.emit()">
+<div *ngIf="renderedAppointment != null" class="appointment" [class.overlapping]="isOverlapping"
+    [attr.data-date]="renderedAppointment.dateISO" [attr.data-appId]="renderedAppointment.id"
+    (click)="onOpenView.emit()">
     <div class="color" [style.backgroundColor]="renderedAppointment.serviceColor"></div>
     <div class="info-container">
         <div class="top-row">

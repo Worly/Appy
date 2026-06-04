@@ -27,6 +27,12 @@
     &.last {
         margin-bottom: 40px;
     }
+
+    &.overlapping {
+        // Inset box-shadow rather than border/outline so it follows the card's
+        // border-radius and adds no layout shift.
+        box-shadow: inset 0 0 0 2px rgb(var(--rgb-danger));
+    }
 }
 
 .status-icons {
