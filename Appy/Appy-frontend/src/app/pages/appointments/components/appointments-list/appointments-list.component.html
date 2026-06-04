@@ -20,6 +20,9 @@
             [ngClass]="{'empty-date': i.isEmptyDate}">
             <span class="date-absolute">{{i.dateFormatted}}{{i.isEmptyDate ? " - " + ("pages.appointments.NO_APPOINTMENTS" | translate) : ""}}</span>
             <span class="date-relative" [ngClass]="i.date | dateRelation">{{i.date | relativeDate}}</span>
+            <span *ngFor="let l of i.allDayLabels" class="all-day-badge" data-test="list-all-day-timeoff">
+                {{ "pages.time-off.CLOSED" | translate }} · {{ l }}
+            </span>
         </div>
 
         <app-single-appointment-list-item #appointmentElement *ngIf="i.type == 'appointment'"
@@ -31,6 +34,12 @@
             <fa-icon *ngIf="i.isOverlap" [icon]="['fas', 'triangle-exclamation']" aria-hidden="true"></fa-icon>
             <span>{{ i.duration | formatDuration }}</span>
             <fa-icon *ngIf="i.isOverlap" [icon]="['fas', 'triangle-exclamation']" aria-hidden="true"></fa-icon>
+        </div>
+
+        <div *ngIf="i.type == 'timeoff'" class="time-off-item" [class.overlap]="i.isOverlapping" data-test="list-time-off">
+            <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
+            <span class="time">{{ i.occurrence.timeFrom?.format("HH:mm") }} – {{ i.occurrence.timeTo?.format("HH:mm") }}</span>
+            <span class="label">{{ i.occurrence.label }}</span>
         </div>
     </div>
 

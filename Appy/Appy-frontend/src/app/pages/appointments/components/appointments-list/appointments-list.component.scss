@@ -127,3 +127,39 @@
         }
     }
 }
+
+.all-day-badge {
+    margin-left: .5rem;
+    padding: .1rem .5rem;
+    border-radius: .4rem;
+    background: rgba(var(--rgb-danger), 0.15);
+    color: rgb(var(--rgb-danger));
+    font-size: 0.8rem;
+    font-weight: 600;
+    align-self: flex-start;
+}
+
+.time-off-item {
+    // A non-bookable block: hatched background, muted italic label, lining up with the cards' inset.
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+
+    padding: .5rem 1rem;
+    margin: 2px 20px 8px;
+    border-radius: .5rem;
+
+    background: repeating-linear-gradient(45deg, rgba(120, 120, 120, .10), rgba(120, 120, 120, .10) 6px, transparent 6px, transparent 12px);
+    font-style: italic;
+    opacity: 0.8;
+
+    .label {
+        font-weight: 600;
+        font-style: normal;
+    }
+
+    &.overlap {
+        outline: 2px solid rgb(var(--rgb-danger));
+        outline-offset: -2px;
+    }
+}

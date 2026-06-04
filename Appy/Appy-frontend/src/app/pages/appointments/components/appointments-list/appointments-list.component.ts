@@ -7,6 +7,9 @@ import { AppointmentView } from 'src/app/models/appointment';
 import { AppointmentService } from '../../services/appointment.service';
 import { appFilterToSmartFilter, AppointmentsFilter } from '../appointments/appointments.component';
 import { PageableListDatasource } from 'src/app/shared/services/datasource';
+import { TimeOffService } from 'src/app/pages/time-off/services/time-off.service';
+import { TimeOffOccurrence } from 'src/app/models/time-off-occurrence';
+import { buildDayTimeline } from 'src/app/utils/list-timeline';
 
 @Component({
   selector: 'app-appointments-list',
@@ -48,7 +51,9 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
 
   public appointments: AppointmentView[] | null = null;
 
-  public renderedItems: (RenderedType & (RenderedAppointment | RenderedDate | RenderedGap))[] = [];
+  public timeOffs: TimeOffOccurrence[] = [];
+
+  public renderedItems: (RenderedType & (RenderedAppointment | RenderedDate | RenderedGap | RenderedTimeOff))[] = [];
 
   private keptScrollPosition: number | null = null;
   private keptScrollElement: (() => HTMLElement | undefined) | null = null;
@@ -72,6 +77,7 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
   constructor(
     private changeDetector: ChangeDetectorRef,
     private appointmentService: AppointmentService,
+    private timeOffService: TimeOffService,
   ) { }
 
   ngOnInit(): void {
@@ -90,6 +96,7 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
     this.keptScrollElement = this.keptScrollPosition = null;
     this.needsScrollToStartDate = true;
     this.appointments = null;
+    this.timeOffs = [];
     this.renderAppointments();
 
     this.datasource = this.appointmentService.getList(this.date, appFilterToSmartFilter(this._filter), appointmentSort);
@@ -97,10 +104,27 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
       next: a => {
         this.appointments = a;
         this.renderAppointments();
+        this.loadTimeOffs();
 
         setTimeout(() => this.checkShouldLoad());
       }
     })
+  }
+
+  private loadTimeOffs() {
+    // The list is appointment-driven; fetch a wide window around the current appointments so
+    // every visible date's occurrences are available. Re-fetched whenever the appointment span
+    // grows (each page load notifies the datasource subscriber again).
+    let dates = (this.appointments ?? []).map(a => a.date as Dayjs).filter(d => d != null);
+
+    // dayjs.min / dayjs.max would need the minMax plugin (not registered here), so reduce manually.
+    let from = (dates.length ? dates.reduce((m, d) => d.isBefore(m) ? d : m) : this.startDate).subtract(1, "day");
+    let to = (dates.length ? dates.reduce((m, d) => d.isAfter(m) ? d : m) : this.startDate).add(1, "day");
+
+    this.timeOffService.getForRange(from, to).subscribe(o => {
+      this.timeOffs = o;
+      this.renderAppointments();
+    });
   }
 
   private checkShouldLoad() {
@@ -213,76 +237,100 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
       date: this.startDate,
       dateFormatted: this.startDate.format("DD.MM.YYYY - dddd"),
       dateISO: this.startDate.format("YYYY-MM-DD"),
-      isEmptyDate: true
+      isEmptyDate: true,
+      allDayLabels: [],
     };
 
-    var currentDate: Dayjs | null = null;
+    let sorted = this.appointments.sort(appointmentSort);
 
-    var sortedAppointments = this.appointments.sort(appointmentSort)
-
-    // prevAp/prevAppointmentItem are intentionally NOT reset on day boundaries — the
-    // startedNewDate guard below already blocks the gap block, so a stale cross-day prev
-    // can never leak through. (Don't add an early `continue` in the date block without
-    // updating these, or that invariant breaks.)
-    let prevAp: AppointmentView | null = null;
-    let prevAppointmentItem: RenderedAppointment | null = null;
-
-    for (let i = 0; i < sortedAppointments.length; i++) {
-      let ap = sortedAppointments[i];
-
-      let startedNewDate = !ap.date?.isSame(currentDate);
-      if (startedNewDate) {
-        if (currentDate?.isBefore(this.startDate, "date") && ap.date?.isAfter(this.startDate, "date"))
-          this.renderedItems.push(startDateItem);
-
-        currentDate = ap.date as Dayjs;
-
-        this.renderedItems.push({
-          type: "date",
-          date: currentDate,
-          dateFormatted: currentDate.format("DD.MM.YYYY - dddd"),
-          dateISO: currentDate.format("YYYY-MM-DD"),
-          isEmptyDate: false
-        });
+    // Group appointments by date (preserving sorted order of dates). The list is
+    // appointment-driven: a date divider is emitted ONLY for days that have at least one
+    // appointment. Days with only time-off never appear.
+    let dayKeys: string[] = [];
+    let byDate = new Map<string, { date: Dayjs, appointments: AppointmentView[] }>();
+    for (let ap of sorted) {
+      let key = ap.date?.format("YYYY-MM-DD") ?? "";
+      if (!byDate.has(key)) {
+        byDate.set(key, { date: ap.date as Dayjs, appointments: [] });
+        dayKeys.push(key);
       }
-
-      // Gap / overlap indicator only between two appointments on the SAME day
-      // (i.e. when no date divider was just emitted between them).
-      let isOverlappingWithPrev = false;
-      if (!startedNewDate && prevAp != null && prevAppointmentItem != null) {
-        let ms = timeBetweenMs(prevAp.time, prevAp.duration, ap.time);
-        if (ms !== 0) {
-          isOverlappingWithPrev = ms < 0;
-          this.renderedItems.push({
-            type: "gap",
-            duration: dayjs.duration(Math.abs(ms)),
-            isOverlap: isOverlappingWithPrev
-          });
-          // Retroactively flag the previous card too — it's the same object already in
-          // renderedItems, so mutating it here updates the rendered entry in place.
-          if (isOverlappingWithPrev)
-            prevAppointmentItem.isOverlapping = true;
-        }
-      }
-
-      let appointmentItem: RenderedAppointment = {
-        type: "appointment",
-        id: ap.id,
-        appointment: ap,
-        dateISO: ap.date?.format("YYYY-MM-DD") ?? "",
-        isLast: i == sortedAppointments.length - 1,
-        isOverlapping: isOverlappingWithPrev
-      };
-      this.renderedItems.push(appointmentItem);
-
-      prevAp = ap;
-      prevAppointmentItem = appointmentItem;
+      byDate.get(key)!.appointments.push(ap);
     }
 
-    if (sortedAppointments.length == 0 || sortedAppointments[0].date?.isAfter(this.startDate, "date"))
-      this.renderedItems.splice(0, 0, startDateItem);
-    else if (sortedAppointments[sortedAppointments.length - 1].date?.isBefore(this.startDate, "date"))
-      this.renderedItems.splice(this.renderedItems.length, 0, startDateItem);
+    let startInserted = false;
+    let prevDate: Dayjs | null = null;
+
+    for (let k = 0; k < dayKeys.length; k++) {
+      let day = byDate.get(dayKeys[k])!;
+
+      // Insert the empty start-date divider when crossing over startDate between two days.
+      if (!startInserted && prevDate?.isBefore(this.startDate, "date") && day.date.isAfter(this.startDate, "date")) {
+        this.renderedItems.push(startDateItem);
+        startInserted = true;
+      }
+
+      let dayOccurrences = this.timeOffs.filter(o => o.date?.isSame(day.date, "date"));
+      let allDayLabels = dayOccurrences.filter(o => o.isAllDay).map(o => o.label ?? "");
+
+      this.renderedItems.push({
+        type: "date",
+        date: day.date,
+        dateFormatted: day.date.format("DD.MM.YYYY - dddd"),
+        dateISO: day.date.format("YYYY-MM-DD"),
+        isEmptyDate: false,
+        allDayLabels,
+      });
+
+      // Merge appointments + partial offs, then walk emitting gaps and items.
+      let timeline = buildDayTimeline(day.appointments, dayOccurrences);
+      let prevEntry: typeof timeline[number] | null = null;
+      let prevAppointmentItem: RenderedAppointment | null = null;
+
+      for (let i = 0; i < timeline.length; i++) {
+        let entry = timeline[i];
+
+        let isOverlappingWithPrev = false;
+        if (prevEntry != null) {
+          let ms = timeBetweenMs(prevEntry.start, prevEntry.duration, entry.start);
+          if (ms !== 0) {
+            isOverlappingWithPrev = ms < 0;
+            this.renderedItems.push({ type: "gap", duration: dayjs.duration(Math.abs(ms)), isOverlap: isOverlappingWithPrev });
+            // Retroactively flag the previous appointment card too — it's the same object
+            // already in renderedItems, so mutating it here updates the rendered entry in place.
+            if (isOverlappingWithPrev && prevAppointmentItem != null)
+              prevAppointmentItem.isOverlapping = true;
+          }
+        }
+
+        if (entry.kind === "appointment") {
+          let item: RenderedAppointment = {
+            type: "appointment",
+            id: entry.appointment.id,
+            appointment: entry.appointment,
+            dateISO: day.date.format("YYYY-MM-DD"),
+            isLast: k === dayKeys.length - 1 && i === timeline.length - 1,
+            isOverlapping: isOverlappingWithPrev,
+          };
+          this.renderedItems.push(item);
+          prevAppointmentItem = item;
+        } else {
+          this.renderedItems.push({ type: "timeoff", occurrence: entry.occurrence, isOverlapping: isOverlappingWithPrev });
+          // A time-off row is not an appointment card; don't retro-flag it as prevAppointmentItem.
+        }
+
+        prevEntry = entry;
+      }
+
+      prevDate = day.date;
+    }
+
+    // Empty / boundary start-date divider (same rules as before, day-grouped).
+    if (!startInserted) {
+      if (dayKeys.length === 0 || byDate.get(dayKeys[0])!.date.isAfter(this.startDate, "date"))
+        this.renderedItems.splice(0, 0, startDateItem);
+      else if (byDate.get(dayKeys[dayKeys.length - 1])!.date.isBefore(this.startDate, "date"))
+        this.renderedItems.splice(this.renderedItems.length, 0, startDateItem);
+    }
 
     this.changeDetector.detectChanges();
     this.restoreScroll();
@@ -428,7 +476,7 @@ function appointmentSort(a: AppointmentView, b: AppointmentView): number {
 }
 
 type RenderedType = {
-  type: "appointment" | "date" | "gap"
+  type: "appointment" | "date" | "gap" | "timeoff"
 }
 
 export type RenderedAppointment = {
@@ -446,10 +494,17 @@ type RenderedDate = {
   dateFormatted: string;
   dateISO: string;
   isEmptyDate: boolean;
+  allDayLabels: string[];   // whole-day time-off labels for this date
 }
 
 type RenderedGap = {
   type: "gap";
   duration: Duration;   // always positive; magnitude of the interval
   isOverlap: boolean;
+}
+
+export type RenderedTimeOff = {
+  type: "timeoff";
+  occurrence: TimeOffOccurrence;
+  isOverlapping: boolean;
 }
