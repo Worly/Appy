@@ -61,6 +61,11 @@
         <div></div>
     </div>
 
+    <div *ngFor="let t of renderedTimeOffs" class="time-off-band" [style.top]="t.top + '%'" [style.height]="t.height + '%'"
+        data-test="scroller-time-off">
+        <span class="time-off-label">{{ t.source.label }}</span>
+    </div>
+
     <div *ngFor="let ap of renderedShadowAppointments" class="single-appointment shadow-appointment"
         [style.top.%]="ap.top" [style.left.%]="ap.left" [style.height.%]="ap.height" [style.width.%]="ap.width"
         [style.backgroundColor]="ap.color">

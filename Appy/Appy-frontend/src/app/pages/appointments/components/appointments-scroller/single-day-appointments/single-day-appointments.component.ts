@@ -4,6 +4,7 @@ import { Appointment, AppointmentView } from 'src/app/models/appointment';
 import { FreeTime } from 'src/app/models/free-time';
 import { invertTimesCustom } from 'src/app/utils/invert-times';
 import { WorkingHour } from 'src/app/models/working-hours';
+import { TimeOffOccurrence } from 'src/app/models/time-off-occurrence';
 import { getRenderedAppointments, getRenderedAppointmentViews, getRenderedIntervals, RenderedInterval } from 'src/app/utils/rendered-interval';
 import { DialogComponent } from 'src/app/components/dialog/dialog.component';
 import dayjs, { Dayjs, unix } from 'dayjs';
@@ -102,6 +103,14 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
     return this._freeTimes;
   }
 
+  private _timeOffs: TimeOffOccurrence[] | null = null;
+  @Input() set timeOffs(value: TimeOffOccurrence[] | null) {
+    if (this._timeOffs == value) return;
+    this._timeOffs = value;
+    this.renderTimeOffs();
+  }
+  get timeOffs(): TimeOffOccurrence[] | null { return this._timeOffs; }
+
   @Input() showDateControls: boolean = false;
   @Input() appointmentsEditable: boolean = true;
   @Output() dateControlPrevious: EventEmitter<void> = new EventEmitter();
@@ -113,6 +122,7 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
   public renderedAppointments: RenderedInterval<AppointmentView>[] = [];
   public renderedShadowAppointments: RenderedInterval<Appointment>[] = [];
   public renderedTimeStatuses: RenderedInterval<string>[] = [];
+  public renderedTimeOffs: RenderedInterval<TimeOffOccurrence>[] = [];
 
   viewAppointmentId?: number;
 
@@ -137,6 +147,7 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
     this.renderAppointments();
     this.renderShadowAppointments();
     this.renderTimeStatuses();
+    this.renderTimeOffs();
   }
 
   public renderAppointments(): void {
@@ -174,6 +185,17 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
         return { source: "closed-time", time: f.from, duration: dayjs.duration(f.to.valueOf() - f.from.valueOf()) };
       }), { crop: true }));
     }
+  }
+
+  public renderTimeOffs(): void {
+    this.renderedTimeOffs = [];
+    if (this.timeOffs == null) return;
+
+    this.renderedTimeOffs = getRenderedIntervals(this.timeFrom, this.timeTo, this.timeOffs.map(t => {
+      let from = t.isAllDay ? this.timeFrom : (t.timeFrom as Dayjs);
+      let to = t.isAllDay ? this.timeTo : (t.timeTo as Dayjs);
+      return { source: t, time: from, duration: dayjs.duration(to.valueOf() - from.valueOf()) };
+    }), { crop: true });
   }
 
   public renderCurrentTimeIndicator(): void {

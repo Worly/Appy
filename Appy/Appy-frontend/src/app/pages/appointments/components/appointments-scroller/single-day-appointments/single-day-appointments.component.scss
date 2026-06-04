@@ -201,3 +201,22 @@
     height: 2px;
     background-color: rgb(var(--rgb-danger));
 }
+
+.time-off-band {
+    position: absolute;
+    left: 0;
+    right: 0;
+    background: repeating-linear-gradient(45deg, rgba(200,60,60,.18), rgba(200,60,60,.18) 6px, transparent 6px, transparent 12px);
+    border-top: 1px solid rgba(200,60,60,.5);
+    border-bottom: 1px solid rgba(200,60,60,.5);
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.time-off-label {
+    font-size: .75rem;
+    font-weight: 600;
+    opacity: .85;
+}

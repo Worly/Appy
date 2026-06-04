@@ -1,7 +1,7 @@
 <div class="my-container">
     <app-single-day-appointments *ngFor="let data of calendarDaySmartCaching.data | filter : onlyVisibleDataFilter"
         [date]="data.key" [appointments]="data.data?.appointments | filter : notInHiddenFilter:this"
-        [workingHours]="data.data?.workingHours ?? null" [timeFrom]="timeFrom" [timeTo]="timeTo"
+        [workingHours]="data.data?.workingHours ?? null" [timeOffs]="data.data?.timeOffs ?? null" [timeFrom]="timeFrom" [timeTo]="timeTo"
         [showDateControls]="showDateControls && data.key.isSame(date, 'date')"
         [appointmentsEditable]="appointmentsEditable" (dateControlNext)="date = date.add(1, 'days')"
         (dateControlPrevious)="date = date.add(-1, 'days')" (dateControlSelect)="date = $event"
