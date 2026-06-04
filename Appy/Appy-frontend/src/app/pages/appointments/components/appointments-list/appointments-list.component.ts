@@ -1,5 +1,7 @@
 import { ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, QueryList, ViewChildren } from '@angular/core';
 import dayjs, { Dayjs } from 'dayjs';
+import { Duration } from 'dayjs/plugin/duration';
+import { timeBetweenMs } from 'src/app/utils/time-utils';
 import _ from 'lodash';
 import { AppointmentView } from 'src/app/models/appointment';
 import { AppointmentService } from '../../services/appointment.service';
@@ -46,7 +48,7 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
 
   public appointments: AppointmentView[] | null = null;
 
-  public renderedItems: (RenderedType & (RenderedAppointment | RenderedDate))[] = [];
+  public renderedItems: (RenderedType & (RenderedAppointment | RenderedDate | RenderedGap))[] = [];
 
   private keptScrollPosition: number | null = null;
   private keptScrollElement: (() => HTMLElement | undefined) | null = null;
@@ -218,10 +220,14 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
 
     var sortedAppointments = this.appointments.sort(appointmentSort)
 
+    let prevAp: AppointmentView | null = null;
+    let prevAppointmentItem: RenderedAppointment | null = null;
+
     for (let i = 0; i < sortedAppointments.length; i++) {
       let ap = sortedAppointments[i];
 
-      if (!ap.date?.isSame(currentDate)) {
+      let startedNewDate = !ap.date?.isSame(currentDate);
+      if (startedNewDate) {
         if (currentDate?.isBefore(this.startDate, "date") && ap.date?.isAfter(this.startDate, "date"))
           this.renderedItems.push(startDateItem);
 
@@ -236,13 +242,35 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
         });
       }
 
-      this.renderedItems.push({
+      // Gap / overlap indicator only between two appointments on the SAME day
+      // (i.e. when no date divider was just emitted between them).
+      let isOverlappingWithPrev = false;
+      if (!startedNewDate && prevAp != null && prevAppointmentItem != null) {
+        let ms = timeBetweenMs(prevAp.time, prevAp.duration, ap.time);
+        if (ms !== 0) {
+          isOverlappingWithPrev = ms < 0;
+          this.renderedItems.push({
+            type: "gap",
+            duration: dayjs.duration(Math.abs(ms)),
+            isOverlap: isOverlappingWithPrev
+          });
+          if (isOverlappingWithPrev)
+            prevAppointmentItem.isOverlapping = true;
+        }
+      }
+
+      let appointmentItem: RenderedAppointment = {
         type: "appointment",
         id: ap.id,
         appointment: ap,
         dateISO: ap.date?.format("YYYY-MM-DD") ?? "",
-        isLast: i == sortedAppointments.length - 1
-      });
+        isLast: i == sortedAppointments.length - 1,
+        isOverlapping: isOverlappingWithPrev
+      };
+      this.renderedItems.push(appointmentItem);
+
+      prevAp = ap;
+      prevAppointmentItem = appointmentItem;
     }
 
     if (sortedAppointments.length == 0 || sortedAppointments[0].date?.isAfter(this.startDate, "date"))
@@ -394,7 +422,7 @@ function appointmentSort(a: AppointmentView, b: AppointmentView): number {
 }
 
 type RenderedType = {
-  type: "appointment" | "date"
+  type: "appointment" | "date" | "gap"
 }
 
 export type RenderedAppointment = {
@@ -403,6 +431,7 @@ export type RenderedAppointment = {
   dateISO: string;
   appointment: AppointmentView;
   isLast: boolean;
+  isOverlapping: boolean;
 }
 
 type RenderedDate = {
@@ -411,4 +440,10 @@ type RenderedDate = {
   dateFormatted: string;
   dateISO: string;
   isEmptyDate: boolean;
+}
+
+type RenderedGap = {
+  type: "gap";
+  duration: Duration;   // always positive; magnitude of the interval
+  isOverlap: boolean;
 }
