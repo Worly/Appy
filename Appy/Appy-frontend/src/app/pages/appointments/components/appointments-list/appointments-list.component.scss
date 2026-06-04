@@ -117,8 +117,10 @@
             align-self: center;
             height: 7px;
             background-color: currentColor;
-            -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='7'><path d='M0 6 L4 1 L8 6' fill='none' stroke='black' stroke-width='1.5'/></svg>") repeat-x center / 8px 7px;
-            mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='7'><path d='M0 6 L4 1 L8 6' fill='none' stroke='black' stroke-width='1.5'/></svg>") repeat-x center / 8px 7px;
+            // The two mask declarations are an intentional vendor-prefix pair (no shorthand
+            // covers both) — keep both; the inline SVG is a zig-zag stroke cropping the red fill.
+            -webkit-mask: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='7'><path d='M0 6 L4 1 L8 6' fill='none' stroke='black' stroke-width='1.5'/></svg>") repeat-x center / 8px 7px;
+            mask: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='7'><path d='M0 6 L4 1 L8 6' fill='none' stroke='black' stroke-width='1.5'/></svg>") repeat-x center / 8px 7px;
         }
     }
 }
