@@ -220,6 +220,10 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
 
     var sortedAppointments = this.appointments.sort(appointmentSort)
 
+    // prevAp/prevAppointmentItem are intentionally NOT reset on day boundaries — the
+    // startedNewDate guard below already blocks the gap block, so a stale cross-day prev
+    // can never leak through. (Don't add an early `continue` in the date block without
+    // updating these, or that invariant breaks.)
     let prevAp: AppointmentView | null = null;
     let prevAppointmentItem: RenderedAppointment | null = null;
 
@@ -254,6 +258,8 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
             duration: dayjs.duration(Math.abs(ms)),
             isOverlap: isOverlappingWithPrev
           });
+          // Retroactively flag the previous card too — it's the same object already in
+          // renderedItems, so mutating it here updates the rendered entry in place.
           if (isOverlappingWithPrev)
             prevAppointmentItem.isOverlapping = true;
         }
