@@ -1,0 +1,16 @@
+.time-row {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.two-dots {
+  font-weight: 600;
+}
+
+.all-day-row {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  gap: 1rem;
+}
