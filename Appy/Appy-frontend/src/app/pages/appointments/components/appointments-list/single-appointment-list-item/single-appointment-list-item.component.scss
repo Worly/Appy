@@ -31,7 +31,7 @@
     &.overlapping {
         // Inset box-shadow rather than border/outline so it follows the card's
         // border-radius and adds no layout shift.
-        box-shadow: inset 0 0 0 2px rgb(var(--rgb-danger));
+        box-shadow: inset 0 0 0 1.2px rgba(var(--rgb-danger), 0.8);
     }
 }
 
