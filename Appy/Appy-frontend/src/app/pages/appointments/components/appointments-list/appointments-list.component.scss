@@ -81,3 +81,49 @@
     height: 150px;
     position: relative;
 }
+
+.gap {
+    // A faint dashed rule with the idle-time duration centred on it.
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    margin: 2px 20px 8px;   // line up with the cards' horizontal inset
+
+    font-size: 0.75rem;
+    opacity: 0.45;
+    white-space: nowrap;
+
+    &::before,
+    &::after {
+        content: "";
+        flex: 1 1 0;
+        border-top: 1px dashed currentColor;
+    }
+
+    fa-icon {
+        font-size: 0.8rem;
+    }
+
+    &.overlap {
+        // A red jagged (zig-zag) rule — the inverse of a gap: a conflict, not idle time.
+        color: rgb(var(--rgb-danger));
+        opacity: 0.8;
+        font-weight: 500;
+
+        // Single source of truth for the zig-zag mask. It's applied to both the standard
+        // and -webkit- properties below (an intentional vendor-prefix pair — no shorthand
+        // covers both); the inline SVG is a zig-zag stroke cropping the red fill.
+        $jagged-mask: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='7'><path d='M0 6 L4 1 L8 6' fill='none' stroke='black' stroke-width='1'/></svg>") repeat-x center / 8px 7px;
+
+        &::before,
+        &::after {
+            border-top: none;
+            align-self: center;
+            height: 7px;
+            background-color: currentColor;
+            -webkit-mask: $jagged-mask;
+            mask: $jagged-mask;
+        }
+    }
+}

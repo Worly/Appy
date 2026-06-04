@@ -1,6 +1,13 @@
 import dayjs from "dayjs";
 import { Dayjs } from "dayjs";
 import { Duration } from "dayjs/plugin/duration";
+// Type-only: these augment the Dayjs interface (objectSupport → dayjs({...}); isSameOrBefore /
+// isSameOrAfter → those methods used in overlap()). The plugins are registered at runtime in
+// app.module.ts; these imports are needed only so this file type-checks when compiled in
+// isolation (e.g. under `ng test`, where app.module isn't in the graph). They are NOT redundant.
+import "dayjs/plugin/objectSupport";
+import "dayjs/plugin/isSameOrBefore";
+import "dayjs/plugin/isSameOrAfter";
 
 export function timeOnly(dateTime: Dayjs) {
     return dayjs({
@@ -40,4 +47,15 @@ export function overlap(startA: Dayjs, endA: Dayjs, startB: Dayjs, endB: Dayjs, 
         right = endA.isSameOrAfter(startB);
 
     return left && right;
+}
+
+/**
+ * Signed time, in milliseconds, between the end of the earlier appointment
+ * (prevStart + prevDuration) and the start of the later one (nextStart):
+ *   > 0  → a gap (idle time between them)
+ *   = 0  → back-to-back
+ *   < 0  → they overlap; the magnitude is how long they overlap.
+ */
+export function timeBetweenMs(prevStart: Dayjs, prevDuration: Duration, nextStart: Dayjs): number {
+    return nextStart.diff(prevStart.add(prevDuration.asMilliseconds(), "millisecond"));
 }
