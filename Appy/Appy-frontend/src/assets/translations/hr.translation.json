@@ -221,6 +221,36 @@
             }
         },
 
+        "time-off": {
+            "TIME_OFF": "Slobodni dani",
+            "ADD": "Dodaj slobodan dan",
+            "NONE": "Nema",
+            "ONE_OFF": "Jednokratno",
+            "WEEKLY": "Tjedno",
+            "MONTHLY": "Mjesečno",
+            "RECURRENCE": "Ponavljanje",
+            "LABEL": "Naziv",
+            "NOTES": "Bilješke",
+            "ALL_DAY": "Cijeli dan",
+            "DAY_OF_WEEK": "Dan u tjednu",
+            "DAY_OF_MONTH": "Dan u mjesecu",
+            "FROM_DATE": "Od",
+            "TO_DATE": "Do",
+            "TIME_FROM": "Od",
+            "TIME_TO": "Do",
+            "CLOSED": "Zatvoreno",
+
+            "errors": {
+                "MISSING_LABEL": "Naziv je obavezan",
+                "MISSING_TIME": "Početno i završno vrijeme su obavezni",
+                "TIMES_NOT_IN_ORDER": "Početno vrijeme mora biti prije završnog",
+                "MISSING_DATE_RANGE": "Početni i završni datum su obavezni",
+                "DATES_NOT_IN_ORDER": "Početni datum mora biti isti ili prije završnog",
+                "MISSING_DAY_OF_WEEK": "Dan u tjednu je obavezan",
+                "INVALID_DAY_OF_MONTH": "Dan u mjesecu mora biti između 1 i 31"
+            }
+        },
+
         "client-notifications": {
             "CLIENT_NOTIFICATIONS": "Notifikacije klijenta",
             "INSTAGRAM_API_ACCESS_TOKEN": "Instagram API pristupni token",
