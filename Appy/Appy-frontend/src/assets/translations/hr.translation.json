@@ -239,6 +239,7 @@
             "TIME_FROM": "Od",
             "TIME_TO": "Do",
             "CLOSED": "Zatvoreno",
+            "LIMIT_DATE_RANGE": "Ograniči na vremenski raspon",
 
             "errors": {
                 "MISSING_LABEL": "Naziv je obavezan",

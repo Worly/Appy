@@ -17,6 +17,7 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
   public timeOff: TimeOff = new TimeOff();
   public isNew: boolean = true;
   public isLoading: boolean = false;
+  public limitDateRange: boolean = false;
 
   public readonly TimeOffRecurrence = TimeOffRecurrence;
 
@@ -70,19 +71,30 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
     if (id != null) {
       this.isNew = false;
       this.subs.push(this.timeOffService.get(+id).subscribe(t => {
-        // Ensure date fields have a fallback so app-date-selector never gets null
-        if (!t.startDate) t.startDate = dayjs();
-        if (!t.endDate) t.endDate = dayjs();
+        // For recurring entries, bounds are optional — only fabricate time defaults
+        // for the time selector (which only renders when isAllDay is false).
         if (!t.timeFrom) t.timeFrom = dayjs({ hour: 9 });
         if (!t.timeTo) t.timeTo = dayjs({ hour: 17 });
+
+        // OneOff requires dates; recurring entries keep null bounds unless already set.
+        if (t.recurrence === TimeOffRecurrence.OneOff) {
+          if (!t.startDate) t.startDate = dayjs();
+          if (!t.endDate) t.endDate = dayjs();
+        } else {
+          // Enable the bounds toggle only when the entry already has bounds.
+          this.limitDateRange = t.startDate != null || t.endDate != null;
+        }
+
         this.timeOff = t;
       }));
     } else {
       this.timeOff = new TimeOff();
+      // OneOff is the default recurrence and requires dates.
       this.timeOff.startDate = dayjs();
       this.timeOff.endDate = dayjs();
       this.timeOff.timeFrom = dayjs({ hour: 9 });
       this.timeOff.timeTo = dayjs({ hour: 17 });
+      // limitDateRange stays false; it is only relevant for Weekly/Monthly.
     }
   }
 
@@ -121,6 +133,33 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
 
   public setToMinute(m: number): void {
     this.timeOff.timeTo = (this.timeOff.timeTo ?? dayjs({ hour: 0 })).minute(m);
+  }
+
+  public onRecurrenceChange(recurrence: TimeOffRecurrence): void {
+    this.timeOff.recurrence = recurrence;
+    if (recurrence === TimeOffRecurrence.OneOff) {
+      // OneOff requires dates — ensure they are set.
+      if (!this.timeOff.startDate) this.timeOff.startDate = dayjs();
+      if (!this.timeOff.endDate) this.timeOff.endDate = dayjs();
+    } else {
+      // Weekly/Monthly — clear phantom dates from OneOff and reset toggle.
+      this.timeOff.startDate = undefined;
+      this.timeOff.endDate = undefined;
+      this.limitDateRange = false;
+    }
+  }
+
+  public onLimitDateRangeChange(value: boolean): void {
+    this.limitDateRange = value;
+    if (value) {
+      // Initialise dates when the user first enables the toggle.
+      if (!this.timeOff.startDate) this.timeOff.startDate = dayjs();
+      if (!this.timeOff.endDate) this.timeOff.endDate = dayjs();
+    } else {
+      // Clear bounds — open-ended.
+      this.timeOff.startDate = undefined;
+      this.timeOff.endDate = undefined;
+    }
   }
 
   public onStartDateChange(date: Dayjs): void {

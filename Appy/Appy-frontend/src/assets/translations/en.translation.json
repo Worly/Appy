@@ -239,6 +239,7 @@
             "TIME_FROM": "From",
             "TIME_TO": "To",
             "CLOSED": "Closed",
+            "LIMIT_DATE_RANGE": "Limit to a date range",
 
             "errors": {
                 "MISSING_LABEL": "Label is required",
