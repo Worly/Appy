@@ -16,6 +16,7 @@ Business logic layer. Each service corresponds to one domain concept and is cons
 | `DashboardService` | Dashboard settings upsert (unique per user + facility) |
 | `ClientNotificationsService` | Notification settings and outbound message dispatch |
 | `AppointmentReminderService` | Cron job (every 5 minutes) — sends reminders for the next day's confirmed appointments |
+| `TimeOffService` | Time-off CRUD, validation, and occurrence expansion (recurrence → concrete date intervals) |
 | `TestingService` | Dev-only data seeder, reachable via `TestingController` |
 
 ## Sub-Folders
