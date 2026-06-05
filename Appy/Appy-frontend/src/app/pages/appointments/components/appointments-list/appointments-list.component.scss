@@ -171,6 +171,8 @@
     padding: 10px;
     margin: 2px 2px 8px;
     border-radius: var(--default-border-radius);
+    background: repeating-linear-gradient(45deg, rgba(var(--rgb-warning), 0.05), rgba(var(--rgb-warning), 0.05) 10px, rgba(var(--rgb-input-background)) 10px, rgba(var(--rgb-input-background)) 20px); 
+    box-shadow: inset 0 0 0 1.2px rgba(var(--rgb-warning), 0.2);
     font-size: 0.9rem;
 
     &::before {
@@ -183,9 +185,6 @@
         background: rgb(var(--rgb-input-background));
         z-index: -1;
     }
-
-    background: repeating-linear-gradient(45deg, rgba(var(--rgb-warning), 0.05), rgba(var(--rgb-warning), 0.05) 10px, rgba(var(--rgb-input-background)) 10px, rgba(var(--rgb-input-background)) 20px); 
-    box-shadow: inset 0 0 0 1.2px rgba(var(--rgb-warning), 0.2);
     
     &>fa-icon {
         color: rgb(var(--rgb-warning))
