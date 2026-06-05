@@ -56,6 +56,13 @@ export function overlap(startA: Dayjs, endA: Dayjs, startB: Dayjs, endB: Dayjs, 
  *   = 0  → back-to-back
  *   < 0  → they overlap; the magnitude is how long they overlap.
  */
-export function timeBetweenMs(prevStart: Dayjs, prevDuration: Duration, nextStart: Dayjs): number {
-    return nextStart.diff(prevStart.add(prevDuration.asMilliseconds(), "millisecond"));
+export function timeBetweenMs(prevStart: Dayjs, prevDuration: Duration, nextStart: Dayjs, nextDuration: Duration): number {
+    var diff = nextStart.diff(prevStart.add(prevDuration.asMilliseconds(), "millisecond"))
+
+    // If overlapping, make sure to not return overlap longer than the nextDuration
+    if (diff < 0) {
+        return Math.max(diff, -nextDuration.asMilliseconds());
+    }
+
+    return diff;
 }

@@ -291,7 +291,7 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
 
         let isOverlappingWithPrev = false;
         if (prevEntry != null) {
-          let ms = timeBetweenMs(prevEntry.start, prevEntry.duration, entry.start);
+          let ms = timeBetweenMs(prevEntry.start, prevEntry.duration, entry.start, entry.duration);
           if (ms !== 0) {
             isOverlappingWithPrev = ms < 0;
             this.renderedItems.push({ type: "gap", duration: dayjs.duration(Math.abs(ms)), isOverlap: isOverlappingWithPrev });
