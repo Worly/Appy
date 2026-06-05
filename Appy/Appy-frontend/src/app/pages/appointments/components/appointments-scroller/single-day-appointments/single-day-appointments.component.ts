@@ -191,7 +191,20 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
     this.renderedTimeOffs = [];
     if (this.timeOffs == null) return;
 
-    this.renderedTimeOffs = getRenderedIntervals(this.timeFrom, this.timeTo, this.timeOffs.map(t => {
+    var partialOffs = this.timeOffs.filter(t => !t.isAllDay);
+    var allDayOffs = this.timeOffs.filter(t => t.isAllDay);
+
+    var finalTimeOffs = [...partialOffs]
+    if (allDayOffs.length > 0) {
+      var allDayOffCopy = { ...allDayOffs[0] };
+
+      if (allDayOffs.length > 1) {
+        allDayOffCopy.label += " +" + (allDayOffs.length - 1);
+      }
+      finalTimeOffs.push(allDayOffCopy)
+    }
+
+    this.renderedTimeOffs = getRenderedIntervals(this.timeFrom, this.timeTo, finalTimeOffs.map(t => {
       let from = t.isAllDay ? this.timeFrom : (t.timeFrom as Dayjs);
       let to = t.isAllDay ? this.timeTo : (t.timeTo as Dayjs);
       return { source: t, time: from, duration: dayjs.duration(to.valueOf() - from.valueOf()) };
