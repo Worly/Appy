@@ -56,14 +56,16 @@
         </div>
     </div>
 
+    <div *ngFor="let t of renderedTimeOffs" class="time-off-band" [style.top]="t.top + '%'"
+        [style.height]="t.height + '%'" data-test="scroller-time-off">
+        <fa-icon class="time-off-label" [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
+        <span *ngIf="!t.source.isAllDay" class="time-off-label">{{t.time}}</span>
+        <span class="time-off-label">{{ t.source.label }}</span>
+    </div>
+
     <div *ngFor="let rts of renderedTimeStatuses" class="time-status" [ngClass]="rts.source" [style.top]="rts.top + '%'"
         [style.height]="rts.height + '%'">
         <div></div>
-    </div>
-
-    <div *ngFor="let t of renderedTimeOffs" class="time-off-band" [style.top]="t.top + '%'" [style.height]="t.height + '%'"
-        data-test="scroller-time-off">
-        <span class="time-off-label">{{ t.source.label }}</span>
     </div>
 
     <div *ngFor="let ap of renderedShadowAppointments" class="single-appointment shadow-appointment"

@@ -21,6 +21,7 @@ export function buildDayTimeline(appointments: AppointmentView[], occurrences: T
   for (let o of occurrences) {
     if (o.isAllDay || o.timeFrom == null || o.timeTo == null)
       continue;
+    
     entries.push({
       kind: "timeoff",
       start: o.timeFrom,

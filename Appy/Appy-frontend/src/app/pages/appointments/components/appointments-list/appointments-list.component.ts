@@ -9,7 +9,7 @@ import { appFilterToSmartFilter, AppointmentsFilter } from '../appointments/appo
 import { PageableListDatasource } from 'src/app/shared/services/datasource';
 import { TimeOffService } from 'src/app/pages/time-off/services/time-off.service';
 import { TimeOffOccurrence } from 'src/app/models/time-off-occurrence';
-import { buildDayTimeline } from 'src/app/utils/list-timeline';
+import { buildDayTimeline, TimelineEntry } from 'src/app/utils/list-timeline';
 
 @Component({
   selector: 'app-appointments-list',
@@ -283,8 +283,8 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
 
       // Merge appointments + partial offs, then walk emitting gaps and items.
       let timeline = buildDayTimeline(day.appointments, dayOccurrences);
-      let prevEntry: typeof timeline[number] | null = null;
-      let prevAppointmentItem: RenderedAppointment | null = null;
+      let prevEntry: TimelineEntry | null = null;
+      let prevRenderedCardItem: RenderedCardItem | null = null;
 
       for (let i = 0; i < timeline.length; i++) {
         let entry = timeline[i];
@@ -297,8 +297,8 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
             this.renderedItems.push({ type: "gap", duration: dayjs.duration(Math.abs(ms)), isOverlap: isOverlappingWithPrev });
             // Retroactively flag the previous appointment card too — it's the same object
             // already in renderedItems, so mutating it here updates the rendered entry in place.
-            if (isOverlappingWithPrev && prevAppointmentItem != null)
-              prevAppointmentItem.isOverlapping = true;
+            if (isOverlappingWithPrev && prevRenderedCardItem != null)
+              prevRenderedCardItem.isOverlapping = true;
           }
         }
 
@@ -312,10 +312,16 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
             isOverlapping: isOverlappingWithPrev,
           };
           this.renderedItems.push(item);
-          prevAppointmentItem = item;
-        } else {
-          this.renderedItems.push({ type: "timeoff", occurrence: entry.occurrence, isOverlapping: isOverlappingWithPrev });
-          // A time-off row is not an appointment card; don't retro-flag it as prevAppointmentItem.
+          prevRenderedCardItem = item;
+        }
+        else if (entry.kind == "timeoff") {
+          let item: RenderedTimeOff = {
+            type: "timeoff", 
+            occurrence: entry.occurrence, 
+            isOverlapping: isOverlappingWithPrev
+          }
+          this.renderedItems.push(item);
+          prevRenderedCardItem = item;
         }
 
         prevEntry = entry;
@@ -479,13 +485,16 @@ type RenderedType = {
   type: "appointment" | "date" | "gap" | "timeoff"
 }
 
-export type RenderedAppointment = {
+type RenderedCardItem = {
+  isOverlapping: boolean;
+}
+
+export type RenderedAppointment = RenderedCardItem & {
   type: "appointment";
   id: number;
   dateISO: string;
   appointment: AppointmentView;
   isLast: boolean;
-  isOverlapping: boolean;
 }
 
 type RenderedDate = {
@@ -503,8 +512,7 @@ type RenderedGap = {
   isOverlap: boolean;
 }
 
-export type RenderedTimeOff = {
+export type RenderedTimeOff = RenderedCardItem & {
   type: "timeoff";
   occurrence: TimeOffOccurrence;
-  isOverlapping: boolean;
 }

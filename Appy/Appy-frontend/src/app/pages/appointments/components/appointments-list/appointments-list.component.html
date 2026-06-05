@@ -46,9 +46,9 @@
         <div *ngIf="i.type == 'timeoff'" class="time-off-item" [class.overlap]="i.isOverlapping"
             data-test="list-time-off">
             <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
-            <span class="time">{{ i.occurrence.timeFrom?.format("HH:mm") }} – {{ i.occurrence.timeTo?.format("HH:mm")
+            <span class="time">{{ i.occurrence.timeFrom?.format("HH:mm") }} - {{ i.occurrence.timeTo?.format("HH:mm")
                 }}</span>
-            <span class="label">{{ i.occurrence.label }}</span>
+            <span>{{ i.occurrence.label }}</span>
         </div>
     </div>
 
