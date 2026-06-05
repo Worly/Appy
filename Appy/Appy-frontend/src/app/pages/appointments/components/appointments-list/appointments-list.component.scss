@@ -33,15 +33,20 @@
 
 .date {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
     padding-top: 8px;
     padding-bottom: 8px;
     margin-left: 20px;
+    margin-right: 20px;
 
     .date-absolute {
         font-size: 1.1rem;
         font-weight: bold;
         line-height: 1.15;
+        white-space: nowrap;
     }
 
     .date-relative {
@@ -88,7 +93,7 @@
     align-items: center;
     gap: 10px;
 
-    margin: 2px 20px 8px;   // line up with the cards' horizontal inset
+    margin: 2px 2px 8px; // line up with the cards' horizontal inset
 
     font-size: 0.75rem;
     opacity: 0.45;
@@ -128,15 +133,31 @@
     }
 }
 
-.all-day-badge {
-    margin-left: .5rem;
-    padding: .1rem .5rem;
-    border-radius: .4rem;
+.whole-day-off {
+    padding: 5px 10px;
+    border-radius: var(--default-border-radius);
     background: rgba(var(--rgb-danger), 0.15);
     color: rgb(var(--rgb-danger));
     font-size: 0.8rem;
     font-weight: 600;
-    align-self: flex-start;
+    height: min-content;
+    overflow: hidden;
+
+    display: flex;
+    gap: 10px;
+    align-items: center;
+
+    .whole-day-off-text {
+        display: flex;
+        gap: 4px;
+        min-width: 0;
+
+        .whole-day-off-label {
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+    }
 }
 
 .time-off-item {
@@ -146,10 +167,10 @@
     gap: .5rem;
 
     padding: .5rem 1rem;
-    margin: 2px 20px 8px;
+    margin: 2px 2px 8px;
     border-radius: .5rem;
 
-    background: repeating-linear-gradient(45deg, rgba(120, 120, 120, .10), rgba(120, 120, 120, .10) 6px, transparent 6px, transparent 12px);
+    background: repeating-linear-gradient(45deg, rgba(var(--rgb-warning), 0.3), rgba(var(--rgb-warning), 0.3) 10px, transparent 10px, transparent 20px);
     font-style: italic;
     opacity: 0.8;
 

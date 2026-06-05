@@ -238,7 +238,6 @@
             "TO_DATE": "Do",
             "TIME_FROM": "Od",
             "TIME_TO": "Do",
-            "CLOSED": "Zatvoreno",
             "LIMIT_DATE_RANGE": "Ograniči na vremenski raspon",
 
             "errors": {
