@@ -39,7 +39,7 @@ export class ServicesComponent implements OnInit, OnDestroy {
   }
 
   private load() {
-    this.subs.push(this.serviceService.getAll(this.isArchive).subscribe((s: Service[]) => this.services = s));
+    this.subs.push(this.serviceService.getAll(this.isArchive).data$.subscribe(s => this.services = s));
   }
 
   public goToNew() {

@@ -4,7 +4,6 @@ import { DashboardService } from '../services/dashboard.service';
 import { AppointmentView } from 'src/app/models/appointment';
 import { TranslateService } from 'src/app/components/translate/translate.service';
 import { Router } from '@angular/router';
-import { EntityChangeNotifyService } from 'src/app/shared/services/entity-change-notify.service';
 
 @Component({
   selector: 'app-upcoming-unconfirmed',
@@ -38,16 +37,8 @@ export class UpcomingUnconfirmedComponent {
   constructor(
     private router: Router,
     private dashboardService: DashboardService,
-    private translateService: TranslateService,
-    private entityChangeNotifyService: EntityChangeNotifyService
+    private translateService: TranslateService
   ) {
-    this.subs.push(
-      ...this.entityChangeNotifyService.for<AppointmentView>(AppointmentView.ENTITY_TYPE).subscribeAll({
-        onAdded: () => this.load(),
-        onDeleted: () => this.load(),
-        onUpdated: () => this.load()
-      })
-    );
   }
 
   ngOnInit(): void {

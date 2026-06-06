@@ -55,7 +55,7 @@ export class WorkingHoursComponent implements OnInit {
   }
 
   private load() {
-    this.subs.push(this.workingHoursService.getAll().subscribe((wh: WorkingHour[]) => {
+    this.subs.push(this.workingHoursService.getAll().data$.subscribe(wh => {
       this.workingHours = wh;
     }));
   }

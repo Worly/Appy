@@ -38,7 +38,7 @@ export class ClientsComponent implements OnInit, OnDestroy {
   }
 
   private load() {
-    this.subs.push(this.clientService.getAll(this.isArchive).subscribe((s: Client[]) => this.clients = s));
+    this.subs.push(this.clientService.getAll(this.isArchive).data$.subscribe(s => this.clients = s));
   }
 
   public goToNew() {
