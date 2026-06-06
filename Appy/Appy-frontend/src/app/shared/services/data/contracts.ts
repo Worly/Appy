@@ -24,7 +24,12 @@ export type PageDirection = "forwards" | "backwards";
 /** Result of a bidirectional, infinitely-scrolling list (the list view). */
 export interface PagedResult<T> {
     items$: Observable<T[]>;
+    /** True while a page is loading in either direction. */
     loading$: Observable<boolean>;
+    /** True while the next (forwards) page is loading — for the bottom spinner. */
+    loadingForwards$: Observable<boolean>;
+    /** True while the previous (backwards) page is loading — for the top spinner. */
+    loadingBackwards$: Observable<boolean>;
     error$: Observable<unknown>;
     loadMore(dir: PageDirection): void;
     hasMore(dir: PageDirection): boolean;

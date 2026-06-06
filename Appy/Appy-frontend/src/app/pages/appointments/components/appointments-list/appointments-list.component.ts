@@ -46,12 +46,10 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
   private startDate: Dayjs = dayjs();
 
   private pagedResult?: PagedResult<AppointmentView>;
-  private itemsSub?: Subscription;
-  private loadingSub?: Subscription;
+  private pagedSubs: Subscription[] = [];
 
-  // PagedResult exposes a single loading$ (library-agnostic). The list view needs to know
-  // WHICH end is loading to place the right spinner, so we track the requested direction
-  // locally and clear both whenever loading$ settles to false.
+  // Synchronous mirrors of PagedResult.loadingForwards$/loadingBackwards$, read by the
+  // template (isLoadingNext/isLoadingPrevious) to place the bottom/top spinner.
   private loadingForwards: boolean = false;
   private loadingBackwards: boolean = false;
 
@@ -89,13 +87,12 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.itemsSub?.unsubscribe();
-    this.loadingSub?.unsubscribe();
+    this.pagedSubs.forEach(s => s.unsubscribe());
   }
 
   load() {
-    this.itemsSub?.unsubscribe();
-    this.loadingSub?.unsubscribe();
+    this.pagedSubs.forEach(s => s.unsubscribe());
+    this.pagedSubs = [];
 
     this.keptScrollElement = this.keptScrollPosition = null;
     this.needsScrollToStartDate = true;
@@ -105,17 +102,15 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
 
     this.pagedResult = this.appointmentService.getList(this.date, appFilterToSmartFilter(this._filter), appointmentSort);
 
-    this.itemsSub = this.pagedResult.items$.subscribe(a => {
+    this.pagedSubs.push(this.pagedResult.items$.subscribe(a => {
       this.appointments = a;
       this.renderAppointments();
 
       setTimeout(() => this.checkShouldLoad());
-    });
+    }));
 
-    this.loadingSub = this.pagedResult.loading$.subscribe(loading => {
-      if (!loading)
-        this.loadingForwards = this.loadingBackwards = false;
-    });
+    this.pagedSubs.push(this.pagedResult.loadingForwards$.subscribe(l => this.loadingForwards = l));
+    this.pagedSubs.push(this.pagedResult.loadingBackwards$.subscribe(l => this.loadingBackwards = l));
   }
 
   private checkShouldLoad() {
@@ -123,7 +118,6 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
 
     if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight - scrollOffset && this.pagedResult?.hasMore("forwards")) {
       this.keepScroll();
-      this.loadingForwards = true;
       this.pagedResult?.loadMore("forwards");
       this.changeDetector.detectChanges();
       this.restoreScroll();
@@ -131,7 +125,6 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
 
     if (window.scrollY <= scrollOffset && this.pagedResult?.hasMore("backwards")) {
       this.keepScroll();
-      this.loadingBackwards = true;
       this.pagedResult?.loadMore("backwards");
       this.changeDetector.detectChanges();
       this.restoreScroll();

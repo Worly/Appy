@@ -89,6 +89,70 @@ describe("pagedQuery()", () => {
         expect(loadings[loadings.length - 1]).toBe(false);
     });
 
+    it("reports loadingForwards$ for the in-flight forwards page only", () => {
+        const sources: Subject<number[]>[] = [new Subject(), new Subject()];
+        let call = 0;
+        const pq = pagedQuery<number>({ loadPage: () => sources[call++], sort: asc, pageSize: 2 });
+
+        let fwd = false, bwd = false;
+        pq.loadingForwards$.subscribe(l => fwd = l);
+        pq.loadingBackwards$.subscribe(l => bwd = l);
+
+        // First (auto) load is forwards.
+        expect(fwd).toBe(true);
+        expect(bwd).toBe(false);
+
+        sources[0].next([1, 2]); // resolve the forwards page
+        expect(fwd).toBe(false);
+        expect(bwd).toBe(false);
+    });
+
+    it("reports loadingBackwards$ for the in-flight backwards page only", () => {
+        const fwdSource = new Subject<number[]>();
+        const bwdSource = new Subject<number[]>();
+        const pq = pagedQuery<number>({
+            loadPage: dir => dir === "forwards" ? fwdSource : bwdSource,
+            sort: asc,
+            pageSize: 2
+        });
+
+        let fwd = false, bwd = false;
+        pq.loadingForwards$.subscribe(l => fwd = l);
+        pq.loadingBackwards$.subscribe(l => bwd = l);
+
+        fwdSource.next([10, 11]); // finish the initial forwards load so loadMore is honoured
+        expect(fwd).toBe(false);
+
+        pq.loadMore("backwards");
+        expect(bwd).toBe(true);
+        expect(fwd).toBe(false);
+
+        bwdSource.next([9, 8]);
+        expect(bwd).toBe(false);
+    });
+
+    it("keeps loading$ true while either direction is loading", () => {
+        const fwdSource = new Subject<number[]>();
+        const bwdSource = new Subject<number[]>();
+        const pq = pagedQuery<number>({
+            loadPage: dir => dir === "forwards" ? fwdSource : bwdSource,
+            sort: asc,
+            pageSize: 2
+        });
+
+        let loading = false;
+        pq.loading$.subscribe(l => loading = l);
+
+        fwdSource.next([10, 11]); // initial forwards done
+        expect(loading).toBe(false);
+
+        pq.loadMore("backwards");
+        expect(loading).toBe(true); // backwards now loading
+
+        bwdSource.next([9, 8]);
+        expect(loading).toBe(false);
+    });
+
     it("resets and reloads from the anchor on refetch()", () => {
         const pq = pagedQuery<number>({ loadPage: dataset([10, 11, 12, 13]), sort: asc, pageSize: 2 });
 

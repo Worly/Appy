@@ -26,6 +26,8 @@ export function pagedQuery<T>(opts: PagedQueryOptions<T>): PagedResult<T> {
     const passesFilter = opts.filter ?? (() => true);
 
     const items$ = new ReplaySubject<T[]>(1);
+    const loadingForwards$ = new BehaviorSubject<boolean>(false);
+    const loadingBackwards$ = new BehaviorSubject<boolean>(false);
     const loading$ = new BehaviorSubject<boolean>(false);
     const error$ = new BehaviorSubject<unknown>(undefined);
 
@@ -34,15 +36,13 @@ export function pagedQuery<T>(opts: PagedQueryOptions<T>): PagedResult<T> {
     let backwardsSkip = 0;
     let reachedEndForwards = false;
     let reachedEndBackwards = false;
-    let loadingForwards = false;
-    let loadingBackwards = false;
     let firstLoadDone = false;
 
-    const isLoading = (dir: PageDirection) => dir === "forwards" ? loadingForwards : loadingBackwards;
+    const loadingSubject = (dir: PageDirection) => dir === "forwards" ? loadingForwards$ : loadingBackwards$;
+    const isLoading = (dir: PageDirection) => loadingSubject(dir).value;
     const setLoading = (dir: PageDirection, value: boolean) => {
-        if (dir === "forwards") loadingForwards = value;
-        else loadingBackwards = value;
-        loading$.next(loadingForwards || loadingBackwards);
+        loadingSubject(dir).next(value);
+        loading$.next(loadingForwards$.value || loadingBackwards$.value);
     };
 
     const runLoad = (dir: PageDirection) => {
@@ -96,6 +96,8 @@ export function pagedQuery<T>(opts: PagedQueryOptions<T>): PagedResult<T> {
     return {
         items$: items$.asObservable(),
         loading$: loading$.asObservable(),
+        loadingForwards$: loadingForwards$.asObservable(),
+        loadingBackwards$: loadingBackwards$.asObservable(),
         error$: error$.asObservable(),
         loadMore: (dir: PageDirection) => {
             // Wait for the first page before honouring user-driven pagination.
@@ -110,9 +112,9 @@ export function pagedQuery<T>(opts: PagedQueryOptions<T>): PagedResult<T> {
             backwardsSkip = 0;
             reachedEndForwards = false;
             reachedEndBackwards = false;
-            loadingForwards = false;
-            loadingBackwards = false;
             firstLoadDone = false;
+            loadingForwards$.next(false);
+            loadingBackwards$.next(false);
             loading$.next(false);
             error$.next(undefined);
             runLoad("forwards");
