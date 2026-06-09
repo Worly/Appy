@@ -1,3 +1,5 @@
+// NOTE: @tanstack/query-core is pinned to exactly 5.90.20 in package.json — v5.91+ uses the
+// TypeScript 5.4 `NoInfer` builtin and fails to build under this project's TypeScript 4.9.
 import { QueryClient } from "@tanstack/query-core";
 
 /**
