@@ -12,7 +12,7 @@ describe("CacheCoordinator", () => {
         let calls = 0;
         const observer = new QueryObserver(client, {
             queryKey: clientKeys.list(false) as unknown as unknown[],
-            queryFn: async () => { calls++; return ++calls; },
+            queryFn: async () => { calls++; return calls; },
             staleTime: Infinity, // so only invalidation (not staleness) can trigger a refetch
         });
         const unsub = observer.subscribe(() => { });

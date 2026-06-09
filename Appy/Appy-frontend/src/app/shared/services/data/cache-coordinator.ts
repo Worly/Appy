@@ -17,7 +17,7 @@ export class CacheCoordinator {
 
     invalidate(...keys: CacheKey[]): void {
         for (const key of keys)
-            this.client.invalidateQueries({ queryKey: key as unknown[] });
+            this.client.invalidateQueries({ queryKey: key });
     }
 
     clear(): void {
