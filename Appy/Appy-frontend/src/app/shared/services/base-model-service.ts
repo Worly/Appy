@@ -64,7 +64,12 @@ export class BaseModelService<T extends EditModel<T>, vT extends BaseModel> {
         return pagedQuery<vT>(this.queryClient, { queryKey, loadPage, sort: sortPredicate, filter: filterFunc });
     }
 
-    /** Key for the default getAll() list fetch. Subclasses with a discriminator (archived/date) override getAll() and pass a list(...) key instead. */
+    /**
+     * Key for the inherited no-arg getAll(). Defaults to the entity's own `all` key, which MUST
+     * be the first entry in `mutationKeys` (cross-entity invalidation keys come after it). Only
+     * services that don't override getAll() rely on this (e.g. WorkingHoursService); services with
+     * a discriminator (archived/date) override getAll() and pass a list(...) key directly.
+     */
     protected allListKey(): CacheKey {
         return this.mutationKeys[0] ?? [];
     }

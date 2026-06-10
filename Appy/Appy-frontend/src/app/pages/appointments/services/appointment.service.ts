@@ -33,6 +33,8 @@ export class AppointmentService extends BaseModelService<Appointment, Appointmen
     }
 
     public getList(date: Dayjs, filter: SmartFilter | undefined, sortPredicate: (a: AppointmentView, b: AppointmentView) => number): PagedResult<AppointmentView> {
+        // Filter is part of the cache key so different filters cache as separate lists; the
+        // serialized form must match what getListAdvanced sends as the `filter` HTTP param.
         return this.getListAdvanced(
             [...appointmentKeys.list(date.format("YYYY-MM-DD")), filter ? JSON.stringify(filter) : "all"],
             { date: date.format("YYYY-MM-DD") }, sortPredicate, filter);
