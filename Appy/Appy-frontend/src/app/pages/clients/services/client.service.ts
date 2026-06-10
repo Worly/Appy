@@ -14,7 +14,7 @@ export class ClientService extends BaseModelService<Client, Client> {
     }
 
     public override getAll(archived?: boolean): QueryResult<Client[]> {
-        return this.getAllAdvanced({
+        return this.getAllAdvanced(clientKeys.list(!!archived), {
             archived: !!archived
         });
     }

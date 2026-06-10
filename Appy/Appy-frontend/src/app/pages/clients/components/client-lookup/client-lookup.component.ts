@@ -9,6 +9,7 @@ import { Client, ClientDTO } from 'src/app/models/client';
 import { ClientService } from '../../services/client.service';
 import { IconName } from '@fortawesome/fontawesome-svg-core';
 import { QueryResult } from 'src/app/shared/services/data/contracts';
+import { clientKeys } from 'src/app/shared/services/data/keys';
 
 @Component({
   selector: 'app-client-lookup',
@@ -89,7 +90,7 @@ export class ClientLookupComponent implements OnInit, OnDestroy {
     this.clientChanged(client);
 
     if (client != null) {
-      this.datasourceSub = this.clientService.getById(client.id).data$.subscribe(c => {
+      this.datasourceSub = this.clientService.getById(clientKeys.detail(client.id), client.id).data$.subscribe(c => {
         this.clientChanged(c?.getDTO());
       });
     }

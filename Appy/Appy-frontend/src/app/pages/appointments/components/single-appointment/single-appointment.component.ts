@@ -9,6 +9,7 @@ import { getClientContactTypeIcon, openClientContactApp } from 'src/app/pages/cl
 import { IconName } from '@fortawesome/fontawesome-svg-core';
 import { ClientContactDTO, ClientContactType } from 'src/app/models/client';
 import { ServiceColorsService } from 'src/app/pages/services/services/service-colors.service';
+import { appointmentKeys } from 'src/app/shared/services/data/keys';
 
 @Component({
   selector: 'app-single-appointment',
@@ -76,7 +77,7 @@ export class SingleAppointmentComponent implements OnInit, OnDestroy {
 
     this.isLoading = true;
 
-    this.datasourceSub = this.appointmentService.getById(id).data$.subscribe(a => {
+    this.datasourceSub = this.appointmentService.getById(appointmentKeys.detail(id), id).data$.subscribe(a => {
       this.appointment = a;
       this.isLoading = false;
     });

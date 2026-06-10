@@ -27,15 +27,15 @@ export class AppointmentService extends BaseModelService<Appointment, Appointmen
         if (date == null)
             throw "Date cannot be null";
 
-        return this.getAllAdvanced({
+        return this.getAllAdvanced(appointmentKeys.list(date.format("YYYY-MM-DD")), {
             date: date.format("YYYY-MM-DD")
         });
     }
 
     public getList(date: Dayjs, filter: SmartFilter | undefined, sortPredicate: (a: AppointmentView, b: AppointmentView) => number): PagedResult<AppointmentView> {
-        return this.getListAdvanced({
-            date: date.format("YYYY-MM-DD")
-        }, sortPredicate, filter);
+        return this.getListAdvanced(
+            [...appointmentKeys.list(date.format("YYYY-MM-DD")), filter ? JSON.stringify(filter) : "all"],
+            { date: date.format("YYYY-MM-DD") }, sortPredicate, filter);
     }
 
     public getFreeTimes(date: Dayjs, serviceId: number, duration: Duration, ignoreAppointmentId?: number): Observable<FreeTime[]> {

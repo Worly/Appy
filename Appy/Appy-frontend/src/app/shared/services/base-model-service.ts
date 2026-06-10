@@ -1,6 +1,7 @@
 import { HttpClient, HttpContext, HttpErrorResponse, HttpHeaders } from "@angular/common/http";
 import { Injector } from "@angular/core";
 import { catchError, map, Observable, of, throwError } from "rxjs";
+import { QueryClient } from "@tanstack/query-core";
 import { appConfig } from "../../app.config";
 import { BaseModel, EditModel } from "../../models/base-model";
 import { applySmartFilter, SmartFilter } from "./smart-filter";
@@ -13,6 +14,7 @@ import { pagedQuery } from "./data/paged-query";
 export class BaseModelService<T extends EditModel<T>, vT extends BaseModel> {
     protected httpClient: HttpClient;
     protected cache: CacheCoordinator;
+    protected queryClient: QueryClient;
 
     constructor(
         protected injector: Injector,
@@ -28,19 +30,20 @@ export class BaseModelService<T extends EditModel<T>, vT extends BaseModel> {
 
         this.httpClient = this.injector.get(HttpClient);
         this.cache = this.injector.get(CacheCoordinator);
+        this.queryClient = this.injector.get(QueryClient);
     }
 
     public getAll(): QueryResult<vT[]> {
-        return this.getAllAdvanced(null);
+        return this.getAllAdvanced(this.allListKey(), null);
     }
 
-    public getAllAdvanced(params: any): QueryResult<vT[]> {
-        return query(() =>
+    public getAllAdvanced(queryKey: CacheKey, params: any): QueryResult<vT[]> {
+        return query(this.queryClient, queryKey, () =>
             this.httpClient.get<any[]>(`${appConfig.apiUrl}${this.controllerName}/getAll`, { params })
                 .pipe(map(r => r.map(o => new this.viewTypeFactory(o)))));
     }
 
-    public getListAdvanced(params: any, sortPredicate: (a: vT, b: vT) => number, filter?: SmartFilter, filterPredicate?: (e: vT) => boolean): PagedResult<vT> {
+    public getListAdvanced(queryKey: CacheKey, params: any, sortPredicate: (a: vT, b: vT) => number, filter?: SmartFilter, filterPredicate?: (e: vT) => boolean): PagedResult<vT> {
         let loadPage = (dir: "forwards" | "backwards", skip: number, take: number): Observable<vT[]> => {
             let p = {
                 ...params,
@@ -58,7 +61,12 @@ export class BaseModelService<T extends EditModel<T>, vT extends BaseModel> {
 
         let filterFunc = (e: vT) => (filter == null || applySmartFilter(e, filter)) && (filterPredicate == null || filterPredicate(e));
 
-        return pagedQuery<vT>({ loadPage, sort: sortPredicate, filter: filterFunc });
+        return pagedQuery<vT>(this.queryClient, { queryKey, loadPage, sort: sortPredicate, filter: filterFunc });
+    }
+
+    /** Key for the default getAll() list fetch. Subclasses with a discriminator (archived/date) override getAll() and pass a list(...) key instead. */
+    protected allListKey(): CacheKey {
+        return this.mutationKeys[0] ?? [];
     }
 
     public delete(id: any): Observable<void> {
@@ -69,17 +77,24 @@ export class BaseModelService<T extends EditModel<T>, vT extends BaseModel> {
     }
 
     /** Single-entity fetch. `data$` emits `undefined` when the entity is not found (404). */
-    public getById(id: any): QueryResult<vT | undefined> {
-        return query<vT | undefined>(() =>
+    public getById(queryKey: CacheKey, id: any): QueryResult<vT | undefined> {
+        const q = query<vT | null>(this.queryClient, queryKey, () =>
             this.httpClient.get<any>(`${appConfig.apiUrl}${this.controllerName}/get/${id}`, {
                 context: new HttpContext().set(IGNORE_NOT_FOUND, true)
             }).pipe(
-                map(s => new this.viewTypeFactory(s) as vT | undefined),
+                map(s => new this.viewTypeFactory(s) as vT),
                 catchError(e => {
                     if (e instanceof HttpErrorResponse && e.status == 404)
-                        return of(undefined);
+                        return of(null); // TanStack queryFn must not resolve `undefined`
                     return throwError(() => e);
                 })));
+
+        return {
+            data$: q.data$.pipe(map(d => d ?? undefined)),
+            loading$: q.loading$,
+            error$: q.error$,
+            refetch: q.refetch,
+        };
     }
 
     public get(id: any): Observable<T> {
