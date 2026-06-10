@@ -61,4 +61,13 @@ export class CustomReuseStrategy implements RouteReuseStrategy {
         return future.routeConfig === curr.routeConfig;
     }
 
+    /** Destroy all cached (detached) components and forget them. Used as a hard tenant boundary on facility switch / logout. */
+    clear(): void {
+        for (let gr in this.handlers) {
+            for (let key in this.handlers[gr])
+                (this.handlers[gr][key] as any).componentRef.destroy();
+        }
+        this.handlers = {};
+    }
+
 }
