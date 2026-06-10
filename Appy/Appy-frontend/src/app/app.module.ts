@@ -69,6 +69,7 @@ import { faUserSlash } from '@fortawesome/free-solid-svg-icons/faUserSlash';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons/faArrowLeft';
 import { faReply } from '@fortawesome/free-solid-svg-icons/faReply';
 import { faUserPlus } from '@fortawesome/free-solid-svg-icons/faUserPlus';
+import { faUser } from '@fortawesome/free-solid-svg-icons/faUser';
 
 import dayjs from "dayjs";
 import "dayjs/locale/hr";
@@ -151,7 +152,7 @@ export class AppModule {
       faTrash, faPen, faReply,
       faEllipsisV, faGear,
       faBusinessTime,
-      faBoxArchive, faUserPlus,
+      faBoxArchive, faUserPlus, faUser,
       faCircleCheck, farCircleCheck, faQuestion, faCheck, faTriangleExclamation,
       faHouse, faHandHoldingHeart, faUsers, faCalendarWeek, faRightFromBracket, faUserSlash,
       faCalendarDays, faClock, faTableList, faFilter, faFileLines,
