@@ -92,7 +92,8 @@ npx cypress run      # Headless E2E
 
 ## CI/CD
 
-- **PRs to `main`**: two required status checks must pass before merging —
+- **PRs to `main`**: three required status checks must pass before merging —
   - `e2e` — E2E tests via `.github/workflows/e2e_on_pr.yml` (real Postgres, live backend + frontend + Cypress)
-  - `unit-tests` — backend xUnit tests via `.github/workflows/unit_tests_on_pr.yml` (`dotnet test`, fully mocked — no Postgres/frontend)
+  - `backend-unit-tests` — backend xUnit tests via `.github/workflows/backend_unit_tests_on_pr.yml` (`dotnet test`, fully mocked — no Postgres/frontend)
+  - `frontend-unit-tests` — frontend Karma/Jasmine tests via `.github/workflows/frontend_unit_tests_on_pr.yml` (`ng test` headless via the `ChromeHeadlessCI` launcher)
 - **GitHub releases**: Docker image built for `linux/amd64` + `linux/arm64`, pushed to `worly/appy:latest`, then a Watchtower webhook triggers auto-deploy

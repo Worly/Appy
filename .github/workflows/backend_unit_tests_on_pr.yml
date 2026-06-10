@@ -1,4 +1,4 @@
-name: Unit Tests
+name: Backend Unit Tests
 
 on:
   pull_request:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  unit-tests:
+  backend-unit-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,5 +28,5 @@ jobs:
       - name: Restore test project
         run: dotnet restore ./Appy.Tests/Appy.Tests.csproj
 
-      - name: Run unit tests
+      - name: Run backend unit tests
         run: dotnet test ./Appy.Tests/Appy.Tests.csproj --no-restore --verbosity normal
