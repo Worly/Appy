@@ -128,12 +128,7 @@ export class ClientLookupComponent implements OnInit, OnDestroy {
       next: c => {
         this.isLoadingNew = false;
         this.selectClient(c);
-
-        // No live datasource any more: refetch so the new client appears in the dropdown list.
-        this.listQuery?.refetch();
-
         this.showAddNewSuccess(c);
-
         this.contextMenu?.close();
       },
       error: e => {
