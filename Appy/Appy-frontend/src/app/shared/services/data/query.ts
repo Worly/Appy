@@ -37,7 +37,11 @@ export function query<T>(client: QueryClient, queryKey: CacheKey, fetchFn: () =>
 
     return {
         data$: result$.pipe(map(r => r.data), distinctUntilChanged()),
-        loading$: result$.pipe(map(r => r.isFetching), distinctUntilChanged()),
+        // `isPending` (status === 'pending'), not `isFetching`: true only on the initial load while
+        // there's no data yet. Background refetches (invalidation, staleTime-0 revalidation) keep
+        // `isFetching` true but `isPending` false, so the loading indicator doesn't pop up over data
+        // we already have.
+        loading$: result$.pipe(map(r => r.isPending), distinctUntilChanged()),
         error$: result$.pipe(map(r => r.error), distinctUntilChanged()),
         refetch: () => { observer?.refetch(); },
     };

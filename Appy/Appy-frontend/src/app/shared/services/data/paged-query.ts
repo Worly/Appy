@@ -107,7 +107,11 @@ export function pagedQuery<T>(client: QueryClient, opts: PagedQueryOptions<T>): 
             return {
                 items: built.items,
                 error: r.error ?? built.error,
-                loading: r.isFetching,
+                // `isPending`, not `isFetching`: loading$ tracks only the initial anchor load (no data
+                // yet). Subsequent page fetches and invalidation-driven background refetches keep
+                // `isFetching` true but `isPending` false — those surface through loadingForwards$/
+                // loadingBackwards$ instead, so loading$ never flips over an already-populated list.
+                loading: r.isPending,
                 // Initial anchor load (pending + fetching, no directional flag) is reported as forwards.
                 loadingForwards: r.isFetchingNextPage || (r.isFetching && r.isPending),
                 loadingBackwards: r.isFetchingPreviousPage,

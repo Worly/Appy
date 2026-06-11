@@ -130,7 +130,7 @@ describe("pagedQuery()", () => {
         expect(bwd).toBe(false);
     });
 
-    it("keeps loading$ true while either direction is loading", async () => {
+    it("scopes loading$ to the initial anchor load — later directional fetches don't flip it", async () => {
         const fwdSource = new Subject<number[]>();
         const bwdSource = new Subject<number[]>();
         const pq = pagedQuery<number>(newClient(), {
@@ -142,13 +142,15 @@ describe("pagedQuery()", () => {
         pq.loading$.subscribe(l => loading = l);
         pq.items$.subscribe();
         await flush();
+        expect(loading).toBe(true); // initial anchor load, no data yet
         fwdSource.next([10, 11]);
         fwdSource.complete();
         await flush();
         expect(loading).toBe(false);
+        // A subsequent directional fetch must NOT flip loading$ — that's what loadingBackwards$ is for.
         pq.loadMore("backwards");
         await flush();
-        expect(loading).toBe(true);
+        expect(loading).toBe(false);
         bwdSource.next([9, 8]);
         bwdSource.complete();
         await flush();
