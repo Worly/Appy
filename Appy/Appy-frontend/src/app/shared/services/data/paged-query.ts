@@ -68,12 +68,10 @@ export function pagedQuery<T>(client: QueryClient, opts: PagedQueryOptions<T>): 
     const result$ = new Observable<Result>(sub => {
         const o = new InfiniteQueryObserver<T[], unknown, InfiniteData<T[], PageParam>, unknown[], PageParam>(client, {
             queryKey: opts.queryKey as unknown[],
-            // Don't persist a paged list across its component's teardown. The list view rebuilds from
-            // the URL anchor on every navigation (it is not route-reused), so a lingering cache would
-            // repaint a previous visit's pages — including pre-edit data — on revisit. gcTime 0 evicts
-            // the query on last-unsubscribe so every mount is a fresh anchor load. (Within a mounted
-            // session the observer stays active, so pagination and invalidation-driven refetch are unaffected.)
-            gcTime: 0,
+            // No special gcTime: a torn-down list lingers in the cache for the default 5 min like any
+            // other query. On revisit to the same anchor it repaints the cached pages instantly and the
+            // staleTime-0 background refetch corrects them — standard invalidation behaviour; the brief
+            // pre-edit flash is acceptable. (CacheCoordinator.clear() still wipes it on facility/logout.)
             queryFn: ({ pageParam }) => firstValueFrom(opts.loadPage(pageParam.dir, pageParam.skip, pageSize)),
             initialPageParam: { dir: "forwards", skip: 0 },
             getNextPageParam: (lastPage, _all, lastParam) =>

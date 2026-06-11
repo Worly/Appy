@@ -171,21 +171,6 @@ describe("pagedQuery()", () => {
         expect(pq.hasMore("forwards")).toBe(true); // last loaded page was full, so more remains
     });
 
-    it("evicts its query from the cache when the last subscriber leaves (fresh load on remount, no cross-navigation persistence)", async () => {
-        const client = newClient();
-        const pq = pagedQuery<number>(client, { queryKey: ["p", "gc"], loadPage: dataset([10, 11, 12, 13]), sort: asc, pageSize: 2 });
-
-        const sub = pq.items$.subscribe();
-        await flush();
-        expect(client.getQueryCache().getAll().length).toBe(1);
-
-        sub.unsubscribe();
-        await flush();
-        // The appointments list rebuilds from scratch on each navigation, so its query must NOT
-        // linger in the cache after the view is torn down — otherwise a revisit paints stale pages.
-        expect(client.getQueryCache().getAll().length).toBe(0);
-    });
-
     it("emits the error on error$ when a page fails", async () => {
         const pq = pagedQuery<number>(newClient(), { queryKey: ["p", 11], loadPage: () => throwError(() => new Error("nope")), sort: asc });
         const errors: unknown[] = [];
