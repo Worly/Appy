@@ -20,7 +20,7 @@ export class AppointmentService extends BaseModelService<Appointment, Appointmen
         private translateService: TranslateService,
         private toastService: ToastService
     ) {
-        super(injector, AppointmentView.ENTITY_TYPE, Appointment, AppointmentView, [appointmentKeys.all]);
+        super(injector, AppointmentView.ENTITY_TYPE, Appointment, AppointmentView, appointmentKeys);
     }
 
     public override getAll(date?: Dayjs): QueryResult<AppointmentView[]> {

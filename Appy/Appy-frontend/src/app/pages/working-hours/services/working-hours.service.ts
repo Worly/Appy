@@ -8,7 +8,7 @@ import { workingHourKeys } from "src/app/shared/services/data/keys";
 @Injectable({ providedIn: "root" })
 export class WorkingHoursService extends BaseModelService<WorkingHour, WorkingHour> {
     constructor(injector: Injector) {
-        super(injector, WorkingHour.ENTITY_TYPE, WorkingHour, WorkingHour, [workingHourKeys.all]);
+        super(injector, WorkingHour.ENTITY_TYPE, WorkingHour, WorkingHour, workingHourKeys);
     }
 
     public set(workingHours: WorkingHour[]): Observable<void> {

@@ -8,12 +8,12 @@ Cross-cutting code consumed by all feature modules. Organized into services, pip
 
 The generic CRUD foundation that all feature services extend. Returns the library-agnostic data contracts from the Data Seam (below):
 - `getAllAdvanced(queryKey, params)` → `QueryResult<vT[]>` (one-shot list fetch)
-- `getById(queryKey, id)` → `QueryResult<vT | undefined>` (single entity; `data$` emits `undefined` on 404)
+- `getById(id)` → `QueryResult<vT | undefined>` (single entity; builds the cache key from the service's own `keys.detail(id)`, so callers pass only the id; `data$` emits `undefined` on 404)
 - `getListAdvanced(queryKey, params, sort, filter?, filterPredicate?)` → `PagedResult<vT>` (paginated list, 20/page, bidirectional from an anchor)
 - `get(id)` → `Observable<TEdit>` (the editable model for forms)
 - `addNew` / `save` / `delete` → mutate, return the fresh entity, and call `CacheCoordinator.invalidate(...mutationKeys)` (now with real effect — matching active queries refetch automatically)
 
-Feature services (`AppointmentService`, `ClientService`, …) extend this base, add domain-specific methods, and pass their `mutationKeys` (own keys + cross-entity deps) to `super()`.
+Feature services (`AppointmentService`, `ClientService`, …) extend this base, add domain-specific methods, and pass their own `EntityKeyFactory` (e.g. `clientKeys` — used to build `getById`/`getAll` keys) plus any cross-entity invalidation keys to `super()`. `mutationKeys` is then `[keys.all, ...crossEntityKeys]`.
 
 ### Data Seam (services/data/)
 

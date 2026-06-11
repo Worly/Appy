@@ -7,6 +7,7 @@ import { BaseModel, EditModel } from "../../models/base-model";
 import { applySmartFilter, SmartFilter } from "./smart-filter";
 import { IGNORE_NOT_FOUND } from "./errors/error-interceptor.service";
 import { CacheCoordinator, CacheKey } from "./data/cache-coordinator";
+import { EntityKeyFactory } from "./data/keys";
 import { PagedResult, QueryResult } from "./data/contracts";
 import { query } from "./data/query";
 import { pagedQuery } from "./data/paged-query";
@@ -16,21 +17,27 @@ export class BaseModelService<T extends EditModel<T>, vT extends BaseModel> {
     protected cache: CacheCoordinator;
     protected queryClient: QueryClient;
 
+    /** Keys this entity's mutations invalidate: its own `all` plus any cross-entity deps. */
+    protected mutationKeys: CacheKey[];
+
     constructor(
         protected injector: Injector,
         protected controllerName: string,
         protected typeFactory: (new (dto?: any) => T),
         protected viewTypeFactory: (new (dto?: any) => vT),
+        /** This entity's own key factory; `getById` builds `detail(id)` from it and `getAll()` uses `all`. */
+        protected keys: EntityKeyFactory,
         /**
-         * Keys this entity's mutations invalidate. No-op today (see CacheCoordinator), but
-         * declared now — including cross-entity dependencies (e.g. a client edit lists
-         * appointmentKeys.all because appointments embed the client).
+         * Extra keys this entity's mutations must also invalidate, beyond its own `all` — the
+         * cross-entity dependencies (e.g. a client edit lists appointmentKeys.all because
+         * appointments embed the client).
          */
-        protected mutationKeys: CacheKey[] = []) {
+        crossEntityKeys: CacheKey[] = []) {
 
         this.httpClient = this.injector.get(HttpClient);
         this.cache = this.injector.get(CacheCoordinator);
         this.queryClient = this.injector.get(QueryClient);
+        this.mutationKeys = [this.keys.all, ...crossEntityKeys];
     }
 
     public getAll(): QueryResult<vT[]> {
@@ -65,13 +72,12 @@ export class BaseModelService<T extends EditModel<T>, vT extends BaseModel> {
     }
 
     /**
-     * Key for the inherited no-arg getAll(). Defaults to the entity's own `all` key, which MUST
-     * be the first entry in `mutationKeys` (cross-entity invalidation keys come after it). Only
-     * services that don't override getAll() rely on this (e.g. WorkingHoursService); services with
-     * a discriminator (archived/date) override getAll() and pass a list(...) key directly.
+     * Key for the inherited no-arg getAll(): the entity's own `all` key. Only services that don't
+     * override getAll() rely on this (e.g. WorkingHoursService); services with a discriminator
+     * (archived/date) override getAll() and pass a list(...) key directly.
      */
     protected allListKey(): CacheKey {
-        return this.mutationKeys[0] ?? [];
+        return this.keys.all;
     }
 
     public delete(id: any): Observable<void> {
@@ -81,9 +87,16 @@ export class BaseModelService<T extends EditModel<T>, vT extends BaseModel> {
             }));
     }
 
-    /** Single-entity fetch. `data$` emits `undefined` when the entity is not found (404). */
-    public getById(queryKey: CacheKey, id: any): QueryResult<vT | undefined> {
-        const q = query<vT | null>(this.queryClient, queryKey, () =>
+    /**
+     * Single-entity fetch. The cache key is built from this service's own key factory
+     * (`keys.detail(id)`), so callers pass only the id. `data$` emits `undefined` when the
+     * entity is not found (404).
+     */
+    public getById(id: any): QueryResult<vT | undefined> {
+        if (this.keys.detail == null)
+            throw new Error(`${this.controllerName}: getById requires a key factory with a detail(id) function`);
+
+        const q = query<vT | null>(this.queryClient, this.keys.detail(id), () =>
             this.httpClient.get<any>(`${appConfig.apiUrl}${this.controllerName}/get/${id}`, {
                 context: new HttpContext().set(IGNORE_NOT_FOUND, true)
             }).pipe(

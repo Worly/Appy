@@ -10,7 +10,7 @@ import { appointmentKeys, serviceKeys } from "src/app/shared/services/data/keys"
 export class ServiceService extends BaseModelService<Service, Service> {
     constructor(injector: Injector) {
         // Appointments embed the service, so service mutations invalidate appointments too.
-        super(injector, Service.ENTITY_TYPE, Service, Service, [serviceKeys.all, appointmentKeys.all]);
+        super(injector, Service.ENTITY_TYPE, Service, Service, serviceKeys, [appointmentKeys.all]);
     }
 
     public override getAll(archived?: boolean): QueryResult<Service[]> {

@@ -1,3 +1,5 @@
+import { CacheKey } from "./cache-coordinator";
+
 /**
  * The TanStack Query cache keys for every entity.
  *
@@ -6,6 +8,17 @@
  * reference nonexistent keys. Invalidations include cross-entity dependencies: a client or
  * service edit invalidates `appointmentKeys.all` too, because appointments embed both.
  */
+
+/**
+ * The shape {@link BaseModelService} needs from an entity's key factory: the entity-wide `all`
+ * key (used by the inherited `getAll()` and as the first invalidation key), and an optional
+ * `detail(id)` factory that `getById` uses to build its own key. Entities without a by-id read
+ * (e.g. working hours) omit `detail`.
+ */
+export interface EntityKeyFactory {
+    readonly all: CacheKey;
+    detail?(id: any): CacheKey;
+}
 
 export const appointmentKeys = {
     all: ["appointment"] as const,
