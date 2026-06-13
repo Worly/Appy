@@ -16,7 +16,8 @@
     gap: 12px;
 
     .accent {
-        flex: 0 0 5px;
+        // Width matches the list-item and previous-appointment colour bars.
+        flex: 0 0 6px;
         align-self: stretch;
         min-height: 1.4rem;
         border-radius: var(--default-border-radius);
@@ -131,7 +132,8 @@
 }
 
 .previous-appointment-color {
-    width: 10px;
+    // Width matches the header and list-item colour bars.
+    width: 6px;
     height: 40px;
     border-radius: var(--default-border-radius);
 }
