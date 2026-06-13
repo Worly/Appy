@@ -139,6 +139,13 @@ export function pagedQuery<T>(client: QueryClient, opts: PagedQueryOptions<T>): 
             const r = observer.getCurrentResult();
             if (r.isPending)
                 return; // wait for the first page before honouring pagination
+            // A full refetch (refetchOnMount on a warm cache, or invalidation) re-fetches every
+            // loaded page at once. Starting a directional fetch now would cancel it (fetchNextPage/
+            // fetchPreviousPage default to cancelRefetch: true) and commit a pre-refetch snapshot,
+            // clobbering the freshly-fetched pages with stale ones. Wait for the refetch to settle —
+            // a later scroll (or the post-refetch re-render) re-attempts pagination.
+            if (r.isFetching && !r.isFetchingNextPage && !r.isFetchingPreviousPage)
+                return;
             if (dir === "forwards") {
                 if (r.isFetchingNextPage || !r.hasNextPage)
                     return;

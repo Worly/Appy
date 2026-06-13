@@ -212,6 +212,62 @@ describe("pagedQuery()", () => {
         expect(pq.hasMore("forwards")).toBe(true);
     });
 
+    it("a loadMore fired during an in-flight refetch must not clobber the refetch's fresh pages", async () => {
+        // Reproduces the warm-cache revisit bug: on a fresh mount over cached pages, the
+        // observer's refetch (refetchOnMount) and the list's auto-backwards-pagination fire
+        // together. fetchPreviousPage defaults to cancelRefetch:true, so it cancels the in-flight
+        // refetch and commits its pre-refetch snapshot — clobbering the just-edited anchor page
+        // with the stale one. A directional loadMore must therefore wait for a refetch to settle.
+        const pending: { dir: PageDirection; skip: number; subject: Subject<number[]>; done: boolean }[] = [];
+        let forwards = [10, 11];
+        let backwards = [9, 8];
+        const loadPage = (dir: PageDirection, skip: number, _take: number) => {
+            const subject = new Subject<number[]>();
+            pending.push({ dir, skip, subject, done: false });
+            return subject;
+        };
+        // Resolve every in-flight fetch with the current backend slice, in waves — an infinite
+        // refetch spawns its page fetches sequentially (index -1, then index 0), so each wave can
+        // reveal the next fetch. Loops until no fetch is left pending.
+        const drain = async () => {
+            for (let i = 0; i < 10; i++) {
+                const inflight = pending.filter(p => !p.done);
+                if (inflight.length === 0) break;
+                for (const e of inflight) {
+                    e.done = true;
+                    e.subject.next((e.dir === "forwards" ? forwards : backwards).slice(e.skip, e.skip + 2));
+                    e.subject.complete();
+                }
+                await flush();
+            }
+        };
+
+        const pq = pagedQuery<number>(newClient(), { queryKey: ["p", "refetch-race"], loadPage, pageSize: 2 });
+        const emissions: number[][] = [];
+        pq.items$.subscribe(i => emissions.push(i));
+        await flush();
+        await drain();            // anchor [10, 11]
+        pq.loadMore("backwards");
+        await flush();
+        await drain();            // prepend [8, 9] → [8, 9, 10, 11]
+        expect(lastEmission(emissions)).toEqual([8, 9, 10, 11]);
+
+        // An edit changes the anchor's first item: 10 → 99.
+        forwards = [99, 11];
+        backwards = [9, 8, 7, 6]; // older history available, should a prepend run after the refetch
+
+        // Warm-remount: a background refetch starts, and in the same tick the list's
+        // auto-backwards-pagination fires a loadMore — they race on the same query.
+        pq.refetch();
+        await flush();            // refetch is now in flight (its first page fetch is unresolved)
+        pq.loadMore("backwards"); // must NOT cancel/clobber the in-flight refetch
+        await drain();
+
+        const items = lastEmission(emissions);
+        expect(items).toContain(99);     // the refetch's fresh anchor survived
+        expect(items).not.toContain(10); // the stale anchor value is gone
+    });
+
     it("emits the error on error$ when a page fails", async () => {
         const pq = pagedQuery<number>(newClient(), { queryKey: ["p", 11], loadPage: () => throwError(() => new Error("nope")), pageSize: 2 });
         const errors: unknown[] = [];
