@@ -8,6 +8,7 @@ Angular 16 SPA. All API calls include `Authorization: Bearer <token>` and `facil
 npm install          # Install dependencies
 npx ng serve         # Dev server → http://localhost:4200
 npx ng build         # Production build into dist/
+npx ng test          # Unit tests (Karma/Jasmine, watch mode)
 npx cypress open     # Interactive E2E runner
 npx cypress run      # Headless E2E (used in CI)
 ```
