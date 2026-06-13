@@ -447,10 +447,10 @@ function expectAppointment(
     a.timeFrom == appointment.time &&
     a.timeTo == timeTo.format("HH:mm");
 
-  // The scroller/list render reactively (CalendarDayService feeds a Datasource that re-emits on
-  // entity changes), so right after an edit the moved appointment can land a beat after navigation
-  // settles. Re-read until it shows up instead of asserting on the first — possibly pre-update —
-  // snapshot, which otherwise flakes in CI where everything is slower.
+  // The scroller/list refetch fresh on navigation/view-switch, and Angular applies the new route
+  // params and the fetched page asynchronously, so right after an edit the moved appointment can
+  // land a beat after navigation settles. Re-read until it shows up instead of asserting on the
+  // first — possibly pre-fetch — snapshot, which otherwise flakes in CI where everything is slower.
   let view = viewType == "list" ? appointments.list() : appointments.scroller();
   let attemptFind = (attemptsLeft: number): any => {
     return view.getAppointments().then(found => {

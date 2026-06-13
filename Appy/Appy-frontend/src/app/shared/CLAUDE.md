@@ -4,26 +4,26 @@ Cross-cutting code consumed by all feature modules. Organized into services, pip
 
 ## Shared Services (services/)
 
-### BaseModelService\<TView, TEdit\>
+### BaseModelService\<TEdit, TView\>
 
-The generic CRUD foundation that all feature services extend. Provides:
-- HTTP calls for `getAll`, `get`, `addNew`, `save`, `delete`
-- Wraps responses in `Datasource` instances (see below)
-- Publishes CRUD events via `EntityChangeNotifyService`
-- Pagination via `PageableListDatasource` (20 items per page, loading forwards or backwards from a date anchor)
+The generic CRUD foundation that all feature services extend. Returns the library-agnostic data contracts from the Data Seam (below):
+- `getAll()` / `getAllAdvanced(params)` → `QueryResult<vT[]>` (one-shot list fetch)
+- `getById(id)` → `QueryResult<vT | undefined>` (single entity; `data$` emits `undefined` on 404)
+- `getListAdvanced(params, sort, filter?, filterPredicate?)` → `PagedResult<vT>` (paginated list, 20/page, bidirectional from an anchor)
+- `get(id)` → `Observable<TEdit>` (the editable model for forms)
+- `addNew` / `save` / `delete` → mutate, return the fresh entity, and call `CacheCoordinator.invalidate(...mutationKeys)`
 
-Feature services (`AppointmentService`, `ClientService`, `ServiceService`, etc.) extend this base and add domain-specific methods.
+Feature services (`AppointmentService`, `ClientService`, …) extend this base, add domain-specific methods, and pass their `mutationKeys` (own keys + cross-entity deps) to `super()`.
 
-### Datasource (datasource.ts)
+### Data Seam (services/data/)
 
-Reactive data containers:
-- `ListDatasource<T>`: holds a full list, exposes an Observable stream, supports in-memory add/update/delete
-- `SingleDatasource<T>`: holds one entity as an Observable
-- `PageableListDatasource<T>`: paginated list with 20-item pages, bidirectional loading, in-memory item cache for already-loaded pages
+A thin, **library-agnostic** seam that replaced the old self-written `Datasource` / `EntityChangeNotifyService` sync layer. Data is allowed to go stale (acceptable for this app — a refetch is cheap); a real caching library (TanStack Query / Apollo / NgRx Entity / a revived custom layer) can be dropped in later behind these contracts **without touching component code**.
 
-### EntityChangeNotifyService
-
-Pub/sub hub for CRUD events. When a service creates, updates, or deletes an entity, it publishes here. Components displaying the same data type subscribe and update themselves automatically — no manual refresh, no shared mutable arrays.
+- **Contracts (`contracts.ts`)**: `QueryResult<T>` (`data$` / `loading$` / `error$` / `refetch()`) for single fetches; `PagedResult<T>` (`items$` / `loading$` / `loadingForwards$` / `loadingBackwards$` / `error$` / `loadMore(dir)` / `hasMore(dir)` / `refetch()`) for the bidirectional infinite list — directional loading flags let the list view show top vs bottom spinners. Observable-flavoured for Angular 16; wrap with `toSignal` at this surface when moving to signals.
+- **`query(fetchFn)`** (`query.ts`): builds a `QueryResult`; `shareReplay({refCount})` so multiple `| async` pipes share one in-flight fetch. No cache, no cross-view sharing.
+- **`pagedQuery(opts)`** (`paged-query.ts`): builds a `PagedResult` — the bidirectional page buffer salvaged from the old `PageableListDatasource`, with the cross-component sync removed. Pagination is preserved (20/page).
+- **Key factories (`keys.ts`)**: `appointmentKeys` / `clientKeys` / `serviceKeys` / `workingHourKeys` — frozen `{ all, list, detail }` vocabulary for a future cache.
+- **`CacheCoordinator`** (`cache-coordinator.ts`): `invalidate(...keys)` is a **no-op today**. Mutation sites declare their invalidations now (typed against the key factories, including cross-entity deps — a client/service edit invalidates appointments, which embed both), so the day a real cache lands it only needs a body here.
 
 ### Smart Filter (smart-filter.ts)
 

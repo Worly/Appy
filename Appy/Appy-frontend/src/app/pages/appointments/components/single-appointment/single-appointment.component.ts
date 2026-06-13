@@ -76,7 +76,7 @@ export class SingleAppointmentComponent implements OnInit, OnDestroy {
 
     this.isLoading = true;
 
-    this.datasourceSub = this.appointmentService.getWithDatasource(id).subscribe(a => {
+    this.datasourceSub = this.appointmentService.getById(id).data$.subscribe(a => {
       this.appointment = a;
       this.isLoading = false;
     });
@@ -100,7 +100,11 @@ export class SingleAppointmentComponent implements OnInit, OnDestroy {
       return;
 
     this.isLoadingStatusChange = true;
-    this.subs.push(this.appointmentService.setStatus(this.appointment?.id, newStatus).subscribe(() => this.isLoadingStatusChange = false))
+    // No live datasource any more: update our own view from the mutation response.
+    this.subs.push(this.appointmentService.setStatus(this.appointment.id, newStatus).subscribe(a => {
+      this.appointment = a;
+      this.isLoadingStatusChange = false;
+    }));
   }
 
   goToEdit() {

@@ -15,13 +15,7 @@ export interface IIdentifiable {
     getId(): any;
 }
 
-export interface IPropertyUpdateable {
-    getPropertyNames(): string[];
-    getPropertyValue(propertyName: string): any;
-    setPropertyValue(propertyName: string, value: any): void;
-}
-
-export abstract class BaseModel implements IIdentifiable, IPropertyUpdateable {
+export abstract class BaseModel implements IIdentifiable {
     [onPropertyChangedSymbol]: Subject<string> = new Subject();
     [childrensKeysSymbol]: string[] | undefined;
 
@@ -106,22 +100,6 @@ export abstract class BaseModel implements IIdentifiable, IPropertyUpdateable {
 
     public getOnPropertyChanged(): Observable<string> {
         return this[onPropertyChangedSymbol];
-    }
-
-    public getPropertyNames(): string[] {
-        let symbols = Object.getOwnPropertySymbols(this);
-
-        return symbols
-            .filter(s => s.description != null && !s.description.startsWith("#S-"))
-            .map(s => s.description!);
-    }
-
-    public getPropertyValue(propertyName: string): any {
-        return (this as any)[propertyName];
-    }
-
-    public setPropertyValue(propertyName: string, value: any): void {
-        (this as any)[propertyName] = value;
     }
 }
 

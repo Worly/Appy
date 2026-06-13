@@ -8,6 +8,7 @@ import { TranslateService } from 'src/app/components/translate/translate.service
 import { Client, ClientDTO } from 'src/app/models/client';
 import { ClientService } from '../../services/client.service';
 import { IconName } from '@fortawesome/fontawesome-svg-core';
+import { QueryResult } from 'src/app/shared/services/data/contracts';
 
 @Component({
   selector: 'app-client-lookup',
@@ -43,6 +44,9 @@ export class ClientLookupComponent implements OnInit, OnDestroy {
   datasourceId?: number;
   datasourceSub?: Subscription;
 
+  private listQuery?: QueryResult<Client[]>;
+  private listSub?: Subscription;
+
   clients?: Client[];
   filteredClients: Client[] = [];
 
@@ -65,10 +69,14 @@ export class ClientLookupComponent implements OnInit, OnDestroy {
       this.datasourceSub.unsubscribe();
       this.datasourceSub = undefined;
     }
+
+    this.listSub?.unsubscribe();
   }
 
   public load() {
-    this.clientService.getAll().subscribe(s => this.clients = s);
+    this.listSub?.unsubscribe();
+    this.listQuery = this.clientService.getAll();
+    this.listSub = this.listQuery.data$.subscribe(s => this.clients = s);
   }
 
   private setDatasource(client: ClientDTO | undefined) {
@@ -81,7 +89,7 @@ export class ClientLookupComponent implements OnInit, OnDestroy {
     this.clientChanged(client);
 
     if (client != null) {
-      this.datasourceSub = this.clientService.getWithDatasource(client.id).subscribe(c => {
+      this.datasourceSub = this.clientService.getById(client.id).data$.subscribe(c => {
         this.clientChanged(c?.getDTO());
       });
     }
@@ -119,6 +127,9 @@ export class ClientLookupComponent implements OnInit, OnDestroy {
       next: c => {
         this.isLoadingNew = false;
         this.selectClient(c);
+
+        // No live datasource any more: refetch so the new client appears in the dropdown list.
+        this.listQuery?.refetch();
 
         this.showAddNewSuccess(c);
 

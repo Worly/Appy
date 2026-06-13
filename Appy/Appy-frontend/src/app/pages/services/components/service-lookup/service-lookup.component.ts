@@ -46,7 +46,7 @@ export class ServiceLookupComponent implements OnInit {
   }
 
   public load() {
-    this.serviceService.getAll().subscribe(s => {
+    this.serviceService.getAll().data$.subscribe(s => {
       this.services = s;
       this.applyFilter();
     });

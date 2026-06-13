@@ -8,6 +8,7 @@ Angular 16 SPA. All API calls include `Authorization: Bearer <token>` and `facil
 npm install          # Install dependencies
 npx ng serve         # Dev server → http://localhost:4200
 npx ng build         # Production build into dist/
+npx ng test          # Unit tests (Karma/Jasmine, watch mode)
 npx cypress open     # Interactive E2E runner
 npx cypress run      # Headless E2E (used in CI)
 ```
@@ -52,12 +53,10 @@ npx cypress run      # Headless E2E (used in CI)
 
 ## State Management
 
-No NgRx. State flows via:
-1. RxJS Observables from services
-2. `EntityChangeNotifyService` (pub/sub) to sync CRUD changes across components
-3. `Datasource` classes as reactive data containers
-4. URL query params for shareable view state (date, filter)
-5. LocalStorage for UI preferences (theme, language, view type)
+No NgRx, no client-side cache. State flows via:
+1. RxJS Observables from services, surfaced through a thin **library-agnostic data seam** — `QueryResult` / `PagedResult` contracts built by `query()` / `pagedQuery()` (see `src/app/shared/CLAUDE.md`). Data is allowed to go stale; mutations return the fresh entity and the acting component updates its own view. `CacheCoordinator.invalidate()` is a no-op hook where a real cache could later plug in. Route-reuse-cached list pages (clients, services) refetch in place on `ngBeforeAttach` so they refresh after edits without losing scroll position.
+2. URL query params for shareable view state (date, filter)
+3. LocalStorage for UI preferences (theme, language, view type)
 
 ## Internationalization
 

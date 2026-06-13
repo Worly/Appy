@@ -38,6 +38,14 @@ module.exports = function (config) {
     logLevel: config.LOG_INFO,
     autoWatch: true,
     browsers: ['Chrome'],
+    // Headless launcher for CI; --no-sandbox is required on GitHub-hosted runners.
+    // Select it with `ng test --no-watch --browsers=ChromeHeadlessCI`.
+    customLaunchers: {
+      ChromeHeadlessCI: {
+        base: 'ChromeHeadless',
+        flags: ['--no-sandbox', '--disable-gpu']
+      }
+    },
     singleRun: false,
     restartOnFileChange: true
   });

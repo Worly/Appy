@@ -3,10 +3,11 @@ import dayjs, { Dayjs } from 'dayjs';
 import { Duration } from 'dayjs/plugin/duration';
 import { timeBetweenMs } from 'src/app/utils/time-utils';
 import _ from 'lodash';
+import { Subscription } from 'rxjs';
 import { AppointmentView } from 'src/app/models/appointment';
 import { AppointmentService } from '../../services/appointment.service';
 import { appFilterToSmartFilter, AppointmentsFilter } from '../appointments/appointments.component';
-import { PageableListDatasource } from 'src/app/shared/services/datasource';
+import { PagedResult } from 'src/app/shared/services/data/contracts';
 
 @Component({
   selector: 'app-appointments-list',
@@ -44,7 +45,13 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
 
   private startDate: Dayjs = dayjs();
 
-  private datasource?: PageableListDatasource<AppointmentView>;
+  private pagedResult?: PagedResult<AppointmentView>;
+  private pagedSubs: Subscription[] = [];
+
+  // Synchronous mirrors of PagedResult.loadingForwards$/loadingBackwards$, read by the
+  // template (isLoadingNext/isLoadingPrevious) to place the bottom/top spinner.
+  private loadingForwards: boolean = false;
+  private loadingBackwards: boolean = false;
 
   public appointments: AppointmentView[] | null = null;
 
@@ -80,42 +87,45 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.datasource?.dispose();
+    this.pagedSubs.forEach(s => s.unsubscribe());
   }
 
   load() {
-    this.datasource?.dispose();
-    this.datasource = undefined;
+    this.pagedSubs.forEach(s => s.unsubscribe());
+    this.pagedSubs = [];
 
     this.keptScrollElement = this.keptScrollPosition = null;
     this.needsScrollToStartDate = true;
+    this.loadingForwards = this.loadingBackwards = false;
     this.appointments = null;
     this.renderAppointments();
 
-    this.datasource = this.appointmentService.getList(this.date, appFilterToSmartFilter(this._filter), appointmentSort);
-    this.datasource.subscribe({
-      next: a => {
-        this.appointments = a;
-        this.renderAppointments();
+    this.pagedResult = this.appointmentService.getList(this.date, appFilterToSmartFilter(this._filter), appointmentSort);
 
-        setTimeout(() => this.checkShouldLoad());
-      }
-    })
+    this.pagedSubs.push(this.pagedResult.items$.subscribe(a => {
+      this.appointments = a;
+      this.renderAppointments();
+
+      setTimeout(() => this.checkShouldLoad());
+    }));
+
+    this.pagedSubs.push(this.pagedResult.loadingForwards$.subscribe(l => this.loadingForwards = l));
+    this.pagedSubs.push(this.pagedResult.loadingBackwards$.subscribe(l => this.loadingBackwards = l));
   }
 
   private checkShouldLoad() {
     const scrollOffset = 100;
 
-    if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight - scrollOffset && !this.datasource?.isReachedEndForwards()) {
+    if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight - scrollOffset && this.pagedResult?.hasMore("forwards")) {
       this.keepScroll();
-      this.datasource?.loadNextPage();
+      this.pagedResult?.loadMore("forwards");
       this.changeDetector.detectChanges();
       this.restoreScroll();
     }
 
-    if (window.scrollY <= scrollOffset && !this.datasource?.isReachedEndBackwards()) {
+    if (window.scrollY <= scrollOffset && this.pagedResult?.hasMore("backwards")) {
       this.keepScroll();
-      this.datasource?.loadPreviousPage();
+      this.pagedResult?.loadMore("backwards");
       this.changeDetector.detectChanges();
       this.restoreScroll();
     }
@@ -300,19 +310,19 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
   }
 
   isReachedBottom(): boolean {
-    return this.datasource?.isReachedEndForwards() == true;
+    return this.pagedResult != null && !this.pagedResult.hasMore("forwards");
   }
 
   isReachedTop(): boolean {
-    return this.datasource?.isReachedEndBackwards() == true;
+    return this.pagedResult != null && !this.pagedResult.hasMore("backwards");
   }
 
   isLoadingNext(): boolean {
-    return this.datasource?.isLoadingNext() == true;
+    return this.loadingForwards;
   }
 
   isLoadingPrevious(): boolean {
-    return this.datasource?.isLoadingPrevious() == true;
+    return this.loadingBackwards;
   }
 
   getFirstVisibleAppointmentElement(): HTMLElement | undefined {
