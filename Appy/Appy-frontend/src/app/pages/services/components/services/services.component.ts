@@ -5,14 +5,13 @@ import { Service } from 'src/app/models/service';
 import { ServiceColorsService } from '../../services/service-colors.service';
 import { ServiceService } from '../../services/service.service';
 import { QueryResult } from 'src/app/shared/services/data/contracts';
-import { BeforeAttach } from 'src/app/services/attach-detach-hooks.service';
 
 @Component({
   selector: 'app-services',
   templateUrl: './services.component.html',
   styleUrls: ['./services.component.scss']
 })
-export class ServicesComponent implements OnInit, OnDestroy, BeforeAttach {
+export class ServicesComponent implements OnInit, OnDestroy {
 
   services?: Service[] = undefined;
   isArchive: boolean = false;
@@ -44,14 +43,6 @@ export class ServicesComponent implements OnInit, OnDestroy, BeforeAttach {
   private load() {
     this.servicesQuery = this.serviceService.getAll(this.isArchive);
     this.subs.push(this.servicesQuery.data$.subscribe(s => this.services = s));
-  }
-
-  // This component is cached by the route-reuse strategy, so navigating back from
-  // edit/new/archive re-attaches it without re-running ngOnInit (and the live-sync bus is
-  // gone). Refetch in place: the already-rendered list stays visible (so the restored scroll
-  // position is preserved) and the fresh data swaps in when it arrives.
-  ngBeforeAttach(): void {
-    this.servicesQuery?.refetch();
   }
 
   public goToNew() {

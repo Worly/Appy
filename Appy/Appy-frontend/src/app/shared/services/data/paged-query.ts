@@ -1,123 +1,162 @@
-import { BehaviorSubject, Observable, ReplaySubject, take } from "rxjs";
-import { getInsertIndex, isSorted } from "src/app/utils/array-utils";
+import { InfiniteData, InfiniteQueryObserver, InfiniteQueryObserverResult, QueryClient } from "@tanstack/query-core";
+import { Observable, distinctUntilChanged, firstValueFrom, map, shareReplay } from "rxjs";
+import { CacheKey } from "./cache-coordinator";
 import { PageDirection, PagedResult } from "./contracts";
 
+/**
+ * A page's position relative to the anchor, as a signed index: 0 = the anchor (forwards, skip 0),
+ * +n = the nth forwards page, -n = the nth backwards page.
+ *
+ * Why an index and not a {dir, skip} pair: TanStack reconstructs a *refetched* infinite query by
+ * walking forward from page 0 via `getNextPageParam` (it does not reuse the stored params). The
+ * params must therefore form one monotonic chain (…-2, -1, 0, 1, 2…). With {dir, skip},
+ * `getNextPageParam` sitting on a full backwards page can't tell it's going backwards and computes a
+ * forwards skip, so the anchor page gets refetched at the wrong offset and its items disappear.
+ */
+interface PageParam {
+    index: number;
+}
+
+/** Map a signed page index to the backend (direction, skip) the loadPage callback expects. */
+function pageRequest(index: number, pageSize: number): { dir: PageDirection; skip: number } {
+    return index >= 0
+        ? { dir: "forwards", skip: index * pageSize }
+        : { dir: "backwards", skip: (-index - 1) * pageSize };
+}
+
 export interface PagedQueryOptions<T> {
-    /** Fetch one raw page from the backend. Forwards pages come back ascending; backwards pages descending (nearest-to-anchor first). */
+    /** TanStack cache key for this list (include the params/filter that scope it). */
+    queryKey: CacheKey;
+    /** Fetch one raw page. Forwards pages come back ascending; backwards pages descending (nearest-to-anchor first). */
     loadPage: (dir: PageDirection, skip: number, take: number) => Observable<T[]>;
-    /** Global sort order the buffer is kept in. Must match the backend's sort. */
-    sort: (a: T, b: T) => number;
-    /** Optional client-side predicate; non-matching items are dropped from the buffer (but still count toward the backend skip). */
-    filter?: (item: T) => boolean;
     /** Items per page. Defaults to 20. */
     pageSize?: number;
 }
 
 /**
- * Builds a {@link PagedResult}: a bidirectional, infinitely-scrolling page buffer.
+ * Builds a {@link PagedResult}: a bidirectional, infinitely-scrolling list backed by a
+ * TanStack {@link InfiniteQueryObserver}.
  *
- * This is the page-buffer half of the old `PageableListDatasource`, with the
- * entity-change-notify subscription and the `updateEntity` in-place sync removed.
- * The buffer is per-view state disposed when the subscription to `items$` is dropped —
- * it is not cross-component sync, so it is preserved here. Pagination is unchanged.
+ * `data.pages` is ordered [...backwards (earliest first), anchor, ...forwards (latest last)].
+ * Backwards pages arrive descending, so each is reversed; the pages are then concatenated into
+ * one buffer for `items$` in the order the backend returned them. Ordering and filtering are the
+ * backend's responsibility — the seam doesn't re-sort or re-filter. The observer is created lazily
+ * on first subscription and destroyed when the last subscriber leaves (mirrors `query()`).
  */
-export function pagedQuery<T>(opts: PagedQueryOptions<T>): PagedResult<T> {
+export function pagedQuery<T>(client: QueryClient, opts: PagedQueryOptions<T>): PagedResult<T> {
     const pageSize = opts.pageSize ?? 20;
-    const passesFilter = opts.filter ?? (() => true);
 
-    const items$ = new ReplaySubject<T[]>(1);
-    const loadingForwards$ = new BehaviorSubject<boolean>(false);
-    const loadingBackwards$ = new BehaviorSubject<boolean>(false);
-    const loading$ = new BehaviorSubject<boolean>(false);
-    const error$ = new BehaviorSubject<unknown>(undefined);
+    /** Flatten the fetched pages into one buffer for items$. Backwards pages arrive descending, so reverse them; everything else is taken as the backend returned it. */
+    const buildItems = (pages: T[][] | undefined, pageParams: PageParam[] | undefined): T[] => {
+        const data: T[] = [];
+        if (pages == null || pageParams == null)
+            return data;
 
-    let data: T[] = [];
-    let forwardsSkip = 0;
-    let backwardsSkip = 0;
-    let reachedEndForwards = false;
-    let reachedEndBackwards = false;
-    let firstLoadDone = false;
-
-    const loadingSubject = (dir: PageDirection) => dir === "forwards" ? loadingForwards$ : loadingBackwards$;
-    const isLoading = (dir: PageDirection) => loadingSubject(dir).value;
-    const setLoading = (dir: PageDirection, value: boolean) => {
-        loadingSubject(dir).next(value);
-        loading$.next(loadingForwards$.value || loadingBackwards$.value);
+        for (let i = 0; i < pages.length; i++) {
+            const param = pageParams[i];
+            // Backwards pages (negative index) arrive descending (nearest-to-anchor first); reverse so the page is ascending.
+            const ascending = param != null && param.index < 0 ? [...pages[i]].reverse() : pages[i];
+            data.push(...ascending);
+        }
+        return data;
     };
 
-    const runLoad = (dir: PageDirection) => {
-        if (isLoading(dir))
-            return;
-        if (dir === "forwards" ? reachedEndForwards : reachedEndBackwards)
-            return;
+    type Result = InfiniteQueryObserverResult<InfiniteData<T[], PageParam>, unknown>;
+    let observer: InfiniteQueryObserver<T[], unknown, InfiniteData<T[], PageParam>, unknown[], PageParam> | null = null;
+    let latest: Result | null = null;
 
-        setLoading(dir, true);
-        const skip = dir === "forwards" ? forwardsSkip : backwardsSkip;
-
-        opts.loadPage(dir, skip, pageSize).pipe(take(1)).subscribe({
-            next: page => {
-                if (dir === "forwards") {
-                    forwardsSkip += page.length;
-                    if (page.length < pageSize) reachedEndForwards = true;
-                } else {
-                    backwardsSkip += page.length;
-                    if (page.length < pageSize) reachedEndBackwards = true;
-                }
-
-                // Backwards pages arrive descending; reverse so the whole page is ascending.
-                const ascendingPage = dir === "backwards" ? [...page].reverse() : page;
-
-                if (!isSorted(ascendingPage, opts.sort)) {
-                    error$.next(new Error("Received page is not correctly sorted. Check if backend sort matches frontend sort!"));
-                    setLoading(dir, false);
-                    return;
-                }
-
-                for (const item of ascendingPage) {
-                    if (!passesFilter(item))
-                        continue;
-                    data.splice(getInsertIndex(data, item, opts.sort), 0, item);
-                }
-
-                firstLoadDone = true;
-                setLoading(dir, false);
-                items$.next([...data]);
+    const result$ = new Observable<Result>(sub => {
+        const o = new InfiniteQueryObserver<T[], unknown, InfiniteData<T[], PageParam>, unknown[], PageParam>(client, {
+            queryKey: opts.queryKey as unknown[],
+            queryFn: ({ pageParam }) => {
+                const { dir, skip } = pageRequest(pageParam.index, pageSize);
+                return firstValueFrom(opts.loadPage(dir, skip, pageSize));
             },
-            error: e => {
-                error$.next(e);
-                setLoading(dir, false);
-            }
+            initialPageParam: { index: 0 },
+            getNextPageParam: (lastPage, _all, lastParam) => {
+                // Walking forward off a backwards page (index < 0) always continues toward the anchor — a
+                // backwards page is never the forwards end, so its (possibly full) length must not decide
+                // hasNextPage. Only a forwards page (index >= 0) that came back partial is the real end.
+                if (lastParam.index < 0)
+                    return { index: lastParam.index + 1 };
+                return lastPage.length < pageSize ? undefined : { index: lastParam.index + 1 };
+            },
+            getPreviousPageParam: (firstPage, _all, firstParam) => {
+                // From the anchor, the previous page is the first backwards page — regardless of how many
+                // items the anchor holds ("before the date" is a separate range from "on/after the date").
+                if (firstParam.index === 0)
+                    return { index: -1 };
+                // Already paginating backwards; stop once a backwards page comes back partial.
+                return firstPage.length < pageSize ? undefined : { index: firstParam.index - 1 };
+            },
         });
-    };
+        observer = o;
+        latest = o.getCurrentResult();
+        sub.next(latest);
+        const unsubscribe = o.subscribe(r => { latest = r; sub.next(r); });
+        return () => {
+            unsubscribe();
+            o.destroy();
+            if (observer === o) {
+                observer = null;
+                latest = null;
+            }
+        };
+    }).pipe(shareReplay({ bufferSize: 1, refCount: true }));
 
-    // Kick off the initial page from the anchor.
-    runLoad("forwards");
+    // One projection so buildItems runs once per emission, shared by every derived stream.
+    const view$ = result$.pipe(
+        map(r => {
+            return {
+                items: buildItems(r.data?.pages, r.data?.pageParams),
+                error: r.error,
+                // `isPending`, not `isFetching`: loading$ tracks only the initial anchor load (no data
+                // yet). Subsequent page fetches and invalidation-driven background refetches keep
+                // `isFetching` true but `isPending` false — those surface through loadingForwards$/
+                // loadingBackwards$ instead, so loading$ never flips over an already-populated list.
+                loading: r.isPending,
+                // Initial anchor load (pending + fetching, no directional flag) is reported as forwards.
+                loadingForwards: r.isFetchingNextPage || (r.isFetching && r.isPending),
+                loadingBackwards: r.isFetchingPreviousPage,
+            };
+        }),
+        shareReplay({ bufferSize: 1, refCount: true }),
+    );
 
     return {
-        items$: items$.asObservable(),
-        loading$: loading$.asObservable(),
-        loadingForwards$: loadingForwards$.asObservable(),
-        loadingBackwards$: loadingBackwards$.asObservable(),
-        error$: error$.asObservable(),
+        items$: view$.pipe(map(v => v.items)),
+        loading$: view$.pipe(map(v => v.loading), distinctUntilChanged()),
+        loadingForwards$: view$.pipe(map(v => v.loadingForwards), distinctUntilChanged()),
+        loadingBackwards$: view$.pipe(map(v => v.loadingBackwards), distinctUntilChanged()),
+        error$: view$.pipe(map(v => v.error), distinctUntilChanged()),
         loadMore: (dir: PageDirection) => {
-            // Wait for the first page before honouring user-driven pagination.
-            if (!firstLoadDone)
+            if (!observer)
                 return;
-            runLoad(dir);
+            // Read fresh state straight off the observer (not the possibly-batched `latest`): a burst of
+            // scroll events fires loadMore repeatedly, and fetchNextPage/fetchPreviousPage default to
+            // cancelRefetch: true — without this guard each scroll cancels the in-flight page and restarts
+            // it, sending one GET per scroll event. Bail while a page in that direction is already loading.
+            const r = observer.getCurrentResult();
+            if (r.isPending)
+                return; // wait for the first page before honouring pagination
+            // A full refetch (refetchOnMount on a warm cache, or invalidation) re-fetches every
+            // loaded page at once. Starting a directional fetch now would cancel it (fetchNextPage/
+            // fetchPreviousPage default to cancelRefetch: true) and commit a pre-refetch snapshot,
+            // clobbering the freshly-fetched pages with stale ones. Wait for the refetch to settle —
+            // a later scroll (or the post-refetch re-render) re-attempts pagination.
+            if (r.isFetching && !r.isFetchingNextPage && !r.isFetchingPreviousPage)
+                return;
+            if (dir === "forwards") {
+                if (r.isFetchingNextPage || !r.hasNextPage)
+                    return;
+                observer.fetchNextPage();
+            } else {
+                if (r.isFetchingPreviousPage || !r.hasPreviousPage)
+                    return;
+                observer.fetchPreviousPage();
+            }
         },
-        hasMore: (dir: PageDirection) => dir === "forwards" ? !reachedEndForwards : !reachedEndBackwards,
-        refetch: () => {
-            data = [];
-            forwardsSkip = 0;
-            backwardsSkip = 0;
-            reachedEndForwards = false;
-            reachedEndBackwards = false;
-            firstLoadDone = false;
-            loadingForwards$.next(false);
-            loadingBackwards$.next(false);
-            loading$.next(false);
-            error$.next(undefined);
-            runLoad("forwards");
-        }
+        hasMore: (dir: PageDirection) => dir === "forwards" ? (latest?.hasNextPage ?? false) : (latest?.hasPreviousPage ?? false),
+        refetch: () => { observer?.refetch(); },
     };
 }

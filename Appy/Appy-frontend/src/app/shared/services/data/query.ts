@@ -1,44 +1,48 @@
-import { BehaviorSubject, Observable, catchError, map, of, shareReplay, switchMap } from "rxjs";
+import { QueryClient, QueryObserver, QueryObserverResult } from "@tanstack/query-core";
+import { Observable, distinctUntilChanged, firstValueFrom, map, shareReplay } from "rxjs";
+import { CacheKey } from "./cache-coordinator";
 import { QueryResult } from "./contracts";
 
 /**
- * Builds a {@link QueryResult} around a single fetch.
+ * Builds a {@link QueryResult} backed by a TanStack {@link QueryObserver}.
  *
- * `refetch$` re-triggers the `switchMap`, and `shareReplay({ refCount: true })`
- * means multiple `| async` pipes (e.g. one on `data$`, one inside `*ngIf`) share
- * one in-flight request instead of double-fetching. No cache, no cross-view sharing —
- * the fetch re-runs whenever the result is re-subscribed from scratch or `refetch()`
- * is called. That deliberate "do nothing" is where a real cache would later live.
+ * The observer is created and subscribed lazily on the first subscription to any of
+ * data$/loading$/error$ (via shareReplay refCount), and destroyed when the last subscriber
+ * leaves — so an unsubscribed QueryResult registers nothing with the cache, and unmounting a
+ * component makes the query inactive and eligible for garbage collection. A route-reused
+ * component that keeps its subscription alive across detach keeps the observer active, so
+ * invalidation refetches it in the background.
+ *
+ * `fetchFn` (an Observable) is adapted to the Promise a queryFn must return via `firstValueFrom`.
+ * `refetch()` is a no-op while nothing is subscribed (refetching an unobserved query is moot).
  */
-export function query<T>(fetchFn: () => Observable<T>): QueryResult<T> {
-    const refetch$ = new BehaviorSubject<void>(undefined);
-    const loading$ = new BehaviorSubject<boolean>(false);
-    const error$ = new BehaviorSubject<unknown>(undefined);
+export function query<T>(client: QueryClient, queryKey: CacheKey, fetchFn: () => Observable<T>): QueryResult<T> {
+    let observer: QueryObserver<T, unknown, T, T> | null = null;
 
-    const data$ = refetch$.pipe(
-        switchMap(() => {
-            loading$.next(true);
-            error$.next(undefined);
-
-            return fetchFn().pipe(
-                map(data => {
-                    loading$.next(false);
-                    return data as T | undefined;
-                }),
-                catchError(err => {
-                    error$.next(err);
-                    loading$.next(false);
-                    return of(undefined);
-                })
-            );
-        }),
-        shareReplay({ bufferSize: 1, refCount: true })
-    );
+    const result$ = new Observable<QueryObserverResult<T, unknown>>(sub => {
+        const o = new QueryObserver<T, unknown, T, T>(client, {
+            queryKey: queryKey as unknown[],
+            queryFn: () => firstValueFrom(fetchFn()),
+        });
+        observer = o;
+        sub.next(o.getCurrentResult());
+        const unsubscribe = o.subscribe(r => sub.next(r));
+        return () => {
+            unsubscribe();
+            o.destroy();
+            if (observer === o)
+                observer = null;
+        };
+    }).pipe(shareReplay({ bufferSize: 1, refCount: true }));
 
     return {
-        data$,
-        loading$: loading$.asObservable(),
-        error$: error$.asObservable(),
-        refetch: () => refetch$.next()
+        data$: result$.pipe(map(r => r.data), distinctUntilChanged()),
+        // `isPending` (status === 'pending'), not `isFetching`: true only on the initial load while
+        // there's no data yet. Background refetches (invalidation, staleTime-0 revalidation) keep
+        // `isFetching` true but `isPending` false, so the loading indicator doesn't pop up over data
+        // we already have.
+        loading$: result$.pipe(map(r => r.isPending), distinctUntilChanged()),
+        error$: result$.pipe(map(r => r.error), distinctUntilChanged()),
+        refetch: () => { observer?.refetch(); },
     };
 }

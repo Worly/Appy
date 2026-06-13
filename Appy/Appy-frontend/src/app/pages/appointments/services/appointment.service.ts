@@ -20,22 +20,24 @@ export class AppointmentService extends BaseModelService<Appointment, Appointmen
         private translateService: TranslateService,
         private toastService: ToastService
     ) {
-        super(injector, AppointmentView.ENTITY_TYPE, Appointment, AppointmentView, [appointmentKeys.all]);
+        super(injector, AppointmentView.ENTITY_TYPE, Appointment, AppointmentView, appointmentKeys);
     }
 
     public override getAll(date?: Dayjs): QueryResult<AppointmentView[]> {
         if (date == null)
             throw "Date cannot be null";
 
-        return this.getAllAdvanced({
+        return this.getAllAdvanced(appointmentKeys.list(date.format("YYYY-MM-DD")), {
             date: date.format("YYYY-MM-DD")
         });
     }
 
-    public getList(date: Dayjs, filter: SmartFilter | undefined, sortPredicate: (a: AppointmentView, b: AppointmentView) => number): PagedResult<AppointmentView> {
-        return this.getListAdvanced({
-            date: date.format("YYYY-MM-DD")
-        }, sortPredicate, filter);
+    public getList(date: Dayjs, filter: SmartFilter | undefined): PagedResult<AppointmentView> {
+        // Filter is part of the cache key so different filters cache as separate lists; the
+        // serialized form must match what getListAdvanced sends as the `filter` HTTP param.
+        return this.getListAdvanced(
+            [...appointmentKeys.list(date.format("YYYY-MM-DD")), filter ? JSON.stringify(filter) : "all"],
+            { date: date.format("YYYY-MM-DD") }, filter);
     }
 
     public getFreeTimes(date: Dayjs, serviceId: number, duration: Duration, ignoreAppointmentId?: number): Observable<FreeTime[]> {

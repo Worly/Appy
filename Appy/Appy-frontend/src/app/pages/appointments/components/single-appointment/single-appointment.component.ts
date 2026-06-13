@@ -100,10 +100,9 @@ export class SingleAppointmentComponent implements OnInit, OnDestroy {
       return;
 
     this.isLoadingStatusChange = true;
-    // No live datasource any more: update our own view from the mutation response.
-    this.subs.push(this.appointmentService.setStatus(this.appointment.id, newStatus).subscribe(a => {
-      this.appointment = a;
-      this.isLoadingStatusChange = false;
+    this.subs.push(this.appointmentService.setStatus(this.appointment.id, newStatus).subscribe({
+      next: () => this.isLoadingStatusChange = false,
+      error: () => this.isLoadingStatusChange = false
     }));
   }
 

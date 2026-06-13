@@ -9,6 +9,7 @@ import { AttachDetachHooksService } from './services/attach-detach-hooks.service
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 import { AppInitializerService } from './services/app-initializer.service';
 import { DayjsDateAdapter, MAT_DAYJS_DATE_ADAPTER_OPTIONS, MAT_DAYJS_DATE_FORMATS } from './utils/material-dayjs-adapter';
+import { createQueryClient } from './shared/services/data/query-client';
 import { ButtonModule } from './components/button/button.module';
 import { FacilitiesModule } from './pages/facilities/facilities.module';
 import { TranslateModule } from './components/translate/translate.module';
@@ -22,6 +23,7 @@ import { environment } from '../environments/environment';
 import { ContextMenuModule } from './components/context-menu/context-menu.module';
 import { SharedModule } from './shared/shared.module';
 
+import { QueryClient } from '@tanstack/query-core';
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faCaretDown } from "@fortawesome/free-solid-svg-icons/faCaretDown";
@@ -127,6 +129,13 @@ dayjs.extend(duration);
   ],
   providers: [
     { provide: RouteReuseStrategy, useClass: CustomReuseStrategy },
+    { provide: QueryClient, useFactory: createQueryClient },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (queryClient: QueryClient) => () => queryClient.mount(),
+      deps: [QueryClient],
+      multi: true,
+    },
     {
       provide: APP_INITIALIZER, useFactory:
         function initAttachDetachHooks(router: Router, reuseStrategy: RouteReuseStrategy) {

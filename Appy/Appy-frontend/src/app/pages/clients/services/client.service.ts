@@ -10,11 +10,11 @@ import { appointmentKeys, clientKeys } from "src/app/shared/services/data/keys";
 export class ClientService extends BaseModelService<Client, Client> {
     constructor(injector: Injector) {
         // Appointments embed the client, so client mutations invalidate appointments too.
-        super(injector, Client.ENTITY_TYPE, Client, Client, [clientKeys.all, appointmentKeys.all]);
+        super(injector, Client.ENTITY_TYPE, Client, Client, clientKeys, [appointmentKeys.all]);
     }
 
     public override getAll(archived?: boolean): QueryResult<Client[]> {
-        return this.getAllAdvanced({
+        return this.getAllAdvanced(clientKeys.list(!!archived), {
             archived: !!archived
         });
     }
