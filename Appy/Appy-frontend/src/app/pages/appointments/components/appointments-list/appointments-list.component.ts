@@ -3,7 +3,8 @@ import dayjs, { Dayjs } from 'dayjs';
 import { Duration } from 'dayjs/plugin/duration';
 import { timeBetweenMs } from 'src/app/utils/time-utils';
 import _ from 'lodash';
-import { Subscription } from 'rxjs';
+import { Subscription, filter } from 'rxjs';
+import { Router, Scroll } from '@angular/router';
 import { AppointmentView } from 'src/app/models/appointment';
 import { AppointmentService } from '../../services/appointment.service';
 import { appFilterToSmartFilter, AppointmentsFilter } from '../appointments/appointments.component';
@@ -48,6 +49,9 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
   private pagedResult?: PagedResult<AppointmentView>;
   private pagedSubs: Subscription[] = [];
 
+  // Component-lifetime subscriptions (router events), torn down in ngOnDestroy.
+  private subs: Subscription[] = [];
+
   // Synchronous mirrors of PagedResult.loadingForwards$/loadingBackwards$, read by the
   // template (isLoadingNext/isLoadingPrevious) to place the bottom/top spinner.
   private loadingForwards: boolean = false;
@@ -79,15 +83,32 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
   constructor(
     private changeDetector: ChangeDetectorRef,
     private appointmentService: AppointmentService,
+    private router: Router,
   ) { }
 
   ngOnInit(): void {
     if (this.date.isSame(dayjs(), "date"))
       this.load();
+
+    // scrollPositionRestoration ('enabled') scrolls this forward navigation to (0, 0) on a
+    // deferred tick after the route renders. On a warm-cache revisit the list paints from cache
+    // and snaps to startDate before that (0, 0) lands, and the next render (the background refetch)
+    // can be seconds away on a slow network — so without this nothing re-snaps and the viewport
+    // sits at the top until the refetch arrives. Re-assert the snap once the router has emitted its
+    // Scroll event, deferred via setTimeout so we run after the router's own (later-queued) scroll.
+    this.subs.push(this.router.events.pipe(filter((e): e is Scroll => e instanceof Scroll)).subscribe(() => {
+      if (!this.needsScrollToStartDate || this.userScrolling)
+        return;
+      setTimeout(() => {
+        if (this.needsScrollToStartDate && !this.userScrolling)
+          this.scrollToDate(this.startDate);
+      });
+    }));
   }
 
   ngOnDestroy(): void {
     this.pagedSubs.forEach(s => s.unsubscribe());
+    this.subs.forEach(s => s.unsubscribe());
   }
 
   load() {
