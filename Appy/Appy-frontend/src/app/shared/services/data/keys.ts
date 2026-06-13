@@ -10,34 +10,35 @@ import { CacheKey } from "./cache-coordinator";
  */
 
 /**
- * The shape {@link BaseModelService} needs from an entity's key factory: the entity-wide `all`
- * key (used by the inherited `getAll()` and as the first invalidation key), and an optional
- * `detail(id)` factory that `getById` uses to build its own key. Entities without a by-id read
- * (e.g. working hours) omit `detail`.
+ * The shape every entity key factory implements (enforced via `satisfies` below). `all` is the
+ * entity-wide key (used by the inherited `getAll()` and as the first invalidation key); `detail(id)`
+ * is what `getById` builds its key from; `list(...)` is the per-discriminator list key. `detail` and
+ * `list` are optional — entities without a by-id read (e.g. working hours) omit them.
  */
 export interface EntityKeyFactory {
     readonly all: CacheKey;
     detail?(id: any): CacheKey;
+    list?(...args: any[]): CacheKey;
 }
 
 export const appointmentKeys = {
     all: ["appointment"] as const,
     list: (date: string) => ["appointment", "list", date] as const,
     detail: (id: number) => ["appointment", "detail", id] as const,
-};
+} satisfies EntityKeyFactory;
 
 export const clientKeys = {
     all: ["client"] as const,
     list: (archived: boolean) => ["client", "list", archived] as const,
     detail: (id: number) => ["client", "detail", id] as const,
-};
+} satisfies EntityKeyFactory;
 
 export const serviceKeys = {
     all: ["service"] as const,
     list: (archived: boolean) => ["service", "list", archived] as const,
     detail: (id: number) => ["service", "detail", id] as const,
-};
+} satisfies EntityKeyFactory;
 
 export const workingHourKeys = {
     all: ["workingHour"] as const,
-};
+} satisfies EntityKeyFactory;
