@@ -8,20 +8,58 @@
     border-radius: var(--default-border-radius);
 
     display: flex;
+    align-items: center;
     gap: 15px;
 
     .color {
-        width: 10px;
+        // Slim, rounded service-colour accent (matches the details popup's accent).
+        flex: 0 0 6px;
+        align-self: stretch;
+        border-radius: var(--default-border-radius);
     }
 
+    .info-container {
+        flex: 1 1 auto;
+        min-width: 0;
+
+        display: flex;
+        flex-direction: column;
+        // Matches the original top-row margin-bottom so row height is unchanged.
+        gap: 5px;
+    }
+
+    // The "when": from-to time with the duration trailing it, faint as secondary metadata.
     .top-row {
         font-size: 0.9rem;
         display: flex;
         flex-wrap: wrap;
+        align-items: baseline;
 
         column-gap: 10px;
 
-        margin-bottom: 5px;
+        .duration {
+            opacity: 0.55;
+        }
+    }
+
+    // Second line: client is the anchor, with the service moved here as faint
+    // trailing detail. Kept to a single row (wraps only if cramped).
+    .bottom-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        column-gap: 10px;
+
+        .client {
+            font-size: 1rem;
+            word-break: break-word;
+        }
+
+        .service {
+            font-size: 0.9rem;
+            opacity: 0.6;
+            word-break: break-word;
+        }
     }
 
     &.last {
@@ -37,5 +75,5 @@
 
 .status-icons {
     margin-left: auto;
-    margin-top: auto;
+    align-self: center;
 }

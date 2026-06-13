@@ -7,6 +7,7 @@ import { ServiceColorsService } from 'src/app/pages/services/services/service-co
 type RenderedAppointment = {
   id: number;
   time: string;
+  duration: Duration;
   service: string;
   serviceColor: string;
   status: AppointmentStatus;
@@ -46,6 +47,7 @@ export class SingleAppointmentListItemComponent {
     this.renderedAppointment = {
       id: ap.id,
       time: `${ap.time?.format("HH:mm")} - ${ap.time?.add(ap.duration as Duration).format("HH:mm")}`,
+      duration: ap.duration as Duration,
       service: ap.service?.displayName as string,
       serviceColor: this.serviceColorsService.get(ap.service?.colorId),
       status: ap.status!,

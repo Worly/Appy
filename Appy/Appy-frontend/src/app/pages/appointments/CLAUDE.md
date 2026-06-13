@@ -35,7 +35,7 @@ Both are read/written reactively so the URL is always shareable and bookmarkable
 
 - **`AppointmentsListComponent`**: List view container. Bidirectional pagination via a `PagedResult` (`items$` / `loadMore` / `hasMore`, with `loadingForwards$`/`loadingBackwards$` driving the bottom/top spinners). `keepScroll`/`restoreScroll` preserves the visible anchor when pages are prepended/appended. The component is not route-reused — going to edit destroys it, going back rebuilds it from the URL date — so there's no detach/attach state to manage. Two flags guard the post-load scroll position: (1) `userScrolling`, set by `window:wheel`/`touchmove`/middle-mousedown and cleared by programmatic scrolls, gates `updateDate()` so a programmatic-scroll echo never rewrites the URL with a stale date and triggers a reload. (2) `needsScrollToStartDate`, set by `load()` and cleared on the same user-input events, makes every render re-snap to `startDate` until the user scrolls — needed because both auto-paginate-back (which fires when the first snap lands near the top) and Angular's `scrollPositionRestoration` scrolling to `(0, 0)` on forward navigation can drag the viewport off the URL's date after the initial snap. Because re-snapping is tied to renders, a warm-cache revisit (instant cached paint, then a possibly-slow background refetch as the next render) would leave the viewport stuck at `(0, 0)` for the whole refetch if `scrollPositionRestoration` lands after the cached paint's snap; so the component also re-snaps on the router's `Scroll` event (deferred, so it runs after the router's own restoration) to bridge that render gap.
 
-- **`SingleAppointmentListItemComponent`**: One row in the list view. Takes an `isOverlapping` input that draws a red inset outline when the appointment collides with an adjacent one.
+- **`SingleAppointmentListItemComponent`**: One row in the list view, showing the from–to time, the appointment duration (faint, just after the time — issue #128), service, and client. Takes an `isOverlapping` input that draws a red inset outline when the appointment collides with an adjacent one.
 
 - **`AppointmentEditComponent`**: Create/edit form with:
   - Client lookup (`ClientLookupComponent` from `ClientsModule`)
@@ -49,7 +49,7 @@ Both are read/written reactively so the URL is always shareable and bookmarkable
 
 - **`TimeButtonComponent`**: Individual available time slot button.
 
-- **`SingleAppointmentComponent`**: Detail/view panel for one appointment showing date, time, duration, client, service, notes, previous appointment link, and status controls. Also shows the "notify client" action if `X-Can-Notify-Client: true` is returned in the response header.
+- **`SingleAppointmentComponent`**: Detail/view panel for one appointment, laid out as grouped cards — a header (service name + service-colour accent bar + status control), a "when" card (date, from–to time, duration), a client card, notes, and a previous-appointment link — with the created/updated timestamps demoted to a faint footer. Also shows the "notify client" action if `X-Can-Notify-Client: true` is returned in the response header.
 
 ## Services
 
