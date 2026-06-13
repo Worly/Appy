@@ -53,10 +53,6 @@ export function pagedQuery<T>(client: QueryClient, opts: PagedQueryOptions<T>): 
     const result$ = new Observable<Result>(sub => {
         const o = new InfiniteQueryObserver<T[], unknown, InfiniteData<T[], PageParam>, unknown[], PageParam>(client, {
             queryKey: opts.queryKey as unknown[],
-            // No special gcTime: a torn-down list lingers in the cache for the default 5 min like any
-            // other query. On revisit to the same anchor it repaints the cached pages instantly and the
-            // staleTime-0 background refetch corrects them — standard invalidation behaviour; the brief
-            // pre-edit flash is acceptable. (CacheCoordinator.clear() still wipes it on facility/logout.)
             queryFn: ({ pageParam }) => firstValueFrom(opts.loadPage(pageParam.dir, pageParam.skip, pageSize)),
             initialPageParam: { dir: "forwards", skip: 0 },
             getNextPageParam: (lastPage, _all, lastParam) =>
