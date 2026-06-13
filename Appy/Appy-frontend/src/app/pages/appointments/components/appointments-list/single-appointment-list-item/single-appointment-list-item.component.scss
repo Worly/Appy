@@ -15,7 +15,7 @@
         // Slim, rounded service-colour accent (matches the details popup's accent).
         flex: 0 0 6px;
         align-self: stretch;
-        border-radius: 3px;
+        border-radius: var(--default-border-radius);
     }
 
     .info-container {

@@ -19,7 +19,7 @@
         flex: 0 0 5px;
         align-self: stretch;
         min-height: 1.4rem;
-        border-radius: 3px;
+        border-radius: var(--default-border-radius);
     }
 
     .title {
@@ -133,7 +133,7 @@
 .previous-appointment-color {
     width: 10px;
     height: 40px;
-    border-radius: 2px;
+    border-radius: var(--default-border-radius);
 }
 
 .previous-appointment-details {
