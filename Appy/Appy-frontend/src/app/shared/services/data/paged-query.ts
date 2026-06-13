@@ -3,10 +3,25 @@ import { Observable, distinctUntilChanged, firstValueFrom, map, shareReplay } fr
 import { CacheKey } from "./cache-coordinator";
 import { PageDirection, PagedResult } from "./contracts";
 
-/** The param each page is fetched with. `dir` selects the endpoint direction; `skip` is the backend offset for that direction. */
+/**
+ * A page's position relative to the anchor, as a signed index: 0 = the anchor (forwards, skip 0),
+ * +n = the nth forwards page, -n = the nth backwards page.
+ *
+ * Why an index and not a {dir, skip} pair: TanStack reconstructs a *refetched* infinite query by
+ * walking forward from page 0 via `getNextPageParam` (it does not reuse the stored params). The
+ * params must therefore form one monotonic chain (…-2, -1, 0, 1, 2…). With {dir, skip},
+ * `getNextPageParam` sitting on a full backwards page can't tell it's going backwards and computes a
+ * forwards skip, so the anchor page gets refetched at the wrong offset and its items disappear.
+ */
 interface PageParam {
-    dir: PageDirection;
-    skip: number;
+    index: number;
+}
+
+/** Map a signed page index to the backend (direction, skip) the loadPage callback expects. */
+function pageRequest(index: number, pageSize: number): { dir: PageDirection; skip: number } {
+    return index >= 0
+        ? { dir: "forwards", skip: index * pageSize }
+        : { dir: "backwards", skip: (-index - 1) * pageSize };
 }
 
 export interface PagedQueryOptions<T> {
@@ -39,8 +54,8 @@ export function pagedQuery<T>(client: QueryClient, opts: PagedQueryOptions<T>): 
 
         for (let i = 0; i < pages.length; i++) {
             const param = pageParams[i];
-            // Backwards pages arrive descending (nearest-to-anchor first); reverse so the page is ascending.
-            const ascending = param?.dir === "backwards" ? [...pages[i]].reverse() : pages[i];
+            // Backwards pages (negative index) arrive descending (nearest-to-anchor first); reverse so the page is ascending.
+            const ascending = param != null && param.index < 0 ? [...pages[i]].reverse() : pages[i];
             data.push(...ascending);
         }
         return data;
@@ -53,16 +68,26 @@ export function pagedQuery<T>(client: QueryClient, opts: PagedQueryOptions<T>): 
     const result$ = new Observable<Result>(sub => {
         const o = new InfiniteQueryObserver<T[], unknown, InfiniteData<T[], PageParam>, unknown[], PageParam>(client, {
             queryKey: opts.queryKey as unknown[],
-            queryFn: ({ pageParam }) => firstValueFrom(opts.loadPage(pageParam.dir, pageParam.skip, pageSize)),
-            initialPageParam: { dir: "forwards", skip: 0 },
-            getNextPageParam: (lastPage, _all, lastParam) =>
-                lastPage.length < pageSize ? undefined : { dir: "forwards", skip: lastParam.skip + lastPage.length },
+            queryFn: ({ pageParam }) => {
+                const { dir, skip } = pageRequest(pageParam.index, pageSize);
+                return firstValueFrom(opts.loadPage(dir, skip, pageSize));
+            },
+            initialPageParam: { index: 0 },
+            getNextPageParam: (lastPage, _all, lastParam) => {
+                // Walking forward off a backwards page (index < 0) always continues toward the anchor — a
+                // backwards page is never the forwards end, so its (possibly full) length must not decide
+                // hasNextPage. Only a forwards page (index >= 0) that came back partial is the real end.
+                if (lastParam.index < 0)
+                    return { index: lastParam.index + 1 };
+                return lastPage.length < pageSize ? undefined : { index: lastParam.index + 1 };
+            },
             getPreviousPageParam: (firstPage, _all, firstParam) => {
-                // No backwards page fetched yet (first page is still the forwards anchor) → start backwards at skip 0.
-                if (firstParam.dir === "forwards")
-                    return { dir: "backwards", skip: 0 };
-                // Otherwise firstPage is the most-recent backwards page; stop on a partial page.
-                return firstPage.length < pageSize ? undefined : { dir: "backwards", skip: firstParam.skip + firstPage.length };
+                // From the anchor, the previous page is the first backwards page — regardless of how many
+                // items the anchor holds ("before the date" is a separate range from "on/after the date").
+                if (firstParam.index === 0)
+                    return { index: -1 };
+                // Already paginating backwards; stop once a backwards page comes back partial.
+                return firstPage.length < pageSize ? undefined : { index: firstParam.index - 1 };
             },
         });
         observer = o;

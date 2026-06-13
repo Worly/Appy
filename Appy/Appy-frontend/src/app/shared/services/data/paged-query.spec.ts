@@ -192,6 +192,26 @@ describe("pagedQuery()", () => {
         expect(pq.hasMore("forwards")).toBe(true); // last loaded page was full, so more remains
     });
 
+    it("preserves all pages (anchor + backwards) when a bidirectional list is refetched", async () => {
+        // Reproduces the cache-revisit bug: after a full backwards page is prepended it sits first in
+        // the page list, and TanStack's refetch reconstructs pages by walking forward from page 0 via
+        // getNextPageParam. If that walk treats the backwards page as a forwards one, the anchor slot is
+        // re-fetched at the wrong skip (empty here) and the anchor's items vanish + hasNextPage flips false.
+        const pq = pagedQuery<number>(newClient(), { queryKey: ["p", "refetch-bidi"], loadPage: dataset([10, 11], [9, 8]), pageSize: 2 });
+        const emissions: number[][] = [];
+        pq.items$.subscribe(i => emissions.push(i));
+        await flush();
+        pq.loadMore("backwards");
+        await flush();
+        expect(lastEmission(emissions)).toEqual([8, 9, 10, 11]);
+        expect(pq.hasMore("forwards")).toBe(true);
+
+        pq.refetch();
+        await flush();
+        expect(lastEmission(emissions)).toEqual([8, 9, 10, 11]); // anchor [10, 11] must survive the refetch
+        expect(pq.hasMore("forwards")).toBe(true);
+    });
+
     it("emits the error on error$ when a page fails", async () => {
         const pq = pagedQuery<number>(newClient(), { queryKey: ["p", 11], loadPage: () => throwError(() => new Error("nope")), pageSize: 2 });
         const errors: unknown[] = [];
