@@ -143,6 +143,41 @@ describe("pagedQuery()", () => {
         expect(loading).toBe(false);
     });
 
+    it("reports loadingForwards$ during a loadMore('forwards') and fetches each next page only once", async () => {
+        const sources: Subject<number[]>[] = [];
+        let calls = 0;
+        const pq = pagedQuery<number>(newClient(), {
+            queryKey: ["p", "fwd-more"],
+            loadPage: () => { calls++; const s = new Subject<number[]>(); sources.push(s); return s; },
+            pageSize: 2,
+        });
+        let fwd = false;
+        pq.loadingForwards$.subscribe(l => fwd = l);
+        pq.items$.subscribe();
+        await flush();
+        sources[0].next([10, 11]); // full initial anchor page → another page remains
+        sources[0].complete();
+        await flush();
+        expect(fwd).toBe(false);
+        expect(calls).toBe(1);
+
+        pq.loadMore("forwards");
+        await flush();
+        expect(fwd).toBe(true); // the next page is in flight → forwards spinner is on
+        expect(calls).toBe(2);
+
+        // A stream of scroll events fires loadMore again while the page is still loading — no extra GETs.
+        pq.loadMore("forwards");
+        pq.loadMore("forwards");
+        await flush();
+        expect(calls).toBe(2);
+
+        sources[1].next([12, 13]);
+        sources[1].complete();
+        await flush();
+        expect(fwd).toBe(false);
+    });
+
     it("refetch() refreshes all loaded pages in place", async () => {
         const pq = pagedQuery<number>(newClient(), { queryKey: ["p", 10], loadPage: dataset([10, 11, 12, 13]), pageSize: 2 });
         const emissions: number[][] = [];

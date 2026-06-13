@@ -109,12 +109,24 @@ export function pagedQuery<T>(client: QueryClient, opts: PagedQueryOptions<T>): 
         loadingBackwards$: view$.pipe(map(v => v.loadingBackwards), distinctUntilChanged()),
         error$: view$.pipe(map(v => v.error), distinctUntilChanged()),
         loadMore: (dir: PageDirection) => {
-            if (!observer || !latest || latest.isPending)
+            if (!observer)
+                return;
+            // Read fresh state straight off the observer (not the possibly-batched `latest`): a burst of
+            // scroll events fires loadMore repeatedly, and fetchNextPage/fetchPreviousPage default to
+            // cancelRefetch: true — without this guard each scroll cancels the in-flight page and restarts
+            // it, sending one GET per scroll event. Bail while a page in that direction is already loading.
+            const r = observer.getCurrentResult();
+            if (r.isPending)
                 return; // wait for the first page before honouring pagination
-            if (dir === "forwards")
+            if (dir === "forwards") {
+                if (r.isFetchingNextPage || !r.hasNextPage)
+                    return;
                 observer.fetchNextPage();
-            else
+            } else {
+                if (r.isFetchingPreviousPage || !r.hasPreviousPage)
+                    return;
                 observer.fetchPreviousPage();
+            }
         },
         hasMore: (dir: PageDirection) => dir === "forwards" ? (latest?.hasNextPage ?? false) : (latest?.hasPreviousPage ?? false),
         refetch: () => { observer?.refetch(); },
