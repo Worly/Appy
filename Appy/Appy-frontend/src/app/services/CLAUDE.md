@@ -19,4 +19,4 @@ Manages the active visual theme: `light`, `dark`, or `follow-os` (tracks the `pr
 
 ## RouteReuseStrategy & AttachDetachHooksService
 
-A custom `RouteReuseStrategy` caches Angular components in memory when the user navigates away, then restores them on return (preserving scroll position and loaded data). `AttachDetachHooksService` exposes `onAttach` and `onDetach` Observables that page components subscribe to for custom behavior during cache/restore cycles.
+A custom `RouteReuseStrategy` caches Angular components in memory when the user navigates away, then restores them on return (preserving scroll position and loaded data). Routes opt in via `data: { shouldDetach: true, detachGroup: "<name>" }` (e.g. the clients and services list routes). `AttachDetachHooksService` calls `ngBeforeAttach` / `ngAfterAttach` / `ngBeforeDetach` lifecycle hooks on components that implement them, for custom behaviour during cache/restore cycles — e.g. the cached clients/services lists implement `ngBeforeAttach` to refetch in place (the data seam has no live sync, so they'd otherwise show stale data after an edit).
