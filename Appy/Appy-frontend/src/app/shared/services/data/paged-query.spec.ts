@@ -4,7 +4,6 @@ import { pagedQuery } from "./paged-query";
 import { PageDirection } from "./contracts";
 
 const flush = () => new Promise<void>(resolve => setTimeout(resolve));
-const asc = (a: number, b: number) => a - b;
 const newClient = () => new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
 /** Builds a loadPage that slices fixed forwards/backwards datasets by skip/take. */
@@ -18,8 +17,8 @@ function lastEmission<T>(emissions: T[][]): T[] {
 }
 
 describe("pagedQuery()", () => {
-    it("loads the first forwards page on subscription and emits it sorted", async () => {
-        const pq = pagedQuery<number>(newClient(), { queryKey: ["p", 1], loadPage: dataset([10, 11, 12, 13]), sort: asc, pageSize: 2 });
+    it("loads the first forwards page on subscription and emits it", async () => {
+        const pq = pagedQuery<number>(newClient(), { queryKey: ["p", 1], loadPage: dataset([10, 11, 12, 13]), pageSize: 2 });
         const emissions: number[][] = [];
         pq.items$.subscribe(i => emissions.push(i));
         await flush();
@@ -27,7 +26,7 @@ describe("pagedQuery()", () => {
     });
 
     it("appends the next page on loadMore('forwards')", async () => {
-        const pq = pagedQuery<number>(newClient(), { queryKey: ["p", 2], loadPage: dataset([10, 11, 12, 13]), sort: asc, pageSize: 2 });
+        const pq = pagedQuery<number>(newClient(), { queryKey: ["p", 2], loadPage: dataset([10, 11, 12, 13]), pageSize: 2 });
         const emissions: number[][] = [];
         pq.items$.subscribe(i => emissions.push(i));
         await flush();
@@ -36,8 +35,8 @@ describe("pagedQuery()", () => {
         expect(lastEmission(emissions)).toEqual([10, 11, 12, 13]);
     });
 
-    it("prepends earlier items on loadMore('backwards'), keeping the buffer globally sorted", async () => {
-        const pq = pagedQuery<number>(newClient(), { queryKey: ["p", 3], loadPage: dataset([10, 11], [9, 8, 7, 6]), sort: asc, pageSize: 2 });
+    it("prepends earlier items on loadMore('backwards') by reversing the descending backwards pages", async () => {
+        const pq = pagedQuery<number>(newClient(), { queryKey: ["p", 3], loadPage: dataset([10, 11], [9, 8, 7, 6]), pageSize: 2 });
         const emissions: number[][] = [];
         pq.items$.subscribe(i => emissions.push(i));
         await flush();
@@ -50,7 +49,7 @@ describe("pagedQuery()", () => {
     });
 
     it("reports hasMore false once a partial page is returned", async () => {
-        const pq = pagedQuery<number>(newClient(), { queryKey: ["p", 4], loadPage: dataset([10, 11, 12]), sort: asc, pageSize: 2 });
+        const pq = pagedQuery<number>(newClient(), { queryKey: ["p", 4], loadPage: dataset([10, 11, 12]), pageSize: 2 });
         pq.items$.subscribe();
         await flush();
         expect(pq.hasMore("forwards")).toBe(true);
@@ -59,22 +58,9 @@ describe("pagedQuery()", () => {
         expect(pq.hasMore("forwards")).toBe(false);
     });
 
-    it("drops filtered items from the buffer but still advances the backend skip", async () => {
-        const pq = pagedQuery<number>(newClient(), {
-            queryKey: ["p", 5], loadPage: dataset([10, 11, 12, 13]), sort: asc, pageSize: 2, filter: n => n % 2 === 0,
-        });
-        const emissions: number[][] = [];
-        pq.items$.subscribe(i => emissions.push(i));
-        await flush();
-        expect(lastEmission(emissions)).toEqual([10]);
-        pq.loadMore("forwards");
-        await flush();
-        expect(lastEmission(emissions)).toEqual([10, 12]);
-    });
-
     it("reports loading true while a page is in flight and false once it resolves", async () => {
         const source = new Subject<number[]>();
-        const pq = pagedQuery<number>(newClient(), { queryKey: ["p", 6], loadPage: () => source, sort: asc, pageSize: 2 });
+        const pq = pagedQuery<number>(newClient(), { queryKey: ["p", 6], loadPage: () => source, pageSize: 2 });
         const loadings: boolean[] = [];
         pq.loading$.subscribe(l => loadings.push(l));
         pq.items$.subscribe();
@@ -88,7 +74,7 @@ describe("pagedQuery()", () => {
 
     it("reports loadingForwards$ for the initial forwards page", async () => {
         const source = new Subject<number[]>();
-        const pq = pagedQuery<number>(newClient(), { queryKey: ["p", 7], loadPage: () => source, sort: asc, pageSize: 2 });
+        const pq = pagedQuery<number>(newClient(), { queryKey: ["p", 7], loadPage: () => source, pageSize: 2 });
         let fwd = false, bwd = false;
         pq.loadingForwards$.subscribe(l => fwd = l);
         pq.loadingBackwards$.subscribe(l => bwd = l);
@@ -109,7 +95,7 @@ describe("pagedQuery()", () => {
         const pq = pagedQuery<number>(newClient(), {
             queryKey: ["p", 8],
             loadPage: (dir: PageDirection) => dir === "forwards" ? fwdSource : bwdSource,
-            sort: asc, pageSize: 2,
+            pageSize: 2,
         });
         let fwd = false, bwd = false;
         pq.loadingForwards$.subscribe(l => fwd = l);
@@ -136,7 +122,7 @@ describe("pagedQuery()", () => {
         const pq = pagedQuery<number>(newClient(), {
             queryKey: ["p", 9],
             loadPage: (dir: PageDirection) => dir === "forwards" ? fwdSource : bwdSource,
-            sort: asc, pageSize: 2,
+            pageSize: 2,
         });
         let loading = false;
         pq.loading$.subscribe(l => loading = l);
@@ -158,7 +144,7 @@ describe("pagedQuery()", () => {
     });
 
     it("refetch() refreshes all loaded pages in place", async () => {
-        const pq = pagedQuery<number>(newClient(), { queryKey: ["p", 10], loadPage: dataset([10, 11, 12, 13]), sort: asc, pageSize: 2 });
+        const pq = pagedQuery<number>(newClient(), { queryKey: ["p", 10], loadPage: dataset([10, 11, 12, 13]), pageSize: 2 });
         const emissions: number[][] = [];
         pq.items$.subscribe(i => emissions.push(i));
         await flush();
@@ -172,20 +158,11 @@ describe("pagedQuery()", () => {
     });
 
     it("emits the error on error$ when a page fails", async () => {
-        const pq = pagedQuery<number>(newClient(), { queryKey: ["p", 11], loadPage: () => throwError(() => new Error("nope")), sort: asc });
+        const pq = pagedQuery<number>(newClient(), { queryKey: ["p", 11], loadPage: () => throwError(() => new Error("nope")), pageSize: 2 });
         const errors: unknown[] = [];
         pq.error$.subscribe(e => errors.push(e));
         pq.items$.subscribe();
         await flush();
         expect((errors[errors.length - 1] as Error)?.message).toBe("nope");
-    });
-
-    it("surfaces an error when a page is not sorted per the sort predicate", async () => {
-        const pq = pagedQuery<number>(newClient(), { queryKey: ["p", 12], loadPage: dataset([2, 1]), sort: asc, pageSize: 2 });
-        const errors: unknown[] = [];
-        pq.error$.subscribe(e => errors.push(e));
-        pq.items$.subscribe();
-        await flush();
-        expect(errors[errors.length - 1]).toBeTruthy();
     });
 });

@@ -4,7 +4,7 @@ import { catchError, map, Observable, of, throwError } from "rxjs";
 import { QueryClient } from "@tanstack/query-core";
 import { appConfig } from "../../app.config";
 import { BaseModel, EditModel } from "../../models/base-model";
-import { applySmartFilter, SmartFilter } from "./smart-filter";
+import { SmartFilter } from "./smart-filter";
 import { IGNORE_NOT_FOUND } from "./errors/error-interceptor.service";
 import { CacheCoordinator, CacheKey } from "./data/cache-coordinator";
 import { EntityKeyFactory } from "./data/keys";
@@ -50,7 +50,12 @@ export class BaseModelService<T extends EditModel<T>, vT extends BaseModel> {
                 .pipe(map(r => r.map(o => new this.viewTypeFactory(o)))));
     }
 
-    public getListAdvanced(queryKey: CacheKey, params: any, sortPredicate: (a: vT, b: vT) => number, filter?: SmartFilter, filterPredicate?: (e: vT) => boolean): PagedResult<vT> {
+    /**
+     * Paginated list fetch. Sorting and filtering are the backend's job: `filter` is forwarded as
+     * the serialized `filter` query param and the pages are shown in the order the backend returns
+     * them (see {@link pagedQuery}). The seam does not re-sort or re-filter client-side.
+     */
+    public getListAdvanced(queryKey: CacheKey, params: any, filter?: SmartFilter): PagedResult<vT> {
         let loadPage = (dir: "forwards" | "backwards", skip: number, take: number): Observable<vT[]> => {
             let p = {
                 ...params,
@@ -66,9 +71,7 @@ export class BaseModelService<T extends EditModel<T>, vT extends BaseModel> {
                 .pipe(map(r => r.map(o => new this.viewTypeFactory(o))));
         };
 
-        let filterFunc = (e: vT) => (filter == null || applySmartFilter(e, filter)) && (filterPredicate == null || filterPredicate(e));
-
-        return pagedQuery<vT>(this.queryClient, { queryKey, loadPage, sort: sortPredicate, filter: filterFunc });
+        return pagedQuery<vT>(this.queryClient, { queryKey, loadPage });
     }
 
     /**

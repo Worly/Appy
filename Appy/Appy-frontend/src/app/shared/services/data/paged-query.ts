@@ -1,6 +1,5 @@
 import { InfiniteData, InfiniteQueryObserver, InfiniteQueryObserverResult, QueryClient } from "@tanstack/query-core";
 import { Observable, distinctUntilChanged, firstValueFrom, map, shareReplay } from "rxjs";
-import { getInsertIndex, isSorted } from "src/app/utils/array-utils";
 import { CacheKey } from "./cache-coordinator";
 import { PageDirection, PagedResult } from "./contracts";
 
@@ -15,10 +14,6 @@ export interface PagedQueryOptions<T> {
     queryKey: CacheKey;
     /** Fetch one raw page. Forwards pages come back ascending; backwards pages descending (nearest-to-anchor first). */
     loadPage: (dir: PageDirection, skip: number, take: number) => Observable<T[]>;
-    /** Global sort order the buffer is kept in. Must match the backend's sort. */
-    sort: (a: T, b: T) => number;
-    /** Optional client-side predicate; non-matching items are dropped from the buffer (but still count toward the backend skip). */
-    filter?: (item: T) => boolean;
     /** Items per page. Defaults to 20. */
     pageSize?: number;
 }
@@ -28,37 +23,27 @@ export interface PagedQueryOptions<T> {
  * TanStack {@link InfiniteQueryObserver}.
  *
  * `data.pages` is ordered [...backwards (earliest first), anchor, ...forwards (latest last)].
- * Each page is oriented ascending (backwards pages are reversed), checked against `sort`,
- * filtered, and sorted-inserted into one globally-sorted buffer for `items$`. The observer is
- * created lazily on first subscription and destroyed when the last subscriber leaves (mirrors
- * `query()`); a route-reused component that keeps its subscription alive across detach keeps
- * the observer active, so invalidation refetches its loaded pages in the background.
+ * Backwards pages arrive descending, so each is reversed; the pages are then concatenated into
+ * one buffer for `items$` in the order the backend returned them. Ordering and filtering are the
+ * backend's responsibility — the seam doesn't re-sort or re-filter. The observer is created lazily
+ * on first subscription and destroyed when the last subscriber leaves (mirrors `query()`).
  */
 export function pagedQuery<T>(client: QueryClient, opts: PagedQueryOptions<T>): PagedResult<T> {
     const pageSize = opts.pageSize ?? 20;
-    const passesFilter = opts.filter ?? (() => true);
 
-    /** Flatten pages into one globally-sorted, filtered buffer (the old PageableListDatasource merge). Returns a sort error instead of throwing. */
-    const buildItems = (pages: T[][] | undefined, pageParams: PageParam[] | undefined): { items: T[]; error: unknown } => {
+    /** Flatten the fetched pages into one buffer for items$. Backwards pages arrive descending, so reverse them; everything else is taken as the backend returned it. */
+    const buildItems = (pages: T[][] | undefined, pageParams: PageParam[] | undefined): T[] => {
         const data: T[] = [];
         if (pages == null || pageParams == null)
-            return { items: data, error: undefined };
+            return data;
 
         for (let i = 0; i < pages.length; i++) {
             const param = pageParams[i];
-            // Backwards pages arrive descending; reverse so the page is ascending.
+            // Backwards pages arrive descending (nearest-to-anchor first); reverse so the page is ascending.
             const ascending = param?.dir === "backwards" ? [...pages[i]].reverse() : pages[i];
-
-            if (!isSorted(ascending, opts.sort))
-                return { items: [], error: new Error("Received page is not correctly sorted. Check if backend sort matches frontend sort!") };
-
-            for (const item of ascending) {
-                if (!passesFilter(item))
-                    continue;
-                data.splice(getInsertIndex(data, item, opts.sort), 0, item);
-            }
+            data.push(...ascending);
         }
-        return { items: data, error: undefined };
+        return data;
     };
 
     type Result = InfiniteQueryObserverResult<InfiniteData<T[], PageParam>, unknown>;
@@ -98,13 +83,12 @@ export function pagedQuery<T>(client: QueryClient, opts: PagedQueryOptions<T>): 
         };
     }).pipe(shareReplay({ bufferSize: 1, refCount: true }));
 
-    // One projection so buildItems runs once per emission and the sort-error reaches error$ reliably.
+    // One projection so buildItems runs once per emission, shared by every derived stream.
     const view$ = result$.pipe(
         map(r => {
-            const built = buildItems(r.data?.pages, r.data?.pageParams);
             return {
-                items: built.items,
-                error: r.error ?? built.error,
+                items: buildItems(r.data?.pages, r.data?.pageParams),
+                error: r.error,
                 // `isPending`, not `isFetching`: loading$ tracks only the initial anchor load (no data
                 // yet). Subsequent page fetches and invalidation-driven background refetches keep
                 // `isFetching` true but `isPending` false — those surface through loadingForwards$/

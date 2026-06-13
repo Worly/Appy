@@ -100,7 +100,7 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
     this.appointments = null;
     this.renderAppointments();
 
-    this.pagedResult = this.appointmentService.getList(this.date, appFilterToSmartFilter(this._filter), appointmentSort);
+    this.pagedResult = this.appointmentService.getList(this.date, appFilterToSmartFilter(this._filter));
 
     this.pagedSubs.push(this.pagedResult.items$.subscribe(a => {
       this.appointments = a;

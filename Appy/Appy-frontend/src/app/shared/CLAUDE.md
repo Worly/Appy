@@ -9,7 +9,7 @@ Cross-cutting code consumed by all feature modules. Organized into services, pip
 The generic CRUD foundation that all feature services extend. Returns the library-agnostic data contracts from the Data Seam (below):
 - `getAllAdvanced(queryKey, params)` → `QueryResult<vT[]>` (one-shot list fetch)
 - `getById(id)` → `QueryResult<vT | undefined>` (single entity; builds the cache key from the service's own `keys.detail(id)`, so callers pass only the id; `data$` emits `undefined` on 404)
-- `getListAdvanced(queryKey, params, sort, filter?, filterPredicate?)` → `PagedResult<vT>` (paginated list, 20/page, bidirectional from an anchor)
+- `getListAdvanced(queryKey, params, filter?)` → `PagedResult<vT>` (paginated list, 20/page, bidirectional from an anchor; `filter` is forwarded to the backend — no client-side sort/filter)
 - `get(id)` → `Observable<TEdit>` (the editable model for forms)
 - `addNew` / `save` / `delete` → mutate, return the fresh entity, and call `CacheCoordinator.invalidate(...mutationKeys)` (now with real effect — matching active queries refetch automatically)
 
@@ -23,7 +23,7 @@ The `QueryClient` singleton is provided and mounted in `AppModule` via a factory
 
 - **Contracts (`contracts.ts`)**: `QueryResult<T>` (`data$` / `loading$` / `error$` / `refetch()`) for single fetches; `PagedResult<T>` (`items$` / `loading$` / `loadingForwards$` / `loadingBackwards$` / `error$` / `loadMore(dir)` / `hasMore(dir)` / `refetch()`) for the bidirectional infinite list — directional loading flags let the list view show top vs bottom spinners. Observable-flavoured for Angular 16; wrap with `toSignal` at this surface when moving to signals.
 - **`query(client, queryKey, fetchFn)`** (`query.ts`): wraps a `QueryObserver` — lazily created on first subscription, ref-counted, torn down on last unsubscribe. The Observable `fetchFn` is adapted to the queryFn Promise via `firstValueFrom`.
-- **`pagedQuery(client, opts)`** (`paged-query.ts`): wraps an `InfiniteQueryObserver`; pages are oriented (backwards pages reversed), sort-guarded, filtered, and merged into one buffer for `items$`. `refetch()` refreshes all loaded pages.
+- **`pagedQuery(client, opts)`** (`paged-query.ts`): wraps an `InfiniteQueryObserver`; backwards pages are reversed and the pages concatenated into one buffer for `items$` in backend order — sorting and filtering are the backend's job, the seam doesn't re-sort/re-filter. `loadMore(dir)` is a no-op while a page in that direction is already loading (so a stream of scroll events fires one request, not many). `refetch()` refreshes all loaded pages.
 - **Key factories (`keys.ts`)**: `appointmentKeys` / `clientKeys` / `serviceKeys` / `workingHourKeys` — the **live query keys** used by the cache: `getById` → `detail(id)`, `getAll` → `list(...)`, paged list → `list(date)` + serialized filter.
 - **`CacheCoordinator`** (`cache-coordinator.ts`): `invalidate(...keys)` calls `queryClient.invalidateQueries({ queryKey })` for each key (prefix match — matching active queries refetch in the background automatically). `clear()` calls `queryClient.clear()` for a hard tenant reset on facility switch / logout.
 
