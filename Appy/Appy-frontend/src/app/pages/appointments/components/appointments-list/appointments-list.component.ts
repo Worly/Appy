@@ -3,13 +3,12 @@ import dayjs, { Dayjs } from 'dayjs';
 import { Duration } from 'dayjs/plugin/duration';
 import { timeBetweenMs } from 'src/app/utils/time-utils';
 import _ from 'lodash';
-import { Subscription, filter } from 'rxjs';
+import { Subscription, filter, combineLatest } from 'rxjs';
 import { Router, Scroll } from '@angular/router';
 import { AppointmentView } from 'src/app/models/appointment';
 import { AppointmentService } from '../../services/appointment.service';
 import { appFilterToSmartFilter, AppointmentsFilter } from '../appointments/appointments.component';
 import { PagedResult } from 'src/app/shared/services/data/contracts';
-import { TimeOffService } from 'src/app/pages/time-off/services/time-off.service';
 import { TimeOffOccurrence } from 'src/app/models/time-off-occurrence';
 import { buildDayTimeline, TimelineEntry } from 'src/app/utils/list-timeline';
 
@@ -88,7 +87,6 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
   constructor(
     private changeDetector: ChangeDetectorRef,
     private appointmentService: AppointmentService,
-    private timeOffService: TimeOffService,
     private router: Router,
   ) { }
 
@@ -130,12 +128,12 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
 
     this.pagedResult = this.appointmentService.getList(this.date, appFilterToSmartFilter(this._filter));
 
-    this.pagedSubs.push(this.pagedResult.items$.subscribe(a => {
-      this.appointments = a;
+    // Appointments and their time-offs arrive in the same paged response (items$ + extras$ are
+    // projections of one query), so combine them and render once — no separate fetch, no pop-in.
+    this.pagedSubs.push(combineLatest([this.pagedResult.items$, this.pagedResult.extras$]).subscribe(([appointments, timeOffs]) => {
+      this.appointments = appointments;
+      this.timeOffs = this.dedupeOccurrences(timeOffs);
       this.renderAppointments();
-      // Re-fetch the time-off window whenever the appointment span grows (each page load
-      // re-emits items$), so newly-revealed dates always have their occurrences available.
-      this.loadTimeOffs();
 
       setTimeout(() => this.checkShouldLoad());
     }));
@@ -144,20 +142,19 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
     this.pagedSubs.push(this.pagedResult.loadingBackwards$.subscribe(l => this.loadingBackwards = l));
   }
 
-  private loadTimeOffs() {
-    // The list is appointment-driven; fetch a wide window around the current appointments so
-    // every visible date's occurrences are available. Re-fetched whenever the appointment span
-    // grows (each page load re-emits items$).
-    let dates = (this.appointments ?? []).map(a => a.date as Dayjs).filter(d => d != null);
-
-    // dayjs.min / dayjs.max would need the minMax plugin (not registered here), so reduce manually.
-    let from = (dates.length ? dates.reduce((m, d) => d.isBefore(m) ? d : m) : this.startDate).subtract(1, "day");
-    let to = (dates.length ? dates.reduce((m, d) => d.isAfter(m) ? d : m) : this.startDate).add(1, "day");
-
-    this.timeOffService.getForRange(from, to).subscribe(o => {
-      this.timeOffs = o;
-      this.renderAppointments();
-    });
+  // A page-boundary date can appear at the tail of one page and the head of the next, so the same
+  // occurrence may arrive twice across pages. Dedupe by (rule id, date).
+  private dedupeOccurrences(occurrences: TimeOffOccurrence[]): TimeOffOccurrence[] {
+    let seen = new Set<string>();
+    let result: TimeOffOccurrence[] = [];
+    for (let o of occurrences) {
+      let key = `${o.id}|${o.date?.format("YYYY-MM-DD")}`;
+      if (seen.has(key))
+        continue;
+      seen.add(key);
+      result.push(o);
+    }
+    return result;
   }
 
   private checkShouldLoad() {
