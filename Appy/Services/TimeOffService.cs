@@ -155,6 +155,7 @@ namespace Appy.Services
 
         private static TimeOffOccurrenceDTO ToOccurrence(TimeOff t, DateOnly date) => new()
         {
+            Id = t.Id,
             Date = date,
             Label = t.Label,
             Notes = t.Notes,

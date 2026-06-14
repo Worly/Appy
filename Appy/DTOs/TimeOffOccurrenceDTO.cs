@@ -5,6 +5,7 @@ namespace Appy.DTOs
     // A TimeOff rule expanded to a concrete day. Distinct from TimeOffDTO (the rule).
     public class TimeOffOccurrenceDTO
     {
+        public int Id { get; set; }
         public DateOnly Date { get; set; }
         public string Label { get; set; }
         public string? Notes { get; set; }

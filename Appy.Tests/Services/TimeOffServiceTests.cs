@@ -159,5 +159,25 @@ namespace Appy.Tests.Services
             Assert.Equal(new DateOnly(2030, 6, 3), occ[0].Date);
             Assert.Equal(new DateOnly(2030, 6, 10), occ[1].Date);
         }
+
+        [Fact]
+        public async Task GetOccurrencesForRange_SetsOccurrenceIdToRuleId()
+        {
+            timeOffs.Add(new TimeOff
+            {
+                Id = 42,
+                FacilityId = FacilityId,
+                Label = "Vacation",
+                Recurrence = TimeOffRecurrence.OneOff,
+                StartDate = new DateOnly(2030, 6, 1),
+                EndDate = new DateOnly(2030, 6, 5),
+                IsAllDay = true,
+            });
+
+            var result = await service.GetOccurrencesForRange(new DateOnly(2030, 6, 1), new DateOnly(2030, 6, 1), FacilityId);
+
+            Assert.Single(result);
+            Assert.Equal(42, result[0].Id);
+        }
     }
 }
