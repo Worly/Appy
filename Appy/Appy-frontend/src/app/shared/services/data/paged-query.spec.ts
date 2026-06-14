@@ -294,5 +294,10 @@ describe("pagedQuery()", () => {
         await flush();
         // backwards page [9,8] (descending) is reversed → its extras ["e9","e8"] become ["e8","e9"], then the anchor's.
         expect(lastEmission(extras)).toEqual(["e8", "e9", "e10", "e11"]);
+
+        pq.loadMore("forwards");
+        await flush();
+        // a second forwards page [12,13] appends its extras after the existing buffer.
+        expect(lastEmission(extras)).toEqual(["e8", "e9", "e10", "e11", "e12", "e13"]);
     });
 });
