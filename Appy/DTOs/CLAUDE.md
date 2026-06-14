@@ -6,7 +6,7 @@ Plain C# records used to transfer data across the HTTP boundary. No business log
 
 - **Request DTOs**: named after the action (e.g. `LogInDTO`, `AppointmentEditDTO`)
 - **Response DTOs**: named with `View` or `Response` suffix (e.g. `AppointmentViewDTO`, `LogInResponseDTO`)
-- **Time-off DTOs**: `TimeOffDTO` represents the recurrence rule (CRUD); `TimeOffOccurrenceDTO` represents a single expanded on-date instance (views)
+- **Time-off DTOs**: `TimeOffDTO` represents the recurrence rule (CRUD); `TimeOffOccurrenceDTO` represents a single expanded on-date instance (views) and carries an `Id` (the source `TimeOff` rule's id), used by the frontend to dedupe occurrences that repeat across page boundaries
 
 ## Separation from Domain Entities
 
