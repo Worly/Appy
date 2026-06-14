@@ -1,6 +1,7 @@
 import dayjs, { Dayjs } from "dayjs";
 
 export class TimeOffOccurrenceDTO {
+  public id?: number;
   public date?: string;
   public label?: string;
   public notes?: string;
@@ -10,6 +11,7 @@ export class TimeOffOccurrenceDTO {
 }
 
 export class TimeOffOccurrence {
+  public id?: number;
   public date?: Dayjs;
   public label?: string;
   public notes?: string;
@@ -18,6 +20,7 @@ export class TimeOffOccurrence {
   public timeTo?: Dayjs;
 
   constructor(dto: TimeOffOccurrenceDTO = new TimeOffOccurrenceDTO()) {
+    this.id = dto.id;
     this.date = dto.date ? dayjs(dto.date) : undefined;
     this.label = dto.label;
     this.notes = dto.notes;
