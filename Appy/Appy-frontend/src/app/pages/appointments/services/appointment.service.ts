@@ -6,18 +6,13 @@ import { catchError, map, Observable, tap, throwError } from "rxjs";
 import { appConfig } from "src/app/app.config";
 import { ToastAction, ToastService } from "src/app/components/toast/toast.service";
 import { TranslateService } from "src/app/components/translate/translate.service";
-import { Appointment, AppointmentStatus, AppointmentView, AppointmentViewDTO } from "src/app/models/appointment";
+import { Appointment, AppointmentListPageDTO, AppointmentStatus, AppointmentView, AppointmentViewDTO } from "src/app/models/appointment";
 import { FreeTime, FreeTimeDTO } from "src/app/models/free-time";
-import { TimeOffOccurrence, TimeOffOccurrenceDTO } from "src/app/models/time-off-occurrence";
+import { TimeOffOccurrence } from "src/app/models/time-off-occurrence";
 import { BaseModelService } from "src/app/shared/services/base-model-service";
 import { PagedResult, QueryResult } from "src/app/shared/services/data/contracts";
 import { appointmentKeys } from "src/app/shared/services/data/keys";
 import { SmartFilter } from "src/app/shared/services/smart-filter";
-
-export interface AppointmentListPageDTO {
-    appointments: AppointmentViewDTO[];
-    timeOffs: TimeOffOccurrenceDTO[];
-}
 
 @Injectable({ providedIn: "root" })
 export class AppointmentService extends BaseModelService<Appointment, AppointmentView> {
