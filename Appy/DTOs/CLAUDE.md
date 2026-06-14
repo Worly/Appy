@@ -22,3 +22,7 @@ Strings in request-body DTOs are trimmed of leading/trailing whitespace during d
 ## Direction Enum
 
 `Direction` (`Forwards` / `Backwards`) lives here and is used by the appointment list pagination endpoint. `Forwards` means "from the given date onwards"; `Backwards` means "before the given date".
+
+## AppointmentListPageDTO
+
+Envelope returned by `GET /appointment/getList`. Contains `Appointments` (the page of `AppointmentViewDTO`) and `TimeOffs` (the `TimeOffOccurrenceDTO` occurrences covering that page's date span). Empty page → empty `TimeOffs`.

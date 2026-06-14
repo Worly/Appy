@@ -253,5 +253,31 @@ namespace Appy.Tests.Services
 
             Assert.Equal(new TimeOnly(10, 0), result.Time);
         }
+
+        [Fact]
+        public async Task GetList_ReturnsTimeOffsForThePageDateSpan()
+        {
+            AddAppointment(AppointmentStatus.Unconfirmed); // Date = 2030-01-15
+
+            var occurrence = new TimeOffOccurrenceDTO { Id = 7, Date = new DateOnly(2030, 1, 15), Label = "Closed" };
+            timeOffServiceMock
+                .Setup(x => x.GetOccurrencesForRange(new DateOnly(2030, 1, 15), new DateOnly(2030, 1, 15), FacilityId))
+                .ReturnsAsync(new List<TimeOffOccurrenceDTO> { occurrence });
+
+            var result = await service.GetList(new DateOnly(2030, 1, 1), Direction.Forwards, 0, 20, null, FacilityId);
+
+            Assert.Single(result.Appointments);
+            Assert.Single(result.TimeOffs);
+            Assert.Equal(7, result.TimeOffs[0].Id);
+        }
+
+        [Fact]
+        public async Task GetList_ReturnsEmptyTimeOffs_WhenNoAppointmentsOnPage()
+        {
+            var result = await service.GetList(new DateOnly(2030, 1, 1), Direction.Forwards, 0, 20, null, FacilityId);
+
+            Assert.Empty(result.Appointments);
+            Assert.Empty(result.TimeOffs);
+        }
     }
 }

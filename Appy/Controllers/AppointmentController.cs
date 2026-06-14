@@ -46,7 +46,7 @@ namespace Appy.Controllers
 
         [HttpGet("getList")]
         [Authorize]
-        public async Task<ActionResult<List<AppointmentViewDTO>>> GetList(
+        public async Task<ActionResult<AppointmentListPageDTO>> GetList(
             [FromQuery] DateOnly date, [FromQuery] Direction direction, [FromQuery] int skip, [FromQuery] int take, [FromQuery] SmartFilter? filter)
         {
             var result = await this.appointmentService.GetList(date, direction, skip, take, filter, HttpContext.SelectedFacility());

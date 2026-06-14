@@ -11,7 +11,7 @@ namespace Appy.Services
     public interface IAppointmentService
     {
         Task<List<AppointmentViewDTO>> GetAll(DateOnly date, int facilityId, bool findPrevious, SmartFilter? filter);
-        Task<List<AppointmentViewDTO>> GetList(DateOnly date, Direction direction, int skip, int take, SmartFilter? filter, int facilityId);
+        Task<AppointmentListPageDTO> GetList(DateOnly date, Direction direction, int skip, int take, SmartFilter? filter, int facilityId);
         Task<AppointmentViewDTO> GetById(int id, int facilityId);
         Task<AppointmentViewDTO> AddNew(AppointmentEditDTO dto, int facilityId, bool ignoreTimeNotAvailable);
         Task<AppointmentViewDTO> Edit(int id, AppointmentEditDTO dto, int facilityId, bool ignoreTimeNotAvailable);
@@ -69,7 +69,7 @@ namespace Appy.Services
                     .ToListAsync();
         }
 
-        public Task<List<AppointmentViewDTO>> GetList(DateOnly date, Direction direction, int skip, int take, SmartFilter? filter, int facilityId)
+        public async Task<AppointmentListPageDTO> GetList(DateOnly date, Direction direction, int skip, int take, SmartFilter? filter, int facilityId)
         {
             var appointments = context.Appointments
                 .Include(a => a.Service)
@@ -82,7 +82,7 @@ namespace Appy.Services
             else
                 appointments = appointments.Where(s => s.Date < date).OrderByDescending(s => s.Date).ThenByDescending(s => s.Time).ThenByDescending(s => s.Duration);
 
-            return appointments
+            var page = await appointments
                 .Skip(skip)
                 .Take(take)
                 .Select(a => new
@@ -100,6 +100,12 @@ namespace Appy.Services
                 })
                 .Select(a => a.app.ToViewDTO(a.previous))
                 .ToListAsync();
+
+            var timeOffs = page.Count == 0
+                ? new List<TimeOffOccurrenceDTO>()
+                : await timeOffService.GetOccurrencesForRange(page.Min(a => a.Date), page.Max(a => a.Date), facilityId);
+
+            return new AppointmentListPageDTO { Appointments = page, TimeOffs = timeOffs };
         }
 
         public async Task<AppointmentViewDTO> GetById(int id, int facilityId)

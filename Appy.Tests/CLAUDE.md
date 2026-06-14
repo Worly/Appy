@@ -10,7 +10,7 @@ Tests live in `Services/` and `Utils/`. The `Services/` tests cover three servic
 
 - **AppointmentReminderServiceTests**: verifies time-based reminder logic — which appointments get reminded based on date and time, that only `Confirmed` appointments trigger reminders, that the `WasReminded` flag prevents duplicate sends, and that an exception on one appointment does not stop reminders for others.
 
-- **AppointmentServiceTests**: verifies the status-revert rule on `Edit` — a `Confirmed` appointment whose date, time, service, or client changes is reset to `Unconfirmed`; other statuses are preserved; duration- and notes-only edits leave the status alone. Also asserts that `AddNew` creates appointments in the `Unconfirmed` state.
+- **AppointmentServiceTests**: verifies the status-revert rule on `Edit` — a `Confirmed` appointment whose date, time, service, or client changes is reset to `Unconfirmed`; other statuses are preserved; duration- and notes-only edits leave the status alone. Also asserts that `AddNew` creates appointments in the `Unconfirmed` state. Also verifies that `GetList` returns an `AppointmentListPageDTO` envelope with the page's time-off occurrences, and returns empty `TimeOffs` when the page is empty.
 
 - **ClientNotificationServiceTests**: verifies contact validation (at least one contact required), Instagram IGSID lookup and `AppSpecificID` caching behavior, message template variable substitution (`{clientName}`, `{service}`, etc.), and multi-contact routing (stops at the first successful send).
 
