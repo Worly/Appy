@@ -61,7 +61,10 @@ export class BaseModelService<T extends EditModel<T>, vT extends BaseModel> {
         filter?: SmartFilter,
         mapPage?: (raw: any) => { items: vT[]; extra: E[] }): PagedResult<vT, E> {
 
-        const mapFn = mapPage ?? ((raw: any[]) => ({ items: raw.map(o => new this.viewTypeFactory(o)), extra: [] as E[] }));
+        // Default: the endpoint returns a plain array of view DTOs and there are no extras.
+        // Endpoints that return a non-array page body (e.g. an {appointments, timeOffs} envelope)
+        // MUST pass `mapPage` — `raw` is `any` here, so the array assumption isn't type-checked.
+        const mapFn = mapPage ?? ((raw: any) => ({ items: (raw as any[]).map(o => new this.viewTypeFactory(o)), extra: [] as E[] }));
 
         let loadPage = (dir: "forwards" | "backwards", skip: number, take: number): Observable<{ items: vT[]; extra: E[] }> => {
             let p = {
