@@ -1,15 +1,15 @@
 import { QueryClient } from "@tanstack/query-core";
 import { Subject, of, throwError } from "rxjs";
-import { pagedQuery } from "./paged-query";
+import { Page, pagedQuery } from "./paged-query";
 import { PageDirection } from "./contracts";
 
 const flush = () => new Promise<void>(resolve => setTimeout(resolve));
 const newClient = () => new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
-/** Builds a loadPage that slices fixed forwards/backwards datasets by skip/take. */
+/** Builds a loadPage that slices fixed forwards/backwards datasets by skip/take, with empty extras. */
 function dataset(forwards: number[], backwards: number[] = []) {
     return (dir: PageDirection, skip: number, take: number) =>
-        of((dir === "forwards" ? forwards : backwards).slice(skip, skip + take));
+        of({ items: (dir === "forwards" ? forwards : backwards).slice(skip, skip + take), extra: [] as never[] });
 }
 
 function lastEmission<T>(emissions: T[][]): T[] {
@@ -59,21 +59,21 @@ describe("pagedQuery()", () => {
     });
 
     it("reports loading true while a page is in flight and false once it resolves", async () => {
-        const source = new Subject<number[]>();
+        const source = new Subject<Page<number, never>>();
         const pq = pagedQuery<number>(newClient(), { queryKey: ["p", 6], loadPage: () => source, pageSize: 2 });
         const loadings: boolean[] = [];
         pq.loading$.subscribe(l => loadings.push(l));
         pq.items$.subscribe();
         await flush();
         expect(loadings[loadings.length - 1]).toBe(true);
-        source.next([1, 2]);
+        source.next({ items: [1, 2], extra: [] });
         source.complete();
         await flush();
         expect(loadings[loadings.length - 1]).toBe(false);
     });
 
     it("reports loadingForwards$ for the initial forwards page", async () => {
-        const source = new Subject<number[]>();
+        const source = new Subject<Page<number, never>>();
         const pq = pagedQuery<number>(newClient(), { queryKey: ["p", 7], loadPage: () => source, pageSize: 2 });
         let fwd = false, bwd = false;
         pq.loadingForwards$.subscribe(l => fwd = l);
@@ -82,7 +82,7 @@ describe("pagedQuery()", () => {
         await flush();
         expect(fwd).toBe(true);
         expect(bwd).toBe(false);
-        source.next([1, 2]);
+        source.next({ items: [1, 2], extra: [] });
         source.complete();
         await flush();
         expect(fwd).toBe(false);
@@ -90,8 +90,8 @@ describe("pagedQuery()", () => {
     });
 
     it("reports loadingBackwards$ for the in-flight backwards page only", async () => {
-        const fwdSource = new Subject<number[]>();
-        const bwdSource = new Subject<number[]>();
+        const fwdSource = new Subject<Page<number, never>>();
+        const bwdSource = new Subject<Page<number, never>>();
         const pq = pagedQuery<number>(newClient(), {
             queryKey: ["p", 8],
             loadPage: (dir: PageDirection) => dir === "forwards" ? fwdSource : bwdSource,
@@ -102,7 +102,7 @@ describe("pagedQuery()", () => {
         pq.loadingBackwards$.subscribe(l => bwd = l);
         pq.items$.subscribe();
         await flush();
-        fwdSource.next([10, 11]);
+        fwdSource.next({ items: [10, 11], extra: [] });
         fwdSource.complete();
         await flush();
         expect(fwd).toBe(false);
@@ -110,15 +110,15 @@ describe("pagedQuery()", () => {
         await flush();
         expect(bwd).toBe(true);
         expect(fwd).toBe(false);
-        bwdSource.next([9, 8]);
+        bwdSource.next({ items: [9, 8], extra: [] });
         bwdSource.complete();
         await flush();
         expect(bwd).toBe(false);
     });
 
     it("scopes loading$ to the initial anchor load — later directional fetches don't flip it", async () => {
-        const fwdSource = new Subject<number[]>();
-        const bwdSource = new Subject<number[]>();
+        const fwdSource = new Subject<Page<number, never>>();
+        const bwdSource = new Subject<Page<number, never>>();
         const pq = pagedQuery<number>(newClient(), {
             queryKey: ["p", 9],
             loadPage: (dir: PageDirection) => dir === "forwards" ? fwdSource : bwdSource,
@@ -129,7 +129,7 @@ describe("pagedQuery()", () => {
         pq.items$.subscribe();
         await flush();
         expect(loading).toBe(true); // initial anchor load, no data yet
-        fwdSource.next([10, 11]);
+        fwdSource.next({ items: [10, 11], extra: [] });
         fwdSource.complete();
         await flush();
         expect(loading).toBe(false);
@@ -137,25 +137,25 @@ describe("pagedQuery()", () => {
         pq.loadMore("backwards");
         await flush();
         expect(loading).toBe(false);
-        bwdSource.next([9, 8]);
+        bwdSource.next({ items: [9, 8], extra: [] });
         bwdSource.complete();
         await flush();
         expect(loading).toBe(false);
     });
 
     it("reports loadingForwards$ during a loadMore('forwards') and fetches each next page only once", async () => {
-        const sources: Subject<number[]>[] = [];
+        const sources: Subject<Page<number, never>>[] = [];
         let calls = 0;
         const pq = pagedQuery<number>(newClient(), {
             queryKey: ["p", "fwd-more"],
-            loadPage: () => { calls++; const s = new Subject<number[]>(); sources.push(s); return s; },
+            loadPage: () => { calls++; const s = new Subject<Page<number, never>>(); sources.push(s); return s; },
             pageSize: 2,
         });
         let fwd = false;
         pq.loadingForwards$.subscribe(l => fwd = l);
         pq.items$.subscribe();
         await flush();
-        sources[0].next([10, 11]); // full initial anchor page → another page remains
+        sources[0].next({ items: [10, 11], extra: [] }); // full initial anchor page → another page remains
         sources[0].complete();
         await flush();
         expect(fwd).toBe(false);
@@ -172,7 +172,7 @@ describe("pagedQuery()", () => {
         await flush();
         expect(calls).toBe(2);
 
-        sources[1].next([12, 13]);
+        sources[1].next({ items: [12, 13], extra: [] });
         sources[1].complete();
         await flush();
         expect(fwd).toBe(false);
@@ -218,11 +218,11 @@ describe("pagedQuery()", () => {
         // together. fetchPreviousPage defaults to cancelRefetch:true, so it cancels the in-flight
         // refetch and commits its pre-refetch snapshot — clobbering the just-edited anchor page
         // with the stale one. A directional loadMore must therefore wait for a refetch to settle.
-        const pending: { dir: PageDirection; skip: number; subject: Subject<number[]>; done: boolean }[] = [];
+        const pending: { dir: PageDirection; skip: number; subject: Subject<Page<number, never>>; done: boolean }[] = [];
         let forwards = [10, 11];
         let backwards = [9, 8];
         const loadPage = (dir: PageDirection, skip: number, _take: number) => {
-            const subject = new Subject<number[]>();
+            const subject = new Subject<Page<number, never>>();
             pending.push({ dir, skip, subject, done: false });
             return subject;
         };
@@ -235,7 +235,7 @@ describe("pagedQuery()", () => {
                 if (inflight.length === 0) break;
                 for (const e of inflight) {
                     e.done = true;
-                    e.subject.next((e.dir === "forwards" ? forwards : backwards).slice(e.skip, e.skip + 2));
+                    e.subject.next({ items: (e.dir === "forwards" ? forwards : backwards).slice(e.skip, e.skip + 2), extra: [] });
                     e.subject.complete();
                 }
                 await flush();
@@ -275,5 +275,24 @@ describe("pagedQuery()", () => {
         pq.items$.subscribe();
         await flush();
         expect((errors[errors.length - 1] as Error)?.message).toBe("nope");
+    });
+
+    it("accumulates per-page extras across forwards and backwards pages via extras$", async () => {
+        const loadPage = (dir: PageDirection, skip: number, take: number) => {
+            const arr = dir === "forwards" ? [10, 11, 12, 13] : [9, 8, 7, 6];
+            const items = arr.slice(skip, skip + take);
+            return of({ items, extra: items.map(n => `e${n}`) });
+        };
+        const pq = pagedQuery<number, string>(newClient(), { queryKey: ["p", "extras"], loadPage, pageSize: 2 });
+        const extras: string[][] = [];
+        pq.extras$.subscribe(e => extras.push(e));
+        pq.items$.subscribe();
+        await flush();
+        expect(lastEmission(extras)).toEqual(["e10", "e11"]);
+
+        pq.loadMore("backwards");
+        await flush();
+        // backwards page [9,8] (descending) is reversed → its extras ["e9","e8"] become ["e8","e9"], then the anchor's.
+        expect(lastEmission(extras)).toEqual(["e8", "e9", "e10", "e11"]);
     });
 });

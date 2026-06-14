@@ -24,11 +24,17 @@ function pageRequest(index: number, pageSize: number): { dir: PageDirection; ski
         : { dir: "backwards", skip: (-index - 1) * pageSize };
 }
 
-export interface PagedQueryOptions<T> {
+/** One raw page: its `items` drive pagination/flattening; `extra` is an optional sidecar accumulated into extras$. */
+export interface Page<T, E> {
+    items: T[];
+    extra: E[];
+}
+
+export interface PagedQueryOptions<T, E> {
     /** TanStack cache key for this list (include the params/filter that scope it). */
     queryKey: CacheKey;
     /** Fetch one raw page. Forwards pages come back ascending; backwards pages descending (nearest-to-anchor first). */
-    loadPage: (dir: PageDirection, skip: number, take: number) => Observable<T[]>;
+    loadPage: (dir: PageDirection, skip: number, take: number) => Observable<Page<T, E>>;
     /** Items per page. Defaults to 20. */
     pageSize?: number;
 }
@@ -43,30 +49,31 @@ export interface PagedQueryOptions<T> {
  * backend's responsibility — the seam doesn't re-sort or re-filter. The observer is created lazily
  * on first subscription and destroyed when the last subscriber leaves (mirrors `query()`).
  */
-export function pagedQuery<T>(client: QueryClient, opts: PagedQueryOptions<T>): PagedResult<T> {
+export function pagedQuery<T, E = never>(client: QueryClient, opts: PagedQueryOptions<T, E>): PagedResult<T, E> {
     const pageSize = opts.pageSize ?? 20;
 
-    /** Flatten the fetched pages into one buffer for items$. Backwards pages arrive descending, so reverse them; everything else is taken as the backend returned it. */
-    const buildItems = (pages: T[][] | undefined, pageParams: PageParam[] | undefined): T[] => {
-        const data: T[] = [];
+    /** Flatten a per-page field into one buffer. Backwards pages (negative index) arrive descending, so reverse them. */
+    const flatten = <V>(pages: Page<T, E>[] | undefined, pageParams: PageParam[] | undefined, pick: (p: Page<T, E>) => V[]): V[] => {
+        const data: V[] = [];
         if (pages == null || pageParams == null)
             return data;
 
         for (let i = 0; i < pages.length; i++) {
             const param = pageParams[i];
+            const arr = pick(pages[i]);
             // Backwards pages (negative index) arrive descending (nearest-to-anchor first); reverse so the page is ascending.
-            const ascending = param != null && param.index < 0 ? [...pages[i]].reverse() : pages[i];
+            const ascending = param != null && param.index < 0 ? [...arr].reverse() : arr;
             data.push(...ascending);
         }
         return data;
     };
 
-    type Result = InfiniteQueryObserverResult<InfiniteData<T[], PageParam>, unknown>;
-    let observer: InfiniteQueryObserver<T[], unknown, InfiniteData<T[], PageParam>, unknown[], PageParam> | null = null;
+    type Result = InfiniteQueryObserverResult<InfiniteData<Page<T, E>, PageParam>, unknown>;
+    let observer: InfiniteQueryObserver<Page<T, E>, unknown, InfiniteData<Page<T, E>, PageParam>, unknown[], PageParam> | null = null;
     let latest: Result | null = null;
 
     const result$ = new Observable<Result>(sub => {
-        const o = new InfiniteQueryObserver<T[], unknown, InfiniteData<T[], PageParam>, unknown[], PageParam>(client, {
+        const o = new InfiniteQueryObserver<Page<T, E>, unknown, InfiniteData<Page<T, E>, PageParam>, unknown[], PageParam>(client, {
             queryKey: opts.queryKey as unknown[],
             queryFn: ({ pageParam }) => {
                 const { dir, skip } = pageRequest(pageParam.index, pageSize);
@@ -79,7 +86,7 @@ export function pagedQuery<T>(client: QueryClient, opts: PagedQueryOptions<T>): 
                 // hasNextPage. Only a forwards page (index >= 0) that came back partial is the real end.
                 if (lastParam.index < 0)
                     return { index: lastParam.index + 1 };
-                return lastPage.length < pageSize ? undefined : { index: lastParam.index + 1 };
+                return lastPage.items.length < pageSize ? undefined : { index: lastParam.index + 1 };
             },
             getPreviousPageParam: (firstPage, _all, firstParam) => {
                 // From the anchor, the previous page is the first backwards page — regardless of how many
@@ -87,7 +94,7 @@ export function pagedQuery<T>(client: QueryClient, opts: PagedQueryOptions<T>): 
                 if (firstParam.index === 0)
                     return { index: -1 };
                 // Already paginating backwards; stop once a backwards page comes back partial.
-                return firstPage.length < pageSize ? undefined : { index: firstParam.index - 1 };
+                return firstPage.items.length < pageSize ? undefined : { index: firstParam.index - 1 };
             },
         });
         observer = o;
@@ -104,11 +111,12 @@ export function pagedQuery<T>(client: QueryClient, opts: PagedQueryOptions<T>): 
         };
     }).pipe(shareReplay({ bufferSize: 1, refCount: true }));
 
-    // One projection so buildItems runs once per emission, shared by every derived stream.
+    // One projection so flatten runs once per emission, shared by every derived stream.
     const view$ = result$.pipe(
         map(r => {
             return {
-                items: buildItems(r.data?.pages, r.data?.pageParams),
+                items: flatten(r.data?.pages, r.data?.pageParams, p => p.items),
+                extras: flatten(r.data?.pages, r.data?.pageParams, p => p.extra),
                 error: r.error,
                 // `isPending`, not `isFetching`: loading$ tracks only the initial anchor load (no data
                 // yet). Subsequent page fetches and invalidation-driven background refetches keep
@@ -125,6 +133,7 @@ export function pagedQuery<T>(client: QueryClient, opts: PagedQueryOptions<T>): 
 
     return {
         items$: view$.pipe(map(v => v.items)),
+        extras$: view$.pipe(map(v => v.extras)),
         loading$: view$.pipe(map(v => v.loading), distinctUntilChanged()),
         loadingForwards$: view$.pipe(map(v => v.loadingForwards), distinctUntilChanged()),
         loadingBackwards$: view$.pipe(map(v => v.loadingBackwards), distinctUntilChanged()),
