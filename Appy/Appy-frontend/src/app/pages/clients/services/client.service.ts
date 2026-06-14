@@ -3,17 +3,20 @@ import { catchError, map, Observable, throwError } from "rxjs";
 import { appConfig } from "src/app/app.config";
 import { Client } from "src/app/models/client";
 import { BaseModelService } from "src/app/shared/services/base-model-service";
+import { QueryResult } from "src/app/shared/services/data/contracts";
+import { appointmentKeys, clientKeys } from "src/app/shared/services/data/keys";
 
 @Injectable({ providedIn: "root" })
 export class ClientService extends BaseModelService<Client, Client> {
     constructor(injector: Injector) {
-        super(injector, Client.ENTITY_TYPE, Client, Client);
+        // Appointments embed the client, so client mutations invalidate appointments too.
+        super(injector, Client.ENTITY_TYPE, Client, Client, clientKeys, [appointmentKeys.all]);
     }
 
-    public override getAll(archived?: boolean): Observable<Client[]> {
-        return this.getAllAdvanced({
+    public override getAll(archived?: boolean): QueryResult<Client[]> {
+        return this.getAllAdvanced(clientKeys.list(!!archived), {
             archived: !!archived
-        }, e => e.isArchived == !!archived);
+        });
     }
 
     public setArchived(client: Client, isArchived: boolean): Observable<Client> {
@@ -22,7 +25,7 @@ export class ClientService extends BaseModelService<Client, Client> {
                 map(s => {
                     let newEntity = new Client(s);
 
-                    this.entityChangeNotifyService.notifyUpdated(newEntity)
+                    this.cache.invalidate(...this.mutationKeys);
 
                     return newEntity;
                 }),

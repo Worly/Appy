@@ -2,8 +2,11 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { forkJoin, Observable } from "rxjs";
 import { map, tap } from "rxjs/operators";
+import { RouteReuseStrategy } from "@angular/router";
 import { appConfig } from "src/app/app.config";
 import { Facility } from "src/app/models/facility";
+import { CacheCoordinator } from "src/app/shared/services/data/cache-coordinator";
+import { CustomReuseStrategy } from "src/app/services/route-reuse-strategy";
 
 @Injectable({ providedIn: "root" })
 export class FacilityService {
@@ -11,7 +14,11 @@ export class FacilityService {
     public myFacilities: Facility[] = [];
     private selectedFacilityId: number | null = null;
 
-    constructor(private http: HttpClient) { }
+    constructor(
+        private http: HttpClient,
+        private cache: CacheCoordinator,
+        private reuseStrategy: RouteReuseStrategy,
+    ) { }
 
     public loadMy(): Observable<Facility[]> {
         var getMy = this.http.get<Facility[]>(appConfig.apiUrl + "facility/getMy");
@@ -34,7 +41,12 @@ export class FacilityService {
 
     public selectFacility(facility: Facility): Observable<void> {
         return this.http.put<void>(appConfig.apiUrl + "facility/selectFacility", facility.id)
-            .pipe(tap(() => this.selectedFacilityId = facility.id));
+            .pipe(tap(() => {
+                this.selectedFacilityId = facility.id;
+                // New tenant → forget the previous one entirely (no page reload happens here).
+                this.cache.clear();
+                (this.reuseStrategy as CustomReuseStrategy).clear();
+            }));
     }
 
     public deleteFacility(facility: Facility): Observable<void> {

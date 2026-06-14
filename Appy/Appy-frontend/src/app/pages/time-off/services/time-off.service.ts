@@ -5,11 +5,12 @@ import { appConfig } from "src/app/app.config";
 import { TimeOff } from "src/app/models/time-off";
 import { TimeOffOccurrence, TimeOffOccurrenceDTO } from "src/app/models/time-off-occurrence";
 import { BaseModelService } from "src/app/shared/services/base-model-service";
+import { timeOffKeys } from "src/app/shared/services/data/keys";
 
 @Injectable({ providedIn: "root" })
 export class TimeOffService extends BaseModelService<TimeOff, TimeOff> {
   constructor(injector: Injector) {
-    super(injector, TimeOff.ENTITY_TYPE, TimeOff, TimeOff);
+    super(injector, TimeOff.ENTITY_TYPE, TimeOff, TimeOff, timeOffKeys);
   }
 
   public getForDate(date: Dayjs): Observable<TimeOffOccurrence[]> {

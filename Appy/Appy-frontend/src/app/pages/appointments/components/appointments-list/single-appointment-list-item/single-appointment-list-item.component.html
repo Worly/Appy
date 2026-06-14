@@ -8,10 +8,13 @@
                 {{renderedAppointment.dateFormatted}}
             </div>
             <div data-test="single-appointment-time" class="time">{{renderedAppointment.time}}</div>
-            <div data-test="single-appointment-service" class="service">{{renderedAppointment.service}}</div>
+            <div data-test="single-appointment-duration" class="duration">{{renderedAppointment.duration | formatDuration}}</div>
         </div>
 
-        <div data-test="single-appointment-client" class="client">{{renderedAppointment.client}}</div>
+        <div class="bottom-row">
+            <div data-test="single-appointment-client" class="client">{{renderedAppointment.client}}</div>
+            <div data-test="single-appointment-service" class="service">{{renderedAppointment.service}}</div>
+        </div>
     </div>
     <app-appointment-status-icons class="status-icons" [hasNotes]="renderedAppointment.hasNotes"
         [status]="renderedAppointment.status" [previousNoShow]="renderedAppointment.previousNoShow"

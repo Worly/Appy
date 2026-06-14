@@ -4,26 +4,28 @@ Cross-cutting code consumed by all feature modules. Organized into services, pip
 
 ## Shared Services (services/)
 
-### BaseModelService\<TView, TEdit\>
+### BaseModelService\<TEdit, TView\>
 
-The generic CRUD foundation that all feature services extend. Provides:
-- HTTP calls for `getAll`, `get`, `addNew`, `save`, `delete`
-- Wraps responses in `Datasource` instances (see below)
-- Publishes CRUD events via `EntityChangeNotifyService`
-- Pagination via `PageableListDatasource` (20 items per page, loading forwards or backwards from a date anchor)
+The generic CRUD foundation that all feature services extend. Returns the library-agnostic data contracts from the Data Seam (below):
+- `getAllAdvanced(queryKey, params)` → `QueryResult<vT[]>` (one-shot list fetch)
+- `getById(id)` → `QueryResult<vT | undefined>` (single entity; builds the cache key from the service's own `keys.detail(id)`, so callers pass only the id; `data$` emits `undefined` on 404)
+- `getListAdvanced(queryKey, params, filter?)` → `PagedResult<vT>` (paginated list, 20/page, bidirectional from an anchor; `filter` is forwarded to the backend — no client-side sort/filter)
+- `get(id)` → `Observable<TEdit>` (the editable model for forms)
+- `addNew` / `save` / `delete` → mutate, return the fresh entity, and call `CacheCoordinator.invalidate(...mutationKeys)` (now with real effect — matching active queries refetch automatically)
 
-Feature services (`AppointmentService`, `ClientService`, `ServiceService`, etc.) extend this base and add domain-specific methods.
+Feature services (`AppointmentService`, `ClientService`, …) extend this base, add domain-specific methods, and pass their own `EntityKeyFactory` (e.g. `clientKeys` — used to build `getById`/`getAll` keys) plus any cross-entity invalidation keys to `super()`. `mutationKeys` is then `[keys.all, ...crossEntityKeys]`.
 
-### Datasource (datasource.ts)
+### Data Seam (services/data/)
 
-Reactive data containers:
-- `ListDatasource<T>`: holds a full list, exposes an Observable stream, supports in-memory add/update/delete
-- `SingleDatasource<T>`: holds one entity as an Observable
-- `PageableListDatasource<T>`: paginated list with 20-item pages, bidirectional loading, in-memory item cache for already-loaded pages
+A thin, **library-agnostic** seam that replaced the old self-written `Datasource` / `EntityChangeNotifyService` sync layer, now **backed by TanStack Query (`@tanstack/query-core`)** as a real client-side cache. The `QueryResult` / `PagedResult` contracts are unchanged; the library sits behind them (a different cache could still be swapped in without touching component code).
 
-### EntityChangeNotifyService
+The `QueryClient` singleton is provided and mounted in `AppModule` via a factory in `services/data/query-client.ts` with defaults: `staleTime: 0`, `retry: false`, `refetchOnWindowFocus: false`.
 
-Pub/sub hub for CRUD events. When a service creates, updates, or deletes an entity, it publishes here. Components displaying the same data type subscribe and update themselves automatically — no manual refresh, no shared mutable arrays.
+- **Contracts (`contracts.ts`)**: `QueryResult<T>` (`data$` / `loading$` / `error$` / `refetch()`) for single fetches; `PagedResult<T>` (`items$` / `loading$` / `loadingForwards$` / `loadingBackwards$` / `error$` / `loadMore(dir)` / `hasMore(dir)` / `refetch()`) for the bidirectional infinite list — directional loading flags let the list view show top vs bottom spinners. Observable-flavoured for Angular 16; wrap with `toSignal` at this surface when moving to signals.
+- **`query(client, queryKey, fetchFn)`** (`query.ts`): wraps a `QueryObserver` — lazily created on first subscription, ref-counted, torn down on last unsubscribe. The Observable `fetchFn` is adapted to the queryFn Promise via `firstValueFrom`.
+- **`pagedQuery(client, opts)`** (`paged-query.ts`): wraps an `InfiniteQueryObserver`; backwards pages are reversed and the pages concatenated into one buffer for `items$` in backend order — sorting and filtering are the backend's job, the seam doesn't re-sort/re-filter. `loadMore(dir)` is a no-op while a page in that direction is already loading (so a stream of scroll events fires one request, not many), and also while a full refetch is in flight — a directional fetch would otherwise cancel the refetch and clobber its fresh pages with a stale snapshot. `refetch()` refreshes all loaded pages.
+- **Key factories (`keys.ts`)**: `appointmentKeys` / `clientKeys` / `serviceKeys` / `workingHourKeys` — the **live query keys** used by the cache: `getById` → `detail(id)`, `getAll` → `list(...)`, paged list → `list(date)` + serialized filter.
+- **`CacheCoordinator`** (`cache-coordinator.ts`): `invalidate(...keys)` calls `queryClient.invalidateQueries({ queryKey })` for each key (prefix match — matching active queries refetch in the background automatically). `clear()` calls `queryClient.clear()` for a hard tenant reset on facility switch / logout.
 
 ### Smart Filter (smart-filter.ts)
 

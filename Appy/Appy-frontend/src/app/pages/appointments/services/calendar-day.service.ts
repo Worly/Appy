@@ -1,51 +1,27 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Dayjs } from "dayjs";
-import { Observable, takeUntil } from "rxjs";
+import { map, Observable } from "rxjs";
 import { appConfig } from "src/app/app.config";
-import { AppointmentView } from "src/app/models/appointment";
 import { CalendarDay, CalendarDayDTO } from "src/app/models/calendar-day";
-import { AppointmentService } from "./appointment.service";
-import { onUnsubscribed } from "src/app/utils/smart-subscriber";
-import { applySmartFilter, SmartFilter } from "src/app/shared/services/smart-filter";
+import { SmartFilter } from "src/app/shared/services/smart-filter";
 
 @Injectable({ providedIn: "root" })
 export class CalendarDayService {
     constructor(
-        private httpClient: HttpClient,
-        private appointmentService: AppointmentService
+        private httpClient: HttpClient
     ) { }
 
     public getAll(date: Dayjs, filter: SmartFilter | undefined): Observable<CalendarDay> {
-        return new Observable<CalendarDay>(s => {
-            let p: any = {
-                date: date.format("YYYY-MM-DD")
-            }
+        let p: any = {
+            date: date.format("YYYY-MM-DD")
+        };
 
-            if (filter != null)
-                p.filter = JSON.stringify(filter);
+        if (filter != null)
+            p.filter = JSON.stringify(filter);
 
-
-            let filterFunc = (e: AppointmentView) => e.date?.isSame(date, "date") == true && (filter == null || applySmartFilter(e, filter));
-
-            this.httpClient.get<CalendarDayDTO>(appConfig.apiUrl + "CalendarDay/getAll", {
-                params: p
-            }).pipe(takeUntil(onUnsubscribed(s)))
-                .subscribe({
-                    next: c => {
-                        let calendarDay = new CalendarDay(c);
-
-                        this.appointmentService.createDatasource(calendarDay.appointments as AppointmentView[], filterFunc)
-                            .pipe(takeUntil(onUnsubscribed(s)))
-                            .subscribe(n => {
-                                calendarDay.appointments = n;
-                                s.next(calendarDay);
-                            });
-
-                        s.next(calendarDay);
-                    },
-                    error: e => s.error(e)
-                });
-        });
+        return this.httpClient.get<CalendarDayDTO>(appConfig.apiUrl + "CalendarDay/getAll", {
+            params: p
+        }).pipe(map(c => new CalendarDay(c)));
     }
 }

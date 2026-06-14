@@ -37,7 +37,7 @@ export class TimeOffComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
-    this.subs.push(this.timeOffService.getAll().subscribe(t => this.timeOffs = t));
+    this.subs.push(this.timeOffService.getAll().data$.subscribe(t => this.timeOffs = t ?? null));
   }
 
   ngOnDestroy(): void {

@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { Service } from 'src/app/models/service';
 import { ServiceColorsService } from '../../services/service-colors.service';
 import { ServiceService } from '../../services/service.service';
+import { QueryResult } from 'src/app/shared/services/data/contracts';
 
 @Component({
   selector: 'app-services',
@@ -15,6 +16,7 @@ export class ServicesComponent implements OnInit, OnDestroy {
   services?: Service[] = undefined;
   isArchive: boolean = false;
 
+  private servicesQuery?: QueryResult<Service[]>;
   private subs: Subscription[] = [];
 
   constructor(
@@ -39,7 +41,8 @@ export class ServicesComponent implements OnInit, OnDestroy {
   }
 
   private load() {
-    this.subs.push(this.serviceService.getAll(this.isArchive).subscribe((s: Service[]) => this.services = s));
+    this.servicesQuery = this.serviceService.getAll(this.isArchive);
+    this.subs.push(this.servicesQuery.data$.subscribe(s => this.services = s));
   }
 
   public goToNew() {

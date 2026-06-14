@@ -76,7 +76,7 @@ export class SingleAppointmentComponent implements OnInit, OnDestroy {
 
     this.isLoading = true;
 
-    this.datasourceSub = this.appointmentService.getWithDatasource(id).subscribe(a => {
+    this.datasourceSub = this.appointmentService.getById(id).data$.subscribe(a => {
       this.appointment = a;
       this.isLoading = false;
     });
@@ -100,7 +100,10 @@ export class SingleAppointmentComponent implements OnInit, OnDestroy {
       return;
 
     this.isLoadingStatusChange = true;
-    this.subs.push(this.appointmentService.setStatus(this.appointment?.id, newStatus).subscribe(() => this.isLoadingStatusChange = false))
+    this.subs.push(this.appointmentService.setStatus(this.appointment.id, newStatus).subscribe({
+      next: () => this.isLoadingStatusChange = false,
+      error: () => this.isLoadingStatusChange = false
+    }));
   }
 
   goToEdit() {

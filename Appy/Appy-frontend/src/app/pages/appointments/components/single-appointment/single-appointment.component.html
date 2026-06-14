@@ -1,6 +1,7 @@
 <app-loading *ngIf="isLoading"></app-loading>
-<div *ngIf="!isLoading && appointment != null">
+<div *ngIf="!isLoading && appointment != null" class="appointment-details">
     <div class="header">
+        <div class="accent" [style.backgroundColor]="serviceColorsService.get(appointment.service.colorId)"></div>
         <div class="title">{{appointment.service.name}}</div>
         <app-appointment-status-lookup class="status" [value]="appointment.status"
             (valueChange)="onChangeStatus($event)" [disabled]="isLoadingStatusChange"
@@ -14,25 +15,24 @@
         </div>
     </div>
 
-    <div class="date">
-        <fa-icon icon="calendar-days" [fixedWidth]="true"></fa-icon>
-        <div>
-            {{appointment.date.format("DD.MM.YYYY - dddd")}}
+    <div class="info-card when-card">
+        <div class="info-row">
+            <fa-icon icon="calendar-days" [fixedWidth]="true"></fa-icon>
+            <div>{{appointment.date.format("DD.MM.YYYY - dddd")}}</div>
         </div>
-    </div>
-
-    <div class="time">
-        <fa-icon icon="clock" [fixedWidth]="true"></fa-icon>
-        <div>
-            {{appointment.time.format("HH:mm")}} -
-            {{appointment.time.add(appointment.duration).format("HH:mm")}}
-            ({{appointment.duration | formatDuration}})
+        <div class="info-row">
+            <fa-icon icon="clock" [fixedWidth]="true"></fa-icon>
+            <div class="time-range">
+                {{appointment.time.format("HH:mm")}} - {{appointment.time.add(appointment.duration).format("HH:mm")}}
+            </div>
+            <div class="duration">{{appointment.duration | formatDuration}}</div>
         </div>
     </div>
 
     <app-button *ngIf="appointment.client != null" class="client-button" (onClick)="goToClient(appointment.client.id)">
         <div class="client">
             <div class="client-column">
+                <fa-icon icon="user" [fixedWidth]="true"></fa-icon>
                 <div class="full-name">{{appointment.client.name}} {{appointment.client.surname}}</div>
             </div>
 
@@ -44,22 +44,11 @@
     </app-button>
 
     <div class="notes" *ngIf="appointment.notes != null && appointment.notes != ''">
-        <div class="notes-title">{{'pages.appointments.NOTES' | translate}}:</div>
+        <div class="notes-title">{{'pages.appointments.NOTES' | translate}}</div>
         <div class="notes-body">{{appointment.notes}}</div>
     </div>
 
-    <div class="created-updated-at">
-        <div>
-            <div>{{'CREATED_AT' | translate}}:</div>
-            <div>{{appointment.createdAt.format("DD.MM.YYYY HH:mm")}}</div>
-        </div>
-        <div>
-            <div>{{'LAST_UPDATED_AT' | translate}}:</div>
-            <div>{{appointment.lastUpdatedAt.format("DD.MM.YYYY HH:mm")}}</div>
-        </div>
-    </div>
-
-    <div *ngIf="appointment.previousAppointment != null">
+    <div class="previous-appointment" *ngIf="appointment.previousAppointment != null">
         <div class="previous-appointment-label">
             {{"PREVIOUS" | translate}}:
         </div>
@@ -98,6 +87,16 @@
         </app-button>
     </div>
 
+    <div class="created-updated-at">
+        <div>
+            <div>{{'CREATED_AT' | translate}}:</div>
+            <div>{{appointment.createdAt.format("DD.MM.YYYY HH:mm")}}</div>
+        </div>
+        <div>
+            <div>{{'LAST_UPDATED_AT' | translate}}:</div>
+            <div>{{appointment.lastUpdatedAt.format("DD.MM.YYYY HH:mm")}}</div>
+        </div>
+    </div>
 
     <div *ngIf="editable" class="action-bar">
         <app-button icon="trash" color="danger" look="solid" text="{{'DELETE' | translate}}"

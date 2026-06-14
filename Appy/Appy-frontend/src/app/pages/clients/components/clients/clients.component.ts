@@ -5,6 +5,7 @@ import { Client, ClientContact, ClientContactType } from 'src/app/models/client'
 import { ClientService } from '../../services/client.service';
 import { getClientContactTypeIcon, openClientContactApp } from '../../clients.module';
 import { IconName } from '@fortawesome/fontawesome-svg-core';
+import { QueryResult } from 'src/app/shared/services/data/contracts';
 
 @Component({
   selector: 'app-clients',
@@ -16,6 +17,7 @@ export class ClientsComponent implements OnInit, OnDestroy {
   filteredClients: Client[] = [];
   isArchive: boolean = false;
 
+  private clientsQuery?: QueryResult<Client[]>;
   private subs: Subscription[] = [];
 
   constructor(
@@ -38,7 +40,8 @@ export class ClientsComponent implements OnInit, OnDestroy {
   }
 
   private load() {
-    this.subs.push(this.clientService.getAll(this.isArchive).subscribe((s: Client[]) => this.clients = s));
+    this.clientsQuery = this.clientService.getAll(this.isArchive);
+    this.subs.push(this.clientsQuery.data$.subscribe(s => this.clients = s));
   }
 
   public goToNew() {

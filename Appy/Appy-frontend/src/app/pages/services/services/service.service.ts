@@ -3,17 +3,20 @@ import { catchError, map, Observable, throwError } from "rxjs";
 import { appConfig } from "src/app/app.config";
 import { Service } from "src/app/models/service";
 import { BaseModelService } from "src/app/shared/services/base-model-service";
+import { QueryResult } from "src/app/shared/services/data/contracts";
+import { appointmentKeys, serviceKeys } from "src/app/shared/services/data/keys";
 
 @Injectable({ providedIn: "root" })
 export class ServiceService extends BaseModelService<Service, Service> {
     constructor(injector: Injector) {
-        super(injector, Service.ENTITY_TYPE, Service, Service);
+        // Appointments embed the service, so service mutations invalidate appointments too.
+        super(injector, Service.ENTITY_TYPE, Service, Service, serviceKeys, [appointmentKeys.all]);
     }
 
-    public override getAll(archived?: boolean): Observable<Service[]> {
-        return this.getAllAdvanced({
+    public override getAll(archived?: boolean): QueryResult<Service[]> {
+        return this.getAllAdvanced(serviceKeys.list(!!archived), {
             archived: !!archived
-        }, e => e.isArchived == !!archived);
+        });
     }
 
     public setArchived(service: Service, isArchived: boolean): Observable<Service> {
@@ -22,7 +25,7 @@ export class ServiceService extends BaseModelService<Service, Service> {
                 map(s => {
                     let newEntity = new Service(s);
 
-                    this.entityChangeNotifyService.notifyUpdated(newEntity);
+                    this.cache.invalidate(...this.mutationKeys);
 
                     return newEntity;
                 }),

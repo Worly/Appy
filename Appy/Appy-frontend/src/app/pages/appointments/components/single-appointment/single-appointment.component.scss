@@ -2,67 +2,102 @@
     display: block;
 }
 
+// One uniform vertical rhythm for every section; conditional sections (warning,
+// notes, previous-appointment) drop out cleanly without leaving stray margins.
+.appointment-details {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
 .header {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 25px;
+    align-items: center;
+    gap: 12px;
+
+    .accent {
+        // Width matches the list-item and previous-appointment colour bars.
+        flex: 0 0 6px;
+        align-self: stretch;
+        min-height: 1.4rem;
+        border-radius: var(--default-border-radius);
+    }
 
     .title {
+        flex: 1 1 auto;
+        min-width: 0;
         font-size: 1.4rem;
         font-weight: bold;
+        word-break: break-word;
     }
 
     .status {
-        margin-left: auto;
+        flex: 0 0 auto;
     }
 }
 
 .first-appointment-warning {
     display: flex;
-    gap: 15px;
+    align-items: center;
+    gap: 12px;
     font-size: 1rem;
-    margin-bottom: 15px;
 
-    color: rgb(var(--rgb-success))
+    color: rgb(var(--rgb-success));
 }
 
-.date {
+// Card grouping the date + time facts; sits elevated (input-background) over the
+// dialog's card-background surface.
+.info-card {
+    background-color: rgb(var(--rgb-input-background));
+    border-radius: var(--default-border-radius);
+    padding: 12px 15px;
+
     display: flex;
-    gap: 15px;
-    font-size: 1rem;
-    margin-bottom: 10px;
+    flex-direction: column;
+    gap: 8px;
 }
 
-.time {
+.info-row {
     display: flex;
-    gap: 15px;
+    align-items: center;
+    gap: 12px;
     font-size: 1rem;
-    margin-bottom: 25px;
+
+    fa-icon {
+        opacity: 0.65;
+    }
+
+    .duration {
+        margin-left: auto;
+        font-size: 0.9rem;
+        opacity: 0.55;
+    }
 }
 
 .client-button {
     width: 100%;
-    margin-bottom: 25px;
 
     .client {
-        font-size: 1rem;
         width: 100%;
+        font-size: 1rem;
 
         display: flex;
+        align-items: center;
         justify-content: space-between;
         gap: 10px;
 
         .client-column {
             display: flex;
-            flex-direction: column;
-            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
 
-            .phone-number,
-            .email {
-                text-align: end;
+            fa-icon {
+                opacity: 0.65;
+            }
+
+            .full-name {
+                word-break: break-word;
             }
         }
     }
@@ -70,42 +105,23 @@
 
 .notes {
     .notes-title {
-        font-size: 1.1rem;
+        font-size: 0.9rem;
         font-weight: bold;
+        opacity: 0.65;
+        margin-bottom: 3px;
     }
 
     .notes-body {
         font-size: 1rem;
-        margin-left: 5px;
         white-space: pre-wrap;
     }
-
-    margin-bottom: 25px;
 }
 
-.created-updated-at {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-
-    margin-bottom: 25px;
-
-    &>div {
-        display: flex;
-        gap: 10px;
-        opacity: 50%;
+.previous-appointment {
+    .previous-appointment-label {
+        margin-bottom: 5px;
+        opacity: 0.5;
     }
-}
-
-.action-bar {
-    display: flex;
-    gap: 5px;
-    margin-top: 20px;
-}
-
-.previous-appointment-label {
-    margin-bottom: 5px;
-    opacity: 50%;
 }
 
 .previous-appointment-button {
@@ -116,8 +132,15 @@
 }
 
 .previous-appointment-color {
-    width: 10px;
+    // Width matches the header and list-item colour bars.
+    width: 6px;
     height: 40px;
+    border-radius: var(--default-border-radius);
+}
+
+.previous-appointment-details {
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 .previous-appointment-date {
@@ -125,7 +148,7 @@
     gap: 5px;
 
     .date-diff {
-        opacity: 50%;
+        opacity: 0.5;
     }
 }
 
@@ -133,4 +156,28 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+// Compact, faint metadata footer separated by a hairline rule.
+.created-updated-at {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    padding-top: 12px;
+    border-top: 1px solid rgba(var(--rgb-text), 0.12);
+
+    font-size: 0.8rem;
+    opacity: 0.5;
+
+    & > div {
+        display: flex;
+        gap: 10px;
+        justify-content: space-between;
+    }
+}
+
+.action-bar {
+    display: flex;
+    gap: 5px;
 }

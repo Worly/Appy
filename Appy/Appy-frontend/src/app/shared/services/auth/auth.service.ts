@@ -1,10 +1,12 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Router } from "@angular/router";
+import { Router, RouteReuseStrategy } from "@angular/router";
 import { Observable } from "rxjs";
 import { appConfig } from "src/app/app.config";
 import jwt_decode from "jwt-decode";
 import { FacilityService } from "src/app/pages/facilities/services/facility.service";
+import { CacheCoordinator } from "src/app/shared/services/data/cache-coordinator";
+import { CustomReuseStrategy } from "src/app/services/route-reuse-strategy";
 
 @Injectable({ providedIn: "root" })
 export class AuthService {
@@ -14,7 +16,8 @@ export class AuthService {
     private accessToken: string | null = null;
     private refreshToken: string | null = null;
 
-    constructor(private router: Router, private httpClient: HttpClient, private facilityService: FacilityService) {
+    constructor(private router: Router, private httpClient: HttpClient, private facilityService: FacilityService,
+        private cache: CacheCoordinator, private reuseStrategy: RouteReuseStrategy) {
     }
 
     public loadFromLocalStorage(): Observable<void> {
@@ -97,6 +100,8 @@ export class AuthService {
         localStorage.removeItem(this.ACCESS_TOKEN_KEY);
         localStorage.removeItem(this.REFRESH_TOKEN_KEY);
         this.facilityService.clear();
+        this.cache.clear();
+        (this.reuseStrategy as CustomReuseStrategy).clear();
         this.router.navigate(["login"]);
 
         return new Observable<void>(s => {
