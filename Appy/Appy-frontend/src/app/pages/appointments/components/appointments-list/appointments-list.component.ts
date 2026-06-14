@@ -49,7 +49,7 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
 
   private startDate: Dayjs = dayjs();
 
-  private pagedResult?: PagedResult<AppointmentView>;
+  private pagedResult?: PagedResult<AppointmentView, TimeOffOccurrence>;
   private pagedSubs: Subscription[] = [];
 
   // Component-lifetime subscriptions (router events), torn down in ngOnDestroy.
