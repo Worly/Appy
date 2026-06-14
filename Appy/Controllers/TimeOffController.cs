@@ -66,12 +66,5 @@ namespace Appy.Controllers
             return Ok(result);
         }
 
-        [HttpGet("getForRange")]
-        [Authorize]
-        public async Task<ActionResult<List<TimeOffOccurrenceDTO>>> GetForRange([FromQuery] DateOnly from, [FromQuery] DateOnly to)
-        {
-            var result = await this.timeOffService.GetOccurrencesForRange(from, to, HttpContext.SelectedFacility());
-            return Ok(result);
-        }
     }
 }
