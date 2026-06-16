@@ -1,0 +1,17 @@
+<app-loading *ngIf="items == null"></app-loading>
+
+<div *ngIf="items != null" data-test="time-off-list">
+  <div *ngIf="items.length === 0" class="empty" data-test="time-off-list-empty">
+    {{ (scope === "Active" ? "pages.time-off.NONE_UPCOMING" : "pages.time-off.NONE_PAST") | translate }}
+  </div>
+
+  <app-single-time-off-list-item
+    *ngFor="let t of items"
+    [timeOff]="t"
+    (onOpenView)="openDetails.emit(t.id)">
+  </app-single-time-off-list-item>
+
+  <div class="loading-more" *ngIf="loadingMore">
+    <app-loading [hasShadow]="false"></app-loading>
+  </div>
+</div>
