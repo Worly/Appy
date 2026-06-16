@@ -23,11 +23,12 @@
                     ("pages.appointments.NO_APPOINTMENTS" | translate) : ""}}</div>
                 <div class="date-relative" [ngClass]="i.date | dateRelation">{{i.date | relativeDate}}</div>
             </div>
-            <div *ngIf="i.allDayLabels.length > 0" class="whole-day-off" data-test="list-all-day-timeoff">
+            <div *ngIf="i.allDayOccurrences.length > 0" class="whole-day-off" data-test="list-all-day-timeoff"
+                (click)="viewingTimeOffId = i.allDayOccurrences[0].id; timeOffDialog.open()">
                 <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
                 <div class="whole-day-off-text">
-                    <span class="whole-day-off-label">{{ i.allDayLabels[0] }}</span>
-                    <span *ngIf="i.allDayLabels.length > 1">+{{i.allDayLabels.length - 1}}</span>
+                    <span class="whole-day-off-label">{{ i.allDayOccurrences[0].label }}</span>
+                    <span *ngIf="i.allDayOccurrences.length > 1">+{{i.allDayOccurrences.length - 1}}</span>
                 </div>
             </div>
         </div>
@@ -44,7 +45,7 @@
         </div>
 
         <div *ngIf="i.type == 'timeoff'" class="time-off-item" [class.overlap]="i.isOverlapping"
-            data-test="list-time-off">
+            data-test="list-time-off" (click)="viewingTimeOffId = i.occurrence.id; timeOffDialog.open()">
             <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
             <span class="time">{{ i.occurrence.timeFrom?.format("HH:mm") }} - {{ i.occurrence.timeTo?.format("HH:mm")
                 }}</span>
@@ -67,4 +68,9 @@
 <app-dialog #appointmentDialog>
     <app-single-appointment *ngIf="appointmentDialog.isOpen" [(id)]="viewingAppointmentId"
         (onDone)="appointmentDialog.close()"></app-single-appointment>
+</app-dialog>
+
+<app-dialog #timeOffDialog>
+    <app-single-time-off *ngIf="timeOffDialog.isOpen" [id]="viewingTimeOffId"
+        (onDone)="timeOffDialog.close()"></app-single-time-off>
 </app-dialog>

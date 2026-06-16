@@ -169,5 +169,10 @@ describe("Time Off", () => {
     getElement("appointments-list-current-date").should("contain", monday.format("DD.MM.YYYY"));
 
     cy.get("[data-test=list-all-day-timeoff]").should("exist").and("contain", "Closed Mondays");
+
+    // Clicking the all-day time-off badge opens the time-off details dialog.
+    cy.get("[data-test=list-all-day-timeoff]").contains("Closed Mondays").click();
+    cy.get("app-single-time-off").should("contain", "Closed Mondays");
+    getElement("time-off-edit-button").should("exist");
   });
 });

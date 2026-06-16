@@ -8,6 +8,7 @@ import { DurationPickerModule } from "src/app/components/duration-picker/duratio
 import { SharedModule } from "src/app/shared/shared.module";
 import { ClientsModule } from "../clients/clients.module";
 import { ServicesModule } from "../services/services.module";
+import { TimeOffModule } from "../time-off/time-off.module";
 import { AppointmentsRoutingModule } from "./appointments-routing.module";
 import { AppointmentEditComponent } from "./components/appointment-edit/appointment-edit.component";
 import { DateTimeChooserComponent } from "./components/appointment-edit/date-time-chooser/date-time-chooser.component";
@@ -46,7 +47,8 @@ import { AppointmentStatusIconsComponent } from './components/appointment-status
         
         ClientsModule,
         ServicesModule,
-        
+        TimeOffModule,
+
         DialogModule,
         CalendarDialogModule,
         DateSelectorModule,

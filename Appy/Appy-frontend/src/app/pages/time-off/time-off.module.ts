@@ -29,5 +29,9 @@ import { SingleTimeOffComponent } from "./components/single-time-off/single-time
     FontAwesomeModule,
     DialogModule,
   ],
+  // Exported so the appointments list can open the time-off details dialog too.
+  exports: [
+    SingleTimeOffComponent,
+  ],
 })
 export class TimeOffModule { }

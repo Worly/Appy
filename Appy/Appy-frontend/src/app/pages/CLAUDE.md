@@ -26,3 +26,4 @@ Some page modules export components consumed by other pages:
 - `ClientsModule` exports `ClientLookupComponent` → used by `AppointmentsModule`
 - `ServicesModule` exports `ServiceLookupComponent` → used by `AppointmentsModule`
 - `AppointmentsModule` exports `SingleAppointmentComponent` → used by `DashboardModule`
+- `TimeOffModule` exports `SingleTimeOffComponent` → used by `AppointmentsModule` (time-off details dialog in the appointment list)

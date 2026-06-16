@@ -69,6 +69,7 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
   private keptScrollElement: (() => HTMLElement | undefined) | null = null;
 
   viewingAppointmentId: number | undefined;
+  viewingTimeOffId: number | undefined;
 
   // While true, every render scrolls the viewport to startDate. Set by load() and cleared when
   // the user physically scrolls. Re-snapping on every render (not just the first) is needed
@@ -268,7 +269,7 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
       dateFormatted: this.startDate.format("DD.MM.YYYY - dddd"),
       dateISO: this.startDate.format("YYYY-MM-DD"),
       isEmptyDate: true,
-      allDayLabels: [],
+      allDayOccurrences: [],
     };
 
     let sorted = this.appointments.sort(appointmentSort);
@@ -300,7 +301,7 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
       }
 
       let dayOccurrences = this.timeOffs.filter(o => o.date?.isSame(day.date, "date"));
-      let allDayLabels = dayOccurrences.filter(o => o.isAllDay).map(o => o.label ?? "");
+      let allDayOccurrences = dayOccurrences.filter(o => o.isAllDay);
 
       this.renderedItems.push({
         type: "date",
@@ -308,7 +309,7 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
         dateFormatted: day.date.format("DD.MM.YYYY - dddd"),
         dateISO: day.date.format("YYYY-MM-DD"),
         isEmptyDate: false,
-        allDayLabels,
+        allDayOccurrences,
       });
 
       // Merge appointments + partial offs, then walk emitting gaps and items.
@@ -533,7 +534,7 @@ type RenderedDate = {
   dateFormatted: string;
   dateISO: string;
   isEmptyDate: boolean;
-  allDayLabels: string[];   // whole-day time-off labels for this date
+  allDayOccurrences: TimeOffOccurrence[];   // whole-day time-off occurrences for this date
 }
 
 type RenderedGap = {
