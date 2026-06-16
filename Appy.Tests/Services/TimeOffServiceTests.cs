@@ -4,7 +4,6 @@ using Appy.Exceptions;
 using Appy.Services;
 using Moq;
 using Moq.EntityFrameworkCore;
-using System.Linq;
 
 namespace Appy.Tests.Services
 {
