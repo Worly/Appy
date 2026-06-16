@@ -66,5 +66,14 @@ namespace Appy.Controllers
             return Ok(result);
         }
 
+        [HttpGet("getList")]
+        [Authorize]
+        public async Task<ActionResult<List<TimeOffDTO>>> GetList(
+            [FromQuery] TimeOffListType type, [FromQuery] TimeOffScope scope, [FromQuery] int skip, [FromQuery] int take)
+        {
+            var result = await this.timeOffService.GetList(type, scope, skip, take, HttpContext.SelectedFacility());
+            return Ok(result);
+        }
+
     }
 }

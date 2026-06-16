@@ -16,6 +16,7 @@ namespace Appy.Services
         bool AppliesOn(TimeOff timeOff, DateOnly date);
         Task<List<TimeOffOccurrenceDTO>> GetOccurrencesForDate(DateOnly date, int facilityId);
         Task<List<TimeOffOccurrenceDTO>> GetOccurrencesForRange(DateOnly from, DateOnly to, int facilityId);
+        Task<List<TimeOffDTO>> GetList(TimeOffListType type, TimeOffScope scope, int skip, int take, int facilityId);
     }
 
     public class TimeOffService : ITimeOffService
@@ -36,6 +37,13 @@ namespace Appy.Services
             if (t == null)
                 throw new NotFoundException();
             return t;
+        }
+
+        public async Task<List<TimeOffDTO>> GetList(TimeOffListType type, TimeOffScope scope, int skip, int take, int facilityId)
+        {
+            var all = await GetAll(facilityId);
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            return BuildListPage(all, type, scope, today, skip, take).Select(t => t.GetDTO()).ToList();
         }
 
         public async Task<TimeOff> AddNew(TimeOffDTO dto, int facilityId)
