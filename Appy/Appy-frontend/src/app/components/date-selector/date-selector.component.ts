@@ -10,7 +10,9 @@ export class DateSelectorComponent implements OnInit {
 
   private _date: Dayjs = dayjs();
   @Input() set date(value: Dayjs) {
-    if (this._date.isSame(value))
+    // Ignore null/undefined so a not-yet-loaded value can't poison _date and crash
+    // every later change-detection cycle (reading .isSame/.format on undefined).
+    if (value == null || this._date.isSame(value))
       return;
 
     this._date = value;

@@ -17,6 +17,9 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
   public timeOff: TimeOff = new TimeOff();
   public isNew: boolean = true;
   public isLoading: boolean = false;
+  // Gates the form: editing fetches the rule async, so we must not render the
+  // date-selectors (which require a defined Dayjs) until the model is populated.
+  public isLoaded: boolean = false;
   public limitDateRange: boolean = false;
 
   public readonly TimeOffRecurrence = TimeOffRecurrence;
@@ -73,6 +76,7 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
 
         this.type = t.recurrence === TimeOffRecurrence.OneOff ? "oneoff" : "recurring";
         this.timeOff = t;
+        this.isLoaded = true;
       }));
     } else {
       this.timeOff = new TimeOff();
@@ -89,6 +93,7 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
       }
       this.timeOff.timeFrom = dayjs({ hour: 9 });
       this.timeOff.timeTo = dayjs({ hour: 17 });
+      this.isLoaded = true;
     }
   }
 

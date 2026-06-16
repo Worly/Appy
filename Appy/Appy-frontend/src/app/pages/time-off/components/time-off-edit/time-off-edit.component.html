@@ -1,3 +1,6 @@
+<app-loading *ngIf="!isLoaded"></app-loading>
+
+<ng-container *ngIf="isLoaded">
 <div class="w-title" *ngIf="isNew">{{ "pages.time-off.ADD" | translate }}</div>
 <div class="w-title" *ngIf="!isNew">{{ "pages.time-off.TIME_OFF" | translate }}</div>
 
@@ -142,3 +145,4 @@
   <app-button [text]="'SAVE' | translate" color="success" look="solid" [disabled]="isLoading"
     [isLoading]="isLoading" (onClick)="save()"></app-button>
 </app-action-bar>
+</ng-container>
