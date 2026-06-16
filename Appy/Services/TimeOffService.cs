@@ -2,7 +2,6 @@ using Appy.Domain;
 using Appy.DTOs;
 using Appy.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace Appy.Services
 {

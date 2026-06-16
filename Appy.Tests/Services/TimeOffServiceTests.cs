@@ -219,6 +219,23 @@ namespace Appy.Tests.Services
             Assert.Equal(new DateOnly(2030, 7, 1), next);
         }
 
+        [Fact]
+        public void NextOccurrence_OneOff_ReturnsStartWhenInRange()
+        {
+            var t = new TimeOff { Recurrence = TimeOffRecurrence.OneOff, StartDate = new DateOnly(2030, 6, 5), EndDate = new DateOnly(2030, 6, 20) };
+            // from before the range -> first applicable day is the start.
+            Assert.Equal(new DateOnly(2030, 6, 5), TimeOffService.NextOccurrenceOnOrAfter(t, new DateOnly(2030, 6, 1)));
+            // from inside the range -> that same day.
+            Assert.Equal(new DateOnly(2030, 6, 10), TimeOffService.NextOccurrenceOnOrAfter(t, new DateOnly(2030, 6, 10)));
+        }
+
+        [Fact]
+        public void NextOccurrence_OneOff_NullAfterEndDate()
+        {
+            var t = new TimeOff { Recurrence = TimeOffRecurrence.OneOff, StartDate = new DateOnly(2030, 6, 5), EndDate = new DateOnly(2030, 6, 20) };
+            Assert.Null(TimeOffService.NextOccurrenceOnOrAfter(t, new DateOnly(2030, 6, 21)));
+        }
+
         // ---- BuildListPage ----
 
         private static readonly DateOnly Today = new DateOnly(2030, 6, 10); // a Monday
