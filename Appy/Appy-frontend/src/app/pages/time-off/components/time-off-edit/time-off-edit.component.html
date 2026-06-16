@@ -12,20 +12,8 @@
   <textarea class="w-input" [(ngModel)]="timeOff.notes"></textarea>
 </div>
 
-<div class="w-input-container">
-  <div class="w-label">{{ "pages.time-off.RECURRENCE" | translate }}</div>
-  <app-dropdown
-    [items]="recurrenceItems"
-    [displayFunction]="formatRecurrence"
-    [hasIcon]="false"
-    [value]="timeOff.recurrence"
-    (valueChange)="onRecurrenceChange($event)"
-    data-test="time-off-recurrence">
-  </app-dropdown>
-</div>
-
 <!-- One-off: required start + end date -->
-<ng-container *ngIf="timeOff.recurrence === TimeOffRecurrence.OneOff">
+<ng-container *ngIf="type === 'oneoff'">
   <div class="w-input-container">
     <div class="w-label">{{ "pages.time-off.FROM_DATE" | translate }}</div>
     <app-date-selector
@@ -43,80 +31,49 @@
   <div class="w-validation-message">{{ timeOff.getValidationErrors("startDate") | translate }}</div>
 </ng-container>
 
-<!-- Weekly: required day-of-week; optional effective bounds -->
-<ng-container *ngIf="timeOff.recurrence === TimeOffRecurrence.Weekly">
+<!-- Recurring: Weekly | Monthly segmented control + the matching day picker + optional bounds -->
+<ng-container *ngIf="type === 'recurring'">
   <div class="w-input-container">
+    <div class="w-label">{{ "pages.time-off.RECURRENCE" | translate }}</div>
+    <div class="segmented" data-test="time-off-recurrence-segment">
+      <button type="button" class="segment" [class.active]="timeOff.recurrence === TimeOffRecurrence.Weekly"
+        (click)="setRecurrence(TimeOffRecurrence.Weekly)" data-test="time-off-recurrence-weekly">
+        {{ "pages.time-off.WEEKLY" | translate }}
+      </button>
+      <button type="button" class="segment" [class.active]="timeOff.recurrence === TimeOffRecurrence.Monthly"
+        (click)="setRecurrence(TimeOffRecurrence.Monthly)" data-test="time-off-recurrence-monthly">
+        {{ "pages.time-off.MONTHLY" | translate }}
+      </button>
+    </div>
+  </div>
+
+  <div class="w-input-container" *ngIf="timeOff.recurrence === TimeOffRecurrence.Weekly">
     <div class="w-label">{{ "pages.time-off.DAY_OF_WEEK" | translate }}</div>
-    <app-dropdown
-      [items]="daysOfWeek"
-      [displayFunction]="formatDayOfWeek"
-      [hasIcon]="false"
-      [value]="timeOff.dayOfWeek"
-      (valueChange)="timeOff.dayOfWeek = $event">
-    </app-dropdown>
+    <app-dropdown [items]="daysOfWeek" [displayFunction]="formatDayOfWeek" [hasIcon]="false"
+      [value]="timeOff.dayOfWeek" (valueChange)="timeOff.dayOfWeek = $event"></app-dropdown>
     <div class="w-validation-message">{{ timeOff.getValidationErrors("dayOfWeek") | translate }}</div>
   </div>
-  <div class="w-input-container all-day-row">
-    <div class="w-label">{{ "pages.time-off.LIMIT_DATE_RANGE" | translate }}</div>
-    <app-toggle-switch
-      [value]="limitDateRange"
-      (valueChange)="onLimitDateRangeChange($event)"
-      data-test="time-off-limit-date-range">
-    </app-toggle-switch>
-  </div>
-  <ng-container *ngIf="limitDateRange">
-    <div class="w-input-container">
-      <div class="w-label">{{ "pages.time-off.FROM_DATE" | translate }}</div>
-      <app-date-selector
-        [date]="timeOff.startDate!"
-        (dateChange)="onStartDateChange($event)">
-      </app-date-selector>
-    </div>
-    <div class="w-input-container">
-      <div class="w-label">{{ "pages.time-off.TO_DATE" | translate }}</div>
-      <app-date-selector
-        [date]="timeOff.endDate!"
-        (dateChange)="onEndDateChange($event)">
-      </app-date-selector>
-    </div>
-    <div class="w-validation-message">{{ timeOff.getValidationErrors("startDate") | translate }}</div>
-  </ng-container>
-</ng-container>
 
-<!-- Monthly: required day-of-month; optional effective bounds -->
-<ng-container *ngIf="timeOff.recurrence === TimeOffRecurrence.Monthly">
-  <div class="w-input-container">
+  <div class="w-input-container" *ngIf="timeOff.recurrence === TimeOffRecurrence.Monthly">
     <div class="w-label">{{ "pages.time-off.DAY_OF_MONTH" | translate }}</div>
-    <app-dropdown
-      [items]="daysOfMonth"
-      [hasIcon]="false"
-      [value]="timeOff.dayOfMonth"
-      (valueChange)="timeOff.dayOfMonth = $event">
-    </app-dropdown>
+    <app-dropdown [items]="daysOfMonth" [hasIcon]="false"
+      [value]="timeOff.dayOfMonth" (valueChange)="timeOff.dayOfMonth = $event"></app-dropdown>
     <div class="w-validation-message">{{ timeOff.getValidationErrors("dayOfMonth") | translate }}</div>
   </div>
+
   <div class="w-input-container all-day-row">
     <div class="w-label">{{ "pages.time-off.LIMIT_DATE_RANGE" | translate }}</div>
-    <app-toggle-switch
-      [value]="limitDateRange"
-      (valueChange)="onLimitDateRangeChange($event)"
-      data-test="time-off-limit-date-range">
-    </app-toggle-switch>
+    <app-toggle-switch [value]="limitDateRange" (valueChange)="onLimitDateRangeChange($event)"
+      data-test="time-off-limit-date-range"></app-toggle-switch>
   </div>
   <ng-container *ngIf="limitDateRange">
     <div class="w-input-container">
       <div class="w-label">{{ "pages.time-off.FROM_DATE" | translate }}</div>
-      <app-date-selector
-        [date]="timeOff.startDate!"
-        (dateChange)="onStartDateChange($event)">
-      </app-date-selector>
+      <app-date-selector [date]="timeOff.startDate!" (dateChange)="onStartDateChange($event)"></app-date-selector>
     </div>
     <div class="w-input-container">
       <div class="w-label">{{ "pages.time-off.TO_DATE" | translate }}</div>
-      <app-date-selector
-        [date]="timeOff.endDate!"
-        (dateChange)="onEndDateChange($event)">
-      </app-date-selector>
+      <app-date-selector [date]="timeOff.endDate!" (dateChange)="onEndDateChange($event)"></app-date-selector>
     </div>
     <div class="w-validation-message">{{ timeOff.getValidationErrors("startDate") | translate }}</div>
   </ng-container>

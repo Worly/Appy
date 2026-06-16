@@ -21,11 +21,7 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
 
   public readonly TimeOffRecurrence = TimeOffRecurrence;
 
-  public readonly recurrenceItems: TimeOffRecurrence[] = [
-    TimeOffRecurrence.OneOff,
-    TimeOffRecurrence.Weekly,
-    TimeOffRecurrence.Monthly,
-  ];
+  public type: "oneoff" | "recurring" = "oneoff";
 
   public readonly daysOfWeek: DayOfWeek[] = [
     DayOfWeek.Monday,
@@ -40,12 +36,6 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
   public readonly daysOfMonth: number[] = Array.from({ length: 31 }, (_, i) => i + 1);
   public readonly hours: number[] = Array.from({ length: 25 }, (_, i) => i);
   public readonly minutes: number[] = [0, 15, 30, 45];
-
-  private static readonly RECURRENCE_KEYS: Record<TimeOffRecurrence, string> = {
-    [TimeOffRecurrence.OneOff]: "pages.time-off.ONE_OFF",
-    [TimeOffRecurrence.Weekly]: "pages.time-off.WEEKLY",
-    [TimeOffRecurrence.Monthly]: "pages.time-off.MONTHLY",
-  };
 
   private static readonly DAY_OF_WEEK_KEYS: Record<DayOfWeek, string> = {
     [DayOfWeek.Sunday]: "SUNDAY",
@@ -71,42 +61,40 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
     if (id != null) {
       this.isNew = false;
       this.subs.push(this.timeOffService.get(+id).subscribe(t => {
-        // For recurring entries, bounds are optional — only fabricate time defaults
-        // for the time selector (which only renders when isAllDay is false).
         if (!t.timeFrom) t.timeFrom = dayjs({ hour: 9 });
         if (!t.timeTo) t.timeTo = dayjs({ hour: 17 });
 
-        // OneOff requires dates; recurring entries keep null bounds unless already set.
         if (t.recurrence === TimeOffRecurrence.OneOff) {
           if (!t.startDate) t.startDate = dayjs();
           if (!t.endDate) t.endDate = dayjs();
         } else {
-          // Enable the bounds toggle only when the entry already has bounds.
           this.limitDateRange = t.startDate != null || t.endDate != null;
         }
 
+        this.type = t.recurrence === TimeOffRecurrence.OneOff ? "oneoff" : "recurring";
         this.timeOff = t;
       }));
     } else {
       this.timeOff = new TimeOff();
-      // OneOff is the default recurrence and requires dates.
-      this.timeOff.startDate = dayjs();
-      this.timeOff.endDate = dayjs();
+      const typeParam = this.route.snapshot.queryParamMap.get("type");
+      this.type = typeParam === "recurring" ? "recurring" : "oneoff";
+
+      if (this.type === "oneoff") {
+        this.timeOff.recurrence = TimeOffRecurrence.OneOff;
+        this.timeOff.startDate = dayjs();
+        this.timeOff.endDate = dayjs();
+      } else {
+        this.timeOff.recurrence = TimeOffRecurrence.Weekly;
+        this.timeOff.dayOfWeek = DayOfWeek.Monday;
+      }
       this.timeOff.timeFrom = dayjs({ hour: 9 });
       this.timeOff.timeTo = dayjs({ hour: 17 });
-      // limitDateRange stays false; it is only relevant for Weekly/Monthly.
     }
   }
 
   ngOnDestroy(): void {
     this.subs.forEach(s => s.unsubscribe());
   }
-
-  // displayFunction for recurrence dropdown
-  public formatRecurrence = (recurrence: TimeOffRecurrence): string => {
-    const key = TimeOffEditComponent.RECURRENCE_KEYS[recurrence];
-    return this.translateService.translate(key);
-  };
 
   // displayFunction for day-of-week dropdown
   public formatDayOfWeek = (dayOfWeek: DayOfWeek): string => {
@@ -135,17 +123,14 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
     this.timeOff.timeTo = (this.timeOff.timeTo ?? dayjs({ hour: 0 })).minute(m);
   }
 
-  public onRecurrenceChange(recurrence: TimeOffRecurrence): void {
+  public setRecurrence(recurrence: TimeOffRecurrence): void {
     this.timeOff.recurrence = recurrence;
-    if (recurrence === TimeOffRecurrence.OneOff) {
-      // OneOff requires dates — ensure they are set.
-      if (!this.timeOff.startDate) this.timeOff.startDate = dayjs();
-      if (!this.timeOff.endDate) this.timeOff.endDate = dayjs();
+    if (recurrence === TimeOffRecurrence.Weekly) {
+      this.timeOff.dayOfMonth = undefined;
+      if (this.timeOff.dayOfWeek == null) this.timeOff.dayOfWeek = DayOfWeek.Monday;
     } else {
-      // Weekly/Monthly — clear phantom dates from OneOff and reset toggle.
-      this.timeOff.startDate = undefined;
-      this.timeOff.endDate = undefined;
-      this.limitDateRange = false;
+      this.timeOff.dayOfWeek = undefined;
+      if (this.timeOff.dayOfMonth == null) this.timeOff.dayOfMonth = 1;
     }
   }
 

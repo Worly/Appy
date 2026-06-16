@@ -14,3 +14,27 @@
   flex-direction: row;
   gap: 1rem;
 }
+
+.segmented {
+  display: flex;
+  gap: 4px;
+  width: fit-content;
+  padding: 3px;
+  border-radius: var(--default-border-radius);
+  background: rgb(var(--rgb-input-background));
+
+  .segment {
+    padding: 5px 16px;
+    border: none;
+    border-radius: var(--default-border-radius);
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+
+    &.active {
+      background: rgb(var(--rgb-success));
+      color: white;
+      font-weight: 600;
+    }
+  }
+}
