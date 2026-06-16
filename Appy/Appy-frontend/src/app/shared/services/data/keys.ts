@@ -45,5 +45,6 @@ export const workingHourKeys = {
 
 export const timeOffKeys = {
     all: ["timeOff"] as const,
+    list: (type: string, scope: string) => ["timeOff", "list", type, scope] as const,
     detail: (id: number) => ["timeOff", "detail", id] as const,
 } satisfies EntityKeyFactory;
