@@ -39,3 +39,7 @@ Controllers throw `HttpException` subclasses (from `Exceptions/`) for validation
 - `getList` supports pagination: `direction` (Forwards/Backwards), `skip`, `take`; returns an `AppointmentListPageDTO` envelope (the page's appointments + the `TimeOffOccurrence`s covering that page's date span)
 - `addNew` and `edit` accept `ignoreTimeNotAvailable=true` to bypass time validation
 - `notifyClient/{id}` accepts a `languageCode` query parameter to select the message language
+
+## Time Off-Specific Notes
+
+- `GET /timeoff/getList?type=&scope=&skip=&take=` — returns a paginated page of `TimeOffDTO` rules for one tab (`type` = `OneOff`|`Recurring`) and scope (`scope` = `Active`|`Expired`); ordered server-side, forward-paginated
