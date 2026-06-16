@@ -1,0 +1,40 @@
+.time-off-row {
+  font-size: 1rem;
+  margin-bottom: 10px;
+  padding: 10px 15px;
+  background-color: rgb(var(--rgb-input-background));
+  border-radius: var(--default-border-radius);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  cursor: pointer;
+
+  & > fa-icon {
+    color: rgb(var(--rgb-warning));
+    flex: 0 0 auto;
+  }
+
+  .info {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .label {
+    font-weight: 600;
+    word-break: break-word;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 10px;
+    font-size: 0.9rem;
+
+    .time {
+      opacity: 0.6;
+    }
+  }
+}
