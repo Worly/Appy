@@ -1,40 +1,185 @@
-.time-row {
-  display: flex;
-  align-items: center;
-  gap: .5rem;
+:host {
+  display: block;
 }
 
-.two-dots {
+// Mobile-first: a single centred column of soft cards, comfortable touch targets.
+.page {
+  max-width: 560px;
+  margin: 0 auto;
+  padding-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// Header: a tinted circular icon badge, title, and the type as an uppercase eyebrow.
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  text-align: center;
+}
+
+.hero-badge {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  background: rgba(var(--rgb-primary), 0.12);
+  color: rgb(var(--rgb-primary));
+}
+
+.hero-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.hero-sub {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(var(--rgb-primary));
+}
+
+.card {
+  background: rgb(var(--rgb-card-background));
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.55;
+
+  fa-icon {
+    font-size: 0.85rem;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label {
+  font-size: 0.9rem;
   font-weight: 600;
+  opacity: 0.8;
 }
 
-.all-day-row {
-  display: flex;
-  align-items: center;
-  flex-direction: row;
-  gap: 1rem;
+.field-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgb(var(--rgb-input-background));
+  border: 1px solid rgb(var(--rgb-input-border));
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:focus {
+    outline: none;
+    border-color: rgb(var(--rgb-primary));
+    box-shadow: 0 0 0 3px rgba(var(--rgb-primary), 0.18);
+  }
 }
 
+textarea.field-input {
+  resize: vertical;
+  min-height: 46px;
+}
+
+.field-error {
+  color: rgb(var(--rgb-danger));
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+// Stacks on phones; two columns once there's room.
+.duo {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+@media (min-width: 600px) {
+  .duo {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+// Weekly | Monthly pill toggle.
 .segmented {
   display: flex;
   gap: 4px;
-  width: fit-content;
-  padding: 3px;
-  border-radius: var(--default-border-radius);
+  padding: 4px;
+  border-radius: 12px;
   background: rgb(var(--rgb-input-background));
+  border: 1px solid rgb(var(--rgb-input-border));
 
   .segment {
-    padding: 5px 16px;
+    flex: 1 1 0;
+    padding: 9px 12px;
     border: none;
-    border-radius: var(--default-border-radius);
+    border-radius: 9px;
     background: transparent;
     color: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
     cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
 
     &.active {
-      background: rgb(var(--rgb-success));
-      color: white;
-      font-weight: 600;
+      background: rgb(var(--rgb-primary));
+      color: rgb(var(--rgb-anti-text));
     }
   }
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  .toggle-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+}
+
+// Hour : minute grouped tightly so it reads like a clock face.
+.time-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  .colon {
+    font-weight: 700;
+    opacity: 0.5;
+  }
+}
+
+app-date-selector {
+  display: block;
 }

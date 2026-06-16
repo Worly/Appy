@@ -8,10 +8,7 @@ import { dateLookup } from "./lookups/date-lookup";
 
 /** Select a day from the day-of-week dropdown (found via its label). */
 function selectDayOfWeek(day: string) {
-  cy.contains(".w-label", "Day of week")
-    .closest(".w-input-container")
-    .find(".my-button")
-    .click();
+  cy.get("[data-test=time-off-day-of-week]").find(".my-button").click();
   cy.contains(day).click();
 }
 
