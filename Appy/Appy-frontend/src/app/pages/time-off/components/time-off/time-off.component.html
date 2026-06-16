@@ -3,27 +3,36 @@
     (onClick)="addNew()" data-test="time-off-add"></app-button>
 </app-action-bar>
 
-<div class="tabs" data-test="time-off-tabs">
-  <button *ngFor="let t of tabs" class="tab" type="button" [class.active]="activeTab === t.tab"
-    (click)="setTab(t.tab)" [attr.data-test]="'time-off-tab-' + t.tab.toLowerCase()">
-    {{ t.labelKey | translate }}
-  </button>
-</div>
+<div class="page">
+  <div class="hero">
+    <div class="hero-badge">
+      <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
+    </div>
+    <div class="hero-title">{{ "pages.time-off.TIME_OFF" | translate }}</div>
+  </div>
 
-<div *ngIf="!isHolidays" class="scope-switch" data-test="time-off-scope">
-  <button class="scope" type="button" [class.active]="scope === 'Active'" (click)="setScope('Active')"
-    data-test="time-off-scope-upcoming">{{ "pages.time-off.UPCOMING" | translate }}</button>
-  <button class="scope" type="button" [class.active]="scope === 'Expired'" (click)="setScope('Expired')"
-    data-test="time-off-scope-past">{{ "pages.time-off.PAST" | translate }}</button>
-</div>
+  <div class="tabs" data-test="time-off-tabs">
+    <button *ngFor="let t of tabs" class="tab" type="button" [class.active]="activeTab === t.tab"
+      (click)="setTab(t.tab)" [attr.data-test]="'time-off-tab-' + t.tab.toLowerCase()">
+      {{ t.labelKey | translate }}
+    </button>
+  </div>
 
-<app-time-off-list *ngIf="!isHolidays" [type]="listType" [scope]="scope"
-  (openDetails)="viewingId = $event; detailsDialog.open()">
-</app-time-off-list>
+  <div *ngIf="!isHolidays" class="scope-switch" data-test="time-off-scope">
+    <button class="scope" type="button" [class.active]="scope === 'Active'" (click)="setScope('Active')"
+      data-test="time-off-scope-upcoming">{{ "pages.time-off.UPCOMING" | translate }}</button>
+    <button class="scope" type="button" [class.active]="scope === 'Expired'" (click)="setScope('Expired')"
+      data-test="time-off-scope-past">{{ "pages.time-off.PAST" | translate }}</button>
+  </div>
 
-<div *ngIf="isHolidays" class="holidays-stub" data-test="time-off-holidays-stub">
-  <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
-  <div>{{ "pages.time-off.HOLIDAYS_COMING_SOON" | translate }}</div>
+  <app-time-off-list *ngIf="!isHolidays" [type]="listType" [scope]="scope"
+    (openDetails)="viewingId = $event; detailsDialog.open()">
+  </app-time-off-list>
+
+  <div *ngIf="isHolidays" class="holidays-stub" data-test="time-off-holidays-stub">
+    <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
+    <div>{{ "pages.time-off.HOLIDAYS_COMING_SOON" | translate }}</div>
+  </div>
 </div>
 
 <app-dialog #detailsDialog>

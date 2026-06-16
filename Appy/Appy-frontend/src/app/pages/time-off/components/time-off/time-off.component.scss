@@ -1,48 +1,95 @@
+:host {
+  display: block;
+}
+
+// Centred column, matching the edit form's width so list and form feel like one screen.
+.page {
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+// Page header: tinted umbrella badge + title (mirrors the edit form's hero).
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0 16px;
+  text-align: center;
+}
+
+.hero-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  background: rgba(var(--rgb-primary), 0.12);
+  color: rgb(var(--rgb-primary));
+}
+
+.hero-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+// Type tabs: a full-width pill segmented control (same language as the editor's segment).
 .tabs {
   display: flex;
-  gap: 8px;
+  gap: 4px;
   margin-bottom: 12px;
+  padding: 4px;
+  border-radius: 12px;
+  background: rgb(var(--rgb-input-background));
+  border: 1px solid rgb(var(--rgb-input-border));
 }
 
 .tab {
   flex: 1 1 0;
-  padding: 8px 12px;
+  padding: 9px 8px;
   border: none;
-  border-radius: var(--default-border-radius);
-  background: rgb(var(--rgb-input-background));
+  border-radius: 9px;
+  background: transparent;
   color: inherit;
-  font-size: 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
 
   &.active {
-    background: rgb(var(--rgb-success));
-    color: white;
-    font-weight: 600;
+    background: rgb(var(--rgb-primary));
+    color: rgb(var(--rgb-anti-text));
   }
 }
 
+// Upcoming | Past scope switch: a smaller, centred pill toggle.
 .scope-switch {
   display: flex;
   gap: 4px;
-  margin-bottom: 16px;
   width: fit-content;
+  margin: 0 auto 16px;
   padding: 3px;
-  border-radius: var(--default-border-radius);
+  border-radius: 10px;
   background: rgb(var(--rgb-input-background));
+  border: 1px solid rgb(var(--rgb-input-border));
 }
 
 .scope {
-  padding: 5px 14px;
+  padding: 6px 18px;
   border: none;
-  border-radius: var(--default-border-radius);
+  border-radius: 8px;
   background: transparent;
   color: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
 
   &.active {
-    background: rgb(var(--rgb-success));
-    color: white;
-    font-weight: 600;
+    background: rgb(var(--rgb-primary));
+    color: rgb(var(--rgb-anti-text));
   }
 }
 

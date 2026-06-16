@@ -1,5 +1,5 @@
 <div class="time-off-row" (click)="onOpenView.emit()" data-test="time-off-row">
-  <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
+  <div class="accent"></div>
   <div class="info">
     <div class="label">{{ label }}</div>
     <div class="meta">
@@ -7,4 +7,5 @@
       <span class="time">{{ time }}</span>
     </div>
   </div>
+  <fa-icon class="type-icon" [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
 </div>
