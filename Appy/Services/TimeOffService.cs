@@ -2,6 +2,7 @@ using Appy.Domain;
 using Appy.DTOs;
 using Appy.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace Appy.Services
 {
@@ -117,6 +118,75 @@ namespace Appy.Services
             t.IsAllDay = dto.IsAllDay;
             t.TimeFrom = dto.IsAllDay ? null : dto.TimeFrom;
             t.TimeTo = dto.IsAllDay ? null : dto.TimeTo;
+        }
+
+        // The first date on/after `from` that this rule applies on, honouring its bounds.
+        // Returns null when the rule has no occurrence in range (e.g. a weekly day that lands past EndDate,
+        // or a day-of-month the calendar skips within a year). Used as a sort key for Recurring/Active.
+        public static DateOnly? NextOccurrenceOnOrAfter(TimeOff t, DateOnly from)
+        {
+            var anchor = (t.StartDate.HasValue && t.StartDate.Value > from) ? t.StartDate.Value : from;
+
+            switch (t.Recurrence)
+            {
+                case TimeOffRecurrence.OneOff:
+                    if (t.EndDate == null) return null;
+                    return anchor <= t.EndDate.Value ? anchor : (DateOnly?)null;
+
+                case TimeOffRecurrence.Weekly:
+                    if (t.DayOfWeek == null) return null;
+                    var delta = ((int)t.DayOfWeek.Value - (int)anchor.DayOfWeek + 7) % 7;
+                    var wd = anchor.AddDays(delta);
+                    return (t.EndDate == null || wd <= t.EndDate.Value) ? wd : (DateOnly?)null;
+
+                case TimeOffRecurrence.Monthly:
+                    if (t.DayOfMonth == null) return null;
+                    for (var d = anchor; d <= anchor.AddDays(366); d = d.AddDays(1))
+                    {
+                        if (t.EndDate != null && d > t.EndDate.Value) return null;
+                        if (d.Day == t.DayOfMonth.Value) return d;
+                    }
+                    return null;
+
+                default:
+                    return null;
+            }
+        }
+
+        // Filters a facility's rules to one tab (type) and scope, orders them, and pages.
+        // Active = today/future or open-ended; Expired = ended before today. Pure — `today` is injected.
+        public static List<TimeOff> BuildListPage(IEnumerable<TimeOff> all, TimeOffListType type, TimeOffScope scope, DateOnly today, int skip, int take)
+        {
+            var typed = type == TimeOffListType.OneOff
+                ? all.Where(t => t.Recurrence == TimeOffRecurrence.OneOff)
+                : all.Where(t => t.Recurrence != TimeOffRecurrence.OneOff);
+
+            // OneOff always has EndDate; recurring may be open-ended (null EndDate = never expires).
+            var scoped = scope == TimeOffScope.Active
+                ? typed.Where(t => t.EndDate == null || t.EndDate.Value >= today)
+                : typed.Where(t => t.EndDate != null && t.EndDate.Value < today);
+
+            IEnumerable<TimeOff> ordered;
+            if (scope == TimeOffScope.Expired)
+            {
+                ordered = scoped.OrderByDescending(t => t.EndDate).ThenByDescending(t => t.Id); // newest-ended first
+            }
+            else if (type == TimeOffListType.OneOff)
+            {
+                ordered = scoped.OrderBy(t => t.StartDate).ThenBy(t => t.EndDate).ThenBy(t => t.Id); // ongoing float up
+            }
+            else
+            {
+                // Recurring/Active: sort by next occurrence; rules with none (sort key null) go last.
+                ordered = scoped
+                    .Select(t => new { t, next = NextOccurrenceOnOrAfter(t, today) })
+                    .OrderBy(x => x.next.HasValue ? 0 : 1)
+                    .ThenBy(x => x.next)
+                    .ThenBy(x => x.t.Id)
+                    .Select(x => x.t);
+            }
+
+            return ordered.Skip(skip).Take(take).ToList();
         }
 
         public bool AppliesOn(TimeOff t, DateOnly date)
