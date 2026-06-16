@@ -19,6 +19,7 @@ export class TimeOffListComponent implements OnChanges, OnDestroy {
 
   private pagedResult?: PagedResult<TimeOff, never>;
   private subs: Subscription[] = [];
+  private destroyed: boolean = false;
 
   constructor(
     private timeOffService: TimeOffService,
@@ -30,6 +31,7 @@ export class TimeOffListComponent implements OnChanges, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
     this.teardown();
   }
 
@@ -53,6 +55,7 @@ export class TimeOffListComponent implements OnChanges, OnDestroy {
 
   @HostListener("window:scroll")
   public checkShouldLoad(): void {
+    if (this.destroyed) return;
     const scrollOffset = 200;
     if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight - scrollOffset && this.pagedResult?.hasMore("forwards")) {
       this.pagedResult.loadMore("forwards");
