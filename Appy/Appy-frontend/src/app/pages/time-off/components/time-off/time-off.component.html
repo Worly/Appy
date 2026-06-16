@@ -1,29 +1,32 @@
 <app-action-bar>
-  <app-button icon="plus" [text]="'pages.time-off.ADD' | translate" color="success" look="solid" (onClick)="addNew()"></app-button>
+  <app-button *ngIf="!isHolidays" icon="plus" [text]="'pages.time-off.ADD' | translate" color="success" look="solid"
+    (onClick)="addNew()" data-test="time-off-add"></app-button>
 </app-action-bar>
 
-<app-loading *ngIf="timeOffs == null"></app-loading>
-
-<div *ngIf="timeOffs != null" class="groups">
-  <div *ngFor="let g of groups" class="group">
-    <h3>{{ g.title | translate }}</h3>
-
-    <div *ngIf="forGroup(g.recurrence).length === 0" class="empty">
-      {{ "pages.time-off.NONE" | translate }}
-    </div>
-
-    <div *ngFor="let t of forGroup(g.recurrence)" class="time-off-row w-clickable" (click)="edit(t)" data-test="time-off-row">
-      <div class="label">{{ t.label }}</div>
-      <div class="schedule">
-        <ng-container [ngSwitch]="t.recurrence">
-          <span *ngSwitchCase="'OneOff'">{{ t.startDate?.format("DD.MM.YYYY") }} – {{ t.endDate?.format("DD.MM.YYYY") }}</span>
-          <span *ngSwitchCase="'Weekly'">{{ dayOfWeekKey(t.dayOfWeek) | translate }}</span>
-          <span *ngSwitchCase="'Monthly'">{{ "pages.time-off.DAY_OF_MONTH" | translate }} {{ t.dayOfMonth }}</span>
-        </ng-container>
-        <span class="time">
-          {{ t.isAllDay ? ("pages.time-off.ALL_DAY" | translate) : (t.timeFrom?.format("HH:mm") + " – " + t.timeTo?.format("HH:mm")) }}
-        </span>
-      </div>
-    </div>
-  </div>
+<div class="tabs" data-test="time-off-tabs">
+  <button *ngFor="let t of tabs" class="tab" type="button" [class.active]="activeTab === t.tab"
+    (click)="setTab(t.tab)" [attr.data-test]="'time-off-tab-' + t.tab.toLowerCase()">
+    {{ t.labelKey | translate }}
+  </button>
 </div>
+
+<div *ngIf="!isHolidays" class="scope-switch" data-test="time-off-scope">
+  <button class="scope" type="button" [class.active]="scope === 'Active'" (click)="setScope('Active')"
+    data-test="time-off-scope-upcoming">{{ "pages.time-off.UPCOMING" | translate }}</button>
+  <button class="scope" type="button" [class.active]="scope === 'Expired'" (click)="setScope('Expired')"
+    data-test="time-off-scope-past">{{ "pages.time-off.PAST" | translate }}</button>
+</div>
+
+<app-time-off-list *ngIf="!isHolidays" [type]="listType" [scope]="scope"
+  (openDetails)="viewingId = $event; detailsDialog.open()">
+</app-time-off-list>
+
+<div *ngIf="isHolidays" class="holidays-stub" data-test="time-off-holidays-stub">
+  <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
+  <div>{{ "pages.time-off.HOLIDAYS_COMING_SOON" | translate }}</div>
+</div>
+
+<app-dialog #detailsDialog>
+  <app-single-time-off *ngIf="detailsDialog.isOpen" [id]="viewingId"
+    (onDone)="detailsDialog.close()"></app-single-time-off>
+</app-dialog>

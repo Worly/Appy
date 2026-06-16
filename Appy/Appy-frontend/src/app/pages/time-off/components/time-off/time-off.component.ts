@@ -1,62 +1,77 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
-import { DayOfWeek } from 'src/app/models/working-hours';
-import { TimeOff, TimeOffRecurrence } from 'src/app/models/time-off';
-import { TimeOffService } from '../../services/time-off.service';
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import { Location } from "@angular/common";
+import { ActivatedRoute, Router } from "@angular/router";
+import { Subscription } from "rxjs";
+import { setUrlParams } from "src/app/utils/dynamic-url-params";
+import { TimeOffListType, TimeOffScope } from "src/app/models/time-off";
+
+type TimeOffTab = "OneOff" | "Recurring" | "Holidays";
 
 @Component({
-  selector: 'app-time-off',
-  templateUrl: './time-off.component.html',
-  styleUrls: ['./time-off.component.scss']
+  selector: "app-time-off",
+  templateUrl: "./time-off.component.html",
+  styleUrls: ["./time-off.component.scss"],
 })
 export class TimeOffComponent implements OnInit, OnDestroy {
-  public timeOffs: TimeOff[] | null = null;
+  public activeTab: TimeOffTab = "OneOff";
+  public scope: TimeOffScope = "Active";
+  public viewingId?: number;
 
-  public readonly groups: { title: string; recurrence: TimeOffRecurrence }[] = [
-    { title: "pages.time-off.ONE_OFF", recurrence: TimeOffRecurrence.OneOff },
-    { title: "pages.time-off.WEEKLY", recurrence: TimeOffRecurrence.Weekly },
-    { title: "pages.time-off.MONTHLY", recurrence: TimeOffRecurrence.Monthly },
+  public readonly tabs: { tab: TimeOffTab; labelKey: string }[] = [
+    { tab: "OneOff", labelKey: "pages.time-off.ONE_OFF" },
+    { tab: "Recurring", labelKey: "pages.time-off.RECURRING" },
+    { tab: "Holidays", labelKey: "pages.time-off.HOLIDAYS" },
   ];
-
-  private static readonly DAY_OF_WEEK_KEYS: Record<DayOfWeek, string> = {
-    [DayOfWeek.Sunday]: "SUNDAY",
-    [DayOfWeek.Monday]: "MONDAY",
-    [DayOfWeek.Tuesday]: "TUESDAY",
-    [DayOfWeek.Wednesday]: "WEDNESDAY",
-    [DayOfWeek.Thursday]: "THURSDAY",
-    [DayOfWeek.Friday]: "FRIDAY",
-    [DayOfWeek.Saturday]: "SATURDAY",
-  };
 
   private subs: Subscription[] = [];
 
   constructor(
-    private timeOffService: TimeOffService,
     private router: Router,
-  ) { }
+    private location: Location,
+    private route: ActivatedRoute,
+  ) {}
 
   ngOnInit(): void {
-    this.subs.push(this.timeOffService.getAll().data$.subscribe(t => this.timeOffs = t ?? null));
+    this.subs.push(this.route.queryParamMap.subscribe(params => {
+      const tab = params.get("tab");
+      this.activeTab = tab === "recurring" ? "Recurring" : tab === "holidays" ? "Holidays" : "OneOff";
+      const scope = params.get("scope");
+      this.scope = scope === "past" ? "Expired" : "Active";
+    }));
   }
 
   ngOnDestroy(): void {
     this.subs.forEach(s => s.unsubscribe());
   }
 
-  public forGroup(recurrence: TimeOffRecurrence): TimeOff[] {
-    return this.timeOffs?.filter(t => t.recurrence === recurrence) ?? [];
+  public get listType(): TimeOffListType {
+    return this.activeTab === "Recurring" ? "Recurring" : "OneOff";
   }
 
-  public dayOfWeekKey(dayOfWeek: DayOfWeek | undefined): string {
-    return dayOfWeek != null ? TimeOffComponent.DAY_OF_WEEK_KEYS[dayOfWeek] : '';
+  public get isHolidays(): boolean {
+    return this.activeTab === "Holidays";
+  }
+
+  public setTab(tab: TimeOffTab): void {
+    this.activeTab = tab;
+    this.updateUrl();
+  }
+
+  public setScope(scope: TimeOffScope): void {
+    this.scope = scope;
+    this.updateUrl();
+  }
+
+  private updateUrl(): void {
+    setUrlParams(this.router, this.route, this.location, {
+      tab: this.activeTab.toLowerCase(),
+      scope: this.scope === "Expired" ? "past" : "upcoming",
+    });
   }
 
   public addNew(): void {
-    this.router.navigate(["/time-off/new"]);
-  }
-
-  public edit(t: TimeOff): void {
-    this.router.navigate(["/time-off/edit", t.id]);
+    this.router.navigate(["/time-off/new"], {
+      queryParams: { type: this.activeTab === "Recurring" ? "recurring" : "oneoff" },
+    });
   }
 }
