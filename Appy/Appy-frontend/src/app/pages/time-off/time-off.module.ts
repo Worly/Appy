@@ -9,6 +9,7 @@ import { TimeOffComponent } from "./components/time-off/time-off.component";
 import { TimeOffEditComponent } from "./components/time-off-edit/time-off-edit.component";
 import { SingleTimeOffListItemComponent } from "./components/single-time-off-list-item/single-time-off-list-item.component";
 import { TimeOffListComponent } from "./components/time-off-list/time-off-list.component";
+import { SingleTimeOffComponent } from "./components/single-time-off/single-time-off.component";
 
 @NgModule({
   declarations: [
@@ -16,6 +17,7 @@ import { TimeOffListComponent } from "./components/time-off-list/time-off-list.c
     TimeOffEditComponent,
     SingleTimeOffListItemComponent,
     TimeOffListComponent,
+    SingleTimeOffComponent,
   ],
   imports: [
     TimeOffRoutingModule,
