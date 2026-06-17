@@ -250,6 +250,9 @@
             "TIME_FROM": "From",
             "TIME_TO": "To",
             "LIMIT_DATE_RANGE": "Limit to a date range",
+            "APPLY_FROM_TITLE": "Apply changes from",
+            "APPLY_FROM_SPECIFIC": "A specific date",
+            "APPLY_FROM_ALL": "The entire schedule",
 
             "errors": {
                 "MISSING_LABEL": "Label is required",

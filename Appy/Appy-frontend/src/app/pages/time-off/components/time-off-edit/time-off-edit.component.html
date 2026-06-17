@@ -145,3 +145,31 @@
       [isLoading]="isLoading" (onClick)="save()"></app-button>
   </app-action-bar>
 </div>
+
+<app-dialog #splitDialog>
+  <div class="split-dialog" *ngIf="splitDialog.isOpen" data-test="time-off-split-dialog">
+    <div class="split-title">{{ "pages.time-off.APPLY_FROM_TITLE" | translate }}</div>
+
+    <div class="segmented">
+      <button type="button" class="segment" [class.active]="splitMode === 'date'"
+        (click)="splitMode = 'date'" data-test="time-off-split-from-date">
+        {{ "pages.time-off.APPLY_FROM_SPECIFIC" | translate }}
+      </button>
+      <button type="button" class="segment" [class.active]="splitMode === 'all'"
+        (click)="splitMode = 'all'" data-test="time-off-split-all">
+        {{ "pages.time-off.APPLY_FROM_ALL" | translate }}
+      </button>
+    </div>
+
+    <div class="field" *ngIf="splitMode === 'date'">
+      <app-date-selector [date]="splitDate" (dateChange)="onSplitDateChange($event)"></app-date-selector>
+    </div>
+
+    <div class="split-actions">
+      <app-button [text]="'CANCEL' | translate" color="danger" look="normal"
+        (onClick)="splitDialog.close()"></app-button>
+      <app-button [text]="'APPLY' | translate" color="success" look="solid"
+        (onClick)="confirmSplit()" data-test="time-off-split-apply"></app-button>
+    </div>
+  </div>
+</app-dialog>

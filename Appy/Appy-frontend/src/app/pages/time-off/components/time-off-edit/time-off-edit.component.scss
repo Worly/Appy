@@ -162,3 +162,26 @@ textarea.field-input {
 app-date-selector {
   display: block;
 }
+
+// Recurring-edit "apply changes from" prompt (rendered inside app-dialog's centered overlay).
+.split-dialog {
+  background: rgb(var(--rgb-card-background));
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: min(92vw, 360px);
+  box-sizing: border-box;
+}
+
+.split-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.split-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}

@@ -20,6 +20,15 @@ export class TimeOffService extends BaseModelService<TimeOff, TimeOff> {
     }).pipe(map(r => r.map(o => new TimeOffOccurrence(o))));
   }
 
+  /**
+   * Save an edit, optionally forking a recurring rule's timeline. When `applyFrom` is given the
+   * backend keeps the original row as history (ending the day before) and writes a new segment
+   * from `applyFrom` onward; without it, this is a plain in-place edit.
+   */
+  public saveWithSplit(timeOff: TimeOff, applyFrom?: Dayjs): Observable<TimeOff> {
+    return this.save(timeOff, applyFrom ? { applyFrom: applyFrom.format("YYYY-MM-DD") } : undefined);
+  }
+
   public getList(type: TimeOffListType, scope: TimeOffScope): PagedResult<TimeOff, never> {
     return this.getListAdvanced<never>(
       [...timeOffKeys.list(type, scope)],

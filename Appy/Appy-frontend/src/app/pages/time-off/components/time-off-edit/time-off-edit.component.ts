@@ -1,5 +1,5 @@
 import { Location } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from 'src/app/components/translate/translate.service';
 import dayjs, { Dayjs } from 'dayjs';
@@ -7,6 +7,7 @@ import { Subscription } from 'rxjs';
 import { DayOfWeek } from 'src/app/models/working-hours';
 import { TimeOff, TimeOffRecurrence } from 'src/app/models/time-off';
 import { TimeOffService } from '../../services/time-off.service';
+import { DialogComponent } from 'src/app/components/dialog/dialog.component';
 
 @Component({
   selector: 'app-time-off-edit',
@@ -21,6 +22,13 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
   // date-selectors (which require a defined Dayjs) until the model is populated.
   public isLoaded: boolean = false;
   public limitDateRange: boolean = false;
+
+  @ViewChild("splitDialog") splitDialog?: DialogComponent;
+
+  // Split prompt state for recurring edits: "date" forks the timeline at `splitDate`,
+  // "all" applies the change to the whole rule (no fork). Default date is today.
+  public splitMode: "date" | "all" = "date";
+  public splitDate: Dayjs = dayjs();
 
   public readonly TimeOffRecurrence = TimeOffRecurrence;
 
@@ -71,7 +79,9 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
           if (!t.startDate) t.startDate = dayjs();
           if (!t.endDate) t.endDate = dayjs();
         } else {
-          this.limitDateRange = t.startDate != null || t.endDate != null;
+          // Recurring rules always carry an effective-from (today on create), so the "limit"
+          // toggle reflects whether an end/"until" bound exists — not the start.
+          this.limitDateRange = t.endDate != null;
         }
 
         this.type = t.recurrence === TimeOffRecurrence.OneOff ? "oneoff" : "recurring";
@@ -163,10 +173,43 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
   public save(): void {
     if (!this.timeOff.validate()) return;
 
+    // Recurring edits fork the rule's timeline — ask the user from which date the change applies.
+    if (!this.isNew && this.type === "recurring") {
+      this.splitMode = "date";
+      this.splitDate = dayjs();
+      this.splitDialog?.open();
+      return;
+    }
+
+    this.commit();
+  }
+
+  public confirmSplit(): void {
+    if (this.splitMode === "date") {
+      // The chosen date is the new segment's start; it overrides the form's From field.
+      this.timeOff.startDate = this.splitDate;
+      if (!this.timeOff.validate()) {
+        this.splitDialog?.close(); // surface the form error (e.g. split date after the "until")
+        return;
+      }
+      this.splitDialog?.close();
+      this.commit(this.splitDate);
+    } else {
+      // "Entire schedule" → plain in-place edit, no fork.
+      this.splitDialog?.close();
+      this.commit();
+    }
+  }
+
+  public onSplitDateChange(date: Dayjs): void {
+    this.splitDate = date;
+  }
+
+  private commit(applyFrom?: Dayjs): void {
     this.isLoading = true;
     const obs = this.isNew
       ? this.timeOffService.addNew(this.timeOff)
-      : this.timeOffService.save(this.timeOff);
+      : this.timeOffService.saveWithSplit(this.timeOff, applyFrom);
 
     this.subs.push(obs.subscribe({
       next: () => this.goBack(),
