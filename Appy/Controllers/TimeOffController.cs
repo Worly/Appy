@@ -44,9 +44,9 @@ namespace Appy.Controllers
 
         [HttpPut("edit/{id}")]
         [Authorize]
-        public async Task<ActionResult<TimeOffDTO>> Edit(int id, TimeOffDTO dto)
+        public async Task<ActionResult<TimeOffDTO>> Edit(int id, TimeOffDTO dto, [FromQuery] DateOnly? applyFrom = null)
         {
-            var result = await this.timeOffService.Edit(id, dto, HttpContext.SelectedFacility());
+            var result = await this.timeOffService.Edit(id, dto, HttpContext.SelectedFacility(), applyFrom);
             return Ok(result.GetDTO());
         }
 

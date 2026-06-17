@@ -4,6 +4,7 @@ using Appy.Exceptions;
 using Appy.Services;
 using Moq;
 using Moq.EntityFrameworkCore;
+using System.Threading;
 
 namespace Appy.Tests.Services
 {
@@ -140,6 +141,120 @@ namespace Appy.Tests.Services
         }
 
         private TimeOff Seed(TimeOff t) { t.FacilityId = FacilityId; timeOffs.Add(t); return t; }
+
+        [Fact]
+        public async Task Edit_RecurringWithApplyFrom_SplitsTimeline()
+        {
+            var original = Seed(new TimeOff
+            {
+                Id = 7,
+                Recurrence = TimeOffRecurrence.Weekly,
+                DayOfWeek = DayOfWeek.Monday,
+                StartDate = new DateOnly(2030, 6, 1),
+                EndDate = null,
+                Label = "Old",
+                IsAllDay = true,
+            });
+
+            var dto = new TimeOffDTO
+            {
+                Label = "New",
+                Recurrence = TimeOffRecurrence.Weekly,
+                DayOfWeek = DayOfWeek.Tuesday, // the change applied from the split date onward
+                IsAllDay = true,
+            };
+
+            var result = await service.Edit(7, dto, FacilityId, applyFrom: new DateOnly(2030, 6, 15));
+
+            // New segment is returned: starts on the split date, carries the edits, stays open-ended.
+            Assert.NotSame(original, result);
+            Assert.Equal(new DateOnly(2030, 6, 15), result.StartDate);
+            Assert.Null(result.EndDate);
+            Assert.Equal("New", result.Label);
+            Assert.Equal(DayOfWeek.Tuesday, result.DayOfWeek);
+            Assert.Equal(FacilityId, result.FacilityId);
+
+            // Original keeps its pre-edit values and ends the day before the split.
+            Assert.Equal(new DateOnly(2030, 6, 14), original.EndDate);
+            Assert.Equal("Old", original.Label);
+            Assert.Equal(DayOfWeek.Monday, original.DayOfWeek);
+
+            dbContextMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task Edit_RecurringApplyFromOnOrBeforeStart_EditsInPlace()
+        {
+            var original = Seed(new TimeOff
+            {
+                Id = 8,
+                Recurrence = TimeOffRecurrence.Weekly,
+                DayOfWeek = DayOfWeek.Monday,
+                StartDate = new DateOnly(2030, 6, 10),
+                EndDate = null,
+                Label = "Old",
+                IsAllDay = true,
+            });
+
+            var dto = new TimeOffDTO { Label = "New", Recurrence = TimeOffRecurrence.Weekly, DayOfWeek = DayOfWeek.Monday, IsAllDay = true };
+
+            // applyFrom == start -> historical segment would be empty -> edit in place, no fork.
+            var result = await service.Edit(8, dto, FacilityId, applyFrom: new DateOnly(2030, 6, 10));
+
+            Assert.Same(original, result);
+            Assert.Equal("New", result.Label);
+            Assert.Null(result.EndDate);
+        }
+
+        [Fact]
+        public async Task Edit_OneOffWithApplyFrom_EditsInPlace()
+        {
+            var original = Seed(new TimeOff
+            {
+                Id = 9,
+                Recurrence = TimeOffRecurrence.OneOff,
+                StartDate = new DateOnly(2030, 6, 1),
+                EndDate = new DateOnly(2030, 6, 5),
+                Label = "Old",
+                IsAllDay = true,
+            });
+
+            var dto = ValidOneOff();
+            dto.Label = "New";
+
+            // One-offs ignore applyFrom entirely.
+            var result = await service.Edit(9, dto, FacilityId, applyFrom: new DateOnly(2030, 6, 3));
+
+            Assert.Same(original, result);
+            Assert.Equal("New", result.Label);
+            Assert.Equal(new DateOnly(2030, 6, 5), result.EndDate);
+        }
+
+        [Fact]
+        public async Task Edit_RecurringSplit_ThrowsWhenUntilBeforeApplyFrom()
+        {
+            Seed(new TimeOff
+            {
+                Id = 10,
+                Recurrence = TimeOffRecurrence.Weekly,
+                DayOfWeek = DayOfWeek.Monday,
+                StartDate = new DateOnly(2030, 6, 1),
+                Label = "Old",
+                IsAllDay = true,
+            });
+
+            var dto = new TimeOffDTO
+            {
+                Label = "New",
+                Recurrence = TimeOffRecurrence.Weekly,
+                DayOfWeek = DayOfWeek.Monday,
+                EndDate = new DateOnly(2030, 6, 10), // until before the chosen split date
+                IsAllDay = true,
+            };
+
+            await Assert.ThrowsAsync<ValidationException>(() =>
+                service.Edit(10, dto, FacilityId, applyFrom: new DateOnly(2030, 6, 20)));
+        }
 
         [Fact]
         public void AppliesOn_OneOff_WithinRange()

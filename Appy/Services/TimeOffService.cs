@@ -10,7 +10,7 @@ namespace Appy.Services
         Task<List<TimeOff>> GetAll(int facilityId);
         Task<TimeOff> GetById(int id, int facilityId);
         Task<TimeOff> AddNew(TimeOffDTO dto, int facilityId);
-        Task<TimeOff> Edit(int id, TimeOffDTO dto, int facilityId);
+        Task<TimeOff> Edit(int id, TimeOffDTO dto, int facilityId, DateOnly? applyFrom = null);
         Task Delete(int id, int facilityId);
 
         bool AppliesOn(TimeOff timeOff, DateOnly date);
@@ -60,12 +60,38 @@ namespace Appy.Services
             return t;
         }
 
-        public async Task<TimeOff> Edit(int id, TimeOffDTO dto, int facilityId)
+        public async Task<TimeOff> Edit(int id, TimeOffDTO dto, int facilityId, DateOnly? applyFrom = null)
         {
-            Validate(dto);
             var t = await context.TimeOffs.FirstOrDefaultAsync(t => t.Id == id && t.FacilityId == facilityId);
             if (t == null)
                 throw new NotFoundException();
+
+            // A recurring rule is a timeline of segments. Editing with an applyFrom date that lands
+            // strictly after the rule's current effective start forks the timeline: the original keeps
+            // its old values and ends the day before applyFrom; a new segment carries the edits from
+            // applyFrom onward. Otherwise (absent date, on/before the start, or a one-off) there's
+            // nothing to preserve — edit in place.
+            bool split = applyFrom.HasValue
+                && t.Recurrence != TimeOffRecurrence.OneOff
+                && (t.StartDate == null || applyFrom.Value > t.StartDate.Value);
+
+            if (split)
+                // The split date is the new segment's effective start; mirror it into the DTO so
+                // Validate checks the real bounds (applyFrom <= until), not the form's From field.
+                dto.StartDate = applyFrom!.Value;
+
+            Validate(dto);
+
+            if (split)
+            {
+                var newSegment = new TimeOff { FacilityId = facilityId };
+                ApplyDto(newSegment, dto);                 // StartDate = applyFrom (set above), EndDate = until or null
+                t.EndDate = applyFrom!.Value.AddDays(-1);  // original becomes the historical segment
+                context.TimeOffs.Add(newSegment);
+                await context.SaveChangesAsync();
+                return newSegment;
+            }
+
             ApplyDto(t, dto);
             await context.SaveChangesAsync();
             return t;
