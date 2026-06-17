@@ -111,6 +111,11 @@ describe("Time Off", () => {
 
     getElement("time-off-label").clear().type("Edited Weekly Label");
     cy.contains("Save").click();
+
+    // Recurring edits now prompt for the apply-from scope; apply to the entire schedule.
+    getElement("time-off-split-dialog").should("exist");
+    getElement("time-off-split-all").click();
+    getElement("time-off-split-apply").click();
     expectURL("/time-off");
 
     clickTab("recurring");
@@ -135,6 +140,61 @@ describe("Time Off", () => {
 
     clickTab("oneoff");
     cy.get("[data-test=time-off-list]").should("not.contain", "Delete Me One Off");
+  });
+
+  it("edits a one-off time off without showing the apply-from dialog", () => {
+    visitTimeOff();
+    getElement("time-off-add").click();
+    getElement("time-off-label").clear().type("One Off No Prompt");
+    cy.contains("Save").click();
+    expectURL("/time-off");
+
+    clickTab("oneoff");
+    clickRow("One Off No Prompt");
+    getElement("time-off-edit-button").click();
+    expectURL(/\/time-off\/edit\/\d+/);
+
+    getElement("time-off-label").clear().type("One Off Saved Directly");
+    cy.contains("Save").click();
+
+    // One-offs save straight away — no fork dialog, navigation happens immediately.
+    expectURL("/time-off");
+    getElement("time-off-split-dialog").should("not.exist");
+
+    clickTab("oneoff");
+    expectRow("One Off Saved Directly");
+  });
+
+  it("prompts for the apply-from scope when editing a recurring time off", () => {
+    visitTimeOff();
+    clickTab("recurring");
+    getElement("time-off-add").click();
+    getElement("time-off-label").clear().type("Prompt Alpha");
+    selectDayOfWeek("Monday");
+    toggleSwitch("time-off-all-day");
+    cy.contains("Save").click();
+    expectURL("/time-off");
+
+    clickTab("recurring");
+    clickRow("Prompt Alpha");
+    getElement("time-off-edit-button").click();
+    expectURL(/\/time-off\/edit\/\d+/);
+
+    getElement("time-off-label").clear().type("Prompt Beta");
+    cy.contains("Save").click();
+
+    // The apply-from dialog appears for recurring edits, with both choices.
+    getElement("time-off-split-dialog").should("exist");
+    getElement("time-off-split-from-date").should("exist");
+    getElement("time-off-split-all").should("exist");
+
+    // Default "specific date" is today; on a rule created today this collapses to an in-place edit.
+    getElement("time-off-split-apply").click();
+    expectURL("/time-off");
+
+    clickTab("recurring");
+    cy.get("[data-test=time-off-list]").should("not.contain", "Prompt Alpha");
+    expectRow("Prompt Beta");
   });
 
   it("shows the Holidays tab as a stub with no add button", () => {
