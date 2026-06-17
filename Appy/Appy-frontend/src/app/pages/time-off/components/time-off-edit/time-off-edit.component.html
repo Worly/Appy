@@ -168,7 +168,7 @@
     <div class="split-actions">
       <app-button [text]="'CANCEL' | translate" color="danger" look="normal"
         (onClick)="splitDialog.close()"></app-button>
-      <app-button [text]="'APPLY' | translate" color="success" look="solid"
+      <app-button [text]="'APPLY' | translate" color="success" look="solid" [disabled]="isLoading"
         (onClick)="confirmSplit()" data-test="time-off-split-apply"></app-button>
     </div>
   </div>

@@ -75,17 +75,18 @@ namespace Appy.Services
                 && t.Recurrence != TimeOffRecurrence.OneOff
                 && (t.StartDate == null || applyFrom.Value > t.StartDate.Value);
 
-            if (split)
-                // The split date is the new segment's effective start; mirror it into the DTO so
-                // Validate checks the real bounds (applyFrom <= until), not the form's From field.
-                dto.StartDate = applyFrom!.Value;
-
             Validate(dto);
 
             if (split)
             {
+                // The new segment's effective start is applyFrom — it overrides any form "From",
+                // so guard the real bound here: an end before applyFrom is "dates not in order".
+                if (dto.EndDate != null && applyFrom!.Value > dto.EndDate.Value)
+                    throw new ValidationException(nameof(TimeOffDTO.StartDate), "pages.time-off.errors.DATES_NOT_IN_ORDER");
+
                 var newSegment = new TimeOff { FacilityId = facilityId };
-                ApplyDto(newSegment, dto);                 // StartDate = applyFrom (set above), EndDate = until or null
+                ApplyDto(newSegment, dto);
+                newSegment.StartDate = applyFrom!.Value;   // applyFrom is the new segment's effective start
                 t.EndDate = applyFrom!.Value.AddDays(-1);  // original becomes the historical segment
                 context.TimeOffs.Add(newSegment);
                 await context.SaveChangesAsync();
