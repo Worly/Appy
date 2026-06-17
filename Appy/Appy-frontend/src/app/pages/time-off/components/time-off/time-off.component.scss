@@ -8,32 +8,7 @@
   margin: 0 auto;
 }
 
-// Page header: tinted umbrella badge + title (mirrors the edit form's hero).
-.hero {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 0 16px;
-  text-align: center;
-}
-
-.hero-badge {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.3rem;
-  background: rgba(var(--rgb-primary), 0.12);
-  color: rgb(var(--rgb-primary));
-}
-
-.hero-title {
-  font-size: 1.2rem;
-  font-weight: 700;
-}
+// Title uses the global .w-title (matching the home screen) — no per-page hero.
 
 // Type tabs: a full-width pill segmented control (same language as the editor's segment).
 .tabs {
@@ -60,7 +35,9 @@
 
   &.active {
     background: rgb(var(--rgb-primary));
-    color: rgb(var(--rgb-anti-text));
+    // text-on-primary, not anti-text: on dark theme primary is a dark navy, so
+    // black anti-text would be near-invisible. text-on-primary stays light there.
+    color: rgb(var(--rgb-text-on-primary));
   }
 }
 
@@ -89,7 +66,7 @@
 
   &.active {
     background: rgb(var(--rgb-primary));
-    color: rgb(var(--rgb-anti-text));
+    color: rgb(var(--rgb-text-on-primary));
   }
 }
 

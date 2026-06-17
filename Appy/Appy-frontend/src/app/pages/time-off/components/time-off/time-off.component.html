@@ -1,10 +1,5 @@
 <div class="page">
-  <div class="hero">
-    <div class="hero-badge">
-      <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
-    </div>
-    <div class="hero-title">{{ "pages.time-off.TIME_OFF" | translate }}</div>
-  </div>
+  <div class="w-title">{{ "pages.time-off.TIME_OFF" | translate }}</div>
 
   <div class="tabs" data-test="time-off-tabs">
     <button *ngFor="let t of tabs" class="tab" type="button" [class.active]="activeTab === t.tab"

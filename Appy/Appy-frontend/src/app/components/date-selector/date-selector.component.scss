@@ -3,6 +3,15 @@
 }
 
 :host::ng-deep {
+    .my-container {
+        .date-button {
+            div {
+                padding-left: 5px;
+                padding-right: 5px;
+            }
+        }
+    }
+
     .my-container.compact {
         .date-button {
             div {

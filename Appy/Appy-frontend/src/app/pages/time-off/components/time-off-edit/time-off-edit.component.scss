@@ -12,36 +12,20 @@
   gap: 16px;
 }
 
-// Header: a tinted circular icon badge, title, and the type as an uppercase eyebrow.
-.hero {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 0;
+// Title uses the global .w-title (matching the home screen), with the type as
+// an uppercase eyebrow beneath it.
+.title-block {
   text-align: center;
+
+  // .w-title carries a 20px bottom margin; collapse it so the eyebrow sits
+  // close under the title (the .page flex gap handles spacing to the cards).
+  .w-title {
+    margin-bottom: 4px;
+  }
 }
 
-.hero-badge {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  background: rgba(var(--rgb-primary), 0.12);
-  color: rgb(var(--rgb-primary));
-}
-
-.hero-title {
-  font-size: 1.2rem;
-  font-weight: 700;
-  line-height: 1.1;
-}
-
-.hero-sub {
-  font-size: 0.8rem;
+.title-sub {
+  font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -115,17 +99,10 @@ textarea.field-input {
   font-weight: 500;
 }
 
-// Stacks on phones; two columns once there's room.
 .duo {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
-}
-
-@media (min-width: 600px) {
-  .duo {
-    grid-template-columns: 1fr 1fr;
-  }
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
 }
 
 // Weekly | Monthly pill toggle.
@@ -151,7 +128,9 @@ textarea.field-input {
 
     &.active {
       background: rgb(var(--rgb-primary));
-      color: rgb(var(--rgb-anti-text));
+      // text-on-primary, not anti-text: black anti-text is unreadable on the
+      // dark-navy primary in dark theme (same fix as the list tabs).
+      color: rgb(var(--rgb-text-on-primary));
     }
   }
 }

@@ -1,12 +1,9 @@
 <app-loading *ngIf="!isLoaded"></app-loading>
 
 <div class="page" *ngIf="isLoaded">
-  <div class="hero">
-    <div class="hero-badge">
-      <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
-    </div>
-    <div class="hero-title">{{ (isNew ? "pages.time-off.ADD" : "pages.time-off.TIME_OFF") | translate }}</div>
-    <div class="hero-sub">{{ (type === 'oneoff' ? "pages.time-off.ONE_OFF" : "pages.time-off.RECURRING") | translate }}</div>
+  <div class="title-block">
+    <div class="w-title">{{ (isNew ? "pages.time-off.ADD" : "pages.time-off.TIME_OFF") | translate }}</div>
+    <div class="title-sub">{{ (type === 'oneoff' ? "pages.time-off.ONE_OFF" : "pages.time-off.RECURRING") | translate }}</div>
   </div>
 
   <!-- Details -->
@@ -140,7 +137,7 @@
   </section>
 
   <app-action-bar>
-    <app-button *ngIf="!isNew" flex-splitter [text]="'DELETE' | translate" icon="trash" color="danger" look="solid"
+    <app-button *ngIf="!isNew" [text]="'DELETE' | translate" icon="trash" color="danger" look="solid"
       [disabled]="isLoading" (onClick)="delete()"></app-button>
     <app-button flex-splitter [text]="'CANCEL' | translate" color="danger" look="normal" [disabled]="isLoading"
       (onClick)="goBack()"></app-button>
