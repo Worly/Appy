@@ -159,7 +159,7 @@ describe("Time Off", () => {
 
     // One-offs save straight away — no fork dialog, navigation happens immediately.
     expectURL("/time-off");
-    getElement("time-off-split-dialog").should("not.exist");
+    cy.get("[data-test=time-off-split-dialog]").should("not.exist");
 
     clickTab("oneoff");
     expectRow("One Off Saved Directly");
