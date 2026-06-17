@@ -51,6 +51,10 @@ namespace Appy.Services
             Validate(dto);
             var t = new TimeOff { FacilityId = facilityId };
             ApplyDto(t, dto);
+            // A new recurring rule with no explicit start is "from today, forever" — stamp today so the
+            // rule has a concrete effective-from (one-offs always carry their own dates).
+            if (t.Recurrence != TimeOffRecurrence.OneOff && t.StartDate == null)
+                t.StartDate = DateOnly.FromDateTime(DateTime.Today);
             context.TimeOffs.Add(t);
             await context.SaveChangesAsync();
             return t;

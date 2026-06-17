@@ -100,6 +100,45 @@ namespace Appy.Tests.Services
             Assert.Equal(FacilityId, result.FacilityId);
         }
 
+        [Fact]
+        public async Task AddNew_OpenEndedRecurring_StampsTodayAsStart()
+        {
+            var dto = ValidOneOff();
+            dto.Recurrence = TimeOffRecurrence.Weekly;
+            dto.DayOfWeek = DayOfWeek.Monday;
+            dto.StartDate = null;
+            dto.EndDate = null;
+
+            var result = await service.AddNew(dto, FacilityId);
+
+            Assert.Equal(DateOnly.FromDateTime(DateTime.Today), result.StartDate);
+            Assert.Null(result.EndDate); // still "forever"
+        }
+
+        [Fact]
+        public async Task AddNew_LimitedRecurring_PreservesBothBounds()
+        {
+            var dto = ValidOneOff();
+            dto.Recurrence = TimeOffRecurrence.Weekly;
+            dto.DayOfWeek = DayOfWeek.Monday;
+            dto.StartDate = new DateOnly(2030, 6, 1);
+            dto.EndDate = new DateOnly(2030, 12, 31);
+
+            var result = await service.AddNew(dto, FacilityId);
+
+            Assert.Equal(new DateOnly(2030, 6, 1), result.StartDate);
+            Assert.Equal(new DateOnly(2030, 12, 31), result.EndDate);
+        }
+
+        [Fact]
+        public async Task AddNew_OneOff_DoesNotStampStart()
+        {
+            // One-offs always carry explicit dates; the today-stamp must not touch them.
+            var dto = ValidOneOff(); // StartDate = 2030-06-01
+            var result = await service.AddNew(dto, FacilityId);
+            Assert.Equal(new DateOnly(2030, 6, 1), result.StartDate);
+        }
+
         private TimeOff Seed(TimeOff t) { t.FacilityId = FacilityId; timeOffs.Add(t); return t; }
 
         [Fact]
