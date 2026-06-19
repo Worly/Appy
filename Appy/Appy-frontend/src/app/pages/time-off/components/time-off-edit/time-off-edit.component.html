@@ -32,17 +32,15 @@
       <span>{{ "pages.time-off.WHEN" | translate }}</span>
     </div>
 
-    <!-- One-off: required start + end date -->
+    <!-- One-off: required start + end date (stacked full-width, like the recurring From/To) -->
     <ng-container *ngIf="type === 'oneoff'">
-      <div class="duo">
-        <div class="field">
-          <label class="field-label">{{ "pages.time-off.FROM_DATE" | translate }}</label>
-          <app-date-selector [date]="timeOff.startDate!" (dateChange)="onStartDateChange($event)"></app-date-selector>
-        </div>
-        <div class="field">
-          <label class="field-label">{{ "pages.time-off.TO_DATE" | translate }}</label>
-          <app-date-selector [date]="timeOff.endDate!" (dateChange)="onEndDateChange($event)"></app-date-selector>
-        </div>
+      <div class="field">
+        <label class="field-label">{{ "pages.time-off.FROM_DATE" | translate }}</label>
+        <app-date-selector [date]="timeOff.startDate!" (dateChange)="onStartDateChange($event)"></app-date-selector>
+      </div>
+      <div class="field">
+        <label class="field-label">{{ "pages.time-off.TO_DATE" | translate }}</label>
+        <app-date-selector [date]="timeOff.endDate!" (dateChange)="onEndDateChange($event)"></app-date-selector>
       </div>
       <div class="field-error" *ngIf="timeOff.getValidationErrors('startDate')">{{ timeOff.getValidationErrors("startDate") | translate }}</div>
     </ng-container>
@@ -62,14 +60,14 @@
 
       <div class="field" *ngIf="timeOff.recurrence === TimeOffRecurrence.Weekly" data-test="time-off-day-of-week">
         <label class="field-label">{{ "pages.time-off.DAY_OF_WEEK" | translate }}</label>
-        <app-dropdown [items]="daysOfWeek" [displayFunction]="formatDayOfWeek" [hasIcon]="false"
+        <app-dropdown [items]="daysOfWeek" [displayFunction]="formatDayOfWeek" [hasIcon]="true"
           [value]="timeOff.dayOfWeek" (valueChange)="timeOff.dayOfWeek = $event"></app-dropdown>
         <div class="field-error" *ngIf="timeOff.getValidationErrors('dayOfWeek')">{{ timeOff.getValidationErrors("dayOfWeek") | translate }}</div>
       </div>
 
       <div class="field" *ngIf="timeOff.recurrence === TimeOffRecurrence.Monthly" data-test="time-off-day-of-month">
         <label class="field-label">{{ "pages.time-off.DAY_OF_MONTH" | translate }}</label>
-        <app-dropdown [items]="daysOfMonth" [hasIcon]="false"
+        <app-dropdown [items]="daysOfMonth" [hasIcon]="true"
           [value]="timeOff.dayOfMonth" (valueChange)="timeOff.dayOfMonth = $event"></app-dropdown>
         <div class="field-error" *ngIf="timeOff.getValidationErrors('dayOfMonth')">{{ timeOff.getValidationErrors("dayOfMonth") | translate }}</div>
       </div>

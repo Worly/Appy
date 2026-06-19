@@ -159,8 +159,40 @@ textarea.field-input {
   }
 }
 
+// The "When" selectors fill the field width — consistent with the Label input and the segmented
+// controls, and bigger tap targets. (The compact hour/minute pickers in the Time row are dropdowns
+// scoped out below, so they stay inline.)
 app-date-selector {
   display: block;
+}
+
+:host ::ng-deep app-date-selector {
+  .my-container {
+    width: 100%;
+  }
+
+  .date-button {
+    flex: 1 1 auto; // the date stretches; the prev/next arrows stay compact
+  }
+}
+
+:host ::ng-deep .field[data-test="time-off-day-of-week"] app-dropdown,
+:host ::ng-deep .field[data-test="time-off-day-of-month"] app-dropdown {
+  display: block;
+
+  .my-container {
+    display: block;
+  }
+
+  app-button {
+    display: block;
+  }
+
+  .button-content {
+    width: 100%;
+    flex-direction: row-reverse; // text first, caret pushed to the far right — reads as a select
+    justify-content: space-between;
+  }
 }
 
 // Recurring-edit "apply changes from" prompt (rendered inside app-dialog's centered overlay).
