@@ -250,7 +250,7 @@
             "TO_DATE": "Do",
             "TIME_FROM": "Od",
             "TIME_TO": "Do",
-            "LIMIT_DATE_RANGE": "Ograniči na vremenski raspon",
+            "SET_END_DATE": "Postavi datum završetka",
             "APPLY_FROM_TITLE": "Primijeni promjene od",
             "APPLY_FROM_SPECIFIC": "Određenog datuma",
             "APPLY_FROM_ALL": "Cijelog rasporeda",

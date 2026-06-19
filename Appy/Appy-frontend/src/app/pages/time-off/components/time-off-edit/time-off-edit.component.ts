@@ -21,7 +21,9 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
   // Gates the form: editing fetches the rule async, so we must not render the
   // date-selectors (which require a defined Dayjs) until the model is populated.
   public isLoaded: boolean = false;
-  public limitDateRange: boolean = false;
+  // Recurring rules always carry an effective-from (startDate); this toggle controls only whether
+  // they also have an end ("until") date. It never clears the start.
+  public hasEndDate: boolean = false;
 
   @ViewChild("splitDialog") splitDialog?: DialogComponent;
 
@@ -79,9 +81,10 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
           if (!t.startDate) t.startDate = dayjs();
           if (!t.endDate) t.endDate = dayjs();
         } else {
-          // Recurring rules always carry an effective-from (today on create), so the "limit"
-          // toggle reflects whether an end/"until" bound exists — not the start.
-          this.limitDateRange = t.endDate != null;
+          // Recurring rules always carry an effective-from; default a missing one to today so the
+          // always-shown From selector has a value. The optional end date drives the toggle.
+          if (!t.startDate) t.startDate = dayjs();
+          this.hasEndDate = t.endDate != null;
         }
 
         this.type = t.recurrence === TimeOffRecurrence.OneOff ? "oneoff" : "recurring";
@@ -100,6 +103,7 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
       } else {
         this.timeOff.recurrence = TimeOffRecurrence.Weekly;
         this.timeOff.dayOfWeek = DayOfWeek.Monday;
+        this.timeOff.startDate = dayjs(); // effective-from defaults to today; the end date is opt-in
       }
       this.timeOff.timeFrom = dayjs({ hour: 9 });
       this.timeOff.timeTo = dayjs({ hour: 17 });
@@ -149,15 +153,13 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
     }
   }
 
-  public onLimitDateRangeChange(value: boolean): void {
-    this.limitDateRange = value;
+  public onHasEndDateChange(value: boolean): void {
+    this.hasEndDate = value;
     if (value) {
-      // Initialise dates when the user first enables the toggle.
-      if (!this.timeOff.startDate) this.timeOff.startDate = dayjs();
+      // Default the end date when the toggle is first enabled.
       if (!this.timeOff.endDate) this.timeOff.endDate = dayjs();
     } else {
-      // Clear bounds — open-ended.
-      this.timeOff.startDate = undefined;
+      // Drop only the end bound — the effective-from (startDate) is always kept.
       this.timeOff.endDate = undefined;
     }
   }

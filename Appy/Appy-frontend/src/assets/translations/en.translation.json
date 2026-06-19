@@ -250,7 +250,7 @@
             "TO_DATE": "To",
             "TIME_FROM": "From",
             "TIME_TO": "To",
-            "LIMIT_DATE_RANGE": "Limit to a date range",
+            "SET_END_DATE": "Set an end date",
             "APPLY_FROM_TITLE": "Apply changes from",
             "APPLY_FROM_SPECIFIC": "A specific date",
             "APPLY_FROM_ALL": "The entire schedule",

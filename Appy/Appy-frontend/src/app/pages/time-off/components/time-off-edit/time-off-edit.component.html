@@ -74,25 +74,23 @@
         <div class="field-error" *ngIf="timeOff.getValidationErrors('dayOfMonth')">{{ timeOff.getValidationErrors("dayOfMonth") | translate }}</div>
       </div>
 
-      <div class="toggle-row">
-        <span class="toggle-label">{{ "pages.time-off.LIMIT_DATE_RANGE" | translate }}</span>
-        <app-toggle-switch [value]="limitDateRange" (valueChange)="onLimitDateRangeChange($event)"
-          data-test="time-off-limit-date-range"></app-toggle-switch>
+      <!-- Recurring always has an effective-from (defaults to today); the end date is opt-in. -->
+      <div class="field">
+        <label class="field-label">{{ "pages.time-off.FROM_DATE" | translate }}</label>
+        <app-date-selector [date]="timeOff.startDate!" (dateChange)="onStartDateChange($event)"></app-date-selector>
       </div>
 
-      <ng-container *ngIf="limitDateRange">
-        <div class="duo">
-          <div class="field">
-            <label class="field-label">{{ "pages.time-off.FROM_DATE" | translate }}</label>
-            <app-date-selector [date]="timeOff.startDate!" (dateChange)="onStartDateChange($event)"></app-date-selector>
-          </div>
-          <div class="field">
-            <label class="field-label">{{ "pages.time-off.TO_DATE" | translate }}</label>
-            <app-date-selector [date]="timeOff.endDate!" (dateChange)="onEndDateChange($event)"></app-date-selector>
-          </div>
-        </div>
-        <div class="field-error" *ngIf="timeOff.getValidationErrors('startDate')">{{ timeOff.getValidationErrors("startDate") | translate }}</div>
-      </ng-container>
+      <div class="toggle-row">
+        <span class="toggle-label">{{ "pages.time-off.SET_END_DATE" | translate }}</span>
+        <app-toggle-switch [value]="hasEndDate" (valueChange)="onHasEndDateChange($event)"
+          data-test="time-off-has-end-date"></app-toggle-switch>
+      </div>
+
+      <div class="field" *ngIf="hasEndDate">
+        <label class="field-label">{{ "pages.time-off.TO_DATE" | translate }}</label>
+        <app-date-selector [date]="timeOff.endDate!" (dateChange)="onEndDateChange($event)"></app-date-selector>
+      </div>
+      <div class="field-error" *ngIf="timeOff.getValidationErrors('startDate')">{{ timeOff.getValidationErrors("startDate") | translate }}</div>
     </ng-container>
   </section>
 
