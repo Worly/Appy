@@ -3,7 +3,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import { Duration } from 'dayjs/plugin/duration';
 import { timeBetweenMs } from 'src/app/utils/time-utils';
 import _ from 'lodash';
-import { Subscription, filter, combineLatest } from 'rxjs';
+import { Subscription, filter } from 'rxjs';
 import { Router, Scroll } from '@angular/router';
 import { AppointmentView } from 'src/app/models/appointment';
 import { AppointmentService } from '../../services/appointment.service';
@@ -129,9 +129,9 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
 
     this.pagedResult = this.appointmentService.getList(this.date, appFilterToSmartFilter(this._filter));
 
-    // Appointments and their time-offs arrive in the same paged response (items$ + extras$ are
-    // projections of one query), so combine them and render once — no separate fetch, no pop-in.
-    this.pagedSubs.push(combineLatest([this.pagedResult.items$, this.pagedResult.extras$]).subscribe(([appointments, timeOffs]) => {
+    // Appointments and their time-offs arrive in the same paged response; page$ pairs them from one
+    // emission, so we render once per update — no separate fetch, no pop-in, no stale-pair flash.
+    this.pagedSubs.push(this.pagedResult.page$.subscribe(({ items: appointments, extras: timeOffs }) => {
       this.appointments = appointments;
       this.timeOffs = this.dedupeOccurrences(timeOffs);
       this.renderAppointments();

@@ -134,6 +134,9 @@ export function pagedQuery<T, E = never>(client: QueryClient, opts: PagedQueryOp
     return {
         items$: view$.pipe(map(v => v.items)),
         extras$: view$.pipe(map(v => v.extras)),
+        // items + extras from one emission, so a consumer needing both renders once per update
+        // (combining items$/extras$ would emit a transient new-items / stale-extras pair first).
+        page$: view$.pipe(map(v => ({ items: v.items, extras: v.extras }))),
         loading$: view$.pipe(map(v => v.loading), distinctUntilChanged()),
         loadingForwards$: view$.pipe(map(v => v.loadingForwards), distinctUntilChanged()),
         loadingBackwards$: view$.pipe(map(v => v.loadingBackwards), distinctUntilChanged()),

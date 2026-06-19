@@ -300,4 +300,29 @@ describe("pagedQuery()", () => {
         // a second forwards page [12,13] appends its extras after the existing buffer.
         expect(lastEmission(extras)).toEqual(["e8", "e9", "e10", "e11", "e12", "e13"]);
     });
+
+    it("page$ pairs items and extras from the same emission (never a stale pair)", async () => {
+        const loadPage = (dir: PageDirection, skip: number, take: number) => {
+            const arr = dir === "forwards" ? [10, 11, 12, 13] : [9, 8, 7, 6];
+            const items = arr.slice(skip, skip + take);
+            return of({ items, extra: items.map(n => `e${n}`) });
+        };
+        const pq = pagedQuery<number, string>(newClient(), { queryKey: ["p", "page"], loadPage, pageSize: 2 });
+        const pages: { items: number[]; extras: string[] }[] = [];
+        pq.page$.subscribe(p => pages.push(p));
+        await flush();
+
+        // The invariant the combined stream guarantees: in EVERY emission the extras correspond 1:1 to
+        // that same emission's items — never new items paired with the previous page's extras (the
+        // stale-pair flash that combining items$/extras$ would produce on each transition).
+        const consistent = (ps: typeof pages) => ps.every(p => JSON.stringify(p.extras) === JSON.stringify(p.items.map(n => `e${n}`)));
+
+        expect(consistent(pages)).toBe(true);
+        expect(pages[pages.length - 1]).toEqual({ items: [10, 11], extras: ["e10", "e11"] });
+
+        pq.loadMore("forwards");
+        await flush();
+        expect(consistent(pages)).toBe(true);
+        expect(pages[pages.length - 1]).toEqual({ items: [10, 11, 12, 13], extras: ["e10", "e11", "e12", "e13"] });
+    });
 });
