@@ -186,14 +186,26 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
 
   public confirmSplit(): void {
     if (this.splitMode === "date") {
-      // The chosen date is the new segment's start; it overrides the form's From field.
-      this.timeOff.startDate = this.splitDate;
-      if (!this.timeOff.validate()) {
-        this.splitDialog?.close(); // surface the form error (e.g. split date after the "until")
-        return;
+      // A fork only happens when the split date is strictly after the rule's current start
+      // (mirrors the backend's condition). Only then does the split date become the new segment's
+      // start — so only then do we move startDate and validate it against the "until". When the
+      // date is on/before the current start there is no history to preserve: the backend does a
+      // plain in-place edit, and mutating startDate here would silently move the rule's start to
+      // the split date (e.g. accepting the default "today" on a future-dated rule).
+      const forks = this.timeOff.startDate == null || this.splitDate.isAfter(this.timeOff.startDate, "date");
+      if (forks) {
+        this.timeOff.startDate = this.splitDate;
+        if (!this.timeOff.validate()) {
+          this.splitDialog?.close(); // surface the form error (e.g. split date after the "until")
+          return;
+        }
+        this.splitDialog?.close();
+        this.commit(this.splitDate);
+      } else {
+        // No fork → plain in-place edit; leave startDate untouched and send no applyFrom.
+        this.splitDialog?.close();
+        this.commit();
       }
-      this.splitDialog?.close();
-      this.commit(this.splitDate);
     } else {
       // "Entire schedule" → plain in-place edit, no fork.
       this.splitDialog?.close();
