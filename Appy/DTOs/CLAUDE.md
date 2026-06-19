@@ -29,4 +29,4 @@ Strings in request-body DTOs are trimmed of leading/trailing whitespace during d
 
 ## AppointmentListPageDTO
 
-Envelope returned by `GET /appointment/getList`. Contains `Appointments` (the page of `AppointmentViewDTO`) and `TimeOffs` (the `TimeOffOccurrenceDTO` occurrences covering that page's date span). Empty page → empty `TimeOffs`.
+Envelope returned by `GET /appointment/getList`. Contains `Appointments` (the page of `AppointmentViewDTO`) and `TimeOffs` (the `TimeOffOccurrenceDTO` occurrences for the dates that have appointments on that page — not every day in the min–max span). Empty page → empty `TimeOffs`.

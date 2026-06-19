@@ -32,6 +32,9 @@ namespace Appy.Tests.Services
             timeOffServiceMock
                 .Setup(x => x.GetOccurrencesForDate(It.IsAny<DateOnly>(), FacilityId))
                 .ReturnsAsync(new List<TimeOffOccurrenceDTO>());
+            timeOffServiceMock
+                .Setup(x => x.GetOccurrencesForDates(It.IsAny<IEnumerable<DateOnly>>(), FacilityId))
+                .ReturnsAsync(new List<TimeOffOccurrenceDTO>());
 
             dbContextMock.Setup(x => x.Appointments).ReturnsDbSet(appointments);
             dbContextMock.Setup(x => x.Services).ReturnsDbSet(new List<Service> { service1, service2 });
@@ -261,7 +264,7 @@ namespace Appy.Tests.Services
 
             var occurrence = new TimeOffOccurrenceDTO { Id = 7, Date = new DateOnly(2030, 1, 15), Label = "Closed" };
             timeOffServiceMock
-                .Setup(x => x.GetOccurrencesForRange(new DateOnly(2030, 1, 15), new DateOnly(2030, 1, 15), FacilityId))
+                .Setup(x => x.GetOccurrencesForDates(It.Is<IEnumerable<DateOnly>>(d => d.Contains(new DateOnly(2030, 1, 15))), FacilityId))
                 .ReturnsAsync(new List<TimeOffOccurrenceDTO> { occurrence });
 
             var result = await service.GetList(new DateOnly(2030, 1, 1), Direction.Forwards, 0, 20, null, FacilityId);

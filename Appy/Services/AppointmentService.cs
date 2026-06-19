@@ -101,9 +101,12 @@ namespace Appy.Services
                 .Select(a => a.app.ToViewDTO(a.previous))
                 .ToListAsync();
 
+            // Only the dates that actually have appointments on this page are rendered, so expand
+            // occurrences for exactly those dates — not every day in the min..max span (which can be
+            // months/years for a sparse page, and whose appointment-less days the client discards anyway).
             var timeOffs = page.Count == 0
                 ? new List<TimeOffOccurrenceDTO>()
-                : await timeOffService.GetOccurrencesForRange(page.Min(a => a.Date), page.Max(a => a.Date), facilityId);
+                : await timeOffService.GetOccurrencesForDates(page.Select(a => a.Date), facilityId);
 
             return new AppointmentListPageDTO { Appointments = page, TimeOffs = timeOffs };
         }

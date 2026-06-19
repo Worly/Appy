@@ -15,7 +15,7 @@ namespace Appy.Services
 
         bool AppliesOn(TimeOff timeOff, DateOnly date);
         Task<List<TimeOffOccurrenceDTO>> GetOccurrencesForDate(DateOnly date, int facilityId);
-        Task<List<TimeOffOccurrenceDTO>> GetOccurrencesForRange(DateOnly from, DateOnly to, int facilityId);
+        Task<List<TimeOffOccurrenceDTO>> GetOccurrencesForDates(IEnumerable<DateOnly> dates, int facilityId);
         Task<List<TimeOffDTO>> GetList(TimeOffListType type, TimeOffScope scope, int skip, int take, int facilityId);
     }
 
@@ -252,11 +252,18 @@ namespace Appy.Services
             return all.Where(t => AppliesOn(t, date)).Select(t => ToOccurrence(t, date)).ToList();
         }
 
-        public async Task<List<TimeOffOccurrenceDTO>> GetOccurrencesForRange(DateOnly from, DateOnly to, int facilityId)
+        // Expands rules to occurrences only on the given dates (deduped, date-ordered). Callers pass the
+        // dates they actually render — e.g. the dates that have appointments on a list page — so this is
+        // O(dates × rules) instead of scanning every day in a potentially huge min..max span.
+        public async Task<List<TimeOffOccurrenceDTO>> GetOccurrencesForDates(IEnumerable<DateOnly> dates, int facilityId)
         {
+            var distinct = dates.Distinct().OrderBy(d => d).ToList();
+            if (distinct.Count == 0)
+                return new List<TimeOffOccurrenceDTO>();
+
             var all = await GetAll(facilityId);
             var result = new List<TimeOffOccurrenceDTO>();
-            for (var d = from; d <= to; d = d.AddDays(1))
+            foreach (var d in distinct)
                 result.AddRange(all.Where(t => AppliesOn(t, d)).Select(t => ToOccurrence(t, d)));
             return result;
         }

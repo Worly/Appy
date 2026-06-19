@@ -302,12 +302,14 @@ namespace Appy.Tests.Services
         }
 
         [Fact]
-        public async Task GetOccurrencesForRange_EmitsOnePerMatchingDate()
+        public async Task GetOccurrencesForDates_EmitsOnePerMatchingDate_DateOrdered()
         {
             Seed(new TimeOff { Label = "Mon", Recurrence = TimeOffRecurrence.Weekly, DayOfWeek = DayOfWeek.Monday, IsAllDay = true });
 
-            // 2030-06-01 (Sat) .. 2030-06-14 (Fri) contains Mondays 3 and 10.
-            var occ = await service.GetOccurrencesForRange(new DateOnly(2030, 6, 1), new DateOnly(2030, 6, 14), FacilityId);
+            // A fortnight of dates (Sat 2030-06-01 .. Fri 2030-06-14); only the two Mondays (3rd, 10th) match.
+            // Passed out of order to prove the result is date-ordered.
+            var dates = new[] { new DateOnly(2030, 6, 10), new DateOnly(2030, 6, 7), new DateOnly(2030, 6, 3) };
+            var occ = await service.GetOccurrencesForDates(dates, FacilityId);
 
             Assert.Equal(2, occ.Count);
             Assert.Equal(new DateOnly(2030, 6, 3), occ[0].Date);
@@ -315,7 +317,20 @@ namespace Appy.Tests.Services
         }
 
         [Fact]
-        public async Task GetOccurrencesForRange_SetsOccurrenceIdToRuleId()
+        public async Task GetOccurrencesForDates_OnlyExpandsRequestedDates_AndDedupes()
+        {
+            Seed(new TimeOff { Label = "Mon", Recurrence = TimeOffRecurrence.Weekly, DayOfWeek = DayOfWeek.Monday, IsAllDay = true });
+
+            // The 3rd and 17th are also Mondays, but we ask only for the 10th — listed twice.
+            var occ = await service.GetOccurrencesForDates(
+                new[] { new DateOnly(2030, 6, 10), new DateOnly(2030, 6, 10) }, FacilityId);
+
+            Assert.Single(occ); // deduped to one; the unrequested Mondays are never expanded
+            Assert.Equal(new DateOnly(2030, 6, 10), occ[0].Date);
+        }
+
+        [Fact]
+        public async Task GetOccurrencesForDates_SetsOccurrenceIdToRuleId()
         {
             timeOffs.Add(new TimeOff
             {
@@ -328,7 +343,7 @@ namespace Appy.Tests.Services
                 IsAllDay = true,
             });
 
-            var result = await service.GetOccurrencesForRange(new DateOnly(2030, 6, 1), new DateOnly(2030, 6, 1), FacilityId);
+            var result = await service.GetOccurrencesForDates(new[] { new DateOnly(2030, 6, 1) }, FacilityId);
 
             Assert.Single(result);
             Assert.Equal(42, result[0].Id);

@@ -36,7 +36,7 @@ Controllers throw `HttpException` subclasses (from `Exceptions/`) for validation
 ## Appointment-Specific Notes
 
 - `GET /appointment/getAll` and `GET /appointment/getList` accept a `filter` query parameter in Smart Filter DSL format (see `Services/SmartFilter/CLAUDE.md`)
-- `getList` supports pagination: `direction` (Forwards/Backwards), `skip`, `take`; returns an `AppointmentListPageDTO` envelope (the page's appointments + the `TimeOffOccurrence`s covering that page's date span)
+- `getList` supports pagination: `direction` (Forwards/Backwards), `skip`, `take`; returns an `AppointmentListPageDTO` envelope (the page's appointments + the `TimeOffOccurrence`s for the dates that have appointments on that page)
 - `addNew` and `edit` accept `ignoreTimeNotAvailable=true` to bypass time validation
 - `notifyClient/{id}` accepts a `languageCode` query parameter to select the message language
 
