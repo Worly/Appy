@@ -243,6 +243,7 @@
             "LABEL": "Naziv",
             "NOTES": "Bilješke",
             "ALL_DAY": "Cijeli dan",
+            "ALL_DAY_TIME_OFF": "Cjelodnevni slobodni dani",
             "DAY_OF_WEEK": "Dan u tjednu",
             "DAY_OF_MONTH": "Dan u mjesecu",
             "FROM_DATE": "Od",

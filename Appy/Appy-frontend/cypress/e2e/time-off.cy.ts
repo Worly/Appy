@@ -230,8 +230,12 @@ describe("Time Off", () => {
 
     cy.get("[data-test=list-all-day-timeoff]").should("exist").and("contain", "Closed Mondays");
 
-    // Clicking the all-day time-off badge opens the time-off details dialog.
+    // Clicking the all-day badge opens a list of that day's all-day time-offs...
     cy.get("[data-test=list-all-day-timeoff]").contains("Closed Mondays").click();
+    cy.get("[data-test=list-all-day-timeoff-list]").should("exist");
+
+    // ...and clicking a row opens that time-off's details dialog.
+    cy.get("[data-test=list-all-day-timeoff-row]").contains("Closed Mondays").click();
     cy.get("app-single-time-off").should("contain", "Closed Mondays");
     getElement("time-off-edit-button").should("exist");
   });

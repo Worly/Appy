@@ -24,7 +24,7 @@
                 <div class="date-relative" [ngClass]="i.date | dateRelation">{{i.date | relativeDate}}</div>
             </div>
             <div *ngIf="i.allDayOccurrences.length > 0" class="whole-day-off" data-test="list-all-day-timeoff"
-                (click)="viewingTimeOffId = i.allDayOccurrences[0].id; timeOffDialog.open()">
+                (click)="allDayList = i.allDayOccurrences; allDayListDialog.open()">
                 <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
                 <div class="whole-day-off-text">
                     <span class="whole-day-off-label">{{ i.allDayOccurrences[0].label }}</span>
@@ -73,4 +73,15 @@
 <app-dialog #timeOffDialog>
     <app-single-time-off *ngIf="timeOffDialog.isOpen" [id]="viewingTimeOffId"
         (onDone)="timeOffDialog.close()"></app-single-time-off>
+</app-dialog>
+
+<app-dialog #allDayListDialog>
+    <div *ngIf="allDayListDialog.isOpen" class="all-day-list" data-test="list-all-day-timeoff-list">
+        <div class="all-day-list-title">{{ "pages.time-off.ALL_DAY_TIME_OFF" | translate }}</div>
+        <div *ngFor="let o of allDayList" class="all-day-list-row" data-test="list-all-day-timeoff-row"
+            (click)="viewingTimeOffId = o.id; allDayListDialog.close(); timeOffDialog.open()">
+            <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
+            <span class="all-day-list-label">{{ o.label }}</span>
+        </div>
+    </div>
 </app-dialog>

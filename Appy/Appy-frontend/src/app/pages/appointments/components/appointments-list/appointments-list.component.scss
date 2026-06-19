@@ -196,3 +196,37 @@
         box-shadow: inset 0 0 0 1.2px rgba(var(--rgb-danger), 0.8);
     }
 }
+
+// Pick-list shown when an all-day badge is clicked: one row per all-day time-off on that day.
+.all-day-list {
+    background: rgb(var(--rgb-card-background));
+    border-radius: 14px;
+    padding: 16px;
+    width: min(92vw, 360px);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    .all-day-list-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+    }
+
+    .all-day-list-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: var(--default-border-radius);
+        background: rgba(var(--rgb-danger), 0.12);
+        color: rgb(var(--rgb-danger));
+        font-weight: 600;
+        cursor: pointer;
+
+        .all-day-list-label {
+            min-width: 0;
+            word-break: break-word;
+        }
+    }
+}

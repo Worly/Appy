@@ -71,6 +71,10 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
   viewingAppointmentId: number | undefined;
   viewingTimeOffId: number | undefined;
 
+  // The all-day occurrences of the day whose badge was clicked, shown as a pick-list in a dialog
+  // (a day can have several all-day time-offs); picking one opens that occurrence's details.
+  allDayList: TimeOffOccurrence[] = [];
+
   // While true, every render scrolls the viewport to startDate. Set by load() and cleared when
   // the user physically scrolls. Re-snapping on every render (not just the first) is needed
   // because two later events can drag the viewport away from startDate after the initial snap:

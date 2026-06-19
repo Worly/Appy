@@ -243,6 +243,7 @@
             "LABEL": "Label",
             "NOTES": "Notes",
             "ALL_DAY": "All day",
+            "ALL_DAY_TIME_OFF": "All-day time off",
             "DAY_OF_WEEK": "Day of week",
             "DAY_OF_MONTH": "Day of month",
             "FROM_DATE": "From",
