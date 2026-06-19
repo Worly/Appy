@@ -11,6 +11,7 @@ import { appFilterToSmartFilter, AppointmentsFilter } from '../appointments/appo
 import { PagedResult } from 'src/app/shared/services/data/contracts';
 import { TimeOffOccurrence } from 'src/app/models/time-off-occurrence';
 import { buildDayTimeline, TimelineEntry } from 'src/app/utils/list-timeline';
+import { DialogComponent } from 'src/app/components/dialog/dialog.component';
 
 @Component({
   selector: 'app-appointments-list',
@@ -145,6 +146,19 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
 
     this.pagedSubs.push(this.pagedResult.loadingForwards$.subscribe(l => this.loadingForwards = l));
     this.pagedSubs.push(this.pagedResult.loadingBackwards$.subscribe(l => this.loadingBackwards = l));
+  }
+
+  // All-day badge click: a single all-day off jumps straight to its details; several open a
+  // pick-list first (a day can have more than one). Dialog refs are passed from the template,
+  // matching how the rest of this view drives its dialogs inline.
+  public openAllDayTimeOff(occurrences: TimeOffOccurrence[], detailsDialog: DialogComponent, listDialog: DialogComponent): void {
+    if (occurrences.length === 1) {
+      this.viewingTimeOffId = occurrences[0].id;
+      detailsDialog.open();
+    } else {
+      this.allDayList = occurrences;
+      listDialog.open();
+    }
   }
 
   // A page-boundary date can appear at the tail of one page and the head of the next, so the same
