@@ -6,7 +6,7 @@ Business logic layer. Each service corresponds to one domain concept and is cons
 
 | Service | Responsibility |
 |---------|---------------|
-| `UserService` | Registration, authentication, token refresh, logout |
+| `UserService` | Registration, authentication, token refresh, logout. Logs: Warning on failed login (no-user, wrong-password) and refresh-token reuse detection; Information on login, register, logout; Debug on token rotation |
 | `JwtService` | JWT generation and validation (see `Auth/CLAUDE.md`) |
 | `FacilityService` | Facility CRUD, selected-facility management per user |
 | `ServiceService` | Service CRUD, archive toggle, name uniqueness enforcement |
