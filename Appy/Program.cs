@@ -8,6 +8,21 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.ClearProviders();
+if (builder.Environment.IsDevelopment())
+{
+    builder.Logging.AddSimpleConsole(o =>
+    {
+        o.IncludeScopes = true;
+        o.SingleLine = true;
+    });
+    builder.Logging.AddDebug();
+}
+else
+{
+    builder.Logging.AddJsonConsole(o => o.IncludeScopes = true);
+}
+
 var jwtSecret = builder.Configuration["JwtSecret"];
 if (string.IsNullOrEmpty(jwtSecret))
     throw new InvalidOperationException(
