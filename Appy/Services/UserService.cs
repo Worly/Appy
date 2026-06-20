@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using Appy.Domain;
@@ -22,23 +23,31 @@ namespace Appy.Services
     {
         private MainDbContext context;
         private IJwtService jwtService;
+        private readonly ILogger<UserService> logger;
 
-        public UserService(MainDbContext mainDbContext, IJwtService jwtService)
+        public UserService(MainDbContext mainDbContext, IJwtService jwtService, ILogger<UserService> logger)
         {
             this.context = mainDbContext;
             this.jwtService = jwtService;
+            this.logger = logger;
         }
 
         public async Task<LogInResponseDTO> Authenticate(LogInDTO model, string userAgent)
         {
             var user = await context.Users.FirstOrDefaultAsync(x => x.Email == model.Email);
             if (user == null)
+            {
+                logger.LogWarning("Failed login attempt: no user with email {Email}", model.Email);
                 throw new NotFoundException();
+            }
 
             var passwordHash = HashPassword(model.Password, user.Salt);
 
             if (passwordHash != user.PasswordHash)
+            {
+                logger.LogWarning("Failed login attempt for userId {UserId}: wrong password", user.Id);
                 throw new BadRequestException();
+            }
 
             var accessToken = GenerateAccessJwtToken(user);
             var refreshTokenFamily = GenerateFamily();
@@ -52,6 +61,8 @@ namespace Appy.Services
                 User = user,
             });
             await context.SaveChangesAsync();
+
+            logger.LogInformation("User {UserId} logged in", user.Id);
 
             return new LogInResponseDTO()
             {
@@ -93,6 +104,8 @@ namespace Appy.Services
                 User = user,
             });
             await context.SaveChangesAsync();
+
+            logger.LogInformation("New user registered: userId {UserId} ({Email})", user.Id, user.Email);
 
             return new LogInResponseDTO()
             {
@@ -137,6 +150,8 @@ namespace Appy.Services
                     // so someone stole the refresh token!
                     if (currentFamily == receivedFamily)
                     {
+                        logger.LogWarning("Refresh token reuse detected for userId {UserId}; invalidating session family", userId);
+
                         // invalidate the whole family
                         user.LoginSessions.Remove(loginSession);
                         await context.SaveChangesAsync();
@@ -162,6 +177,8 @@ namespace Appy.Services
 
             loginSession.RefreshToken = newRefreshToken;
             await context.SaveChangesAsync();
+
+            logger.LogDebug("Refresh tokens rotated for userId {UserId}", userId);
 
             return new LogInResponseDTO()
             {
@@ -190,6 +207,8 @@ namespace Appy.Services
 
             user.LoginSessions.Remove(user.LoginSessions.Single());
             await context.SaveChangesAsync();
+
+            logger.LogInformation("User {UserId} logged out", userId);
         }
 
         public async Task<User> GetById(int id)
