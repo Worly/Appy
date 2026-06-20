@@ -39,7 +39,6 @@ All application services are registered as **Scoped**. The one exception is `Cro
 
 - **Development**: `appsettings.json`
 - **Production**: environment variables (UPPER_SNAKE_CASE — see `Utils/CLAUDE.md`)
-- `NO_FRONTEND=true` env var skips static file serving (used in CI)
 
 ## Database
 
@@ -49,6 +48,9 @@ PostgreSQL via `Npgsql.EntityFrameworkCore.PostgreSQL`. Single `AppDbContext`. M
 
 `GET /health` returns 200 OK. Used by CI/CD to wait for the backend to be ready before running E2E tests.
 
-## Static File Serving (Production)
+## Frontend Serving
 
-When not in development and `NO_FRONTEND` is not set, the backend serves the Angular build from `Appy-frontend/dist/` and falls back all unmatched routes to `index.html` (for Angular's client-side routing).
+The backend **never builds the frontend**.
+
+- **Development**: the backend does not serve the frontend at all — run it manually with `npx ng serve` (→ `http://localhost:4200`).
+- **Production**: the backend serves the pre-built Angular files from `Appy-frontend/build/` and falls back all unmatched routes to `index.html` (for Angular's client-side routing). The Docker build builds the frontend in a separate stage and copies the output into the image.

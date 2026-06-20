@@ -3,7 +3,6 @@ using Appy.Exceptions;
 using Appy.Services;
 using Appy.Services.Facilities;
 using Appy.Services.MessagingServices;
-using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 var builder = WebApplication.CreateBuilder(args);
@@ -75,11 +74,17 @@ builder.Services.AddHealthChecks().AddCheck("self", () => HealthCheckResult.Heal
 
 var app = builder.Build();
 
-var useLocalSPA = app.Environment.IsDevelopment() && Environment.GetEnvironmentVariable("NO_FRONTEND") != "true";
+// In development the frontend is run manually by the developer (npx ng serve) and the
+// backend does not serve it at all. In production the backend serves the pre-built frontend.
+var serveFrontend = !app.Environment.IsDevelopment();
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
-app.UseSpaStaticFiles();
+
+if (serveFrontend)
+{
+    app.UseStaticFiles();
+    app.UseSpaStaticFiles();
+}
 
 app.UseRouting();
 
@@ -103,7 +108,7 @@ app.UseEndpoints(endpoints =>
     endpoints.MapControllers();
     endpoints.MapHealthChecks("/health");
 
-    if (!useLocalSPA)
+    if (serveFrontend)
     {
         // Explicit Fallback to index.html in SpaStaticFiles directory
         endpoints.MapFallback(async context =>
@@ -124,16 +129,6 @@ app.UseEndpoints(endpoints =>
         });
     }
 });
-
-if (useLocalSPA)
-{
-    app.UseSpa(spa =>
-    {
-        spa.Options.SourcePath = "Appy-frontend";
-
-        spa.UseAngularCliServer(npmScript: "start");
-    });
-}
 
 using (var scope = app.Services.CreateScope())
 {
