@@ -83,6 +83,9 @@ namespace Appy.Services
                 .Where(a => a.Date == date && a.FacilityId == facilityId)
                 .ToListAsync();
 
+            int sent = 0;
+            int failed = 0;
+
             foreach (var appointment in appointments)
             {
                 if (appointment.Status != AppointmentStatus.Confirmed)
@@ -100,15 +103,21 @@ namespace Appy.Services
                     await this.clientNotificationsService.SendAppointmentReminderMessage(appointment.Client.Id, appointment.ToViewDTO(null), cultureInfo);
 
                     appointment.WasReminded = true;
+                    sent++;
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError("Failed to send appointment reminder for appointmentId: {appointmentId} to clientId: {clientId} because: {exceptionMessage}",
-                        appointment.Id, appointment.Client.Id, ex.Message);
+                    failed++;
+                    logger.LogError(ex, "Failed to send appointment reminder for appointmentId {AppointmentId} to clientId {ClientId}",
+                        appointment.Id, appointment.Client.Id);
                 }
             }
 
             await dbContext.SaveChangesAsync();
+
+            if (sent > 0 || failed > 0)
+                logger.LogInformation("Reminder run for facilityId {FacilityId} on {Date}: {Sent} sent, {Failed} failed",
+                    facilityId, date, sent, failed);
         }
     }
 }

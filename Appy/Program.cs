@@ -75,7 +75,7 @@ builder.Services.AddScheduler(config =>
         var logger = sp.GetRequiredService<ILoggerFactory>().CreateLogger("CronJobs");
         return (sender, args) =>
         {
-            logger?.LogError(args.Exception?.Message);
+            logger?.LogError(args.Exception, "Unobserved task exception in scheduled job");
             args.SetObserved();
         };
     });
