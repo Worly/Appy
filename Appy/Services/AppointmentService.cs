@@ -3,7 +3,6 @@ using Appy.DTOs;
 using Appy.Exceptions;
 using Appy.Services.SmartFiltering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 

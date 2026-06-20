@@ -3,7 +3,6 @@ using Appy.DTOs;
 using Appy.Exceptions;
 using Appy.Services.MessagingServices;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using System.Globalization;
 
 namespace Appy.Services

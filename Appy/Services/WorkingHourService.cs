@@ -2,7 +2,6 @@
 using Appy.DTOs;
 using Appy.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace Appy.Services
 {
