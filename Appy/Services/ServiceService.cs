@@ -3,6 +3,7 @@ using Appy.DTOs;
 using Appy.Exceptions;
 using EntityFramework.Exceptions.Common;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Npgsql;
 
 namespace Appy.Services
@@ -20,10 +21,12 @@ namespace Appy.Services
     public class ServiceService : IServiceService
     {
         private MainDbContext context;
+        private readonly ILogger<ServiceService> logger;
 
-        public ServiceService(MainDbContext context)
+        public ServiceService(MainDbContext context, ILogger<ServiceService> logger)
         {
             this.context = context;
+            this.logger = logger;
         }
 
         public Task<List<Service>> GetAll(int facilityId, bool archived)
@@ -58,6 +61,8 @@ namespace Appy.Services
             context.Services.Add(service);
             await context.SaveChangesAsync();
 
+            logger.LogInformation("Service {ServiceId} '{Name}' created (facilityId {FacilityId})", service.Id, service.Name, facilityId);
+
             return service;
         }
 
@@ -77,6 +82,8 @@ namespace Appy.Services
             service.ColorId = dto.ColorId;
             await context.SaveChangesAsync();
 
+            logger.LogInformation("Service {ServiceId} updated (facilityId {FacilityId})", service.Id, facilityId);
+
             return service;
         }
 
@@ -90,6 +97,8 @@ namespace Appy.Services
             {
                 context.Services.Remove(service);
                 await context.SaveChangesAsync();
+
+                logger.LogInformation("Service {ServiceId} deleted (facilityId {FacilityId})", id, facilityId);
             }
             catch (ReferenceConstraintException)
             {
@@ -106,6 +115,8 @@ namespace Appy.Services
             service.IsArchived = isArchived;
 
             await context.SaveChangesAsync();
+
+            logger.LogInformation("Service {ServiceId} archive set to {IsArchived} (facilityId {FacilityId})", service.Id, isArchived, facilityId);
 
             return service;
         }

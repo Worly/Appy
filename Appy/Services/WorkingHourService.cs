@@ -2,6 +2,7 @@
 using Appy.DTOs;
 using Appy.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Appy.Services
 {
@@ -16,10 +17,12 @@ namespace Appy.Services
     public class WorkingHourService : IWorkingHourService
     {
         private MainDbContext context;
+        private readonly ILogger<WorkingHourService> logger;
 
-        public WorkingHourService(MainDbContext context)
+        public WorkingHourService(MainDbContext context, ILogger<WorkingHourService> logger)
         {
             this.context = context;
+            this.logger = logger;
         }
 
         public Task<List<WorkingHour>> GetAll(int facilityId)
@@ -32,7 +35,7 @@ namespace Appy.Services
             return context.WorkingHours.Where(w => w.FacilityId == facilityId && w.DayOfWeek == date.DayOfWeek).ToListAsync();
         }
 
-        public Task SetWorkingHours(List<WorkingHourDTO> workingHours, int facilityId)
+        public async Task SetWorkingHours(List<WorkingHourDTO> workingHours, int facilityId)
         {
             if (workingHours.Any(w => w.TimeFrom >= w.TimeTo))
                 throw new ValidationException("pages.working-hours.errors.TIMES_NOT_IN_ORDER");
@@ -63,7 +66,9 @@ namespace Appy.Services
             context.WorkingHours.RemoveRange(context.WorkingHours.Where(w => w.FacilityId == facilityId));
 
             context.WorkingHours.AddRange(entites);
-            return context.SaveChangesAsync();
+            await context.SaveChangesAsync();
+
+            logger.LogInformation("Working hours replaced for facilityId {FacilityId}: {Count} entries", facilityId, workingHours.Count);
         }
     }
 }

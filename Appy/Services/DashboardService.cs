@@ -2,6 +2,7 @@
 using Appy.DTOs;
 using Appy.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Appy.Services
 {
@@ -14,10 +15,12 @@ namespace Appy.Services
     public class DashboardService : IDashboardService
     {
         private MainDbContext context;
+        private readonly ILogger<DashboardService> logger;
 
-        public DashboardService(MainDbContext context)
+        public DashboardService(MainDbContext context, ILogger<DashboardService> logger)
         {
             this.context = context;
+            this.logger = logger;
         }
 
         public async Task<DashboardSettings> GetSettings(int userId, int facilityId)
@@ -46,6 +49,8 @@ namespace Appy.Services
             settings.SettingsJSON = dto.SettingsJSON;
 
             await this.context.SaveChangesAsync();
+
+            logger.LogInformation("Dashboard settings saved for userId {UserId}, facilityId {FacilityId}", userId, facilityId);
 
             return settings;
         }

@@ -3,6 +3,7 @@ using Appy.DTOs;
 using Appy.Exceptions;
 using EntityFramework.Exceptions.Common;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Appy.Services
 {
@@ -19,10 +20,12 @@ namespace Appy.Services
     public class ClientService : IClientService
     {
         private MainDbContext context;
+        private readonly ILogger<ClientService> logger;
 
-        public ClientService(MainDbContext context)
+        public ClientService(MainDbContext context, ILogger<ClientService> logger)
         {
             this.context = context;
+            this.logger = logger;
         }
 
         public Task<List<Client>> GetAll(int facilityId, bool archived)
@@ -49,8 +52,8 @@ namespace Appy.Services
         {
             var lowercaseSurname = dto.Surname?.ToLower();
 
-            var nameSurnameTaken = await context.Clients.Where(o => o.FacilityId == facilityId 
-                && o.Name.ToLower() == dto.Name.ToLower() 
+            var nameSurnameTaken = await context.Clients.Where(o => o.FacilityId == facilityId
+                && o.Name.ToLower() == dto.Name.ToLower()
                 && (o.Surname == null ? o.Surname : o.Surname.ToLower()) == lowercaseSurname).AnyAsync();
             if (nameSurnameTaken)
                 throw new ValidationException(nameof(Client.Surname), "pages.clients.errors.NAME_AND_SURNAME_TAKEN");
@@ -67,6 +70,8 @@ namespace Appy.Services
 
             context.Clients.Add(client);
             await context.SaveChangesAsync();
+
+            logger.LogInformation("Client {ClientId} created (facilityId {FacilityId})", client.Id, facilityId);
 
             return client;
         }
@@ -88,6 +93,8 @@ namespace Appy.Services
             client.IsArchived = dto.IsArchived;
             await context.SaveChangesAsync();
 
+            logger.LogInformation("Client {ClientId} updated (facilityId {FacilityId})", client.Id, facilityId);
+
             return client;
         }
 
@@ -101,6 +108,8 @@ namespace Appy.Services
             {
                 context.Clients.Remove(client);
                 await context.SaveChangesAsync();
+
+                logger.LogInformation("Client {ClientId} deleted (facilityId {FacilityId})", id, facilityId);
             }
             catch (ReferenceConstraintException)
             {
@@ -117,6 +126,8 @@ namespace Appy.Services
             client.IsArchived = isArchived;
 
             await context.SaveChangesAsync();
+
+            logger.LogInformation("Client {ClientId} archive set to {IsArchived} (facilityId {FacilityId})", client.Id, isArchived, facilityId);
 
             return client;
         }
