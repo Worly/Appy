@@ -32,7 +32,18 @@ var spaPath = "Appy-frontend/build";
 
 // Add services to the container.
 builder.Services.AddDbContext<MainDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("Main")));
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("Main"));
+
+    if (builder.Environment.IsDevelopment())
+    {
+        // Dev-only EF diagnostics. EnableSensitiveDataLogging includes SQL parameter values
+        // in logs, so it must never run in production. These take effect when the
+        // Microsoft.EntityFrameworkCore log level is raised to Information in appsettings.Development.json.
+        options.EnableSensitiveDataLogging();
+        options.EnableDetailedErrors();
+    }
+});
 builder.Services.AddSingleton<IJwtService, JwtService>();
 
 builder.Services.AddHttpClient<InstagramMessagingService>(client =>

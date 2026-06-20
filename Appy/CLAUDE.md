@@ -47,6 +47,8 @@ All application services are registered as **Scoped**. The one exception is `Cro
 
 Built-in `Microsoft.Extensions.Logging`. Console providers are configured in `Program.cs`: readable single-line console + Debug in Development, JSON console in Production. `IncludeScopes` is on, so correlation scopes appear in output. Per-category levels live in `appsettings*.json` (`Microsoft.EntityFrameworkCore` is pinned to Warning to suppress per-SQL noise; `Appy` is Information in prod, Debug in dev).
 
+**EF Core logging**: `MainDbContext` does **not** call `UseLoggerFactory` — because the context is registered via `AddDbContext`, EF Core automatically uses the application's `ILoggerFactory`, so EF logs flow through the same providers and honor the `Microsoft.EntityFrameworkCore` level above. (Never pass a per-instance `LoggerFactory` from `OnConfiguring` — it leaks and bypasses the pipeline.) In Development only, `AddDbContext` enables `EnableSensitiveDataLogging` + `EnableDetailedErrors`; raise the EF level to Information in `appsettings.Development.json` to see parameterized SQL.
+
 **Correlation scopes** are opened by middleware: `RequestId` (RequestLoggingMiddleware), `UserId` (JwtMiddleware), `FacilityId` (FacilityMiddleware). Downstream logs inherit them — don't repeat these ids in messages.
 
 **Levels:** Debug = diagnostic detail; Information = significant business events (create/update/delete, login/logout, notification sent); Warning = handled failures + security signals (failed login, refresh-token reuse, notification send failure); Error = unexpected/unhandled exceptions and 5xx. Always use message templates, never string interpolation.
