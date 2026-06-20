@@ -3,6 +3,7 @@ using Appy.DTOs;
 using Appy.Exceptions;
 using Appy.Services.MessagingServices;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Globalization;
 
 namespace Appy.Services
@@ -22,10 +23,13 @@ namespace Appy.Services
 
         private IMessagingServiceManager messagingServiceManager;
 
-        public ClientNotificationsService(MainDbContext context, IMessagingServiceManager messagingServiceManager)
+        private readonly ILogger<ClientNotificationsService> logger;
+
+        public ClientNotificationsService(MainDbContext context, IMessagingServiceManager messagingServiceManager, ILogger<ClientNotificationsService> logger)
         {
             this.context = context;
             this.messagingServiceManager = messagingServiceManager;
+            this.logger = logger;
         }
 
         public async Task<ClientNotificationsSettings> GetSettings(int facilityId)
@@ -82,67 +86,99 @@ namespace Appy.Services
 
         public async Task SendAppointmentConfirmationMessage(int clientId, AppointmentViewDTO appointment, CultureInfo cultureInfo)
         {
-            var client = await context.Clients.FirstOrDefaultAsync(c => c.Id == clientId);
-            if (client == null)
-                throw new NotFoundException();
+            using (logger.BeginScope(new Dictionary<string, object>
+            {
+                ["AppointmentId"] = appointment.Id,
+                ["ClientId"] = clientId,
+                ["MessageType"] = "AppointmentConfirmation"
+            }))
+            {
+                var client = await context.Clients.FirstOrDefaultAsync(c => c.Id == clientId);
+                if (client == null)
+                    throw new NotFoundException();
 
-            var facility = await context.Facilities.Include(f => f.ClientNotificationsSettings).FirstOrDefaultAsync(f => f.Id == client.FacilityId);
-            if (facility == null)
-                throw new NotFoundException();
+                var facility = await context.Facilities.Include(f => f.ClientNotificationsSettings).FirstOrDefaultAsync(f => f.Id == client.FacilityId);
+                if (facility == null)
+                    throw new NotFoundException();
 
-            var settings = facility.ClientNotificationsSettings;
+                var settings = facility.ClientNotificationsSettings;
 
-            var message = settings?.AppointmentConfirmationMessageTemplate;
-            if (settings == null || string.IsNullOrEmpty(message))
-                throw new BadRequestException("Appointment confirmation message template is not set");
+                var message = settings?.AppointmentConfirmationMessageTemplate;
+                if (settings == null || string.IsNullOrEmpty(message))
+                    throw new BadRequestException("Appointment confirmation message template is not set");
 
-            message = FillInMessageTemplate(message, cultureInfo, client, appointment);
+                message = FillInMessageTemplate(message, cultureInfo, client, appointment);
 
-            await SendMessageTo(settings, client, message);
+                await SendMessageTo(settings, client, message);
+            }
         }
 
         public async Task SendAppointmentReminderMessage(int clientId, AppointmentViewDTO appointment, CultureInfo cultureInfo)
         {
-            var client = await context.Clients.FirstOrDefaultAsync(c => c.Id == clientId);
-            if (client == null)
-                throw new NotFoundException();
+            using (logger.BeginScope(new Dictionary<string, object>
+            {
+                ["AppointmentId"] = appointment.Id,
+                ["ClientId"] = clientId,
+                ["MessageType"] = "AppointmentReminder"
+            }))
+            {
+                var client = await context.Clients.FirstOrDefaultAsync(c => c.Id == clientId);
+                if (client == null)
+                    throw new NotFoundException();
 
-            var facility = await context.Facilities.Include(f => f.ClientNotificationsSettings).FirstOrDefaultAsync(f => f.Id == client.FacilityId);
-            if (facility == null)
-                throw new NotFoundException();
+                var facility = await context.Facilities.Include(f => f.ClientNotificationsSettings).FirstOrDefaultAsync(f => f.Id == client.FacilityId);
+                if (facility == null)
+                    throw new NotFoundException();
 
-            var settings = facility.ClientNotificationsSettings;
+                var settings = facility.ClientNotificationsSettings;
 
-            var message = settings?.AppointmentReminderMessageTemplate;
-            if (settings == null || string.IsNullOrEmpty(message))
-                throw new BadRequestException("Appointment reminder message template is not set");
+                var message = settings?.AppointmentReminderMessageTemplate;
+                if (settings == null || string.IsNullOrEmpty(message))
+                    throw new BadRequestException("Appointment reminder message template is not set");
 
-            message = FillInMessageTemplate(message, cultureInfo, client, appointment);
+                message = FillInMessageTemplate(message, cultureInfo, client, appointment);
 
-            await SendMessageTo(settings, client, message);
+                await SendMessageTo(settings, client, message);
+            }
         }
 
         public async Task SendMessageTo(ClientNotificationsSettings settings, Client client, string message)
         {
             if (client.Contacts == null || client.Contacts.Count == 0)
+            {
+                logger.LogWarning("Cannot send message to clientId {ClientId}: client has no contacts", client.Id);
                 throw new BadRequestException("Client has no contacts");
+            }
+
+            var triedContactTypes = new List<ContactType>();
 
             foreach (var contact in client.Contacts)
             {
                 if (!messagingServiceManager.IsSupported(contact.Type))
+                {
+                    logger.LogDebug("Skipping {ContactType} contact for clientId {ClientId}: type not supported", contact.Type, client.Id);
                     continue;
+                }
+
+                triedContactTypes.Add(contact.Type);
 
                 var messagingService = messagingServiceManager.GetService(contact.Type);
                 var accessToken = messagingServiceManager.GetAccessToken(contact.Type, settings);
 
                 if (string.IsNullOrEmpty(accessToken))
+                {
+                    logger.LogDebug("Skipping {ContactType} contact for clientId {ClientId}: no access token configured", contact.Type, client.Id);
                     continue;
+                }
 
                 if (string.IsNullOrEmpty(contact.AppSpecificID))
                 {
                     var appSpecificID = await messagingService.GetAppSpecificUserID(accessToken, contact.Value);
                     if (string.IsNullOrEmpty(appSpecificID))
+                    {
+                        logger.LogDebug("Skipping {ContactType} contact for clientId {ClientId}: could not resolve app-specific user ID", contact.Type, client.Id);
                         continue;
+                    }
 
                     context.Attach(contact);
 
@@ -153,8 +189,16 @@ namespace Appy.Services
 
                 var success = await messagingService.SendMessage(accessToken, contact.AppSpecificID, message);
                 if (success)
+                {
+                    logger.LogInformation("Message sent to clientId {ClientId} via {ContactType}", client.Id, contact.Type);
                     return;
+                }
+
+                logger.LogDebug("Send via {ContactType} for clientId {ClientId} returned failure", contact.Type, client.Id);
             }
+
+            logger.LogWarning("Failed to send message to clientId {ClientId}: all contacts exhausted (types tried: {ContactTypes})",
+                client.Id, string.Join(", ", triedContactTypes));
 
             throw new BadRequestException("pages.client-notifications.errors.MESSAGE_FAILED_TO_SEND");
         }

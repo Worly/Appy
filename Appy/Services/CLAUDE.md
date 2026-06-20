@@ -14,7 +14,7 @@ Business logic layer. Each service corresponds to one domain concept and is cons
 | `AppointmentService` | Appointment CRUD, free-time slot generation, status changes, client notification dispatch |
 | `WorkingHourService` | Working-hour CRUD with overlap validation; replaces all hours for a facility atomically |
 | `DashboardService` | Dashboard settings upsert (unique per user + facility) |
-| `ClientNotificationsService` | Notification settings and outbound message dispatch |
+| `ClientNotificationsService` | Notification settings and outbound message dispatch; logs per-contact Debug detail, Information on success, Warning before throwing `MESSAGE_FAILED_TO_SEND` |
 | `AppointmentReminderService` | Cron job (every 5 minutes) — sends reminders for the next day's confirmed appointments |
 | `TestingService` | Dev-only data seeder, reachable via `TestingController` |
 
