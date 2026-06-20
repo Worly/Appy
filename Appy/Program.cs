@@ -107,6 +107,7 @@ if (app.Environment.IsDevelopment())
         .WithOrigins("http://localhost:4200"));
 }
 
+app.UseMiddleware<Appy.Middleware.RequestLoggingMiddleware>();
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseMiddleware<Appy.Auth.JwtMiddleware>();
 app.UseMiddleware<FacilityMiddleware>();
