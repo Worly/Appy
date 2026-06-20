@@ -32,3 +32,4 @@ Business logic layer. Each service corresponds to one domain concept and is cons
 - **Reminder deduplication**: `AppointmentReminderService` only reminds once per appointment (`WasReminded` flag prevents repeats across scheduler ticks)
 - **Contact name uniqueness**: `ClientService` enforces case-insensitive name + surname uniqueness per facility
 - **AppSpecificID preservation**: when a client's contacts are updated, existing `AppSpecificID` values are re-attached by matching contact type + value, so cached IGSIDs survive edits
+- **Logging**: services log significant mutations at Information and handled failures / security signals at Warning/Error, using `ILogger<T>` with message templates. Correlation ids (`RequestId`/`UserId`/`FacilityId`) come from middleware scopes — don't repeat them in messages. See `Appy/CLAUDE.md` → Logging.
