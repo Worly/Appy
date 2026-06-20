@@ -41,7 +41,16 @@ export class ContextMenuComponent implements OnInit, OnDestroy {
   @Input() viewportMargin: number = 0;
   @Input() closeOnButtonClick: boolean = true;
 
+  // When true, the menu opens as a centered full-screen modal on mobile-width
+  // viewports instead of a button-anchored dropdown. Avoids the CDK reposition
+  // jank when the on-screen keyboard shrinks the viewport (issue #26).
+  @Input() fullscreenOnMobile: boolean = false;
+
+  // Matches the app's mobile breakpoint (see action-bar.component.ts / app.component.scss).
+  private static readonly MOBILE_MAX_WIDTH = 992;
+
   overlayRef?: OverlayRef;
+  isFullscreen: boolean = false;
   keepOpen: boolean = false;
   keepClosed: boolean = false;
 
@@ -66,33 +75,47 @@ export class ContextMenuComponent implements OnInit, OnDestroy {
   }
 
   public open(): void {
-    this.overlayRef = this.overlay.create({
-      positionStrategy: this.overlay
-        .position()
-        .flexibleConnectedTo(this.relativeTo as ElementRef<any>)
-        .withPush(true)
-        .withFlexibleDimensions(true)
-        .withGrowAfterOpen(true)
-        .withViewportMargin(this.viewportMargin)
-        .withPositions([
-          {
-            originX: "end",
-            originY: "bottom",
-            overlayX: "end",
-            overlayY: "top"
-          },
-          {
-            originX: "end",
-            originY: "top",
-            overlayX: "end",
-            overlayY: "bottom"
-          }
-        ]),
-      scrollStrategy: this.overlay.scrollStrategies.reposition(),
-      minHeight: 5,
-      minWidth: this.copyOriginWidth ? this.relativeTo?.nativeElement.offsetWidth : null,
-    });
+    this.isFullscreen = this.fullscreenOnMobile && window.innerWidth < ContextMenuComponent.MOBILE_MAX_WIDTH;
+
+    this.overlayRef = this.isFullscreen
+      ? this.overlay.create({
+        // Centered modal: no trigger-relative positioning, so the on-screen
+        // keyboard has nothing to reposition. Backdrop dims the page and
+        // blocking the background scroll completes the modal feel.
+        positionStrategy: this.overlay.position().global().centerHorizontally().centerVertically(),
+        scrollStrategy: this.overlay.scrollStrategies.block(),
+        hasBackdrop: true,
+      })
+      : this.overlay.create({
+        positionStrategy: this.overlay
+          .position()
+          .flexibleConnectedTo(this.relativeTo as ElementRef<any>)
+          .withPush(true)
+          .withFlexibleDimensions(true)
+          .withGrowAfterOpen(true)
+          .withViewportMargin(this.viewportMargin)
+          .withPositions([
+            {
+              originX: "end",
+              originY: "bottom",
+              overlayX: "end",
+              overlayY: "top"
+            },
+            {
+              originX: "end",
+              originY: "top",
+              overlayX: "end",
+              overlayY: "bottom"
+            }
+          ]),
+        scrollStrategy: this.overlay.scrollStrategies.reposition(),
+        minHeight: 5,
+        minWidth: this.copyOriginWidth ? this.relativeTo?.nativeElement.offsetWidth : null,
+      });
     this.overlayRef.attach(new TemplatePortal(this.template as TemplateRef<any>, this.viewContainerRef));
+
+    if (this.isFullscreen)
+      this.subs.push(this.overlayRef.backdropClick().subscribe(() => this.close()));
 
     this.keepOpen = true;
     setTimeout(() => this.keepOpen = false, 10);

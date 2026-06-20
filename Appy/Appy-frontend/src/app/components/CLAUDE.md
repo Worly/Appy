@@ -8,7 +8,7 @@ Presentational building blocks shared across feature pages. No domain logic, no 
 |-----------|---------|
 | `ButtonComponent` | Unified button with `color` (success/danger/warning/normal/disabled), `look` (solid/outlined/normal), loading spinner state, optional icon |
 | `DialogComponent` | Modal overlay wrapper with open/close API |
-| `ContextMenuComponent` | Dropdown menu positioned relative to a trigger element; used for navigation sub-menus |
+| `ContextMenuComponent` | Dropdown menu positioned relative to a trigger element; used for navigation sub-menus. Opt-in `fullscreenOnMobile` input renders it as a centered full-screen modal (backdrop + blocked scroll) on mobile-width viewports (`< 992px`) instead of an anchored dropdown — avoids CDK reposition jank when the on-screen keyboard opens (issue #26). Enabled on the client and service lookups. |
 | `ActionBarComponent` | Flex container for page-level action buttons (add, filter, etc.) with a built-in flex splitter |
 | `ActionDropdownComponent` | Dropdown variant of action-bar items |
 | `ToastComponent` | Notification pop-up with an optional inline action button |

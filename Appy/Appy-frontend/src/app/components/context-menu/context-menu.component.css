@@ -9,6 +9,16 @@
     overscroll-behavior: contain;
 }
 
+/* Full-screen modal variant (mobile): fills the viewport minus a small padding
+   on every side. The pane is centered by the overlay's global position strategy;
+   content scrolls inside. dvh keeps it correct as mobile browser chrome collapses. */
+.context-menu-container.fullscreen {
+    width: calc(100vw - 32px);
+    height: calc(100vh - 32px);
+    height: calc(100dvh - 32px);
+    max-width: 500px;
+}
+
 ::-webkit-scrollbar {
     width: 8px;
 }

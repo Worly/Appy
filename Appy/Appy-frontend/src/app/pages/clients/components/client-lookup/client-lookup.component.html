@@ -5,7 +5,7 @@
 <app-button *ngIf="showClearButton && value != null" class="clear-button" look="transparent" icon="times"
     [isCircle]="true" (onClick)="clear()"></app-button>
 
-<app-context-menu #contextMenu [relativeTo]="buttonRef.elementRef" [copyOriginWidth]="true">
+<app-context-menu #contextMenu [relativeTo]="buttonRef.elementRef" [copyOriginWidth]="true" [fullscreenOnMobile]="true">
     <div class="search-input-container">
         <app-search [source]="clients" (onSearch)="filteredClients = $event.filteredSource"></app-search>
         <app-button *ngIf="showNewButton" icon="plus" color="success" look="outlined" borderStyle="dashed"
