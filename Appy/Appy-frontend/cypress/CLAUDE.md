@@ -6,7 +6,7 @@ Cypress end-to-end tests that run against the full live stack. Triggered automat
 
 The workflow:
 1. Starts Postgres 14
-2. Builds and starts the backend (`ASPNETCORE_ENVIRONMENT=Development`, `NO_FRONTEND=true`)
+2. Builds and starts the backend (`ASPNETCORE_ENVIRONMENT=Development` — in Development the backend does not serve the frontend)
 3. Starts `npx ng serve` for the frontend
 4. Runs Cypress against `http://localhost:4200`
 

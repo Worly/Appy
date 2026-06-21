@@ -1,3 +1,6 @@
 Dockerfile
 bin/
 obj/
+Appy-frontend/node_modules/
+Appy-frontend/build/
+Appy-frontend/.angular/
