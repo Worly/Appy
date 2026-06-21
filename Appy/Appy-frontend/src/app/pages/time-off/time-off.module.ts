@@ -11,6 +11,7 @@ import { TimeOffEditComponent } from "./components/time-off-edit/time-off-edit.c
 import { SingleTimeOffListItemComponent } from "./components/single-time-off-list-item/single-time-off-list-item.component";
 import { TimeOffListComponent } from "./components/time-off-list/time-off-list.component";
 import { SingleTimeOffComponent } from "./components/single-time-off/single-time-off.component";
+import { AllDayTimeOffPickerComponent } from "./components/all-day-time-off-picker/all-day-time-off-picker.component";
 
 @NgModule({
   declarations: [
@@ -19,6 +20,7 @@ import { SingleTimeOffComponent } from "./components/single-time-off/single-time
     SingleTimeOffListItemComponent,
     TimeOffListComponent,
     SingleTimeOffComponent,
+    AllDayTimeOffPickerComponent,
   ],
   imports: [
     TimeOffRoutingModule,
@@ -29,9 +31,10 @@ import { SingleTimeOffComponent } from "./components/single-time-off/single-time
     FontAwesomeModule,
     DialogModule,
   ],
-  // Exported so the appointments list can open the time-off details dialog too.
+  // Exported so the appointments list/scroller can open the time-off details dialog and all-day pick-list.
   exports: [
     SingleTimeOffComponent,
+    AllDayTimeOffPickerComponent,
   ],
 })
 export class TimeOffModule { }

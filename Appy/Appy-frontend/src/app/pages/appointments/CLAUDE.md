@@ -64,4 +64,4 @@ Both are read/written reactively so the URL is always shareable and bookmarkable
 
 ## Cross-Module Dependencies
 
-This module imports `ClientsModule` (for `ClientLookupComponent`), `ServicesModule` (for `ServiceLookupComponent`), and `TimeOffModule` (for `SingleTimeOffComponent` — the time-off details dialog opened from both the list and scroller views). The `SingleAppointmentComponent` is exported from this module and consumed by `DashboardModule` for the upcoming-unconfirmed list.
+This module imports `ClientsModule` (for `ClientLookupComponent`), `ServicesModule` (for `ServiceLookupComponent`), and `TimeOffModule` (for `SingleTimeOffComponent` — the time-off details dialog — and `AllDayTimeOffPickerComponent` — the all-day pick-list — both opened from the list and scroller views). The `SingleAppointmentComponent` is exported from this module and consumed by `DashboardModule` for the upcoming-unconfirmed list.

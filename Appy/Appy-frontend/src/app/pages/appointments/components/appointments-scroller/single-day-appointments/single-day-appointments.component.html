@@ -97,21 +97,8 @@
 </app-dialog>
 
 <app-dialog #allDayListDialog>
-    <div *ngIf="allDayListDialog.isOpen" class="all-day-list" data-test="scroller-all-day-timeoff-list">
-        <div class="all-day-header">
-            <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
-            <div class="all-day-heading">
-                <div class="all-day-title">{{ "pages.time-off.ALL_DAY_TIME_OFF" | translate }}</div>
-                <div class="all-day-date" *ngIf="allDayListDate">{{ allDayListDate.format("dddd, DD.MM.YYYY") }}</div>
-            </div>
-        </div>
-        <div class="all-day-rows">
-            <div *ngFor="let o of allDayTimeOffList" class="all-day-list-row" data-test="scroller-all-day-timeoff-row"
-                (click)="viewTimeOffId = o.id; allDayListDialog.close(); timeOffDialog.open()">
-                <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
-                <span class="all-day-list-label">{{ o.label }}</span>
-                <fa-icon class="all-day-chevron" icon="angle-right" aria-hidden="true"></fa-icon>
-            </div>
-        </div>
-    </div>
+    <app-all-day-time-off-picker *ngIf="allDayListDialog.isOpen" testPrefix="scroller"
+        [occurrences]="allDayTimeOffList" [date]="allDayListDate"
+        (pick)="viewTimeOffId = $event; allDayListDialog.close(); timeOffDialog.open()">
+    </app-all-day-time-off-picker>
 </app-dialog>
