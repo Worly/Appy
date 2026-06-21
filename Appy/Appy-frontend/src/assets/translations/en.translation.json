@@ -254,6 +254,8 @@
             "APPLY_FROM_TITLE": "Apply changes from",
             "APPLY_FROM_SPECIFIC": "A specific date",
             "APPLY_FROM_ALL": "The entire schedule",
+            "APPLY_FROM_SPECIFIC_HINT": "Changes apply from the selected date onward. Earlier occurrences keep their current settings, splitting the schedule in two.",
+            "APPLY_FROM_ALL_HINT": "Changes apply to every occurrence in this schedule — both past and future.",
 
             "errors": {
                 "MISSING_LABEL": "Label is required",

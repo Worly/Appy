@@ -19,14 +19,14 @@ export class TimeOffComponent implements OnInit, OnDestroy {
   public viewingId?: number;
 
   public readonly tabOptions: SegmentedOption[] = [
-    { value: "OneOff", label: "pages.time-off.ONE_OFF", dataTest: "time-off-tab-oneoff" },
-    { value: "Recurring", label: "pages.time-off.RECURRING", dataTest: "time-off-tab-recurring" },
-    { value: "Holidays", label: "pages.time-off.HOLIDAYS", dataTest: "time-off-tab-holidays" },
+    { value: "OneOff", label: "pages.time-off.ONE_OFF", icon: "calendar-day", dataTest: "time-off-tab-oneoff" },
+    { value: "Recurring", label: "pages.time-off.RECURRING", icon: "arrows-rotate", dataTest: "time-off-tab-recurring" },
+    { value: "Holidays", label: "pages.time-off.HOLIDAYS", icon: "umbrella-beach", dataTest: "time-off-tab-holidays" },
   ];
 
   public readonly scopeOptions: SegmentedOption[] = [
-    { value: "Active", label: "pages.time-off.UPCOMING", dataTest: "time-off-scope-upcoming" },
-    { value: "Expired", label: "pages.time-off.PAST", dataTest: "time-off-scope-past" },
+    { value: "Active", label: "pages.time-off.UPCOMING", icon: "arrow-right", dataTest: "time-off-scope-upcoming" },
+    { value: "Expired", label: "pages.time-off.PAST", icon: "arrow-left", dataTest: "time-off-scope-past" },
   ];
 
   private subs: Subscription[] = [];

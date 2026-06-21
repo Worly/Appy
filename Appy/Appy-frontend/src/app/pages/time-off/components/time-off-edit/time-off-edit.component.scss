@@ -184,6 +184,24 @@ app-date-selector {
   font-weight: 700;
 }
 
+// Explains what the selected apply-from mode will do. Soft tinted panel so it reads as guidance.
+.split-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 11px 13px;
+  border-radius: 10px;
+  background: rgba(var(--rgb-primary), 0.1);
+  color: rgb(var(--rgb-text));
+  font-size: 0.88rem;
+  line-height: 1.4;
+
+  fa-icon {
+    color: rgb(var(--rgb-primary));
+    margin-top: 1px; // optical-align the icon with the first line of text
+  }
+}
+
 .split-actions {
   display: flex;
   justify-content: flex-end;

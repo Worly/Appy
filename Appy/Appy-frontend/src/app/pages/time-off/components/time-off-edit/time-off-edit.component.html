@@ -141,6 +141,12 @@
     <app-segmented-control [options]="splitModeOptions" [value]="splitMode"
       (valueChange)="splitMode = $event"></app-segmented-control>
 
+    <!-- Explains the effect of the selected apply-from mode before the user commits. -->
+    <div class="split-hint" data-test="time-off-split-hint">
+      <fa-icon [icon]="['fas', 'circle-info']" aria-hidden="true"></fa-icon>
+      <span>{{ (splitMode === 'date' ? 'pages.time-off.APPLY_FROM_SPECIFIC_HINT' : 'pages.time-off.APPLY_FROM_ALL_HINT') | translate }}</span>
+    </div>
+
     <div class="field" *ngIf="splitMode === 'date'">
       <app-date-selector [date]="splitDate" (dateChange)="onSplitDateChange($event)"></app-date-selector>
     </div>

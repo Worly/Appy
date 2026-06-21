@@ -254,6 +254,8 @@
             "APPLY_FROM_TITLE": "Primijeni promjene od",
             "APPLY_FROM_SPECIFIC": "Određenog datuma",
             "APPLY_FROM_ALL": "Cijelog rasporeda",
+            "APPLY_FROM_SPECIFIC_HINT": "Promjene se primjenjuju od odabranog datuma nadalje. Ranija ponavljanja zadržavaju trenutne postavke, čime se raspored dijeli na dva dijela.",
+            "APPLY_FROM_ALL_HINT": "Promjene se primjenjuju na cijeli raspored — i prošla i buduća ponavljanja.",
 
             "errors": {
                 "MISSING_LABEL": "Naziv je obavezan",

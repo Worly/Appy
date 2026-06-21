@@ -1,10 +1,13 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
+import { IconName } from "@fortawesome/fontawesome-svg-core";
 
 export interface SegmentedOption {
   // The value bound to this segment (string, enum, etc.).
   value: any;
   // Translation key shown as the segment's text (run through TranslatePipe; a literal also works).
   label: string;
+  // Optional FontAwesome icon (solid set) rendered before the label. Must be registered in the icon library.
+  icon?: IconName;
   // Optional data-test hook placed on the segment button.
   dataTest?: string;
 }
