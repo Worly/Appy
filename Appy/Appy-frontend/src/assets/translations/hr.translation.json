@@ -230,6 +230,7 @@
             "RECURRING": "Ponavljajući",
             "HOLIDAYS": "Praznici",
             "HOLIDAYS_COMING_SOON": "Uvezeni praznici uskoro stižu.",
+            "CONFIGURE_AUTO_IMPORT": "Postavi automatski uvoz",
             "UPCOMING": "Nadolazeći",
             "PAST": "Prošli",
             "NONE_UPCOMING": "Nema nadolazećih slobodnih dana.",

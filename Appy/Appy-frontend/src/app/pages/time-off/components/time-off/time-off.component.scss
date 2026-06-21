@@ -41,12 +41,22 @@
   }
 }
 
-// Upcoming | Past scope switch: a smaller, centred pill toggle.
+// Controls row: scope toggle on the left, the primary action (add / configure import) on the right.
+// Wraps on very narrow widths so the two never collide.
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+// Upcoming | Past scope switch: a smaller pill toggle.
 .scope-switch {
   display: flex;
   gap: 4px;
   width: fit-content;
-  margin: 0 auto 16px;
   padding: 3px;
   border-radius: 10px;
   background: rgb(var(--rgb-input-background));

@@ -8,11 +8,25 @@
     </button>
   </div>
 
-  <div *ngIf="!isHolidays" class="scope-switch" data-test="time-off-scope">
-    <button class="scope" type="button" [class.active]="scope === 'Active'" (click)="setScope('Active')"
-      data-test="time-off-scope-upcoming">{{ "pages.time-off.UPCOMING" | translate }}</button>
-    <button class="scope" type="button" [class.active]="scope === 'Expired'" (click)="setScope('Expired')"
-      data-test="time-off-scope-past">{{ "pages.time-off.PAST" | translate }}</button>
+  <!-- Scope toggle + primary action share one row: add-new on the list tabs, configure-import on Holidays. -->
+  <div class="controls">
+    <div class="scope-switch" data-test="time-off-scope">
+      <button class="scope" type="button" [class.active]="scope === 'Active'" (click)="setScope('Active')"
+        data-test="time-off-scope-upcoming">{{ "pages.time-off.UPCOMING" | translate }}</button>
+      <button class="scope" type="button" [class.active]="scope === 'Expired'" (click)="setScope('Expired')"
+        data-test="time-off-scope-past">{{ "pages.time-off.PAST" | translate }}</button>
+    </div>
+
+    <!-- Icon-only so the row never wraps on narrow screens (long labels, esp. in Croatian, forced a wrap);
+         title/aria-label keep the action discoverable. -->
+    <app-button *ngIf="!isHolidays" icon="plus" color="success" look="outlined" borderStyle="dashed"
+      alignContent="center" (onClick)="addNew()" data-test="time-off-add"
+      [attr.title]="'pages.time-off.ADD' | translate" [attr.aria-label]="'pages.time-off.ADD' | translate"></app-button>
+
+    <app-button *ngIf="isHolidays" icon="gear" color="success" look="outlined" borderStyle="dashed"
+      alignContent="center" (onClick)="configureAutoImport()" data-test="time-off-configure-import"
+      [attr.title]="'pages.time-off.CONFIGURE_AUTO_IMPORT' | translate"
+      [attr.aria-label]="'pages.time-off.CONFIGURE_AUTO_IMPORT' | translate"></app-button>
   </div>
 
   <app-time-off-list *ngIf="!isHolidays" [type]="listType" [scope]="scope"
@@ -23,13 +37,6 @@
     <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
     <div>{{ "pages.time-off.HOLIDAYS_COMING_SOON" | translate }}</div>
   </div>
-
-  <!-- Anchored at the end so its floating-mode spacer reserves space at the bottom
-       (where the button floats on mobile), not above the title. -->
-  <app-action-bar>
-    <app-button *ngIf="!isHolidays" icon="plus" [text]="'pages.time-off.ADD' | translate" color="success" look="solid"
-      (onClick)="addNew()" data-test="time-off-add"></app-button>
-  </app-action-bar>
 </div>
 
 <app-dialog #detailsDialog>

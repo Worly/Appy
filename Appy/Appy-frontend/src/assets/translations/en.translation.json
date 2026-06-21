@@ -230,6 +230,7 @@
             "RECURRING": "Recurring",
             "HOLIDAYS": "Holidays",
             "HOLIDAYS_COMING_SOON": "Imported public holidays are coming soon.",
+            "CONFIGURE_AUTO_IMPORT": "Configure auto-import",
             "UPCOMING": "Upcoming",
             "PAST": "Past",
             "NONE_UPCOMING": "No upcoming time off.",

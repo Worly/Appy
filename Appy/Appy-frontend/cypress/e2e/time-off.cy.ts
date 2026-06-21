@@ -210,12 +210,14 @@ describe("Time Off", () => {
     expectRow("Prompt Beta");
   });
 
-  it("shows the Holidays tab as a stub with no add button", () => {
+  it("shows the Holidays tab as a stub with the scope switch and an auto-import button instead of add", () => {
     visitTimeOff();
     clickTab("holidays");
     cy.get("[data-test=time-off-holidays-stub]").should("exist");
+    // No add-new on Holidays; the scope switch and the auto-import config button take its place.
     cy.get("[data-test=time-off-add]").should("not.exist");
-    cy.get("[data-test=time-off-scope]").should("not.exist");
+    cy.get("[data-test=time-off-scope]").should("exist");
+    cy.get("[data-test=time-off-configure-import]").should("exist");
   });
 
   it("shows an all-day badge in the appointments list for a day covered by all-day time off", () => {

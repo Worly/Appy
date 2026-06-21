@@ -74,4 +74,9 @@ export class TimeOffComponent implements OnInit, OnDestroy {
       queryParams: { type: this.activeTab === "Recurring" ? "recurring" : "oneoff" },
     });
   }
+
+  // Placeholder for the upcoming holiday auto-import feature. The Holidays-tab button is wired here so
+  // the UI is in place; it does nothing until the import backend exists.
+  public configureAutoImport(): void {
+  }
 }
