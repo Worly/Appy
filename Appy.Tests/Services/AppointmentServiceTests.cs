@@ -1,6 +1,7 @@
 using Appy.Domain;
 using Appy.DTOs;
 using Appy.Services;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Moq.EntityFrameworkCore;
 
@@ -44,7 +45,7 @@ namespace Appy.Tests.Services
                 .Setup(x => x.GetWorkingHours(It.IsAny<DateOnly>(), FacilityId))
                 .ReturnsAsync(allDays);
 
-            service = new AppointmentService(dbContextMock.Object, workingHourServiceMock.Object);
+            service = new AppointmentService(dbContextMock.Object, workingHourServiceMock.Object, NullLogger<AppointmentService>.Instance);
         }
 
         private Appointment AddAppointment(AppointmentStatus status)

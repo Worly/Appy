@@ -2,6 +2,7 @@
 using Appy.Exceptions;
 using Appy.Services;
 using Appy.Services.MessagingServices;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace Appy.Tests.Services
@@ -11,6 +12,7 @@ namespace Appy.Tests.Services
         private Mock<MainDbContext> dbContextMock;
         private Mock<IMessagingService> messagingServiceMock;
         private Mock<IMessagingServiceManager> messagingServiceManagerMock;
+        private Mock<ILogger<ClientNotificationsService>> loggerMock;
         private ClientNotificationsService service;
 
         private const string accessToken = "token";
@@ -29,7 +31,9 @@ namespace Appy.Tests.Services
             messagingServiceManagerMock.Setup(x => x.GetAccessToken(It.IsAny<ContactType>(), It.IsAny<ClientNotificationsSettings>())).Returns(accessToken);
             messagingServiceManagerMock.Setup(x => x.GetService(It.IsAny<ContactType>())).Returns(messagingServiceMock.Object);
 
-            service = new ClientNotificationsService(dbContextMock.Object, messagingServiceManagerMock.Object);
+            loggerMock = new Mock<ILogger<ClientNotificationsService>>();
+
+            service = new ClientNotificationsService(dbContextMock.Object, messagingServiceManagerMock.Object, loggerMock.Object);
         }
 
         [Fact]
@@ -177,6 +181,33 @@ namespace Appy.Tests.Services
 
             messagingServiceMock.Verify(x => x.SendMessage(accessToken, appSpecificID1, message), Times.Once);
             messagingServiceMock.Verify(x => x.SendMessage(accessToken, appSpecificID2, message), Times.Never);
+        }
+
+        [Fact]
+        public async Task SendMessageTo_LogsWarning_WhenAllContactsFail()
+        {
+            var message = "message";
+            var appSpecificID = "12311111";
+            var client = new Client
+            {
+                Id = 42,
+                Contacts = new List<ClientContact>
+                {
+                    new() { Type = ContactType.Instagram, Value = "123", AppSpecificID = appSpecificID }
+                }
+            };
+
+            messagingServiceMock.Setup(x => x.SendMessage(accessToken, appSpecificID, message)).ReturnsAsync(false);
+
+            await Assert.ThrowsAsync<BadRequestException>(() => service.SendMessageTo(new ClientNotificationsSettings(), client, message));
+
+            loggerMock.Verify(x => x.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.IsAny<It.IsAnyType>(),
+                It.IsAny<Exception?>(),
+                (Func<It.IsAnyType, Exception?, string>)It.IsAny<object>()),
+                Times.Once);
         }
     }
 }

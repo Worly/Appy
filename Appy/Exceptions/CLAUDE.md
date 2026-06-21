@@ -1,6 +1,6 @@
 # CLAUDE.md — Exception System (Exceptions/)
 
-Custom exception hierarchy that maps to HTTP status codes. `ExceptionMiddleware` (registered in `Program.cs`) catches every `HttpException` and serializes it to a JSON response — controllers and services never catch these themselves.
+Custom exception hierarchy that maps to HTTP status codes. `ExceptionMiddleware` (registered in `Program.cs`) catches every `HttpException` and serializes it to a JSON response — controllers and services never catch these themselves. The middleware also logs `HttpException` by severity (4xx/client errors at Information, 5xx at Error), and additionally catches any unhandled non-`HttpException` exception, logs it at Error with the full stack trace, and returns a generic `500` response with body `"An unexpected error occurred"` that does not leak exception details.
 
 ## Hierarchy
 

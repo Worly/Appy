@@ -18,14 +18,16 @@ ASP.NET Core 8 Web API. Serves the REST API and, in production, also serves the 
 | `Auth/` | `Auth/CLAUDE.md` |
 | `Exceptions/` | `Exceptions/CLAUDE.md` |
 | `Utils/` | `Utils/CLAUDE.md` |
+| `Middleware/` | `Middleware/CLAUDE.md` |
 
 ## Request Pipeline (order matters)
 
 ```
 Request
-  → ExceptionMiddleware       (catches HttpException → JSON response)
-  → JwtMiddleware             (validates Bearer token → attaches User to HttpContext.Items)
-  → FacilityMiddleware        (reads facility-id header → stores in HttpContext.Items)
+  → RequestLoggingMiddleware  (opens RequestId scope; logs method/path/status/elapsed)
+  → ExceptionMiddleware       (logs by severity; HttpException → JSON; unhandled → generic 500)
+  → JwtMiddleware             (validates Bearer token → attaches User; opens UserId scope)
+  → FacilityMiddleware        (reads facility-id header → stores in HttpContext.Items; opens FacilityId scope)
   → [AuthorizeAttribute]      (action filter: 401 if no user)
   → [SelectedFacilityAttribute] (action filter: validates ownership, 400/404)
   → Controller Action
@@ -39,6 +41,16 @@ All application services are registered as **Scoped**. The one exception is `Cro
 
 - **Development**: `appsettings.json`
 - **Production**: environment variables (UPPER_SNAKE_CASE — see `Utils/CLAUDE.md`)
+
+## Logging
+
+Built-in `Microsoft.Extensions.Logging`. Console providers are configured in `Program.cs`: readable single-line console + Debug in Development, JSON console in Production. `IncludeScopes` is on, so correlation scopes appear in output. Per-category levels live in `appsettings*.json` (`Microsoft.EntityFrameworkCore` is pinned to Warning to suppress per-SQL noise; `Appy` is Information in prod, Debug in dev).
+
+**EF Core logging**: `MainDbContext` does **not** call `UseLoggerFactory` — because the context is registered via `AddDbContext`, EF Core automatically uses the application's `ILoggerFactory`, so EF logs flow through the same providers and honor the `Microsoft.EntityFrameworkCore` level above. (Never pass a per-instance `LoggerFactory` from `OnConfiguring` — it leaks and bypasses the pipeline.) In Development only, `AddDbContext` enables `EnableSensitiveDataLogging` + `EnableDetailedErrors`; raise the EF level to Information in `appsettings.Development.json` to see parameterized SQL.
+
+**Correlation scopes** are opened by middleware: `RequestId` (RequestLoggingMiddleware), `UserId` (JwtMiddleware), `FacilityId` (FacilityMiddleware). Downstream logs inherit them — don't repeat these ids in messages.
+
+**Levels:** Debug = diagnostic detail; Information = significant business events (create/update/delete, login/logout, notification sent); Warning = handled failures + security signals (failed login, refresh-token reuse, notification send failure); Error = unexpected/unhandled exceptions and 5xx. Always use message templates, never string interpolation.
 
 ## Database
 

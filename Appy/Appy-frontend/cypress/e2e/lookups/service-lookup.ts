@@ -11,8 +11,13 @@ export function serviceLookup(elementSelector: string) {
     },
 
     expectSelected(service: string | null) {
-      this.getSelected().then(selected => {
-        expect(selected).to.equal(service);
+      // .should() retries the read+assert — the edit form fetches the appointment after the
+      // popup opens, so the lookup briefly shows the "Choose service" placeholder (null) before
+      // it populates. A one-shot read races that fetch and flakes in CI (where everything is slower).
+      getElement(elementSelector).should(el => {
+        let text = el.text().trim();
+        let selectedService: string | null = text.includes("Choose service") ? null : text;
+        expect(selectedService).to.equal(service);
       })
 
       return this;
