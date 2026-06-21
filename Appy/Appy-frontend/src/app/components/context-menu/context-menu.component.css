@@ -48,26 +48,6 @@
     white-space: nowrap;
 }
 
-.fullscreen-close {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 34px;
-    height: 34px;
-    border: none;
-    border-radius: 50%;
-    background-color: transparent;
-    color: rgb(var(--rgb-text));
-    font-size: 1.1rem;
-    line-height: 1;
-    cursor: pointer;
-}
-
-.fullscreen-close:hover {
-    background-color: rgba(var(--rgb-text), 0.1);
-}
-
 ::-webkit-scrollbar {
     width: 8px;
 }

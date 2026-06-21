@@ -5,8 +5,8 @@
              stays right-aligned and gives a way out without picking a value. -->
         <div class="fullscreen-header">
             <span class="fullscreen-title">{{ title }}</span>
-            <button type="button" class="fullscreen-close" aria-label="Close"
-                data-test="context-menu-close" (click)="close()">✕</button>
+            <app-button data-test="context-menu-close" aria-label="Close" icon="times"
+                look="transparent" [isCircle]="true" (onClick)="close()"></app-button>
         </div>
         <ng-content></ng-content>
     </div>
