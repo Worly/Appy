@@ -9,6 +9,45 @@
     overscroll-behavior: contain;
 }
 
+/* Full-screen modal variant (mobile): fills the viewport minus a small padding
+   on every side. The pane is centered by the overlay's global position strategy;
+   content scrolls inside. dvh keeps it correct as mobile browser chrome collapses. */
+.context-menu-container.fullscreen {
+    width: calc(100vw - 32px);
+    height: calc(100vh - 32px);
+    height: calc(100dvh - 32px);
+    max-width: 500px;
+}
+
+/* Header bar with title + close button. Hidden unless the menu is full-screen,
+   so the regular dropdown is untouched. Sticky so it stays pinned at the top
+   while the list scrolls underneath (no scroll-container restructuring needed). */
+.fullscreen-header {
+    display: none;
+}
+
+.context-menu-container.fullscreen .fullscreen-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 6px 8px 6px 15px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: rgb(var(--rgb-input-background));
+    border-bottom: 1px solid rgb(var(--rgb-input-border));
+}
+
+.fullscreen-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: rgb(var(--rgb-text));
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 ::-webkit-scrollbar {
     width: 8px;
 }
