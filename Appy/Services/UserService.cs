@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using Appy.Domain;
 using Appy.DTOs;
 using Appy.Exceptions;
+using System.Net.Mail;
 using System.Text;
 
 namespace Appy.Services
@@ -72,6 +73,9 @@ namespace Appy.Services
 
         public async Task<LogInResponseDTO> Register(RegisterDTO model, string userAgent)
         {
+            if (!IsValidEmail(model.Email))
+                throw new ValidationException(nameof(RegisterDTO.Email), "pages.login-register.errors.EMAIL_INVALID");
+
             var userWithSameEmail = await context.Users.SingleOrDefaultAsync(x => x.Email == model.Email);
             if (userWithSameEmail != null)
                 throw new ValidationException(nameof(RegisterDTO.Email), "pages.login-register.errors.EMAIL_TAKEN");
@@ -217,6 +221,16 @@ namespace Appy.Services
                 throw new NotFoundException();
 
             return user;
+        }
+
+        private static bool IsValidEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return false;
+
+            // MailAddress.TryCreate also accepts display-name forms like "Foo <a@b.com>",
+            // so require the parsed address to equal the input — only a bare address passes.
+            return MailAddress.TryCreate(email, out var parsed) && parsed.Address == email;
         }
 
         private byte[] GenerateSalt()

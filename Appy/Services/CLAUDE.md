@@ -26,6 +26,7 @@ Business logic layer. Each service corresponds to one domain concept and is cons
 
 ## Key Business Rules (enforced here, not in controllers)
 
+- **Registration email format**: `UserService.Register` rejects malformed emails (`MailAddress` parsing) before the uniqueness check, throwing a `ValidationException` (`EMAIL_INVALID`)
 - **Service/Client deletion blocked** if any `Appointment` references them — caller must archive instead
 - **Appointment time validation**: the slot must fall within a `WorkingHour` range for that day-of-week and must not overlap an existing appointment. Pass `ignoreTimeNotAvailable=true` to bypass
 - **Free-time generation**: 5-minute-interval slots within working hours, minus slots that would overlap existing appointments (and optionally ignoring one appointment ID for edit scenarios)

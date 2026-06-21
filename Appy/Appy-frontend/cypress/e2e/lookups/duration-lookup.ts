@@ -11,8 +11,13 @@ export function durationLookup(elementSelector: string) {
     },
 
     expectSelected(duration: string | null) {
-      this.getSelected().then(selected => {
-        expect(selected).to.equal(duration);
+      // .should() retries the read+assert — the edit form fetches the appointment after the
+      // popup opens, so the lookup briefly shows the "Choose duration" placeholder (null) before
+      // it populates. A one-shot read races that fetch and flakes in CI (where everything is slower).
+      getElement(elementSelector).should(el => {
+        let text = el.text().trim();
+        let duration2: string | null = text.includes("Choose duration") ? null : text;
+        expect(duration2).to.equal(duration);
       })
 
       return this;
