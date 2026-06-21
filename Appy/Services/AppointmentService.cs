@@ -30,10 +30,13 @@ namespace Appy.Services
 
         private IWorkingHourService workingHourService;
 
-        public AppointmentService(MainDbContext context, IWorkingHourService workingHourService)
+        private readonly ILogger<AppointmentService> logger;
+
+        public AppointmentService(MainDbContext context, IWorkingHourService workingHourService, ILogger<AppointmentService> logger)
         {
             this.context = context;
             this.workingHourService = workingHourService;
+            this.logger = logger;
         }
 
         public Task<List<AppointmentViewDTO>> GetAll(DateOnly date, int facilityId, bool findPrevious, SmartFilter? filter)
@@ -146,6 +149,9 @@ namespace Appy.Services
             context.Appointments.Add(appointment);
             await context.SaveChangesAsync();
 
+            logger.LogInformation("Appointment {AppointmentId} created for clientId {ClientId}, serviceId {ServiceId} on {Date} {Time} (facilityId {FacilityId})",
+                appointment.Id, client.Id, service.Id, appointment.Date, appointment.Time, facilityId);
+
             var previous = await GetPreviousAppointment(appointment);
 
             return appointment.ToViewDTO(previous);
@@ -198,6 +204,8 @@ namespace Appy.Services
 
             await context.SaveChangesAsync();
 
+            logger.LogInformation("Appointment {AppointmentId} updated (facilityId {FacilityId})", appointment.Id, facilityId);
+
             var previous = await GetPreviousAppointment(appointment);
 
             return appointment.ToViewDTO(previous);
@@ -215,6 +223,8 @@ namespace Appy.Services
 
             await context.SaveChangesAsync();
 
+            logger.LogInformation("Appointment {AppointmentId} status set to {Status} (facilityId {FacilityId})", appointment.Id, status, facilityId);
+
             var previous = await GetPreviousAppointment(appointment);
 
             return appointment.ToViewDTO(previous);
@@ -228,6 +238,8 @@ namespace Appy.Services
 
             context.Appointments.Remove(appointments);
             await context.SaveChangesAsync();
+
+            logger.LogInformation("Appointment {AppointmentId} deleted (facilityId {FacilityId})", id, facilityId);
         }
 
         public List<FreeTimeDTO> GetFreeTimes(List<AppointmentViewDTO> appointmentsOfTheDay, List<WorkingHour> workingHours, ServiceDTO service, TimeSpan duration)

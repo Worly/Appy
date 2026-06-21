@@ -12,7 +12,7 @@ Tests live in `Services/` and `Utils/`. The `Services/` tests cover four service
 
 - **AppointmentServiceTests**: verifies the status-revert rule on `Edit` — a `Confirmed` appointment whose date, time, service, or client changes is reset to `Unconfirmed`; other statuses are preserved; duration- and notes-only edits leave the status alone. Also asserts that `AddNew` creates appointments in the `Unconfirmed` state.
 
-- **ClientNotificationServiceTests**: verifies contact validation (at least one contact required), Instagram IGSID lookup and `AppSpecificID` caching behavior, message template variable substitution (`{clientName}`, `{service}`, etc.), and multi-contact routing (stops at the first successful send).
+- **ClientNotificationServiceTests**: verifies contact validation (at least one contact required), Instagram IGSID lookup and `AppSpecificID` caching behavior, message template variable substitution (`{clientName}`, `{service}`, etc.), multi-contact routing (stops at the first successful send), and that a `LogLevel.Warning` is emitted when all contacts fail.
 
 - **UserServiceTests**: verifies `Register` rejects malformed email addresses with a `ValidationException` (before the uniqueness check) and accepts well-formed ones.
 

@@ -20,10 +20,12 @@ namespace Appy.Services.Facilities
     public class FacilityService : IFacilityService
     {
         private MainDbContext context;
+        private readonly ILogger<FacilityService> logger;
 
-        public FacilityService(MainDbContext context)
+        public FacilityService(MainDbContext context, ILogger<FacilityService> logger)
         {
             this.context = context;
+            this.logger = logger;
         }
 
         public async Task<Facility> AddNew(FacilityDTO dto, int ownerId)
@@ -37,6 +39,8 @@ namespace Appy.Services.Facilities
             context.Facilities.Add(facility);
             await context.SaveChangesAsync();
 
+            logger.LogInformation("Facility {FacilityId} '{Name}' created for ownerId {OwnerId}", facility.Id, facility.Name, ownerId);
+
             return facility;
         }
 
@@ -48,6 +52,8 @@ namespace Appy.Services.Facilities
 
             facility.Name = dto.Name;
             await context.SaveChangesAsync();
+
+            logger.LogInformation("Facility {FacilityId} updated by ownerId {OwnerId}", facilityId, ownerId);
 
             return facility;
         }
@@ -81,6 +87,8 @@ namespace Appy.Services.Facilities
 
             context.Facilities.Remove(facility);
             await context.SaveChangesAsync();
+
+            logger.LogInformation("Facility {FacilityId} deleted by userId {UserId}", facilityId, userId);
         }
 
         public async Task SetSelectedFacility(int userId, int facilityId)
