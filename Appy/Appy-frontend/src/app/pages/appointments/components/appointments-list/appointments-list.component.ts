@@ -75,6 +75,8 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
   // The all-day occurrences of the day whose badge was clicked, shown as a pick-list in a dialog
   // (a day can have several all-day time-offs); picking one opens that occurrence's details.
   allDayList: TimeOffOccurrence[] = [];
+  // The date those occurrences fall on, shown in the pick-list title.
+  allDayListDate?: Dayjs;
 
   // While true, every render scrolls the viewport to startDate. Set by load() and cleared when
   // the user physically scrolls. Re-snapping on every render (not just the first) is needed
@@ -157,6 +159,7 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
       detailsDialog.open();
     } else {
       this.allDayList = occurrences;
+      this.allDayListDate = occurrences[0]?.date;
       listDialog.open();
     }
   }

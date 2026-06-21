@@ -198,35 +198,76 @@
 }
 
 // Pick-list shown when an all-day badge is clicked: one row per all-day time-off on that day.
+// No card chrome here — app-dialog already supplies the card surface and padding.
 .all-day-list {
-    background: rgb(var(--rgb-card-background));
-    border-radius: 14px;
-    padding: 16px;
-    width: min(92vw, 360px);
-    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 16px;
 
-    .all-day-list-title {
-        font-size: 1.05rem;
-        font-weight: 700;
+    .all-day-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        & > fa-icon {
+            color: rgb(var(--rgb-warning));
+            font-size: 1.3rem;
+        }
+
+        .all-day-heading {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        .all-day-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .all-day-date {
+            font-size: 0.9rem;
+            opacity: 0.6;
+            text-transform: capitalize; // localized weekday names can be lowercase (e.g. Croatian)
+        }
+    }
+
+    .all-day-rows {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
     }
 
     .all-day-list-row {
         display: flex;
         align-items: center;
         gap: 10px;
-        padding: 10px 12px;
+        padding: 12px 14px;
         border-radius: var(--default-border-radius);
-        background: rgba(var(--rgb-danger), 0.12);
-        color: rgb(var(--rgb-danger));
+        background: rgba(var(--rgb-warning), 0.12);
         font-weight: 600;
         cursor: pointer;
+        transition: background 0.15s ease;
+
+        & > fa-icon:first-child {
+            color: rgb(var(--rgb-warning));
+        }
+
+        &:hover {
+            background: rgba(var(--rgb-warning), 0.2);
+        }
 
         .all-day-list-label {
+            flex: 1 1 auto;
             min-width: 0;
             word-break: break-word;
+        }
+
+        .all-day-chevron {
+            flex: 0 0 auto;
+            opacity: 0.5;
         }
     }
 }

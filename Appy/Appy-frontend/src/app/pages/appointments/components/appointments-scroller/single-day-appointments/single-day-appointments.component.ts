@@ -133,6 +133,8 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
   private allDayTimeOffs: TimeOffOccurrence[] = [];
   // Backing the all-day pick-list dialog (a day can have more than one all-day time-off).
   public allDayTimeOffList: TimeOffOccurrence[] = [];
+  // The viewed day, shown in the pick-list title.
+  public allDayListDate?: Dayjs;
 
   private subs: Subscription[] = [];
   private interval: any;
@@ -318,6 +320,7 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
       detailsDialog.open();
     } else {
       this.allDayTimeOffList = this.allDayTimeOffs;
+      this.allDayListDate = this.date ?? this.allDayTimeOffs[0]?.date;
       listDialog.open();
     }
   }
