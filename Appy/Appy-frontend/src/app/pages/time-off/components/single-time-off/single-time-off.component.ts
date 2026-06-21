@@ -51,7 +51,7 @@ export class SingleTimeOffComponent implements OnDestroy {
     this.sub = this.timeOffService.get(id).subscribe(t => {
       this.timeOff = t;
       const tr = (k: string) => this.translateService.translate(k);
-      this.schedule = timeOffScheduleText(t, tr);
+      this.schedule = timeOffScheduleText(t, tr, this.translateService.getSelectedLanguageCode());
       this.dateRange = timeOffRecurringRangeText(t, tr);
       this.time = timeOffTimeText(t, tr);
       this.isLoading = false;

@@ -34,11 +34,39 @@ describe("time-off-display", () => {
     expect(timeOffScheduleText(t, tr)).toBe("pages.time-off.EVERY MONDAY");
   });
 
-  it("formats a monthly schedule", () => {
+  // Stubs the EVERY_DAY_OF_MONTH template the way each locale's translation file fills it.
+  const monthlyTr = (template: string) => (k: string) =>
+    k === "pages.time-off.EVERY_DAY_OF_MONTH" ? template : k;
+
+  it("formats a monthly schedule with an English ordinal", () => {
     const t = new TimeOff();
     t.recurrence = TimeOffRecurrence.Monthly;
-    t.dayOfMonth = 15;
-    expect(timeOffScheduleText(t, tr)).toBe("pages.time-off.DAY_OF_MONTH 15");
+    t.dayOfMonth = 9;
+    expect(timeOffScheduleText(t, monthlyTr("Every {day} of month"), "en")).toBe("Every 9th of month");
+  });
+
+  it("uses correct English ordinal suffixes (st/nd/rd/th, incl. the 11–13 exception)", () => {
+    const tmpl = monthlyTr("Every {day} of month");
+    const text = (day: number) => {
+      const t = new TimeOff();
+      t.recurrence = TimeOffRecurrence.Monthly;
+      t.dayOfMonth = day;
+      return timeOffScheduleText(t, tmpl, "en");
+    };
+    expect(text(1)).toBe("Every 1st of month");
+    expect(text(2)).toBe("Every 2nd of month");
+    expect(text(3)).toBe("Every 3rd of month");
+    expect(text(11)).toBe("Every 11th of month");
+    expect(text(13)).toBe("Every 13th of month");
+    expect(text(21)).toBe("Every 21st of month");
+    expect(text(31)).toBe("Every 31st of month");
+  });
+
+  it("formats a monthly schedule with a Croatian ordinal", () => {
+    const t = new TimeOff();
+    t.recurrence = TimeOffRecurrence.Monthly;
+    t.dayOfMonth = 21;
+    expect(timeOffScheduleText(t, monthlyTr("Svaki {day} u mjesecu"), "hr")).toBe("Svaki 21. u mjesecu");
   });
 
   it("shows a bounded recurring rule's effective range as from – to", () => {

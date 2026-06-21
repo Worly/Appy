@@ -32,7 +32,7 @@ export class SingleTimeOffListItemComponent {
     if (t == null) return;
     const tr = (k: string) => this.translateService.translate(k);
     this.label = t.label ?? "";
-    this.schedule = timeOffScheduleText(t, tr);
+    this.schedule = timeOffScheduleText(t, tr, this.translateService.getSelectedLanguageCode());
     this.dateRange = timeOffRecurringRangeText(t, tr);
     this.time = timeOffTimeText(t, tr);
   }

@@ -11,8 +11,8 @@ const DAY_OF_WEEK_KEYS: Record<DayOfWeek, string> = {
   [DayOfWeek.Saturday]: "SATURDAY",
 };
 
-/** Humanized recurrence schedule, e.g. "02.01.2026 – 05.01.2026", "02.01.2026" (single day), "Every Monday", "Day of month 15". */
-export function timeOffScheduleText(t: TimeOff, translate: (key: string) => string): string {
+/** Humanized recurrence schedule, e.g. "02.01.2026 – 05.01.2026", "02.01.2026" (single day), "Every Monday", "Every 9th of month". */
+export function timeOffScheduleText(t: TimeOff, translate: (key: string) => string, languageCode: string = "en"): string {
   switch (t.recurrence) {
     case TimeOffRecurrence.OneOff: {
       const start = t.startDate?.format("DD.MM.YYYY") ?? "";
@@ -25,9 +25,25 @@ export function timeOffScheduleText(t: TimeOff, translate: (key: string) => stri
         ? `${translate("pages.time-off.EVERY")} ${translate(DAY_OF_WEEK_KEYS[t.dayOfWeek])}`
         : "";
     case TimeOffRecurrence.Monthly:
-      return `${translate("pages.time-off.DAY_OF_MONTH")} ${t.dayOfMonth}`;
+      // e.g. "Every 9th of month" / "Svaki 9. u mjesecu" — the day is formatted as a locale-aware ordinal.
+      return t.dayOfMonth != null
+        ? translate("pages.time-off.EVERY_DAY_OF_MONTH").replace("{day}", ordinalDay(t.dayOfMonth, languageCode))
+        : "";
     default:
       return "";
+  }
+}
+
+/** A day-of-month as a locale-aware ordinal: "9th" / "21st" (English) or "9." (Croatian and other locales). */
+function ordinalDay(day: number, languageCode: string): string {
+  if (languageCode !== "en") return `${day}.`;
+  const mod100 = day % 100;
+  if (mod100 >= 11 && mod100 <= 13) return `${day}th`;
+  switch (day % 10) {
+    case 1: return `${day}st`;
+    case 2: return `${day}nd`;
+    case 3: return `${day}rd`;
+    default: return `${day}th`;
   }
 }
 
