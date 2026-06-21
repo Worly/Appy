@@ -75,7 +75,7 @@
       <!-- Recurring always has an effective-from (defaults to today); the end date is opt-in. -->
       <div class="field">
         <label class="field-label">{{ "pages.time-off.FROM_DATE" | translate }}</label>
-        <app-date-selector [date]="timeOff.startDate!" (dateChange)="onStartDateChange($event)"></app-date-selector>
+        <app-date-selector data-test="time-off-start-date" [date]="timeOff.startDate!" (dateChange)="onStartDateChange($event)"></app-date-selector>
       </div>
 
       <div class="toggle-row">

@@ -80,5 +80,7 @@ export function dateLookup(elementSelector: string) {
 
 function parseSelectedDate(text: string): Dayjs {
   let split = text.trim().split(".");
-  return dayjs(`20${split[2]}-${split[1]}-${split[0]}`);
+  // Date selectors render either compact (DD.MM.YY) or full (DD.MM.YYYY); normalise both to a 4-digit year.
+  let year = split[2].length <= 2 ? `20${split[2]}` : split[2];
+  return dayjs(`${year}-${split[1]}-${split[0]}`);
 }

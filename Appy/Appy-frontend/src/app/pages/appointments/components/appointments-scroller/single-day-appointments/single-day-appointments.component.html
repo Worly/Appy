@@ -56,8 +56,9 @@
         </div>
     </div>
 
-    <div *ngFor="let t of renderedTimeOffs" class="time-off-band" [style.top]="t.top + '%'"
-        [style.height]="t.height + '%'" data-test="scroller-time-off">
+    <div *ngFor="let t of renderedTimeOffs; trackBy: trackTimeOff" class="time-off-band" [style.top]="t.top + '%'"
+        [style.height]="t.height + '%'" data-test="scroller-time-off"
+        (click)="onTimeOffBandClick(t.source, timeOffDialog, allDayListDialog)">
         <fa-icon class="time-off-label" [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
         <span *ngIf="!t.source.isAllDay" class="time-off-label">{{t.time}}</span>
         <span class="time-off-label">{{ t.source.label }}</span>
@@ -88,4 +89,20 @@
 <app-dialog #appointmentDialog>
     <app-single-appointment *ngIf="appointmentDialog.isOpen" [(id)]="viewAppointmentId"
         [editable]="appointmentsEditable" (onDone)="closeAppointmentDialog()"></app-single-appointment>
+</app-dialog>
+
+<app-dialog #timeOffDialog>
+    <app-single-time-off *ngIf="timeOffDialog.isOpen" [id]="viewTimeOffId"
+        (onDone)="timeOffDialog.close()"></app-single-time-off>
+</app-dialog>
+
+<app-dialog #allDayListDialog>
+    <div *ngIf="allDayListDialog.isOpen" class="all-day-list" data-test="scroller-all-day-timeoff-list">
+        <div class="all-day-list-title">{{ "pages.time-off.ALL_DAY_TIME_OFF" | translate }}</div>
+        <div *ngFor="let o of allDayTimeOffList" class="all-day-list-row" data-test="scroller-all-day-timeoff-row"
+            (click)="viewTimeOffId = o.id; allDayListDialog.close(); timeOffDialog.open()">
+            <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
+            <span class="all-day-list-label">{{ o.label }}</span>
+        </div>
+    </div>
 </app-dialog>

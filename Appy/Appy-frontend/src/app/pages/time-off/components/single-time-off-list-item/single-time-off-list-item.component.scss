@@ -34,9 +34,17 @@
 
   .meta {
     display: flex;
-    flex-wrap: wrap;
-    column-gap: 10px;
+    flex-direction: column;
+    gap: 2px;
     font-size: 0.88rem;
+
+    // Recurrence + time share the top line (both short); the longer effective date range drops to
+    // its own line below, so the three pieces never cram into one overflowing row.
+    .meta-primary {
+      display: flex;
+      flex-wrap: wrap;
+      column-gap: 10px;
+    }
 
     .schedule {
       opacity: 0.85;
@@ -44,6 +52,10 @@
 
     .time {
       opacity: 0.55;
+    }
+
+    .date-range {
+      opacity: 0.7;
     }
   }
 

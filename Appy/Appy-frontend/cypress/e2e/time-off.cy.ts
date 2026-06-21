@@ -28,6 +28,15 @@ function clickTab(tab: "oneoff" | "recurring" | "holidays") {
   cy.get(`[data-test=time-off-tab-${tab}]`).click();
 }
 
+/** From /appointments, switch to the scroller view when currently showing the list. */
+function openScrollerView() {
+  getElement("appointment-view-switch-button").then(btn => {
+    if (btn.attr("data-test-data") === "list") {
+      getElement("appointment-view-switch-button").click();
+    }
+  });
+}
+
 function clickScope(scope: "upcoming" | "past") {
   cy.get(`[data-test=time-off-scope-${scope}]`).click();
 }
@@ -90,7 +99,9 @@ describe("Time Off", () => {
     clickTab("recurring");
     expectRow("Weekly All Day Off");
     cy.get("[data-test=time-off-list]").find("[data-test=time-off-row]").contains("Weekly All Day Off")
-      .closest("[data-test=time-off-row]").should("contain", "All day");
+      .closest("[data-test=time-off-row]").should("contain", "All day")
+      // Recurring rows show the effective span; a rule created today is open-ended → "From <today>".
+      .and("contain", dayjs().format("DD.MM.YYYY"));
   });
 
   it("edits a weekly time off via the details modal and saves the new label", () => {
@@ -105,6 +116,8 @@ describe("Time Off", () => {
 
     clickTab("recurring");
     clickRow("Edit Me Weekly");
+    // The details modal shows the recurring effective span (open-ended rule created today → "From <today>").
+    cy.get("app-single-time-off").should("contain", dayjs().format("DD.MM.YYYY"));
     // Details modal → Edit button → editor.
     getElement("time-off-edit-button").click();
     expectURL(/\/time-off\/edit\/\d+/);
@@ -206,16 +219,20 @@ describe("Time Off", () => {
   });
 
   it("shows an all-day badge in the appointments list for a day covered by all-day time off", () => {
+    const monday = dayjs("2021-02-08");
+
     visitTimeOff();
     clickTab("recurring");
     getElement("time-off-add").click();
     getElement("time-off-label").clear().type("Closed Mondays");
     selectDayOfWeek("Monday");
     toggleSwitch("time-off-all-day");
+    // Recurring rules default their effective-from to today; the only seeded appointments (and thus
+    // the only list days a badge can attach to) are in Feb 2021, so pull the start back to that Monday.
+    dateLookup("time-off-start-date").select(monday);
     cy.contains("Save").click();
     expectURL("/time-off");
 
-    const monday = dayjs("2021-02-08");
     cy.visit("/appointments");
     expectURL("/appointments");
 
@@ -234,6 +251,43 @@ describe("Time Off", () => {
     cy.get("[data-test=list-all-day-timeoff]").contains("Closed Mondays").click();
     cy.get("[data-test=list-all-day-timeoff-list]").should("not.exist");
     cy.get("app-single-time-off").should("contain", "Closed Mondays");
+    getElement("time-off-edit-button").should("exist");
+  });
+
+  it("opens the time-off details when a partial band is clicked in the scroller view", () => {
+    visitTimeOff();
+    // One-offs tab is the default; a one-off defaults to today (the scroller's default day),
+    // partial 09:00–17:00, so its band renders directly on the scroller without any date navigation.
+    getElement("time-off-add").click();
+    getElement("time-off-label").clear().type("Scroller One Off");
+    cy.contains("Save").click();
+    expectURL("/time-off");
+
+    cy.visit("/appointments");
+    expectURL("/appointments");
+    openScrollerView();
+
+    cy.get("[data-test=scroller-time-off]").should("exist").and("contain", "Scroller One Off").click();
+    cy.get("app-single-time-off").should("contain", "Scroller One Off");
+    getElement("time-off-edit-button").should("exist");
+  });
+
+  it("opens the time-off details when an all-day band is clicked in the scroller view", () => {
+    visitTimeOff();
+    getElement("time-off-add").click();
+    getElement("time-off-label").clear().type("Scroller All Day");
+    toggleSwitch("time-off-all-day");
+    cy.contains("Save").click();
+    expectURL("/time-off");
+
+    cy.visit("/appointments");
+    expectURL("/appointments");
+    openScrollerView();
+
+    // A single all-day off jumps straight to its details — no pick-list.
+    cy.get("[data-test=scroller-time-off]").should("exist").and("contain", "Scroller All Day").click();
+    cy.get("[data-test=scroller-all-day-timeoff-list]").should("not.exist");
+    cy.get("app-single-time-off").should("contain", "Scroller All Day");
     getElement("time-off-edit-button").should("exist");
   });
 });

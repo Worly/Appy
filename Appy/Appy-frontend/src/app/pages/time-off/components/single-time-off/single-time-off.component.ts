@@ -4,7 +4,7 @@ import { Subscription } from "rxjs";
 import { TimeOff } from "src/app/models/time-off";
 import { TranslateService } from "src/app/components/translate/translate.service";
 import { TimeOffService } from "../../services/time-off.service";
-import { timeOffScheduleText, timeOffTimeText } from "../../time-off-display";
+import { timeOffRecurringRangeText, timeOffScheduleText, timeOffTimeText } from "../../time-off-display";
 
 @Component({
   selector: "app-single-time-off",
@@ -27,6 +27,7 @@ export class SingleTimeOffComponent implements OnDestroy {
   public timeOff?: TimeOff;
   public isLoading: boolean = false;
   public schedule: string = "";
+  public dateRange: string = "";
   public time: string = "";
 
   private sub?: Subscription;
@@ -51,6 +52,7 @@ export class SingleTimeOffComponent implements OnDestroy {
       this.timeOff = t;
       const tr = (k: string) => this.translateService.translate(k);
       this.schedule = timeOffScheduleText(t, tr);
+      this.dateRange = timeOffRecurringRangeText(t, tr);
       this.time = timeOffTimeText(t, tr);
       this.isLoading = false;
     });

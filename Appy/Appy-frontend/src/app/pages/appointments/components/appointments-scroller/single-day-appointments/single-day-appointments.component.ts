@@ -125,6 +125,14 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
   public renderedTimeOffs: RenderedInterval<TimeOffOccurrence>[] = [];
 
   viewAppointmentId?: number;
+  viewTimeOffId?: number;
+
+  // The all-day occurrences of the viewed day. The hatched all-day band collapses them all into one
+  // (with a "+N" label), so clicking it needs the full list to open either the single off's details
+  // or a pick-list when there are several.
+  private allDayTimeOffs: TimeOffOccurrence[] = [];
+  // Backing the all-day pick-list dialog (a day can have more than one all-day time-off).
+  public allDayTimeOffList: TimeOffOccurrence[] = [];
 
   private subs: Subscription[] = [];
   private interval: any;
@@ -193,6 +201,7 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
 
     var partialOffs = this.timeOffs.filter(t => !t.isAllDay);
     var allDayOffs = this.timeOffs.filter(t => t.isAllDay);
+    this.allDayTimeOffs = allDayOffs;
 
     var finalTimeOffs = [...partialOffs]
     if (allDayOffs.length > 0) {
@@ -283,5 +292,33 @@ export class SingleDayAppointmentsComponent implements OnInit, OnDestroy {
   closeAppointmentDialog() {
     this.viewAppointmentId = undefined;
     this.appointmentDialog?.close();
+  }
+
+  // Stable identity for the time-off bands so Angular reuses their DOM across re-renders (e.g. when
+  // the scroller's adjacent-day prefetch re-emits inputs). Without it the *ngFor rebuilds every band,
+  // detaching nodes mid-interaction — which both flakes clicks in tests and can drop a real user's
+  // click during a background refresh. The all-day band is a single collapsed entry, hence one key.
+  public trackTimeOff(_index: number, t: RenderedInterval<TimeOffOccurrence>): string {
+    return (t.source.isAllDay ? "allDay" : "partial") + ":" + (t.source.id ?? "");
+  }
+
+  // Time-off band click: partial bands carry their own occurrence and open its details directly.
+  // The all-day band is a collapsed view of every all-day off for the day — a single one opens its
+  // details, several open a pick-list. Dialog refs are passed from the template, matching how the
+  // list view drives the same dialogs.
+  onTimeOffBandClick(occurrence: TimeOffOccurrence, detailsDialog: DialogComponent, listDialog: DialogComponent) {
+    if (!occurrence.isAllDay) {
+      this.viewTimeOffId = occurrence.id;
+      detailsDialog.open();
+      return;
+    }
+
+    if (this.allDayTimeOffs.length <= 1) {
+      this.viewTimeOffId = this.allDayTimeOffs[0]?.id ?? occurrence.id;
+      detailsDialog.open();
+    } else {
+      this.allDayTimeOffList = this.allDayTimeOffs;
+      listDialog.open();
+    }
   }
 }

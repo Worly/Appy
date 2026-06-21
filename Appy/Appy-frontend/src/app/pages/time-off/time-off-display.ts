@@ -11,11 +11,15 @@ const DAY_OF_WEEK_KEYS: Record<DayOfWeek, string> = {
   [DayOfWeek.Saturday]: "SATURDAY",
 };
 
-/** Humanized recurrence schedule, e.g. "02.01.2026 – 05.01.2026", "Every Monday", "Day of month 15". */
+/** Humanized recurrence schedule, e.g. "02.01.2026 – 05.01.2026", "02.01.2026" (single day), "Every Monday", "Day of month 15". */
 export function timeOffScheduleText(t: TimeOff, translate: (key: string) => string): string {
   switch (t.recurrence) {
-    case TimeOffRecurrence.OneOff:
-      return `${t.startDate?.format("DD.MM.YYYY") ?? ""} – ${t.endDate?.format("DD.MM.YYYY") ?? ""}`;
+    case TimeOffRecurrence.OneOff: {
+      const start = t.startDate?.format("DD.MM.YYYY") ?? "";
+      const end = t.endDate?.format("DD.MM.YYYY") ?? "";
+      // Collapse a single-day one-off (identical start/end) to one date instead of "from – to".
+      return start === end ? start : `${start} – ${end}`;
+    }
     case TimeOffRecurrence.Weekly:
       return t.dayOfWeek != null
         ? `${translate("pages.time-off.EVERY")} ${translate(DAY_OF_WEEK_KEYS[t.dayOfWeek])}`
@@ -25,6 +29,18 @@ export function timeOffScheduleText(t: TimeOff, translate: (key: string) => stri
     default:
       return "";
   }
+}
+
+/**
+ * Effective date span for a recurring rule, e.g. "22.06.2026 – 31.12.2026" (bounded) or
+ * "From 22.06.2026" (open-ended). Empty for one-offs, whose schedule text already is their date range.
+ */
+export function timeOffRecurringRangeText(t: TimeOff, translate: (key: string) => string): string {
+  if (t.recurrence === TimeOffRecurrence.OneOff || t.startDate == null) return "";
+  const start = t.startDate.format("DD.MM.YYYY");
+  return t.endDate != null
+    ? `${start} – ${t.endDate.format("DD.MM.YYYY")}`
+    : `${translate("pages.time-off.FROM_DATE")} ${start}`;
 }
 
 /** "All day" or a "HH:mm – HH:mm" range. */

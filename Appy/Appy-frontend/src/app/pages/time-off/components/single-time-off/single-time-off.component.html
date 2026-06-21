@@ -11,6 +11,10 @@
       <fa-icon icon="calendar-days" [fixedWidth]="true"></fa-icon>
       <div>{{ schedule }}</div>
     </div>
+    <div class="info-row" *ngIf="dateRange">
+      <fa-icon icon="calendar-week" [fixedWidth]="true"></fa-icon>
+      <div>{{ dateRange }}</div>
+    </div>
     <div class="info-row">
       <fa-icon icon="clock" [fixedWidth]="true"></fa-icon>
       <div>{{ time }}</div>

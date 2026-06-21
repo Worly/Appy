@@ -83,6 +83,10 @@
 .body-container {
     position: relative;
     width: 100%;
+
+    // Own stacking context below the sticky header (z-index: 1), so everything inside it — including
+    // appointments (z-index: 1) and time-off bands (z-index: 0) — scrolls *under* the header.
+    z-index: 0;
 }
 
 .time-background {
@@ -158,6 +162,10 @@
     position: absolute;
     width: 100%;
 
+    // Above the (now click-interactive) time-off band, so an appointment overlapping a time-off
+    // still wins both the paint order and the click hit-test.
+    z-index: 1;
+
     border-radius: var(--default-border-radius);
     border: 1px solid rgb(var(--rgb-anti-text));
     padding-left: 2px;
@@ -220,7 +228,7 @@
     border: 1.2px solid rgba(var(--rgb-warning), 0.2);
     border-radius: var(--default-border-radius);
     padding: 15px;
-    pointer-events: none;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -231,4 +239,37 @@
 .time-off-label {
     font-size: 1rem;
     opacity: .85;
+}
+
+.all-day-list {
+    background: rgb(var(--rgb-card-background));
+    border-radius: 14px;
+    padding: 16px;
+    width: min(92vw, 360px);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    .all-day-list-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+    }
+
+    .all-day-list-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: var(--default-border-radius);
+        background: rgba(var(--rgb-danger), 0.12);
+        color: rgb(var(--rgb-danger));
+        font-weight: 600;
+        cursor: pointer;
+
+        .all-day-list-label {
+            min-width: 0;
+            word-break: break-word;
+        }
+    }
 }
