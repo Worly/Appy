@@ -3,6 +3,7 @@ using Appy.Domain;
 using Appy.DTOs;
 using Appy.Exceptions;
 using Appy.Services;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Moq.EntityFrameworkCore;
 
@@ -25,7 +26,7 @@ namespace Appy.Tests.Services
             dbContextMock.Setup(x => x.LoginSessions).ReturnsDbSet(new List<LoginSession>());
             jwtServiceMock.Setup(x => x.GenerateToken(It.IsAny<TimeSpan>(), It.IsAny<Claim[]>())).Returns("token");
 
-            service = new UserService(dbContextMock.Object, jwtServiceMock.Object);
+            service = new UserService(dbContextMock.Object, jwtServiceMock.Object, new Mock<ILogger<UserService>>().Object);
         }
 
         private static RegisterDTO RegisterWith(string email) => new RegisterDTO
