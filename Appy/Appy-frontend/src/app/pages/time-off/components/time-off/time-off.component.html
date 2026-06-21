@@ -19,13 +19,12 @@
 
     <!-- Icon-only so the row never wraps on narrow screens (long labels, esp. in Croatian, forced a wrap);
          title/aria-label keep the action discoverable. -->
-    <app-button *ngIf="!isHolidays" icon="plus" color="success" look="outlined" borderStyle="dashed"
-      alignContent="center" (onClick)="addNew()" data-test="time-off-add"
-      [attr.title]="'pages.time-off.ADD' | translate" [attr.aria-label]="'pages.time-off.ADD' | translate"></app-button>
+    <app-button *ngIf="!isHolidays" icon="plus" color="success" look="solid" alignContent="center" (onClick)="addNew()"
+      data-test="time-off-add" [attr.title]="'pages.time-off.ADD' | translate"
+      [attr.aria-label]="'pages.time-off.ADD' | translate"></app-button>
 
-    <app-button *ngIf="isHolidays" icon="gear" color="success" look="outlined" borderStyle="dashed"
-      alignContent="center" (onClick)="configureAutoImport()" data-test="time-off-configure-import"
-      [attr.title]="'pages.time-off.CONFIGURE_AUTO_IMPORT' | translate"
+    <app-button *ngIf="isHolidays" icon="gear" alignContent="center" (onClick)="configureAutoImport()"
+      data-test="time-off-configure-import" [attr.title]="'pages.time-off.CONFIGURE_AUTO_IMPORT' | translate"
       [attr.aria-label]="'pages.time-off.CONFIGURE_AUTO_IMPORT' | translate"></app-button>
   </div>
 
