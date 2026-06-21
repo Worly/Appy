@@ -2,6 +2,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
+using Appy.Domain;
 using Appy.Services;
 
 namespace Appy.Auth
@@ -10,11 +11,13 @@ namespace Appy.Auth
     {
         private readonly RequestDelegate _next;
         private readonly IJwtService jwtService;
+        private readonly ILogger<JwtMiddleware> logger;
 
-        public JwtMiddleware(RequestDelegate next, IJwtService jwtService)
+        public JwtMiddleware(RequestDelegate next, IJwtService jwtService, ILogger<JwtMiddleware> logger)
         {
             _next = next;
             this.jwtService = jwtService;
+            this.logger = logger;
         }
 
         public async Task Invoke(HttpContext context, IUserService userService)
@@ -24,7 +27,17 @@ namespace Appy.Auth
             if (token != null)
                 await AttachUserToContext(context, userService, token);
 
-            await _next(context);
+            if (context.Items["User"] is User user)
+            {
+                using (logger.BeginScope(new Dictionary<string, object> { ["UserId"] = user.Id }))
+                {
+                    await _next(context);
+                }
+            }
+            else
+            {
+                await _next(context);
+            }
         }
 
         private async Task AttachUserToContext(HttpContext context, IUserService userService, string token)

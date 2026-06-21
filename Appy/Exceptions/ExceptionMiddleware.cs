@@ -1,15 +1,9 @@
-﻿using Appy.DTOs;
-using Microsoft.AspNetCore.Http.Json;
-using Microsoft.Extensions.Options;
-using System.Net;
-using System.Text.Json;
-
-namespace Appy.Exceptions
+﻿namespace Appy.Exceptions
 {
     public class ExceptionMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly ILogger _logger;
+        private readonly ILogger<ExceptionMiddleware> _logger;
 
         public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
         {
@@ -25,16 +19,27 @@ namespace Appy.Exceptions
             }
             catch (HttpException ex)
             {
-                _logger.LogError($"Something went wrong: {ex}");
-                await HandleExceptionAsync(httpContext, ex);
-            }
-        }
+                var statusCode = (int)ex.StatusCode;
+                if (statusCode >= 500)
+                    _logger.LogError(ex, "Request failed: {Method} {Path} -> {StatusCode}",
+                        httpContext.Request.Method, httpContext.Request.Path.Value, statusCode);
+                else
+                    _logger.LogInformation("Request rejected: {Method} {Path} -> {StatusCode} ({Message})",
+                        httpContext.Request.Method, httpContext.Request.Path.Value, statusCode, ex.Message);
 
-        private async Task HandleExceptionAsync(HttpContext context, HttpException exception)
-        {
-            context.Response.ContentType = "application/json";
-            context.Response.StatusCode = (int)exception.StatusCode;
-            await context.Response.WriteAsync(exception.Message);
+                httpContext.Response.ContentType = "application/json";
+                httpContext.Response.StatusCode = statusCode;
+                await httpContext.Response.WriteAsync(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unhandled exception: {Method} {Path}",
+                    httpContext.Request.Method, httpContext.Request.Path.Value);
+
+                httpContext.Response.ContentType = "application/json";
+                httpContext.Response.StatusCode = 500;
+                await httpContext.Response.WriteAsync("An unexpected error occurred");
+            }
         }
     }
 }

@@ -59,6 +59,7 @@ npx cypress run      # Headless E2E
 | JWT Authentication | `Appy/Auth/CLAUDE.md` |
 | Exception System | `Appy/Exceptions/CLAUDE.md` |
 | Backend Utilities | `Appy/Utils/CLAUDE.md` |
+| Request Middleware | `Appy/Middleware/CLAUDE.md` |
 | Frontend Domain Models | `Appy/Appy-frontend/src/app/models/CLAUDE.md` |
 | Global App Services | `Appy/Appy-frontend/src/app/services/CLAUDE.md` |
 | Shared (Services, Pipes, Directives) | `Appy/Appy-frontend/src/app/shared/CLAUDE.md` |

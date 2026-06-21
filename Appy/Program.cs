@@ -8,6 +8,21 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.ClearProviders();
+if (builder.Environment.IsDevelopment())
+{
+    builder.Logging.AddSimpleConsole(o =>
+    {
+        o.IncludeScopes = true;
+        o.SingleLine = true;
+    });
+    builder.Logging.AddDebug();
+}
+else
+{
+    builder.Logging.AddJsonConsole(o => o.IncludeScopes = true);
+}
+
 var jwtSecret = builder.Configuration["JwtSecret"];
 if (string.IsNullOrEmpty(jwtSecret))
     throw new InvalidOperationException(
@@ -17,7 +32,18 @@ var spaPath = "Appy-frontend/build";
 
 // Add services to the container.
 builder.Services.AddDbContext<MainDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("Main")));
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("Main"));
+
+    if (builder.Environment.IsDevelopment())
+    {
+        // Dev-only EF diagnostics. EnableSensitiveDataLogging includes SQL parameter values
+        // in logs, so it must never run in production. These take effect when the
+        // Microsoft.EntityFrameworkCore log level is raised to Information in appsettings.Development.json.
+        options.EnableSensitiveDataLogging();
+        options.EnableDetailedErrors();
+    }
+});
 builder.Services.AddSingleton<IJwtService, JwtService>();
 
 builder.Services.AddHttpClient<InstagramMessagingService>(client =>
@@ -60,7 +86,7 @@ builder.Services.AddScheduler(config =>
         var logger = sp.GetRequiredService<ILoggerFactory>().CreateLogger("CronJobs");
         return (sender, args) =>
         {
-            logger?.LogError(args.Exception?.Message);
+            logger?.LogError(args.Exception, "Unobserved task exception in scheduled job");
             args.SetObserved();
         };
     });
@@ -92,6 +118,7 @@ if (app.Environment.IsDevelopment())
         .WithOrigins("http://localhost:4200"));
 }
 
+app.UseMiddleware<Appy.Middleware.RequestLoggingMiddleware>();
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseMiddleware<Appy.Auth.JwtMiddleware>();
 app.UseMiddleware<FacilityMiddleware>();
