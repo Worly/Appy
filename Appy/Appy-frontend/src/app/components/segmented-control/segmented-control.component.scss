@@ -14,8 +14,6 @@
     flex: 1 1 0; // default: segments share the full width equally
     min-width: 0;
     font-weight: 600;
-    // Nest the segment's corners inside the container's radius (app-button reads this token).
-    --default-border-radius: 9px;
   }
 
   // Compact: a fit-content pill with content-sized segments (e.g. a scope toggle).
@@ -26,7 +24,21 @@
 
     .segment {
       flex: 0 0 auto;
-      --default-border-radius: 8px;
     }
   }
+}
+
+// Round each segment's corners to nest concentrically inside the container:
+// inner radius = container radius − padding, so the segment curve runs parallel to the pill.
+// app-button draws its corner on the inner `.my-button` element, which reads
+// `--default-border-radius`. We must set that token ON `.my-button` itself (piercing with
+// ::ng-deep) — setting it on the host does nothing, because the global
+// `* { --default-border-radius: 4px }` in my-styles.scss re-declares it on every element and
+// defeats inheritance.
+:host ::ng-deep .segmented .segment .my-button {
+  --default-border-radius: 8px; // 12px container − 4px padding
+}
+
+:host ::ng-deep .segmented.compact .segment .my-button {
+  --default-border-radius: 7px; // 10px container − 3px padding
 }
