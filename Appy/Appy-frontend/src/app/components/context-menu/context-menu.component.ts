@@ -46,6 +46,11 @@ export class ContextMenuComponent implements OnInit, OnDestroy {
   // jank when the on-screen keyboard shrinks the viewport (issue #26).
   @Input() fullscreenOnMobile: boolean = false;
 
+  // Shown in the full-screen modal's header bar (next to the close button).
+  // Only rendered in full-screen mode; ignored by the regular dropdown.
+  // Accepts null so the `| translate` pipe output binds directly.
+  @Input() title?: string | null;
+
   // Matches the app's mobile breakpoint (see action-bar.component.ts / app.component.scss).
   private static readonly MOBILE_MAX_WIDTH = 992;
 
