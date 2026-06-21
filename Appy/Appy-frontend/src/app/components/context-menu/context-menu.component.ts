@@ -85,10 +85,16 @@ export class ContextMenuComponent implements OnInit, OnDestroy {
     this.overlayRef = this.isFullscreen
       ? this.overlay.create({
         // Centered modal: no trigger-relative positioning, so the on-screen
-        // keyboard has nothing to reposition. Backdrop dims the page and
-        // blocking the background scroll completes the modal feel.
+        // keyboard has nothing to reposition. The backdrop dims the page and
+        // `.context-menu-container`'s `overscroll-behavior: contain` keeps the
+        // background visually inert.
+        //
+        // NOT `block()`: it pins <html> to `position: fixed; top: -scrollY`,
+        // which forces `window.scrollY` to 0. The appointments list paginates
+        // off window scroll (see appointments-list checkShouldLoad) and would
+        // read scroll-at-top, loading backwards and jumping dates (#26 regression).
         positionStrategy: this.overlay.position().global().centerHorizontally().centerVertically(),
-        scrollStrategy: this.overlay.scrollStrategies.block(),
+        scrollStrategy: this.overlay.scrollStrategies.noop(),
         hasBackdrop: true,
       })
       : this.overlay.create({
