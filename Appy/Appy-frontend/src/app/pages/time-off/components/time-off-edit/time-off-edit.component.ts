@@ -8,6 +8,7 @@ import { DayOfWeek } from 'src/app/models/working-hours';
 import { TimeOff, TimeOffRecurrence } from 'src/app/models/time-off';
 import { TimeOffService } from '../../services/time-off.service';
 import { DialogComponent } from 'src/app/components/dialog/dialog.component';
+import { SegmentedOption } from 'src/app/components/segmented-control/segmented-control.component';
 
 @Component({
   selector: 'app-time-off-edit',
@@ -49,6 +50,16 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
   public readonly daysOfMonth: number[] = Array.from({ length: 31 }, (_, i) => i + 1);
   public readonly hours: number[] = Array.from({ length: 25 }, (_, i) => i);
   public readonly minutes: number[] = [0, 15, 30, 45];
+
+  public readonly recurrenceOptions: SegmentedOption[] = [
+    { value: TimeOffRecurrence.Weekly, label: "pages.time-off.WEEKLY", dataTest: "time-off-recurrence-weekly" },
+    { value: TimeOffRecurrence.Monthly, label: "pages.time-off.MONTHLY", dataTest: "time-off-recurrence-monthly" },
+  ];
+
+  public readonly splitModeOptions: SegmentedOption[] = [
+    { value: "date", label: "pages.time-off.APPLY_FROM_SPECIFIC", dataTest: "time-off-split-from-date" },
+    { value: "all", label: "pages.time-off.APPLY_FROM_ALL", dataTest: "time-off-split-all" },
+  ];
 
   private static readonly DAY_OF_WEEK_KEYS: Record<DayOfWeek, string> = {
     [DayOfWeek.Sunday]: "SUNDAY",

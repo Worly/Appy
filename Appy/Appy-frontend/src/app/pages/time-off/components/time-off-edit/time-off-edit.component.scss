@@ -105,35 +105,7 @@ textarea.field-input {
   gap: 15px;
 }
 
-// Weekly | Monthly pill toggle.
-.segmented {
-  display: flex;
-  gap: 4px;
-  padding: 4px;
-  border-radius: 12px;
-  background: rgb(var(--rgb-input-background));
-  border: 1px solid rgb(var(--rgb-input-border));
-
-  .segment {
-    flex: 1 1 0;
-    padding: 9px 12px;
-    border: none;
-    border-radius: 9px;
-    background: transparent;
-    color: inherit;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease;
-
-    &.active {
-      background: rgb(var(--rgb-primary));
-      // text-on-primary, not anti-text: black anti-text is unreadable on the
-      // dark-navy primary in dark theme (same fix as the list tabs).
-      color: rgb(var(--rgb-text-on-primary));
-    }
-  }
-}
+// Weekly | Monthly and the apply-from toggle are now app-segmented-control (default full-width size).
 
 .toggle-row {
   display: flex;

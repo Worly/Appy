@@ -10,35 +10,10 @@
 
 // Title uses the global .w-title (matching the home screen) — no per-page hero.
 
-// Type tabs: a full-width pill segmented control (same language as the editor's segment).
+// The tabs + scope toggle are now app-segmented-control; just space the tabs above the controls row.
 .tabs {
-  display: flex;
-  gap: 4px;
+  display: block;
   margin-bottom: 12px;
-  padding: 4px;
-  border-radius: 12px;
-  background: rgb(var(--rgb-input-background));
-  border: 1px solid rgb(var(--rgb-input-border));
-}
-
-.tab {
-  flex: 1 1 0;
-  padding: 9px 8px;
-  border: none;
-  border-radius: 9px;
-  background: transparent;
-  color: inherit;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
-
-  &.active {
-    background: rgb(var(--rgb-primary));
-    // text-on-primary, not anti-text: on dark theme primary is a dark navy, so
-    // black anti-text would be near-invisible. text-on-primary stays light there.
-    color: rgb(var(--rgb-text-on-primary));
-  }
 }
 
 // Controls row: scope toggle on the left, the primary action (add / configure import) on the right.
@@ -50,34 +25,6 @@
   flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 16px;
-}
-
-// Upcoming | Past scope switch: a smaller pill toggle.
-.scope-switch {
-  display: flex;
-  gap: 4px;
-  width: fit-content;
-  padding: 3px;
-  border-radius: 10px;
-  background: rgb(var(--rgb-input-background));
-  border: 1px solid rgb(var(--rgb-input-border));
-}
-
-.scope {
-  padding: 6px 18px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: inherit;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
-
-  &.active {
-    background: rgb(var(--rgb-primary));
-    color: rgb(var(--rgb-text-on-primary));
-  }
 }
 
 .holidays-stub {

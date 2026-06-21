@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { Subscription } from "rxjs";
 import { setUrlParams } from "src/app/utils/dynamic-url-params";
 import { TimeOffListType, TimeOffScope } from "src/app/models/time-off";
+import { SegmentedOption } from "src/app/components/segmented-control/segmented-control.component";
 
 type TimeOffTab = "OneOff" | "Recurring" | "Holidays";
 
@@ -17,10 +18,15 @@ export class TimeOffComponent implements OnInit, OnDestroy {
   public scope: TimeOffScope = "Active";
   public viewingId?: number;
 
-  public readonly tabs: { tab: TimeOffTab; labelKey: string }[] = [
-    { tab: "OneOff", labelKey: "pages.time-off.ONE_OFF" },
-    { tab: "Recurring", labelKey: "pages.time-off.RECURRING" },
-    { tab: "Holidays", labelKey: "pages.time-off.HOLIDAYS" },
+  public readonly tabOptions: SegmentedOption[] = [
+    { value: "OneOff", label: "pages.time-off.ONE_OFF", dataTest: "time-off-tab-oneoff" },
+    { value: "Recurring", label: "pages.time-off.RECURRING", dataTest: "time-off-tab-recurring" },
+    { value: "Holidays", label: "pages.time-off.HOLIDAYS", dataTest: "time-off-tab-holidays" },
+  ];
+
+  public readonly scopeOptions: SegmentedOption[] = [
+    { value: "Active", label: "pages.time-off.UPCOMING", dataTest: "time-off-scope-upcoming" },
+    { value: "Expired", label: "pages.time-off.PAST", dataTest: "time-off-scope-past" },
   ];
 
   private subs: Subscription[] = [];

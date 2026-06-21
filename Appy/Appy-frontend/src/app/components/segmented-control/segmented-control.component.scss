@@ -1,0 +1,32 @@
+:host {
+  display: block;
+}
+
+.segmented {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: rgb(var(--rgb-input-background));
+  border: 1px solid rgb(var(--rgb-input-border));
+
+  .segment {
+    flex: 1 1 0; // default: segments share the full width equally
+    min-width: 0;
+    font-weight: 600;
+    // Nest the segment's corners inside the container's radius (app-button reads this token).
+    --default-border-radius: 9px;
+  }
+
+  // Compact: a fit-content pill with content-sized segments (e.g. a scope toggle).
+  &.compact {
+    width: fit-content;
+    padding: 3px;
+    border-radius: 10px;
+
+    .segment {
+      flex: 0 0 auto;
+      --default-border-radius: 8px;
+    }
+  }
+}

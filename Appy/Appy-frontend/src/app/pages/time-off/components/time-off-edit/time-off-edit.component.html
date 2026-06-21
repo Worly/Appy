@@ -47,16 +47,8 @@
 
     <!-- Recurring: Weekly | Monthly segmented control + matching day picker + optional bounds -->
     <ng-container *ngIf="type === 'recurring'">
-      <div class="segmented" data-test="time-off-recurrence-segment">
-        <button type="button" class="segment" [class.active]="timeOff.recurrence === TimeOffRecurrence.Weekly"
-          (click)="setRecurrence(TimeOffRecurrence.Weekly)" data-test="time-off-recurrence-weekly">
-          {{ "pages.time-off.WEEKLY" | translate }}
-        </button>
-        <button type="button" class="segment" [class.active]="timeOff.recurrence === TimeOffRecurrence.Monthly"
-          (click)="setRecurrence(TimeOffRecurrence.Monthly)" data-test="time-off-recurrence-monthly">
-          {{ "pages.time-off.MONTHLY" | translate }}
-        </button>
-      </div>
+      <app-segmented-control dataTest="time-off-recurrence-segment" [options]="recurrenceOptions"
+        [value]="timeOff.recurrence" (valueChange)="setRecurrence($event)"></app-segmented-control>
 
       <div class="field" *ngIf="timeOff.recurrence === TimeOffRecurrence.Weekly" data-test="time-off-day-of-week">
         <label class="field-label">{{ "pages.time-off.DAY_OF_WEEK" | translate }}</label>
@@ -146,16 +138,8 @@
   <div class="split-dialog" *ngIf="splitDialog.isOpen" data-test="time-off-split-dialog">
     <div class="split-title">{{ "pages.time-off.APPLY_FROM_TITLE" | translate }}</div>
 
-    <div class="segmented">
-      <button type="button" class="segment" [class.active]="splitMode === 'date'"
-        (click)="splitMode = 'date'" data-test="time-off-split-from-date">
-        {{ "pages.time-off.APPLY_FROM_SPECIFIC" | translate }}
-      </button>
-      <button type="button" class="segment" [class.active]="splitMode === 'all'"
-        (click)="splitMode = 'all'" data-test="time-off-split-all">
-        {{ "pages.time-off.APPLY_FROM_ALL" | translate }}
-      </button>
-    </div>
+    <app-segmented-control [options]="splitModeOptions" [value]="splitMode"
+      (valueChange)="splitMode = $event"></app-segmented-control>
 
     <div class="field" *ngIf="splitMode === 'date'">
       <app-date-selector [date]="splitDate" (dateChange)="onSplitDateChange($event)"></app-date-selector>

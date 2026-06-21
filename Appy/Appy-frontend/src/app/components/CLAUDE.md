@@ -6,7 +6,8 @@ Presentational building blocks shared across feature pages. No domain logic, no 
 
 | Component | Purpose |
 |-----------|---------|
-| `ButtonComponent` | Unified button with `color` (success/danger/warning/normal/disabled), `look` (solid/outlined/normal), loading spinner state, optional icon |
+| `ButtonComponent` | Unified button with `color` (success/danger/warning/normal/primary/inherit), `look` (solid/outlined/normal/transparent/custom), loading spinner state, optional icon |
+| `SegmentedControlComponent` | Single-select button group / radio-style pill toggle. `[(value)]` + `options` (`{value, label, dataTest?}`); `size` `default` (full-width) or `compact`. Each segment is an `app-button` (transparent when inactive, solid-`primary` when active). Used for the time-off tabs, scope switch, and editor segments |
 | `DialogComponent` | Modal overlay wrapper with open/close API |
 | `ContextMenuComponent` | Dropdown menu positioned relative to a trigger element; used for navigation sub-menus |
 | `ActionBarComponent` | Flex container for page-level action buttons (add, filter, etc.) with a built-in flex splitter |
