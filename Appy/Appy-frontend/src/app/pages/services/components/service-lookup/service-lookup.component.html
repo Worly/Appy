@@ -6,7 +6,8 @@
 <app-button *ngIf="showClearButton && value != null" class="clear-button" look="transparent" icon="times"
     [isCircle]="true" (onClick)="clear()"></app-button>
 
-<app-context-menu #contextMenu [relativeTo]="buttonRef.elementRef" [copyOriginWidth]="true">
+<app-context-menu #contextMenu [relativeTo]="buttonRef.elementRef" [copyOriginWidth]="true" [fullscreenOnMobile]="true"
+    [title]="'pages.services.CHOOSE_SERVICE' | translate">
     <input #searchInput class="w-input search-input" type="text" placeholder="{{'SEARCH' | translate}}"
         [(ngModel)]="search">
 

@@ -1,5 +1,13 @@
 <ng-template #template>
-    <div #container class="context-menu-container">
+    <div #container class="context-menu-container" [class.fullscreen]="isFullscreen">
+        <!-- Header bar: only visible in full-screen mode (CSS-gated on .fullscreen,
+             so no CommonModule/*ngIf needed). Title is optional; the close button
+             stays right-aligned and gives a way out without picking a value. -->
+        <div class="fullscreen-header">
+            <span class="fullscreen-title">{{ title }}</span>
+            <app-button data-test="context-menu-close" aria-label="Close" icon="times"
+                look="transparent" [isCircle]="true" (onClick)="close()"></app-button>
+        </div>
         <ng-content></ng-content>
     </div>
 </ng-template>
