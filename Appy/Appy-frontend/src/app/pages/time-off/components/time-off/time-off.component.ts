@@ -26,7 +26,7 @@ export class TimeOffComponent implements OnInit, OnDestroy {
 
   public readonly scopeOptions: SegmentedOption[] = [
     { value: "Active", label: "pages.time-off.UPCOMING", icon: "arrow-right", dataTest: "time-off-scope-upcoming" },
-    { value: "Expired", label: "pages.time-off.PAST", icon: "arrow-left", dataTest: "time-off-scope-past" },
+    { value: "Expired", label: "pages.time-off.HISTORY", icon: "clock-rotate-left", dataTest: "time-off-scope-history" },
   ];
 
   private subs: Subscription[] = [];

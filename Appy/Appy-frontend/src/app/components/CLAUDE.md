@@ -17,9 +17,9 @@ Presentational building blocks shared across feature pages. No domain logic, no 
 | `LoadingComponent` | Spinner indicator |
 | `SearchComponent` | Text input with debounced output for list filtering |
 | `ToggleSwitchComponent` | Boolean toggle input |
-| `DropdownComponent` | Generic labeled option selector |
+| `DropdownComponent` | Generic labeled option selector. `matchTriggerWidth` makes the options panel at least as wide as the trigger (forwards to the context menu's `copyOriginWidth`) |
 | `DurationPickerComponent` | Hour + minute duration input |
-| `DateSelectorComponent` | Date navigation with previous/next/today buttons |
+| `DateSelectorComponent` | Date navigation with previous/next/today buttons. `showDayOfWeek` prefixes the displayed date with its localized weekday (e.g. "Monday, 21.06.2026") |
 | `CalendarDialogComponent` | Full calendar date picker (Angular Material datepicker inside a dialog) with a custom today-header component |
 | `LanguagePickerComponent` | Language selector |
 | `ColorSchemePickerComponent` | Light/dark/system theme selector |

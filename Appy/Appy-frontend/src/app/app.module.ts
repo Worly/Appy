@@ -53,6 +53,7 @@ import { faCalendarWeek } from '@fortawesome/free-solid-svg-icons/faCalendarWeek
 import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons/faRightFromBracket';
 import { faCalendarDays } from "@fortawesome/free-solid-svg-icons/faCalendarDays";
 import { faClock } from "@fortawesome/free-solid-svg-icons/faClock";
+import { faClockRotateLeft } from "@fortawesome/free-solid-svg-icons/faClockRotateLeft";
 import { faTableList } from "@fortawesome/free-solid-svg-icons/faTableList";
 import { faFilter } from "@fortawesome/free-solid-svg-icons/faFilter";
 import { faFileLines } from "@fortawesome/free-regular-svg-icons/faFileLines";
@@ -170,7 +171,7 @@ export class AppModule {
       faUmbrellaBeach,
       faCircleCheck, farCircleCheck, faQuestion, faCheck, faTriangleExclamation,
       faHouse, faHandHoldingHeart, faUsers, faCalendarWeek, faRightFromBracket, faUserSlash,
-      faCalendarDays, faClock, faTableList, faFilter, faFileLines,
+      faCalendarDays, faClock, faTableList, faFilter, faFileLines, faClockRotateLeft,
       faWhatsapp, faInstagram,
       faMoon, faSun, faCircleHalfStroke, faStar, faBell, faEnvelope,
       faCalendarDay, faArrowsRotate, faArrowRight, faCircleInfo

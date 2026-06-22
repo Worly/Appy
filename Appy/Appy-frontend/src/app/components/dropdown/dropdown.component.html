@@ -5,7 +5,7 @@
         alignContent="center" (onClick)="contextMenu.toggle()">
     </app-button>
 
-    <app-context-menu #contextMenu [relativeTo]="mainButton.elementRef">
+    <app-context-menu #contextMenu [relativeTo]="mainButton.elementRef" [copyOriginWidth]="matchTriggerWidth">
         <app-button *ngFor="let item of items" [text]="display(item)" [ngClass]="{'selected': value == item}"
             (onClick)="select(item); $event.stopImmediatePropagation()">
         </app-button>

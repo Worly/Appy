@@ -29,6 +29,9 @@ export class DropdownComponent implements OnInit {
 
   @Input() hasIcon: boolean = true;
   @Input() selectString: string = "SELECT";
+  // When true, the options panel is at least as wide as the trigger (useful for full-width dropdowns
+  // so the popup lines up with the input instead of hanging off one edge).
+  @Input() matchTriggerWidth: boolean = false;
 
   constructor() { }
 

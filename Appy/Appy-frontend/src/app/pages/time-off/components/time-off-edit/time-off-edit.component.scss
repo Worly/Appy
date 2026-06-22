@@ -103,6 +103,12 @@ textarea.field-input {
   display: flex;
   flex-wrap: wrap;
   gap: 15px;
+
+  // From / To share the row evenly instead of hugging the left.
+  > .field {
+    flex: 1 1 0;
+    min-width: 0;
+  }
 }
 
 // Weekly | Monthly and the apply-from toggle are now app-segmented-control (default full-width size).
@@ -119,7 +125,8 @@ textarea.field-input {
   }
 }
 
-// Hour : minute grouped tightly so it reads like a clock face.
+// Hour : minute grouped tightly so it reads like a clock face. The two dropdowns share the
+// row equally so the pair fills its field instead of sitting as two small boxes on the left.
 .time-row {
   display: flex;
   align-items: center;
@@ -128,6 +135,25 @@ textarea.field-input {
   .colon {
     font-weight: 700;
     opacity: 0.5;
+  }
+}
+
+:host ::ng-deep .time-row app-dropdown {
+  flex: 1 1 0;
+  min-width: 0;
+  display: block;
+
+  .my-container {
+    display: block;
+  }
+
+  app-button {
+    display: block;
+  }
+
+  .button-content {
+    width: 100%;
+    justify-content: center;
   }
 }
 
@@ -206,4 +232,19 @@ app-date-selector {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+}
+
+// The split dialog renders in a CDK overlay (outside :host), so the form's :host-scoped
+// full-width date-selector rule can't reach it. Repeat the width treatment scoped to the
+// dialog element, which keeps its content attribute and matches inside the overlay.
+.split-dialog ::ng-deep app-date-selector {
+  display: block;
+
+  .my-container {
+    width: 100%;
+  }
+
+  .date-button {
+    flex: 1 1 auto;
+  }
 }

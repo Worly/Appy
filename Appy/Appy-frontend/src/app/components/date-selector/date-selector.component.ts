@@ -24,11 +24,26 @@ export class DateSelectorComponent implements OnInit {
 
   @Input() compact: boolean = false;
 
+  // When true, the displayed date is prefixed with its (localized) weekday, e.g. "Monday, 21.06.2026".
+  @Input() showDayOfWeek: boolean = false;
+
   @Output() dateChange: EventEmitter<Dayjs> = new EventEmitter();
 
   constructor() { }
 
   ngOnInit(): void {
+  }
+
+  // Text shown on the date button. dayjs renders the weekday in the active locale (lowercase in
+  // Croatian); we capitalize the first letter so it matches the app's weekday labels elsewhere.
+  get displayText(): string {
+    const dateFormat = this.compact ? "DD.MM.YY" : "DD.MM.YYYY";
+    if (!this.showDayOfWeek)
+      return this._date.format(dateFormat);
+
+    const weekday = this._date.format("dddd");
+    const capitalized = weekday.charAt(0).toUpperCase() + weekday.slice(1);
+    return `${capitalized}, ${this._date.format(dateFormat)}`;
   }
 
 }
