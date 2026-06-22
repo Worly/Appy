@@ -256,6 +256,75 @@ namespace Appy.Tests.Services
                 service.Edit(10, dto, FacilityId, applyFrom: new DateOnly(2030, 6, 20)));
         }
 
+        // ---- StopRecurring ----
+
+        [Fact]
+        public async Task StopRecurring_OpenEnded_ClampsEndDateToYesterday()
+        {
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            var rule = Seed(new TimeOff
+            {
+                Id = 20,
+                Recurrence = TimeOffRecurrence.Weekly,
+                DayOfWeek = DayOfWeek.Monday,
+                StartDate = today.AddDays(-30),
+                EndDate = null,
+                Label = "Closed Mondays",
+                IsAllDay = true,
+            });
+
+            var result = await service.StopRecurring(20, FacilityId);
+
+            Assert.Same(rule, result);
+            Assert.Equal(today.AddDays(-1), result.EndDate);
+            dbContextMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task StopRecurring_AlreadyEndedBeforeYesterday_IsNoOp()
+        {
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            var endedEnd = today.AddDays(-10);
+            var rule = Seed(new TimeOff
+            {
+                Id = 21,
+                Recurrence = TimeOffRecurrence.Weekly,
+                DayOfWeek = DayOfWeek.Monday,
+                StartDate = today.AddDays(-40),
+                EndDate = endedEnd,
+                Label = "Old",
+                IsAllDay = true,
+            });
+
+            var result = await service.StopRecurring(21, FacilityId);
+
+            // Stopping never extends an already-expired rule's end forward to yesterday.
+            Assert.Equal(endedEnd, result.EndDate);
+            dbContextMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task StopRecurring_OneOff_ThrowsValidation()
+        {
+            Seed(new TimeOff
+            {
+                Id = 22,
+                Recurrence = TimeOffRecurrence.OneOff,
+                StartDate = new DateOnly(2030, 6, 1),
+                EndDate = new DateOnly(2030, 6, 5),
+                Label = "Vacation",
+                IsAllDay = true,
+            });
+
+            await Assert.ThrowsAsync<ValidationException>(() => service.StopRecurring(22, FacilityId));
+        }
+
+        [Fact]
+        public async Task StopRecurring_Missing_Throws404()
+        {
+            await Assert.ThrowsAsync<NotFoundException>(() => service.StopRecurring(999, FacilityId));
+        }
+
         [Fact]
         public void AppliesOn_OneOff_WithinRange()
         {

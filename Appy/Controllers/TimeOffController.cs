@@ -58,6 +58,14 @@ namespace Appy.Controllers
             return Ok();
         }
 
+        [HttpPut("stop/{id}")]
+        [Authorize]
+        public async Task<ActionResult<TimeOffDTO>> StopRecurring(int id)
+        {
+            var result = await this.timeOffService.StopRecurring(id, HttpContext.SelectedFacility());
+            return Ok(result.GetDTO());
+        }
+
         [HttpGet("getForDate")]
         [Authorize]
         public async Task<ActionResult<List<TimeOffOccurrenceDTO>>> GetForDate([FromQuery] DateOnly date)

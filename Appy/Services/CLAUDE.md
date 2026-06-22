@@ -16,7 +16,7 @@ Business logic layer. Each service corresponds to one domain concept and is cons
 | `DashboardService` | Dashboard settings upsert (unique per user + facility) |
 | `ClientNotificationsService` | Notification settings and outbound message dispatch |
 | `AppointmentReminderService` | Cron job (every 5 minutes) — sends reminders for the next day's confirmed appointments |
-| `TimeOffService` | Time-off CRUD, validation, and occurrence expansion (recurrence → concrete date intervals) + paginated GetList(type, scope) and pure BuildListPage / NextOccurrenceOnOrAfter (next-occurrence sort key for Recurring/Active); AddNew stamps today as StartDate for open-ended recurring rules; Edit(id, dto, facilityId, applyFrom?) forks a recurring rule's timeline at applyFrom (original clamped to applyFrom-1, new segment inserted from applyFrom onward) |
+| `TimeOffService` | Time-off CRUD, validation, and occurrence expansion (recurrence → concrete date intervals) + paginated GetList(type, scope) and pure BuildListPage / NextOccurrenceOnOrAfter (next-occurrence sort key for Recurring/Active); AddNew stamps today as StartDate for open-ended recurring rules; Edit(id, dto, facilityId, applyFrom?) forks a recurring rule's timeline at applyFrom (original clamped to applyFrom-1, new segment inserted from applyFrom onward); StopRecurring(id, facilityId) clamps a recurring rule's EndDate to yesterday (keep-history "stop"), rejecting one-offs and never extending an already-expired rule |
 | `TestingService` | Dev-only data seeder, reachable via `TestingController` |
 
 ## Sub-Folders

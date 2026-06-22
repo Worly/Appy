@@ -44,3 +44,4 @@ Controllers throw `HttpException` subclasses (from `Exceptions/`) for validation
 
 - `GET /timeoff/getList?type=&scope=&skip=&take=` — returns a paginated page of `TimeOffDTO` rules for one tab (`type` = `OneOff`|`Recurring`) and scope (`scope` = `Active`|`Expired`); ordered server-side, forward-paginated
 - `PUT /timeoff/edit/{id}?applyFrom=YYYY-MM-DD` — for recurring rules, `applyFrom` forks the rule: the original row becomes history (ends the day before) and a new row carries the edit from that date onward. Absent (or for one-offs / a date on-or-before the rule's start) → plain in-place edit.
+- `PUT /timeoff/stop/{id}` — clamps a recurring rule's `EndDate` to yesterday (stop-going-forward, keeps past occurrences). Rejects one-offs; no-op if the rule already ended earlier.

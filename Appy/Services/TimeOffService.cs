@@ -12,6 +12,7 @@ namespace Appy.Services
         Task<TimeOff> AddNew(TimeOffDTO dto, int facilityId);
         Task<TimeOff> Edit(int id, TimeOffDTO dto, int facilityId, DateOnly? applyFrom = null);
         Task Delete(int id, int facilityId);
+        Task<TimeOff> StopRecurring(int id, int facilityId);
 
         bool AppliesOn(TimeOff timeOff, DateOnly date);
         Task<List<TimeOffOccurrenceDTO>> GetOccurrencesForDate(DateOnly date, int facilityId);
@@ -105,6 +106,27 @@ namespace Appy.Services
                 throw new NotFoundException();
             context.TimeOffs.Remove(t);
             await context.SaveChangesAsync();
+        }
+
+        // "Stop" a recurring rule going forward: clamp its end to yesterday so past occurrences
+        // remain as history but it no longer applies from today on. Mirrors the EndDate clamp the
+        // edit-fork applies to the historical segment. No-op (and no save) if the rule already ends
+        // on or before yesterday, so stopping never extends an expired rule's end forward.
+        public async Task<TimeOff> StopRecurring(int id, int facilityId)
+        {
+            var t = await context.TimeOffs.FirstOrDefaultAsync(t => t.Id == id && t.FacilityId == facilityId);
+            if (t == null)
+                throw new NotFoundException();
+            if (t.Recurrence == TimeOffRecurrence.OneOff)
+                throw new ValidationException(nameof(TimeOffDTO.Recurrence), "pages.time-off.errors.CANNOT_STOP_ONE_OFF");
+
+            var yesterday = DateOnly.FromDateTime(DateTime.Today).AddDays(-1);
+            if (t.EndDate == null || t.EndDate.Value > yesterday)
+            {
+                t.EndDate = yesterday;
+                await context.SaveChangesAsync();
+            }
+            return t;
         }
 
         private void Validate(TimeOffDTO dto)
