@@ -1,3 +1,4 @@
+import { Dayjs } from "dayjs";
 import { TimeOff, TimeOffRecurrence } from "src/app/models/time-off";
 import { DayOfWeek } from "src/app/models/working-hours";
 
@@ -64,4 +65,18 @@ export function timeOffTimeText(t: TimeOff, translate: (key: string) => string):
   return t.isAllDay
     ? translate("pages.time-off.ALL_DAY")
     : `${t.timeFrom?.format("HH:mm") ?? ""} – ${t.timeTo?.format("HH:mm") ?? ""}`;
+}
+
+/**
+ * Whether a recurring rule can be "stopped" (clamped to yesterday, keeping past occurrences) rather
+ * than hard-deleted. Only meaningful for a recurring rule that has already started and is still
+ * active — for one-offs, future/today-starting, or already-expired rules, stopping at yesterday
+ * yields zero occurrences (i.e. equivalent to a delete), so the editor just deletes those outright.
+ */
+export function canStopRecurring(t: TimeOff, today: Dayjs): boolean {
+  if (t.recurrence === TimeOffRecurrence.OneOff) return false;
+  if (t.startDate == null) return false;
+  if (!t.startDate.isBefore(today, "date")) return false;        // must have already started
+  if (t.endDate != null && t.endDate.isBefore(today, "date")) return false; // must still be active
+  return true;
 }
