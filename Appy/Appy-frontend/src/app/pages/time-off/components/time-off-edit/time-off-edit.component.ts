@@ -7,6 +7,7 @@ import { Subscription } from 'rxjs';
 import { DayOfWeek } from 'src/app/models/working-hours';
 import { TimeOff, TimeOffRecurrence } from 'src/app/models/time-off';
 import { TimeOffService } from '../../services/time-off.service';
+import { canStopRecurring } from '../../time-off-display';
 import { DialogComponent } from 'src/app/components/dialog/dialog.component';
 import { SegmentedOption } from 'src/app/components/segmented-control/segmented-control.component';
 
@@ -27,11 +28,21 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
   public hasEndDate: boolean = false;
 
   @ViewChild("splitDialog") splitDialog?: DialogComponent;
+  @ViewChild("deleteDialog") deleteDialog?: DialogComponent;
 
   // Split prompt state for recurring edits: "date" forks the timeline at `splitDate`,
   // "all" applies the change to the whole rule (no fork). Default date is today.
   public splitMode: "date" | "all" = "date";
   public splitDate: Dayjs = dayjs();
+
+  // Delete prompt state for recurring rules: "stop" clamps the rule's end to yesterday (keeps
+  // history), "remove" hard-deletes the row. Only shown when canStopRecurring(...) is true.
+  public deleteMode: "stop" | "remove" = "stop";
+
+  public readonly deleteModeOptions: SegmentedOption[] = [
+    { value: "stop", label: "pages.time-off.DELETE_MODE_STOP", dataTest: "time-off-delete-stop" },
+    { value: "remove", label: "pages.time-off.DELETE_MODE_REMOVE", dataTest: "time-off-delete-remove" },
+  ];
 
   public readonly TimeOffRecurrence = TimeOffRecurrence;
 
@@ -244,6 +255,32 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
 
   public delete(): void {
     if (this.isNew) return;
+
+    // For an active, already-started recurring rule, offer "stop" (keep history) vs full delete.
+    if (canStopRecurring(this.timeOff, dayjs())) {
+      this.deleteMode = "stop";
+      this.deleteDialog?.open();
+      return;
+    }
+
+    this.deleteNow();
+  }
+
+  public confirmDelete(): void {
+    this.deleteDialog?.close();
+    if (this.deleteMode === "stop") this.stop();
+    else this.deleteNow();
+  }
+
+  private stop(): void {
+    this.isLoading = true;
+    this.subs.push(this.timeOffService.stop(this.timeOff.id).subscribe({
+      next: () => this.goBack(),
+      error: () => { this.isLoading = false; }
+    }));
+  }
+
+  private deleteNow(): void {
     this.isLoading = true;
     this.subs.push(this.timeOffService.delete(this.timeOff.id).subscribe({
       next: () => this.goBack(),

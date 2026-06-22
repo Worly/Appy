@@ -29,6 +29,18 @@ export class TimeOffService extends BaseModelService<TimeOff, TimeOff> {
     return this.save(timeOff, applyFrom ? { applyFrom: applyFrom.format("YYYY-MM-DD") } : undefined);
   }
 
+  /**
+   * Stop a recurring rule going forward (backend clamps its end to yesterday, keeping history).
+   * Mirrors `delete`'s shape — fire-and-forget, invalidating the same keys so the rule drops from
+   * the Active list into Past and the appointment views refresh.
+   */
+  public stop(id: any): Observable<void> {
+    return this.httpClient.put<void>(`${appConfig.apiUrl}${this.controllerName}/stop/${id}`, null)
+      .pipe(map(() => {
+        this.cache.invalidate(...this.mutationKeys);
+      }));
+  }
+
   public getList(type: TimeOffListType, scope: TimeOffScope): PagedResult<TimeOff, never> {
     return this.getListAdvanced<never>(
       [...timeOffKeys.list(type, scope)],

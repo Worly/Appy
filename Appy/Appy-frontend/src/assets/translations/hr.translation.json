@@ -256,6 +256,11 @@
             "APPLY_FROM_ALL": "Cijelog rasporeda",
             "APPLY_FROM_SPECIFIC_HINT": "Promjene se primjenjuju od odabranog datuma nadalje. Ranija ponavljanja zadržavaju trenutne postavke, čime se raspored dijeli na dva dijela.",
             "APPLY_FROM_ALL_HINT": "Promjene se primjenjuju na cijeli raspored — i prošla i buduća ponavljanja.",
+            "DELETE_TITLE": "Brisanje slobodnog dana",
+            "DELETE_MODE_STOP": "Zaustavi",
+            "DELETE_MODE_REMOVE": "Obriši u potpunosti",
+            "DELETE_MODE_STOP_HINT": "Prošla ponavljanja se zadržavaju; pravilo se više ne primjenjuje od danas nadalje.",
+            "DELETE_MODE_REMOVE_HINT": "Uklanja pravilo i cijelu njegovu povijest.",
 
             "errors": {
                 "MISSING_LABEL": "Naziv je obavezan",
@@ -264,7 +269,8 @@
                 "MISSING_DATE_RANGE": "Početni i završni datum su obavezni",
                 "DATES_NOT_IN_ORDER": "Početni datum mora biti isti ili prije završnog",
                 "MISSING_DAY_OF_WEEK": "Dan u tjednu je obavezan",
-                "INVALID_DAY_OF_MONTH": "Dan u mjesecu mora biti između 1 i 31"
+                "INVALID_DAY_OF_MONTH": "Dan u mjesecu mora biti između 1 i 31",
+                "CANNOT_STOP_ONE_OFF": "Jednokratni slobodan dan se ne može zaustaviti — umjesto toga ga obrišite"
             }
         },
 

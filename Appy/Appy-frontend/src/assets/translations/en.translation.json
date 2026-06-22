@@ -256,6 +256,11 @@
             "APPLY_FROM_ALL": "The entire schedule",
             "APPLY_FROM_SPECIFIC_HINT": "Changes apply from the selected date onward. Earlier occurrences keep their current settings, splitting the schedule in two.",
             "APPLY_FROM_ALL_HINT": "Changes apply to every occurrence in this schedule — both past and future.",
+            "DELETE_TITLE": "Delete time off",
+            "DELETE_MODE_STOP": "End it",
+            "DELETE_MODE_REMOVE": "Delete entirely",
+            "DELETE_MODE_STOP_HINT": "Past occurrences are kept; the rule won't apply from today onward.",
+            "DELETE_MODE_REMOVE_HINT": "Removes the rule and all of its history.",
 
             "errors": {
                 "MISSING_LABEL": "Label is required",
@@ -264,7 +269,8 @@
                 "MISSING_DATE_RANGE": "Start and end date are required",
                 "DATES_NOT_IN_ORDER": "Start date must be on or before end date",
                 "MISSING_DAY_OF_WEEK": "Day of week is required",
-                "INVALID_DAY_OF_MONTH": "Day of month must be between 1 and 31"
+                "INVALID_DAY_OF_MONTH": "Day of month must be between 1 and 31",
+                "CANNOT_STOP_ONE_OFF": "A one-off time off can't be stopped — delete it instead"
             }
         },
 

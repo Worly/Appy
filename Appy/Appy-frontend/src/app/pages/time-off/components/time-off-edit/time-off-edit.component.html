@@ -159,3 +159,25 @@
     </div>
   </div>
 </app-dialog>
+
+<app-dialog #deleteDialog>
+  <div class="split-dialog" *ngIf="deleteDialog.isOpen" data-test="time-off-delete-dialog">
+    <div class="split-title">{{ "pages.time-off.DELETE_TITLE" | translate }}</div>
+
+    <app-segmented-control [options]="deleteModeOptions" [value]="deleteMode"
+      (valueChange)="deleteMode = $event"></app-segmented-control>
+
+    <!-- Explains the effect of the selected delete mode before the user commits. -->
+    <div class="split-hint" data-test="time-off-delete-hint">
+      <fa-icon [icon]="['fas', 'circle-info']" aria-hidden="true"></fa-icon>
+      <span>{{ (deleteMode === 'stop' ? 'pages.time-off.DELETE_MODE_STOP_HINT' : 'pages.time-off.DELETE_MODE_REMOVE_HINT') | translate }}</span>
+    </div>
+
+    <div class="split-actions">
+      <app-button [text]="'CANCEL' | translate" color="danger" look="normal"
+        (onClick)="deleteDialog.close()"></app-button>
+      <app-button [text]="'CONFIRM' | translate" color="danger" look="solid" [disabled]="isLoading"
+        (onClick)="confirmDelete()" data-test="time-off-delete-confirm"></app-button>
+    </div>
+  </div>
+</app-dialog>
