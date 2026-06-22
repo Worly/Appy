@@ -38,7 +38,9 @@ function openScrollerView() {
 }
 
 function clickScope(scope: "upcoming" | "past") {
-  cy.get(`[data-test=time-off-scope-${scope}]`).click();
+  // Segments are tagged by their label, not the URL token: upcoming → -upcoming, past → -history.
+  const dataTest = scope === "past" ? "time-off-scope-history" : "time-off-scope-upcoming";
+  cy.get(`[data-test=${dataTest}]`).click();
 }
 
 /** Assert the visible list contains a row with `text`. */
