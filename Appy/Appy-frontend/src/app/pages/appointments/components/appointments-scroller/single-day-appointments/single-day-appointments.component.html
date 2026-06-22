@@ -56,13 +56,13 @@
         </div>
     </div>
 
-    <div *ngFor="let t of renderedTimeOffs; trackBy: trackTimeOff" class="time-off-band" [style.top]="t.top + '%'"
-        [style.height]="t.height + '%'" data-test="scroller-time-off"
-        (click)="onTimeOffBandClick(t.source, timeOffDialog, allDayListDialog)">
-        <fa-icon class="time-off-label" [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
-        <span *ngIf="!t.source.isAllDay" class="time-off-label">{{t.time}}</span>
-        <span class="time-off-label">{{ t.source.label }}</span>
-    </div>
+    <!-- Time-off click targets. Kept BELOW appointments (z-index: 0) so an appointment overlapping a
+         time-off still wins the click — only the exposed parts of a band open its details. The visible
+         hatch/border/label live in the .time-off-band overlay further down, which paints OVER
+         appointments; this layer is transparent and exists only to catch clicks. -->
+    <div *ngFor="let t of renderedTimeOffs; trackBy: trackTimeOff" class="time-off-hit" [style.top]="t.top + '%'"
+        [style.height]="t.height + '%'" data-test="scroller-time-off-hit"
+        (click)="onTimeOffBandClick(t.source, timeOffDialog, allDayListDialog)"></div>
 
     <div *ngFor="let rts of renderedTimeStatuses" class="time-status" [ngClass]="rts.source" [style.top]="rts.top + '%'"
         [style.height]="rts.height + '%'">
@@ -78,6 +78,15 @@
         <div class="appointment-service-name">
             {{ap.source.service?.displayName}}
         </div>
+    </div>
+
+    <!-- Time-off visuals, painted OVER appointments (z-index: 2). pointer-events: none so they never
+         steal a click — the transparent .time-off-hit catchers above handle all interaction. -->
+    <div *ngFor="let t of renderedTimeOffs; trackBy: trackTimeOff" class="time-off-band" [style.top]="t.top + '%'"
+        [style.height]="t.height + '%'" data-test="scroller-time-off">
+        <fa-icon class="time-off-label" [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
+        <span *ngIf="!t.source.isAllDay" class="time-off-label">{{t.time}}</span>
+        <span class="time-off-label">{{ t.source.label }}</span>
     </div>
 
     <div *ngIf="date != null && date.isSame(getNowDate(), 'day') && currentTimeIndicatorTop >= 0 && currentTimeIndicatorTop < 100"

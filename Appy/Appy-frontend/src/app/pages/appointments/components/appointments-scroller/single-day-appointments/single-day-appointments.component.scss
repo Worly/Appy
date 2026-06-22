@@ -84,8 +84,9 @@
     position: relative;
     width: 100%;
 
-    // Own stacking context below the sticky header (z-index: 1), so everything inside it — including
-    // appointments (z-index: 1) and time-off bands (z-index: 0) — scrolls *under* the header.
+    // Own stacking context below the sticky header (z-index: 1), so everything inside it — time-off
+    // hit catchers (z-index: 0), appointments (z-index: 1) and time-off band overlays (z-index: 2) —
+    // scrolls *under* the header.
     z-index: 0;
 }
 
@@ -162,8 +163,8 @@
     position: absolute;
     width: 100%;
 
-    // Above the (now click-interactive) time-off band, so an appointment overlapping a time-off
-    // still wins both the paint order and the click hit-test.
+    // Above the transparent .time-off-hit catchers (z-index: 0), so an appointment overlapping a
+    // time-off still wins the click. The decorative .time-off-band overlay (z-index: 2) paints on top.
     z-index: 1;
 
     border-radius: var(--default-border-radius);
@@ -210,6 +211,16 @@
     background-color: rgb(var(--rgb-danger));
 }
 
+// Transparent click target for a time-off band, kept below appointments (z-index: 0) so an
+// overlapping appointment still wins the click. The band's visuals are in .time-off-band.
+.time-off-hit {
+    position: absolute;
+    z-index: 0;
+    left: 0;
+    right: 0;
+    cursor: pointer;
+}
+
 .time-off-band {
     &::before {
         content: "";
@@ -222,13 +233,15 @@
     }
 
     position: absolute;
-    z-index: 0;
+    // Above appointments (z-index: 1) so the time-off always reads on top of any booking made during
+    // it. pointer-events: none keeps it purely decorative — the .time-off-hit layer catches clicks.
+    z-index: 2;
+    pointer-events: none;
     left: 0;
     right: 0;
     border: 1.2px solid rgba(var(--rgb-warning), 0.2);
     border-radius: var(--default-border-radius);
     padding: 15px;
-    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;

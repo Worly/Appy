@@ -323,6 +323,8 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
 
       let dayOccurrences = this.timeOffs.filter(o => o.date?.isSame(day.date, "date"));
       let allDayOccurrences = dayOccurrences.filter(o => o.isAllDay);
+      // Any appointment on a day that's a full-day off gets the red attention border.
+      let isOnDayOff = allDayOccurrences.length > 0;
 
       this.renderedItems.push({
         type: "date",
@@ -362,6 +364,7 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
             dateISO: day.date.format("YYYY-MM-DD"),
             isLast: k === dayKeys.length - 1 && i === timeline.length - 1,
             isOverlapping: isOverlappingWithPrev,
+            isOnDayOff,
           };
           this.renderedItems.push(item);
           prevRenderedCardItem = item;
@@ -547,6 +550,7 @@ export type RenderedAppointment = RenderedCardItem & {
   dateISO: string;
   appointment: AppointmentView;
   isLast: boolean;
+  isOnDayOff: boolean;   // booked on a day that is a full-day off
 }
 
 type RenderedDate = {

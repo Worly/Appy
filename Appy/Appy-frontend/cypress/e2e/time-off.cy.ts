@@ -251,6 +251,11 @@ describe("Time Off", () => {
 
     cy.get("[data-test=list-all-day-timeoff]").should("exist").and("contain", "Closed Mondays");
 
+    // Appointments booked on that full-day off get the same red attention border as overlapping ones.
+    cy.get(`app-single-appointment-list-item[data-date='${monday.format("YYYY-MM-DD")}'] .appointment`)
+      .should("have.length.greaterThan", 0)
+      .each($el => cy.wrap($el).should("have.class", "on-day-off"));
+
     // A day with a single all-day time-off jumps straight to its details dialog — no pick-list.
     cy.get("[data-test=list-all-day-timeoff]").contains("Closed Mondays").click();
     cy.get("[data-test=list-all-day-timeoff-list]").should("not.exist");
@@ -271,7 +276,10 @@ describe("Time Off", () => {
     expectURL("/appointments");
     openScrollerView();
 
-    cy.get("[data-test=scroller-time-off]").should("exist").and("contain", "Scroller One Off").click();
+    // The visible band paints over appointments (pointer-events: none); the click is caught by the
+    // transparent hit layer underneath.
+    cy.get("[data-test=scroller-time-off]").should("exist").and("contain", "Scroller One Off");
+    cy.get("[data-test=scroller-time-off-hit]").click();
     cy.get("app-single-time-off").should("contain", "Scroller One Off");
     getElement("time-off-edit-button").should("exist");
   });
@@ -288,8 +296,10 @@ describe("Time Off", () => {
     expectURL("/appointments");
     openScrollerView();
 
-    // A single all-day off jumps straight to its details — no pick-list.
-    cy.get("[data-test=scroller-time-off]").should("exist").and("contain", "Scroller All Day").click();
+    // A single all-day off jumps straight to its details — no pick-list. The visible band is
+    // pointer-events: none (it paints over appointments); the hit layer underneath catches the click.
+    cy.get("[data-test=scroller-time-off]").should("exist").and("contain", "Scroller All Day");
+    cy.get("[data-test=scroller-time-off-hit]").click();
     cy.get("[data-test=scroller-all-day-timeoff-list]").should("not.exist");
     cy.get("app-single-time-off").should("contain", "Scroller All Day");
     getElement("time-off-edit-button").should("exist");

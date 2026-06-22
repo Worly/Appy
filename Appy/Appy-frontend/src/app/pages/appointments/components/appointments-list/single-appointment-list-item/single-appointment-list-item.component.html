@@ -1,4 +1,5 @@
 <div *ngIf="renderedAppointment != null" class="appointment" [class.overlapping]="isOverlapping"
+    [class.on-day-off]="isOnDayOff"
     [attr.data-date]="renderedAppointment.dateISO" [attr.data-appId]="renderedAppointment.id"
     (click)="onOpenView.emit()">
     <div class="color" [style.backgroundColor]="renderedAppointment.serviceColor"></div>
