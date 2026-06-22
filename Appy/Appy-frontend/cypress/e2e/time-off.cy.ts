@@ -292,4 +292,72 @@ describe("Time Off", () => {
     cy.get("app-single-time-off").should("contain", "Scroller All Day");
     getElement("time-off-edit-button").should("exist");
   });
+
+  it("offers stop-vs-delete when deleting an active recurring rule and 'End it' keeps it in Past", () => {
+    const lastMonth = dayjs().subtract(1, "month").day(1); // a Monday roughly a month ago
+
+    visitTimeOff();
+    clickTab("recurring");
+    getElement("time-off-add").click();
+    getElement("time-off-label").clear().type("Stoppable Weekly");
+    selectDayOfWeek("Monday");
+    toggleSwitch("time-off-all-day");
+    // Recurring rules default their start to today; pull it back so the rule has already started.
+    dateLookup("time-off-start-date").select(lastMonth);
+    cy.contains("Save").click();
+    expectURL("/time-off");
+
+    clickTab("recurring");
+    clickRow("Stoppable Weekly");
+    getElement("time-off-edit-button").click();
+    expectURL(/\/time-off\/edit\/\d+/);
+
+    // Delete now prompts for recurring rules that have already started.
+    clickDeleteButton();
+    getElement("time-off-delete-dialog").should("exist");
+    getElement("time-off-delete-stop").should("exist");
+    getElement("time-off-delete-remove").should("exist");
+
+    // "End it" (stop) is the default mode; confirm.
+    getElement("time-off-delete-confirm").click();
+    expectURL("/time-off");
+
+    // It's gone from Active (Upcoming) but present in Past — history kept.
+    clickTab("recurring");
+    clickScope("upcoming");
+    cy.get("[data-test=time-off-list]").should("not.contain", "Stoppable Weekly");
+    clickScope("past");
+    expectRow("Stoppable Weekly");
+  });
+
+  it("deletes a recurring rule entirely via the 'Delete entirely' option", () => {
+    const lastMonth = dayjs().subtract(1, "month").day(1);
+
+    visitTimeOff();
+    clickTab("recurring");
+    getElement("time-off-add").click();
+    getElement("time-off-label").clear().type("Removable Weekly");
+    selectDayOfWeek("Monday");
+    toggleSwitch("time-off-all-day");
+    dateLookup("time-off-start-date").select(lastMonth);
+    cy.contains("Save").click();
+    expectURL("/time-off");
+
+    clickTab("recurring");
+    clickRow("Removable Weekly");
+    getElement("time-off-edit-button").click();
+
+    clickDeleteButton();
+    getElement("time-off-delete-dialog").should("exist");
+    getElement("time-off-delete-remove").click();
+    getElement("time-off-delete-confirm").click();
+    expectURL("/time-off");
+
+    // Absent from both scopes — fully removed.
+    clickTab("recurring");
+    clickScope("upcoming");
+    cy.get("[data-test=time-off-list]").should("not.contain", "Removable Weekly");
+    clickScope("past");
+    cy.get("[data-test=time-off-list]").should("not.contain", "Removable Weekly");
+  });
 });
