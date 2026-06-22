@@ -187,7 +187,15 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
   }
 
   public onStartDateChange(date: Dayjs): void {
+    const previousStart = this.timeOff.startDate;
     this.timeOff.startDate = date;
+
+    // One-off only: when the range was a single day (To == the old From), keep them linked by
+    // dragging the To date along with the From. A multi-day range leaves its To untouched.
+    if (this.type === "oneoff" && previousStart != null && this.timeOff.endDate != null
+      && this.timeOff.endDate.isSame(previousStart, "date")) {
+      this.timeOff.endDate = date;
+    }
   }
 
   public onEndDateChange(date: Dayjs): void {
