@@ -6,7 +6,7 @@ Business logic layer. Each service corresponds to one domain concept and is cons
 
 | Service | Responsibility |
 |---------|---------------|
-| `UserService` | Registration, authentication, token refresh, logout |
+| `UserService` | Registration, authentication, token refresh, logout. Logs: Warning on failed login (no-user, wrong-password) and refresh-token reuse detection; Information on login, register, logout; Debug on token rotation |
 | `JwtService` | JWT generation and validation (see `Auth/CLAUDE.md`) |
 | `FacilityService` | Facility CRUD, selected-facility management per user |
 | `ServiceService` | Service CRUD, archive toggle, name uniqueness enforcement |
@@ -14,7 +14,7 @@ Business logic layer. Each service corresponds to one domain concept and is cons
 | `AppointmentService` | Appointment CRUD, free-time slot generation, status changes, client notification dispatch |
 | `WorkingHourService` | Working-hour CRUD with overlap validation; replaces all hours for a facility atomically |
 | `DashboardService` | Dashboard settings upsert (unique per user + facility) |
-| `ClientNotificationsService` | Notification settings and outbound message dispatch |
+| `ClientNotificationsService` | Notification settings and outbound message dispatch; logs per-contact Debug detail, Information on success, Warning before throwing `MESSAGE_FAILED_TO_SEND` |
 | `AppointmentReminderService` | Cron job (every 5 minutes) — sends reminders for the next day's confirmed appointments |
 | `TimeOffService` | Time-off CRUD, validation, and occurrence expansion (recurrence → concrete date intervals) + paginated GetList(type, scope) and pure BuildListPage / NextOccurrenceOnOrAfter (next-occurrence sort key for Recurring/Active); AddNew stamps today as StartDate for open-ended recurring rules; Edit(id, dto, facilityId, applyFrom?) forks a recurring rule's timeline at applyFrom (original clamped to applyFrom-1, new segment inserted from applyFrom onward); StopRecurring(id, facilityId) clamps a recurring rule's EndDate to yesterday (keep-history "stop"), rejecting one-offs and never extending an already-expired rule |
 | `TestingService` | Dev-only data seeder, reachable via `TestingController` |
@@ -27,9 +27,11 @@ Business logic layer. Each service corresponds to one domain concept and is cons
 
 ## Key Business Rules (enforced here, not in controllers)
 
+- **Registration email format**: `UserService.Register` rejects malformed emails (`MailAddress` parsing) before the uniqueness check, throwing a `ValidationException` (`EMAIL_INVALID`)
 - **Service/Client deletion blocked** if any `Appointment` references them — caller must archive instead
 - **Appointment time validation**: the slot must fall within a `WorkingHour` range for that day-of-week, must not overlap an existing appointment, and must not overlap a time-off interval. Pass `ignoreTimeNotAvailable=true` to bypass
 - **Free-time generation**: 5-minute-interval slots within working hours, minus slots that would overlap existing appointments (and optionally ignoring one appointment ID for edit scenarios)
 - **Reminder deduplication**: `AppointmentReminderService` only reminds once per appointment (`WasReminded` flag prevents repeats across scheduler ticks)
 - **Contact name uniqueness**: `ClientService` enforces case-insensitive name + surname uniqueness per facility
 - **AppSpecificID preservation**: when a client's contacts are updated, existing `AppSpecificID` values are re-attached by matching contact type + value, so cached IGSIDs survive edits
+- **Logging**: services log significant mutations at Information and handled failures / security signals at Warning/Error, using `ILogger<T>` with message templates. Correlation ids (`RequestId`/`UserId`/`FacilityId`) come from middleware scopes — don't repeat them in messages. See `Appy/CLAUDE.md` → Logging.

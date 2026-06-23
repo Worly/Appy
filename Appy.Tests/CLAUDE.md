@@ -4,7 +4,7 @@ xUnit unit tests for backend service logic. Targets **.NET 8.0**, same as the ma
 
 ## What Is Tested
 
-Tests live in `Services/` and `Utils/`. The `Services/` tests cover three services:
+Tests live in `Services/` and `Utils/`. The `Services/` tests cover four services:
 
 - **TrimmingStringConverterTests** (`Utils/`): verifies the global request-body string-trimming converter — leading/trailing whitespace is trimmed across top-level, nested, and collection string properties; `null` is preserved; whitespace-only becomes empty; and serialization (Write) is a passthrough that does not trim.
 
@@ -12,7 +12,9 @@ Tests live in `Services/` and `Utils/`. The `Services/` tests cover three servic
 
 - **AppointmentServiceTests**: verifies the status-revert rule on `Edit` — a `Confirmed` appointment whose date, time, service, or client changes is reset to `Unconfirmed`; other statuses are preserved; duration- and notes-only edits leave the status alone. Also asserts that `AddNew` creates appointments in the `Unconfirmed` state. Also verifies that `GetList` returns an `AppointmentListPageDTO` envelope with the page's time-off occurrences, and returns empty `TimeOffs` when the page is empty.
 
-- **ClientNotificationServiceTests**: verifies contact validation (at least one contact required), Instagram IGSID lookup and `AppSpecificID` caching behavior, message template variable substitution (`{clientName}`, `{service}`, etc.), and multi-contact routing (stops at the first successful send).
+- **ClientNotificationServiceTests**: verifies contact validation (at least one contact required), Instagram IGSID lookup and `AppSpecificID` caching behavior, message template variable substitution (`{clientName}`, `{service}`, etc.), multi-contact routing (stops at the first successful send), and that a `LogLevel.Warning` is emitted when all contacts fail.
+
+- **UserServiceTests**: verifies `Register` rejects malformed email addresses with a `ValidationException` (before the uniqueness check) and accepts well-formed ones.
 
 ## How to Run
 

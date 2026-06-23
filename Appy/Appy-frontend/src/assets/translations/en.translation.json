@@ -98,7 +98,8 @@
                 "MISSING_REPEAT_PASSWORD": "Please repeat your password",
                 "WRONG_REPEAT_PASSWORD": "Passwords do not match",
                 "WRONG_LOGIN": "Email or password is incorrect",
-                "EMAIL_TAKEN": "Account with this email already exists"
+                "EMAIL_TAKEN": "Account with this email already exists",
+                "EMAIL_INVALID": "Please enter a valid email address"
             }
         },
 

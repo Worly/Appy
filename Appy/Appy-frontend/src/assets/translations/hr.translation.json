@@ -98,7 +98,8 @@
                 "MISSING_REPEAT_PASSWORD": "Molim ponovite Vašu lozinku",
                 "WRONG_REPEAT_PASSWORD": "Lozinke se ne podudaraju",
                 "WRONG_LOGIN": "Email ili lozinka su pogrešni",
-                "EMAIL_TAKEN": "Račun s ovom email adresom već postoji"
+                "EMAIL_TAKEN": "Račun s ovom email adresom već postoji",
+                "EMAIL_INVALID": "Molim upišite ispravnu email adresu"
             }
         },
 

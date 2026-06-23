@@ -28,8 +28,7 @@ jobs:
       ASPNETCORE_ENVIRONMENT: Development
       JwtSecret: "ci-throwaway-secret-not-used-in-production"
       ConnectionStrings__Main: "Server=localhost;Port=5432;Database=Appy;Userid=postgres;Password=password"
-      NO_FRONTEND: true
-          
+
     steps:
       - uses: actions/checkout@v3
 

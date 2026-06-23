@@ -25,7 +25,11 @@ namespace Appy.Domain
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseLoggerFactory(LoggerFactory.Create(b => b.AddFilter((category, level) => level > LogLevel.Information)));
+            // Do NOT call UseLoggerFactory here: when the context is registered via AddDbContext,
+            // EF Core automatically uses the application's ILoggerFactory, so EF logs flow through
+            // the configured console/JSON providers and honor the Microsoft.EntityFrameworkCore
+            // log level from appsettings. Creating a per-instance LoggerFactory would leak memory
+            // (a new factory per context instance) and bypass that pipeline.
             optionsBuilder.UseExceptionProcessor();
             optionsBuilder.UseNpgsql();
         }

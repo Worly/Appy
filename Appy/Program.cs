@@ -3,10 +3,24 @@ using Appy.Exceptions;
 using Appy.Services;
 using Appy.Services.Facilities;
 using Appy.Services.MessagingServices;
-using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.ClearProviders();
+if (builder.Environment.IsDevelopment())
+{
+    builder.Logging.AddSimpleConsole(o =>
+    {
+        o.IncludeScopes = true;
+        o.SingleLine = true;
+    });
+    builder.Logging.AddDebug();
+}
+else
+{
+    builder.Logging.AddJsonConsole(o => o.IncludeScopes = true);
+}
 
 var jwtSecret = builder.Configuration["JwtSecret"];
 if (string.IsNullOrEmpty(jwtSecret))
@@ -17,7 +31,18 @@ var spaPath = "Appy-frontend/build";
 
 // Add services to the container.
 builder.Services.AddDbContext<MainDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("Main")));
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("Main"));
+
+    if (builder.Environment.IsDevelopment())
+    {
+        // Dev-only EF diagnostics. EnableSensitiveDataLogging includes SQL parameter values
+        // in logs, so it must never run in production. These take effect when the
+        // Microsoft.EntityFrameworkCore log level is raised to Information in appsettings.Development.json.
+        options.EnableSensitiveDataLogging();
+        options.EnableDetailedErrors();
+    }
+});
 builder.Services.AddSingleton<IJwtService, JwtService>();
 
 builder.Services.AddHttpClient<InstagramMessagingService>(client =>
@@ -61,7 +86,7 @@ builder.Services.AddScheduler(config =>
         var logger = sp.GetRequiredService<ILoggerFactory>().CreateLogger("CronJobs");
         return (sender, args) =>
         {
-            logger?.LogError(args.Exception?.Message);
+            logger?.LogError(args.Exception, "Unobserved task exception in scheduled job");
             args.SetObserved();
         };
     });
@@ -76,11 +101,17 @@ builder.Services.AddHealthChecks().AddCheck("self", () => HealthCheckResult.Heal
 
 var app = builder.Build();
 
-var useLocalSPA = app.Environment.IsDevelopment() && Environment.GetEnvironmentVariable("NO_FRONTEND") != "true";
+// In development the frontend is run manually by the developer (npx ng serve) and the
+// backend does not serve it at all. In production the backend serves the pre-built frontend.
+var serveFrontend = !app.Environment.IsDevelopment();
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
-app.UseSpaStaticFiles();
+
+if (serveFrontend)
+{
+    app.UseStaticFiles();
+    app.UseSpaStaticFiles();
+}
 
 app.UseRouting();
 
@@ -93,6 +124,7 @@ if (app.Environment.IsDevelopment())
         .WithOrigins("http://localhost:4200"));
 }
 
+app.UseMiddleware<Appy.Middleware.RequestLoggingMiddleware>();
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseMiddleware<Appy.Auth.JwtMiddleware>();
 app.UseMiddleware<FacilityMiddleware>();
@@ -104,7 +136,7 @@ app.UseEndpoints(endpoints =>
     endpoints.MapControllers();
     endpoints.MapHealthChecks("/health");
 
-    if (!useLocalSPA)
+    if (serveFrontend)
     {
         // Explicit Fallback to index.html in SpaStaticFiles directory
         endpoints.MapFallback(async context =>
@@ -125,16 +157,6 @@ app.UseEndpoints(endpoints =>
         });
     }
 });
-
-if (useLocalSPA)
-{
-    app.UseSpa(spa =>
-    {
-        spa.Options.SourcePath = "Appy-frontend";
-
-        spa.UseAngularCliServer(npmScript: "start");
-    });
-}
 
 using (var scope = app.Services.CreateScope())
 {
