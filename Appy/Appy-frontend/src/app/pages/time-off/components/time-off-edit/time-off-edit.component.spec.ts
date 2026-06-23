@@ -211,3 +211,29 @@ describe("TimeOffEditComponent — recurring save dialog gate", () => {
     expect(service.addNew).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("TimeOffEditComponent — new time-off defaults", () => {
+  // ngOnInit's new-rule branch only reads route snapshot params and sets fields — no service,
+  // no subscriptions — so we can drive it with a tiny ActivatedRoute stub and no TestBed.
+  function makeNew(type: "oneoff" | "recurring"): TimeOffEditComponent {
+    const route = {
+      snapshot: {
+        paramMap: { get: () => null },        // no :id → isNew
+        queryParamMap: { get: () => type },   // ?type=oneoff|recurring
+      },
+    };
+    const c = new TimeOffEditComponent(null as any, route as any, null as any, null as any);
+    c.ngOnInit();
+    return c;
+  }
+
+  it("defaults a new one-off to all-day", () => {
+    const c = makeNew("oneoff");
+    expect(c.timeOff.isAllDay).toBe(true);
+  });
+
+  it("defaults a new recurring rule to all-day", () => {
+    const c = makeNew("recurring");
+    expect(c.timeOff.isAllDay).toBe(true);
+  });
+});

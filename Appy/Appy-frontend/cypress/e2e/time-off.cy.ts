@@ -74,7 +74,8 @@ describe("Time Off", () => {
     expectURL("/time-off/new");
 
     getElement("time-off-label").clear().type("One Off Partial");
-    // type=oneoff: date range prefilled, times default 09:00–17:00.
+    // New time-offs default to all-day; turn it off for a partial 09:00–17:00 range.
+    toggleSwitch("time-off-all-day");
     cy.contains("Save").click();
     expectURL("/time-off");
 
@@ -92,9 +93,8 @@ describe("Time Off", () => {
     expectURL("/time-off/new");
 
     getElement("time-off-label").clear().type("Weekly All Day Off");
-    // type=recurring defaults to Weekly; pick Monday explicitly, then all-day.
+    // type=recurring defaults to Weekly; pick Monday explicitly. New time-offs are all-day by default.
     selectDayOfWeek("Monday");
-    toggleSwitch("time-off-all-day");
     cy.contains("Save").click();
     expectURL("/time-off");
 
@@ -266,7 +266,7 @@ describe("Time Off", () => {
     getElement("time-off-add").click();
     getElement("time-off-label").clear().type("Closed Mondays");
     selectDayOfWeek("Monday");
-    toggleSwitch("time-off-all-day");
+    // New time-offs are all-day by default — exactly what this badge test needs.
     // Recurring rules default their effective-from to today; the only seeded appointments (and thus
     // the only list days a badge can attach to) are in Feb 2021, so pull the start back to that Monday.
     dateLookup("time-off-start-date").select(monday);
@@ -301,10 +301,12 @@ describe("Time Off", () => {
 
   it("opens the time-off details when a partial band is clicked in the scroller view", () => {
     visitTimeOff();
-    // One-offs tab is the default; a one-off defaults to today (the scroller's default day),
-    // partial 09:00–17:00, so its band renders directly on the scroller without any date navigation.
+    // One-offs tab is the default; a one-off defaults to today (the scroller's default day). New
+    // time-offs are all-day by default — turn it off for a partial 09:00–17:00 band that renders
+    // directly on the scroller without any date navigation.
     getElement("time-off-add").click();
     getElement("time-off-label").clear().type("Scroller One Off");
+    toggleSwitch("time-off-all-day");
     cy.contains("Save").click();
     expectURL("/time-off");
 
@@ -324,7 +326,7 @@ describe("Time Off", () => {
     visitTimeOff();
     getElement("time-off-add").click();
     getElement("time-off-label").clear().type("Scroller All Day");
-    toggleSwitch("time-off-all-day");
+    // New time-offs are all-day by default.
     cy.contains("Save").click();
     expectURL("/time-off");
 

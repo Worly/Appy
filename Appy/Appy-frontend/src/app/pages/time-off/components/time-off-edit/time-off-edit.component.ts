@@ -136,6 +136,9 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
         this.timeOff.dayOfWeek = DayOfWeek.Monday;
         this.timeOff.startDate = dayjs(); // effective-from defaults to today; the end date is opt-in
       }
+      // New time-offs default to all-day; the 9–17 time range is pre-filled so it's ready the
+      // moment the user turns all-day off.
+      this.timeOff.isAllDay = true;
       this.timeOff.timeFrom = dayjs({ hour: 9 });
       this.timeOff.timeTo = dayjs({ hour: 17 });
       this.isLoaded = true;
