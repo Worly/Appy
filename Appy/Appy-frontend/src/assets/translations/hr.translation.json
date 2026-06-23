@@ -246,6 +246,8 @@
             "DAY_OF_WEEK": "Dan u tjednu",
             "DAY_OF_MONTH": "Dan u mjesecu",
             "EVERY_DAY_OF_MONTH": "Svaki {day} u mjesecu",
+            "DAYS_COUNT_ONE": "{count} dan",
+            "DAYS_COUNT_OTHER": "{count} dana",
             "FROM_DATE": "Od",
             "TO_DATE": "Do",
             "TIME_FROM": "Od",

@@ -4,7 +4,7 @@ import { Subscription } from "rxjs";
 import { TimeOff } from "src/app/models/time-off";
 import { TranslateService } from "src/app/components/translate/translate.service";
 import { TimeOffService } from "../../services/time-off.service";
-import { timeOffRecurringRangeText, timeOffScheduleText, timeOffTimeText } from "../../time-off-display";
+import { timeOffDayCountText, timeOffRecurringRangeText, timeOffScheduleText, timeOffTimeText } from "../../time-off-display";
 
 @Component({
   selector: "app-single-time-off",
@@ -28,6 +28,7 @@ export class SingleTimeOffComponent implements OnDestroy {
   public isLoading: boolean = false;
   public schedule: string = "";
   public dateRange: string = "";
+  public dayCount: string = ""; // inclusive "N days" — populated only for one-offs
   public time: string = "";
 
   private sub?: Subscription;
@@ -53,6 +54,7 @@ export class SingleTimeOffComponent implements OnDestroy {
       const tr = (k: string) => this.translateService.translate(k);
       this.schedule = timeOffScheduleText(t, tr, this.translateService.getSelectedLanguageCode());
       this.dateRange = timeOffRecurringRangeText(t, tr);
+      this.dayCount = timeOffDayCountText(t, tr, this.translateService.getSelectedLanguageCode());
       this.time = timeOffTimeText(t, tr);
       this.isLoading = false;
     });

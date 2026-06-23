@@ -60,6 +60,29 @@ export function timeOffRecurringRangeText(t: TimeOff, translate: (key: string) =
     : `${translate("pages.time-off.FROM_DATE")} ${start}`;
 }
 
+/**
+ * Inclusive count of selected days for a one-off rule, humanized and pluralized — e.g. "1 day" /
+ * "4 days" (en) or "1 dan" / "4 dana" (hr). Empty for recurring rules, when either bound is missing,
+ * or for an inverted range (To before From, possible mid-edit).
+ */
+export function timeOffDayCountText(t: TimeOff, translate: (key: string) => string, languageCode: string = "en"): string {
+  if (t.recurrence !== TimeOffRecurrence.OneOff || t.startDate == null || t.endDate == null) return "";
+  const count = t.endDate.diff(t.startDate, "day") + 1; // inclusive: same start/end is one day
+  if (count < 1) return "";
+  const key = isPluralOne(count, languageCode) ? "pages.time-off.DAYS_COUNT_ONE" : "pages.time-off.DAYS_COUNT_OTHER";
+  return translate(key).replace("{count}", count.toString());
+}
+
+/**
+ * Whether `count` takes the locale's "one" plural form. English uses it only for exactly 1; Croatian
+ * uses it for counts ending in 1 except the 11 exception (1 dan, 21 dan — but 11 dana). For "dan" the
+ * few/many forms coincide ("dana"), so a single "other" form covers everything else.
+ */
+function isPluralOne(count: number, languageCode: string): boolean {
+  if (languageCode === "en") return count === 1;
+  return count % 10 === 1 && count % 100 !== 11;
+}
+
 /** "All day" or a "HH:mm – HH:mm" range. */
 export function timeOffTimeText(t: TimeOff, translate: (key: string) => string): string {
   return t.isAllDay

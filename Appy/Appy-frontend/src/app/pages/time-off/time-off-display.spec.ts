@@ -3,7 +3,7 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { DayOfWeek } from "src/app/models/working-hours";
 import { TimeOff, TimeOffRecurrence } from "src/app/models/time-off";
-import { canStopRecurring, timeOffRecurringRangeText, timeOffScheduleText, timeOffTimeText } from "./time-off-display";
+import { canStopRecurring, timeOffDayCountText, timeOffRecurringRangeText, timeOffScheduleText, timeOffTimeText } from "./time-off-display";
 
 dayjs.extend(customParseFormat);
 dayjs.extend(isSameOrBefore);
@@ -149,5 +149,60 @@ describe("canStopRecurring", () => {
 
   it("is false when a recurring rule has no start date", () => {
     expect(canStopRecurring(recurring(undefined), today)).toBe(false);
+  });
+});
+
+describe("timeOffDayCountText", () => {
+  // Stubs the two count templates the way each locale's translation file fills them.
+  const dayTr = (one: string, other: string) => (k: string) =>
+    k === "pages.time-off.DAYS_COUNT_ONE" ? one :
+    k === "pages.time-off.DAYS_COUNT_OTHER" ? other : k;
+
+  const en = dayTr("{count} day", "{count} days");
+  const hr = dayTr("{count} dan", "{count} dana");
+
+  function oneOff(start: string, end: string): TimeOff {
+    const t = new TimeOff();
+    t.recurrence = TimeOffRecurrence.OneOff;
+    t.startDate = dayjs(start);
+    t.endDate = dayjs(end);
+    return t;
+  }
+
+  it("counts a single-day one-off inclusively as 1 day", () => {
+    expect(timeOffDayCountText(oneOff("2026-01-02", "2026-01-02"), en, "en")).toBe("1 day");
+  });
+
+  it("counts a multi-day one-off inclusively (both ends included)", () => {
+    expect(timeOffDayCountText(oneOff("2026-01-02", "2026-01-05"), en, "en")).toBe("4 days");
+  });
+
+  it("uses Croatian plural forms (1/21 → dan; 2–20/others → dana)", () => {
+    const count = (n: number) => timeOffDayCountText(oneOff("2026-01-01", dayjs("2026-01-01").add(n - 1, "day").format("YYYY-MM-DD")), hr, "hr");
+    expect(count(1)).toBe("1 dan");
+    expect(count(4)).toBe("4 dana");
+    expect(count(5)).toBe("5 dana");
+    expect(count(11)).toBe("11 dana"); // the 11 exception → dana, not dan
+    expect(count(21)).toBe("21 dan");
+  });
+
+  it("is empty for recurring rules (no fixed day count)", () => {
+    const t = new TimeOff();
+    t.recurrence = TimeOffRecurrence.Weekly;
+    t.dayOfWeek = DayOfWeek.Monday;
+    t.startDate = dayjs("2026-01-02");
+    t.endDate = dayjs("2026-01-05");
+    expect(timeOffDayCountText(t, en, "en")).toBe("");
+  });
+
+  it("is empty when either bound is missing", () => {
+    const t = new TimeOff();
+    t.recurrence = TimeOffRecurrence.OneOff;
+    t.startDate = dayjs("2026-01-02");
+    expect(timeOffDayCountText(t, en, "en")).toBe("");
+  });
+
+  it("is empty for an inverted range (To before From, mid-edit)", () => {
+    expect(timeOffDayCountText(oneOff("2026-01-05", "2026-01-02"), en, "en")).toBe("");
   });
 });

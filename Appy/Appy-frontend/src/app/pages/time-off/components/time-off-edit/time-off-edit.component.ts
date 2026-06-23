@@ -7,7 +7,7 @@ import { Subscription } from 'rxjs';
 import { DayOfWeek } from 'src/app/models/working-hours';
 import { TimeOff, TimeOffRecurrence } from 'src/app/models/time-off';
 import { TimeOffService } from '../../services/time-off.service';
-import { canStopRecurring } from '../../time-off-display';
+import { canStopRecurring, timeOffDayCountText } from '../../time-off-display';
 import { DialogComponent } from 'src/app/components/dialog/dialog.component';
 import { SegmentedOption } from 'src/app/components/segmented-control/segmented-control.component';
 
@@ -184,6 +184,15 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
       // Drop only the end bound — the effective-from (startDate) is always kept.
       this.timeOff.endDate = undefined;
     }
+  }
+
+  // Live, inclusive "N days" caption for the one-off date range (re-evaluated on every date change).
+  public get oneOffDayCountText(): string {
+    return timeOffDayCountText(
+      this.timeOff,
+      (k) => this.translateService.translate(k),
+      this.translateService.getSelectedLanguageCode(),
+    );
   }
 
   public onStartDateChange(date: Dayjs): void {

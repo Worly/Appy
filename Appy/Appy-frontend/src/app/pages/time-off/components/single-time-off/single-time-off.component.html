@@ -15,6 +15,10 @@
       <fa-icon icon="calendar-week" [fixedWidth]="true"></fa-icon>
       <div>{{ dateRange }}</div>
     </div>
+    <div class="info-row" *ngIf="dayCount" data-test="time-off-day-count">
+      <fa-icon icon="calendar-day" [fixedWidth]="true"></fa-icon>
+      <div>{{ dayCount }}</div>
+    </div>
     <div class="info-row">
       <fa-icon icon="clock" [fixedWidth]="true"></fa-icon>
       <div>{{ time }}</div>

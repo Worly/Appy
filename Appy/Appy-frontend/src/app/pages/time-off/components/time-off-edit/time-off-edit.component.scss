@@ -99,6 +99,20 @@ textarea.field-input {
   font-weight: 500;
 }
 
+// The "To" label shares its row with the inclusive day-count summary, pushed to the right.
+.field-label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+// Inclusive "N days" summary, right-aligned beside the "To" label — a quiet metadata note.
+.day-count {
+  font-size: 0.85rem;
+  opacity: 0.6;
+}
+
 .duo {
   display: flex;
   flex-wrap: wrap;

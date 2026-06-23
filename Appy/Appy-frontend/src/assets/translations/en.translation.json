@@ -246,6 +246,8 @@
             "DAY_OF_WEEK": "Day of week",
             "DAY_OF_MONTH": "Day of month",
             "EVERY_DAY_OF_MONTH": "Every {day} of month",
+            "DAYS_COUNT_ONE": "{count} day",
+            "DAYS_COUNT_OTHER": "{count} days",
             "FROM_DATE": "From",
             "TO_DATE": "To",
             "TIME_FROM": "From",

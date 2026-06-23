@@ -39,7 +39,10 @@
         <app-date-selector [showDayOfWeek]="true" [date]="timeOff.startDate!" (dateChange)="onStartDateChange($event)"></app-date-selector>
       </div>
       <div class="field">
-        <label class="field-label">{{ "pages.time-off.TO_DATE" | translate }}</label>
+        <div class="field-label-row">
+          <label class="field-label">{{ "pages.time-off.TO_DATE" | translate }}</label>
+          <span class="day-count" *ngIf="oneOffDayCountText" data-test="time-off-day-count">{{ oneOffDayCountText }}</span>
+        </div>
         <app-date-selector [showDayOfWeek]="true" [date]="timeOff.endDate!" (dateChange)="onEndDateChange($event)"></app-date-selector>
       </div>
       <div class="field-error" *ngIf="timeOff.getValidationErrors('startDate')">{{ timeOff.getValidationErrors("startDate") | translate }}</div>
