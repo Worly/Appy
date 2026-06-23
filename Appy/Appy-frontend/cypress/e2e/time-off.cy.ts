@@ -242,6 +242,10 @@ describe("Time Off", () => {
     // Must navigate straight back — no fork dialog shown.
     expectURL("/time-off");
     cy.get("[data-test=time-off-split-dialog]").should("not.exist");
+
+    // Confirm the edit actually persisted (guards against a silent save error + router bounce).
+    clickTab("recurring");
+    expectRow("Move Start Recurring");
   });
 
   it("shows the Holidays tab as a stub with the scope switch and an auto-import button instead of add", () => {
