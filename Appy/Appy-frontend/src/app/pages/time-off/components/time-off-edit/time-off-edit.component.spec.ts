@@ -154,3 +154,60 @@ describe("TimeOffEditComponent — delete confirmation", () => {
     expect(service.stop).not.toHaveBeenCalled();
   });
 });
+
+describe("TimeOffEditComponent — recurring save dialog gate", () => {
+  // A fake observable that records subscription but never emits, so the success handler
+  // (goBack) never runs — we only assert which service method was invoked.
+  const fakeObs = () => ({ subscribe: () => ({ unsubscribe() {} }) });
+
+  function makeWithService() {
+    const service = {
+      saveWithSplit: jasmine.createSpy("saveWithSplit").and.callFake(fakeObs),
+      addNew: jasmine.createSpy("addNew").and.callFake(fakeObs),
+    };
+    const c = new TimeOffEditComponent(service as any, null as any, null as any, null as any);
+    c.isNew = false;
+    c.type = "recurring";
+    c.timeOff.recurrence = TimeOffRecurrence.Weekly;
+    c.timeOff.label = "Vacation";                       // satisfy validate()
+    c.timeOff.dayOfWeek = DayOfWeek.Monday;
+    c.timeOff.startDate = dayjs("2026-01-05");
+    c.timeOff.timeFrom = dayjs("2026-01-05T09:00:00");
+    c.timeOff.timeTo = dayjs("2026-01-05T17:00:00");
+    (c as any).originalStartDate = dayjs("2026-01-05");  // baseline "as loaded"
+    const splitDialog = { open: jasmine.createSpy("open"), close: jasmine.createSpy("close") };
+    c.splitDialog = splitDialog as any;
+    return { c, service, splitDialog };
+  }
+
+  it("opens the apply-from dialog when the start date is unchanged", () => {
+    const { c, service, splitDialog } = makeWithService();
+    c.timeOff.dayOfWeek = DayOfWeek.Tuesday; // content change only; start untouched
+
+    c.save();
+
+    expect(splitDialog.open).toHaveBeenCalledTimes(1);
+    expect(service.saveWithSplit).not.toHaveBeenCalled();
+  });
+
+  it("saves in place without the dialog when the start date was moved", () => {
+    const { c, service, splitDialog } = makeWithService();
+    c.timeOff.startDate = dayjs("2026-02-01"); // moved from 2026-01-05
+
+    c.save();
+
+    expect(splitDialog.open).not.toHaveBeenCalled();
+    expect(service.saveWithSplit).toHaveBeenCalledTimes(1);
+    expect(service.saveWithSplit).toHaveBeenCalledWith(c.timeOff, undefined);
+  });
+
+  it("does not open the dialog for a brand-new rule", () => {
+    const { c, service, splitDialog } = makeWithService();
+    c.isNew = true;
+
+    c.save();
+
+    expect(splitDialog.open).not.toHaveBeenCalled();
+    expect(service.addNew).toHaveBeenCalledTimes(1);
+  });
+});

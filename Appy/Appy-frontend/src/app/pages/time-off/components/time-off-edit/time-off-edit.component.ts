@@ -35,6 +35,10 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
   public splitMode: "date" | "all" = "date";
   public splitDate: Dayjs = dayjs();
 
+  // The rule's start date as loaded (after defaulting). A recurring edit forks the timeline only
+  // when the start date is unchanged; moving it is direct timeline editing → save in place. See save().
+  private originalStartDate?: Dayjs;
+
   // Delete prompt state for recurring rules: "stop" clamps the rule's end to yesterday (keeps
   // history), "remove" hard-deletes the row. The stop-vs-remove choice is only offered when
   // `canStop` is true; otherwise the dialog is a plain "are you sure" confirmation.
@@ -115,6 +119,7 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
 
         this.type = t.recurrence === TimeOffRecurrence.OneOff ? "oneoff" : "recurring";
         this.timeOff = t;
+        this.originalStartDate = t.startDate;
         this.isLoaded = true;
       }));
     } else {
@@ -218,12 +223,19 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
   public save(): void {
     if (!this.timeOff.validate()) return;
 
-    // Recurring edits fork the rule's timeline — ask the user from which date the change applies.
+    // A recurring edit can fork the rule's timeline — but only when the user changed the rule's
+    // content (day/time/all-day), NOT its start date. Moving the start date IS editing the timeline
+    // directly, so there's nothing to fork: save it in place. Gating on the start date also avoids
+    // the trap where the fork dialog's date silently overrode the start the user just set.
     if (!this.isNew && this.type === "recurring") {
-      this.splitMode = "date";
-      this.splitDate = dayjs();
-      this.splitDialog?.open();
-      return;
+      const startMoved = !this.timeOff.startDate?.isSame(this.originalStartDate, "date");
+      if (!startMoved) {
+        this.splitMode = "date";
+        this.splitDate = dayjs();
+        this.splitDialog?.open();
+        return;
+      }
+      // start date moved → plain in-place edit (no applyFrom, no dialog); fall through to commit().
     }
 
     this.commit();
