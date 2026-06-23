@@ -207,16 +207,13 @@ app-date-selector {
   }
 }
 
-// Recurring-edit "apply changes from" prompt (rendered inside app-dialog's centered overlay).
+// Body layout for the apply-from / delete prompts. The host app-dialog already supplies the card
+// surface and its own padding (.dialog-container is a .w-card), so we only own the inner stacking
+// here — adding a background/radius/padding again would double the card and its padding.
 .split-dialog {
-  background: rgb(var(--rgb-card-background));
-  border-radius: 14px;
-  padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  width: min(92vw, 360px);
-  box-sizing: border-box;
 }
 
 .split-title {
