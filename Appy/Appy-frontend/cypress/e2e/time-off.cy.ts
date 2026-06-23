@@ -216,6 +216,34 @@ describe("Time Off", () => {
     expectRow("Prompt Beta");
   });
 
+  it("saves a recurring edit in place without the apply-from dialog when the start date changes", () => {
+    const newStart = dayjs().add(14, "day");
+
+    visitTimeOff();
+    clickTab("recurring");
+    getElement("time-off-add").click();
+    getElement("time-off-label").clear().type("Move Start Recurring");
+    selectDayOfWeek("Monday");
+    toggleSwitch("time-off-all-day");
+    cy.contains("Save").click();
+    expectURL("/time-off");
+
+    clickTab("recurring");
+    clickRow("Move Start Recurring");
+    getElement("time-off-edit-button").click();
+    expectURL(/\/time-off\/edit\/\d+/);
+
+    // Move the start date forward by two weeks — this is the change that triggers the
+    // in-place save path introduced on this branch. Before the fix, ANY recurring save
+    // opened the fork dialog; now a start-date change bypasses it entirely.
+    dateLookup("time-off-start-date").select(newStart);
+    cy.contains("Save").click();
+
+    // Must navigate straight back — no fork dialog shown.
+    expectURL("/time-off");
+    cy.get("[data-test=time-off-split-dialog]").should("not.exist");
+  });
+
   it("shows the Holidays tab as a stub with the scope switch and an auto-import button instead of add", () => {
     visitTimeOff();
     clickTab("holidays");
