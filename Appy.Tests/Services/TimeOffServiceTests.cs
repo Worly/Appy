@@ -2,6 +2,7 @@ using Appy.Domain;
 using Appy.DTOs;
 using Appy.Exceptions;
 using Appy.Services;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Moq.EntityFrameworkCore;
 using System.Threading;
@@ -20,7 +21,7 @@ namespace Appy.Tests.Services
         {
             dbContextMock = new Mock<MainDbContext>();
             dbContextMock.Setup(x => x.TimeOffs).ReturnsDbSet(timeOffs);
-            service = new TimeOffService(dbContextMock.Object);
+            service = new TimeOffService(dbContextMock.Object, NullLogger<TimeOffService>.Instance);
         }
 
         private static TimeOffDTO ValidOneOff() => new()

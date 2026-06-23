@@ -23,10 +23,12 @@ namespace Appy.Services
     public class TimeOffService : ITimeOffService
     {
         private MainDbContext context;
+        private readonly ILogger<TimeOffService> logger;
 
-        public TimeOffService(MainDbContext context)
+        public TimeOffService(MainDbContext context, ILogger<TimeOffService> logger)
         {
             this.context = context;
+            this.logger = logger;
         }
 
         public Task<List<TimeOff>> GetAll(int facilityId)
@@ -58,6 +60,7 @@ namespace Appy.Services
                 t.StartDate = DateOnly.FromDateTime(DateTime.Today);
             context.TimeOffs.Add(t);
             await context.SaveChangesAsync();
+            logger.LogInformation("TimeOff {TimeOffId} created (facilityId {FacilityId})", t.Id, facilityId);
             return t;
         }
 
@@ -91,11 +94,13 @@ namespace Appy.Services
                 t.EndDate = applyFrom!.Value.AddDays(-1);  // original becomes the historical segment
                 context.TimeOffs.Add(newSegment);
                 await context.SaveChangesAsync();
+                logger.LogInformation("TimeOff {TimeOffId} forked at {ApplyFrom}: new segment {NewSegmentId} (facilityId {FacilityId})", t.Id, applyFrom!.Value, newSegment.Id, facilityId);
                 return newSegment;
             }
 
             ApplyDto(t, dto);
             await context.SaveChangesAsync();
+            logger.LogInformation("TimeOff {TimeOffId} updated (facilityId {FacilityId})", t.Id, facilityId);
             return t;
         }
 
@@ -106,6 +111,7 @@ namespace Appy.Services
                 throw new NotFoundException();
             context.TimeOffs.Remove(t);
             await context.SaveChangesAsync();
+            logger.LogInformation("TimeOff {TimeOffId} deleted (facilityId {FacilityId})", id, facilityId);
         }
 
         // "Stop" a recurring rule going forward: clamp its end to yesterday so past occurrences
@@ -125,6 +131,7 @@ namespace Appy.Services
             {
                 t.EndDate = yesterday;
                 await context.SaveChangesAsync();
+                logger.LogInformation("TimeOff {TimeOffId} stopped: end clamped to {EndDate} (facilityId {FacilityId})", t.Id, yesterday, facilityId);
             }
             return t;
         }
