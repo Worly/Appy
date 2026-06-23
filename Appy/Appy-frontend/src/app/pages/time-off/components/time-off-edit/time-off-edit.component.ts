@@ -36,8 +36,12 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
   public splitDate: Dayjs = dayjs();
 
   // Delete prompt state for recurring rules: "stop" clamps the rule's end to yesterday (keeps
-  // history), "remove" hard-deletes the row. Only shown when canStopRecurring(...) is true.
+  // history), "remove" hard-deletes the row. The stop-vs-remove choice is only offered when
+  // `canStop` is true; otherwise the dialog is a plain "are you sure" confirmation.
   public deleteMode: "stop" | "remove" = "stop";
+  // Whether the rule being deleted can be stopped (kept as history) rather than hard-deleted —
+  // drives whether the delete dialog shows the stop-vs-remove choice or a plain confirmation.
+  public canStop: boolean = false;
 
   public readonly deleteModeOptions: SegmentedOption[] = [
     { value: "stop", label: "pages.time-off.DELETE_MODE_STOP", dataTest: "time-off-delete-stop" },
@@ -273,19 +277,16 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
   public delete(): void {
     if (this.isNew) return;
 
-    // For an active, already-started recurring rule, offer "stop" (keep history) vs full delete.
-    if (canStopRecurring(this.timeOff, dayjs())) {
-      this.deleteMode = "stop";
-      this.deleteDialog?.open();
-      return;
-    }
-
-    this.deleteNow();
+    // Every delete goes through a confirmation dialog. For an active, already-started recurring
+    // rule it also offers "stop" (keep history) vs full delete; otherwise it's a plain confirm.
+    this.canStop = canStopRecurring(this.timeOff, dayjs());
+    this.deleteMode = "stop";
+    this.deleteDialog?.open();
   }
 
   public confirmDelete(): void {
     this.deleteDialog?.close();
-    if (this.deleteMode === "stop") this.stop();
+    if (this.canStop && this.deleteMode === "stop") this.stop();
     else this.deleteNow();
   }
 

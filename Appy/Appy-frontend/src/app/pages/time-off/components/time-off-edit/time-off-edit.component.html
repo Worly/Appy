@@ -167,13 +167,22 @@
   <div class="split-dialog" *ngIf="deleteDialog.isOpen" data-test="time-off-delete-dialog">
     <div class="split-title">{{ "pages.time-off.DELETE_TITLE" | translate }}</div>
 
-    <app-segmented-control [options]="deleteModeOptions" [value]="deleteMode"
-      (valueChange)="deleteMode = $event"></app-segmented-control>
+    <!-- Active, already-started recurring rule: choose to stop (keep history) or delete entirely. -->
+    <ng-container *ngIf="canStop">
+      <app-segmented-control [options]="deleteModeOptions" [value]="deleteMode"
+        (valueChange)="deleteMode = $event"></app-segmented-control>
 
-    <!-- Explains the effect of the selected delete mode before the user commits. -->
-    <div class="split-hint" data-test="time-off-delete-hint">
+      <!-- Explains the effect of the selected delete mode before the user commits. -->
+      <div class="split-hint" data-test="time-off-delete-hint">
+        <fa-icon [icon]="['fas', 'circle-info']" aria-hidden="true"></fa-icon>
+        <span>{{ (deleteMode === 'stop' ? 'pages.time-off.DELETE_MODE_STOP_HINT' : 'pages.time-off.DELETE_MODE_REMOVE_HINT') | translate }}</span>
+      </div>
+    </ng-container>
+
+    <!-- Every other rule: a plain confirmation before the delete goes through. -->
+    <div class="split-hint" *ngIf="!canStop" data-test="time-off-delete-confirm-message">
       <fa-icon [icon]="['fas', 'circle-info']" aria-hidden="true"></fa-icon>
-      <span>{{ (deleteMode === 'stop' ? 'pages.time-off.DELETE_MODE_STOP_HINT' : 'pages.time-off.DELETE_MODE_REMOVE_HINT') | translate }}</span>
+      <span>{{ "pages.time-off.DELETE_CONFIRM" | translate }}</span>
     </div>
 
     <div class="split-actions">

@@ -150,7 +150,11 @@ describe("Time Off", () => {
     getElement("time-off-edit-button").click();
     expectURL(/\/time-off\/edit\/\d+/);
 
+    // A one-off can't be stopped, so the delete dialog is a plain confirmation.
     clickDeleteButton();
+    getElement("time-off-delete-dialog").should("exist");
+    getElement("time-off-delete-confirm-message").should("exist");
+    getElement("time-off-delete-confirm").click();
     expectURL("/time-off");
 
     clickTab("oneoff");

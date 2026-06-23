@@ -259,6 +259,7 @@
             "APPLY_FROM_SPECIFIC_HINT": "Promjene se primjenjuju od odabranog datuma nadalje. Ranija ponavljanja zadržavaju trenutne postavke, čime se raspored dijeli na dva dijela.",
             "APPLY_FROM_ALL_HINT": "Promjene se primjenjuju na cijeli raspored — i prošla i buduća ponavljanja.",
             "DELETE_TITLE": "Brisanje slobodnog dana",
+            "DELETE_CONFIRM": "Jeste li sigurni da želite obrisati ovaj slobodni dan?",
             "DELETE_MODE_STOP": "Zaustavi",
             "DELETE_MODE_REMOVE": "Obriši u potpunosti",
             "DELETE_MODE_STOP_HINT": "Prošla ponavljanja se zadržavaju; pravilo se više ne primjenjuje od danas nadalje.",
