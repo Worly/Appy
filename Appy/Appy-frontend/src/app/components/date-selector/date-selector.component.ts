@@ -34,16 +34,11 @@ export class DateSelectorComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  // Text shown on the date button. dayjs renders the weekday in the active locale (lowercase in
-  // Croatian); we capitalize the first letter so it matches the app's weekday labels elsewhere.
+  // Text shown on the date button; with showDayOfWeek the weekday is prefixed in the active locale's
+  // own casing (capitalized in English, lowercase in Croatian — dayjs's localized weekday names).
   get displayText(): string {
     const dateFormat = this.compact ? "DD.MM.YY" : "DD.MM.YYYY";
-    if (!this.showDayOfWeek)
-      return this._date.format(dateFormat);
-
-    const weekday = this._date.format("dddd");
-    const capitalized = weekday.charAt(0).toUpperCase() + weekday.slice(1);
-    return `${capitalized}, ${this._date.format(dateFormat)}`;
+    return this._date.format(this.showDayOfWeek ? `dddd, ${dateFormat}` : dateFormat);
   }
 
 }
