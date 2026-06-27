@@ -77,6 +77,26 @@ namespace Appy.Tests.Services
             return appointment;
         }
 
+        private Appointment AddAppointmentOn(int id, DateOnly date)
+        {
+            var appointment = new Appointment
+            {
+                Id = id,
+                FacilityId = FacilityId,
+                Date = date,
+                Time = new TimeOnly(10, 0),
+                Duration = TimeSpan.FromMinutes(30),
+                ServiceId = service1.Id,
+                Service = service1,
+                ClientId = client1.Id,
+                Client = client1,
+                Status = AppointmentStatus.Unconfirmed,
+                Notes = "",
+            };
+            appointments.Add(appointment);
+            return appointment;
+        }
+
         private AppointmentEditDTO DtoMatching(Appointment a) => new AppointmentEditDTO
         {
             Date = a.Date,
@@ -259,13 +279,13 @@ namespace Appy.Tests.Services
         }
 
         [Fact]
-        public async Task GetList_ReturnsTimeOffsForThePageDateSpan()
+        public async Task GetList_IncludesTimeOffsForReturnedAppointments()
         {
-            AddAppointment(AppointmentStatus.Unconfirmed); // Date = 2030-01-15
+            var appointment = AddAppointment(AppointmentStatus.Unconfirmed);
 
-            var occurrence = new TimeOffOccurrenceDTO { Id = 7, Date = new DateOnly(2030, 1, 15), Label = "Closed" };
+            var occurrence = new TimeOffOccurrenceDTO { Id = 7, Date = appointment.Date, Label = "Closed" };
             timeOffServiceMock
-                .Setup(x => x.GetOccurrencesForDates(It.Is<IEnumerable<DateOnly>>(d => d.Contains(new DateOnly(2030, 1, 15))), FacilityId))
+                .Setup(x => x.GetOccurrencesForDates(It.Is<IEnumerable<DateOnly>>(d => d.Contains(appointment.Date)), FacilityId))
                 .ReturnsAsync(new List<TimeOffOccurrenceDTO> { occurrence });
 
             var result = await service.GetList(new DateOnly(2030, 1, 1), Direction.Forwards, 0, 20, null, FacilityId);
@@ -273,6 +293,26 @@ namespace Appy.Tests.Services
             Assert.Single(result.Appointments);
             Assert.Single(result.TimeOffs);
             Assert.Equal(7, result.TimeOffs[0].Id);
+        }
+
+        [Fact]
+        public async Task GetList_RequestsTimeOffsOnlyForReturnedAppointmentDates()
+        {
+            var first = AddAppointmentOn(1, new DateOnly(2030, 1, 15));
+            var second = AddAppointmentOn(2, new DateOnly(2030, 1, 20));
+            AddAppointmentOn(3, new DateOnly(2029, 12, 31)); // before the anchor — excluded from the page
+
+            List<DateOnly>? requestedDates = null;
+            timeOffServiceMock
+                .Setup(x => x.GetOccurrencesForDates(It.IsAny<IEnumerable<DateOnly>>(), FacilityId))
+                .Callback<IEnumerable<DateOnly>, int>((dates, _) => requestedDates = dates.ToList())
+                .ReturnsAsync(new List<TimeOffOccurrenceDTO>());
+
+            await service.GetList(new DateOnly(2030, 1, 1), Direction.Forwards, 0, 20, null, FacilityId);
+
+            Assert.NotNull(requestedDates);
+            Assert.Equal(new[] { first.Date, second.Date }, requestedDates!.OrderBy(d => d).ToArray());
+            Assert.DoesNotContain(new DateOnly(2029, 12, 31), requestedDates!);
         }
 
         [Fact]
