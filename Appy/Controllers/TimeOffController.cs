@@ -66,14 +66,6 @@ namespace Appy.Controllers
             return Ok(result.GetDTO());
         }
 
-        [HttpGet("getForDate")]
-        [Authorize]
-        public async Task<ActionResult<List<TimeOffOccurrenceDTO>>> GetForDate([FromQuery] DateOnly date)
-        {
-            var result = await this.timeOffService.GetOccurrencesForDate(date, HttpContext.SelectedFacility());
-            return Ok(result);
-        }
-
         [HttpGet("getList")]
         [Authorize]
         public async Task<ActionResult<List<TimeOffDTO>>> GetList(
