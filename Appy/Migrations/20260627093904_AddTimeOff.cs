@@ -22,7 +22,7 @@ namespace Appy.Migrations
                     Label = table.Column<string>(type: "text", nullable: false),
                     Notes = table.Column<string>(type: "text", nullable: true),
                     Recurrence = table.Column<int>(type: "integer", nullable: false),
-                    StartDate = table.Column<DateOnly>(type: "date", nullable: true),
+                    StartDate = table.Column<DateOnly>(type: "date", nullable: false),
                     EndDate = table.Column<DateOnly>(type: "date", nullable: true),
                     DayOfWeek = table.Column<int>(type: "integer", nullable: true),
                     DayOfMonth = table.Column<int>(type: "integer", nullable: true),

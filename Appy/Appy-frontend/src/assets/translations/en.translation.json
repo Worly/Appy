@@ -270,6 +270,7 @@
                 "MISSING_LABEL": "Label is required",
                 "MISSING_TIME": "Start and end time are required",
                 "TIMES_NOT_IN_ORDER": "Start time must be before end time",
+                "MISSING_START_DATE": "Start date is required",
                 "MISSING_DATE_RANGE": "Start and end date are required",
                 "DATES_NOT_IN_ORDER": "Start date must be on or before end date",
                 "MISSING_DAY_OF_WEEK": "Day of week is required",

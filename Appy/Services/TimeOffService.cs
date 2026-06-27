@@ -54,10 +54,6 @@ namespace Appy.Services
             Validate(dto);
             var t = new TimeOff { FacilityId = facilityId };
             ApplyDto(t, dto);
-            // A new recurring rule with no explicit start is "from today, forever" — stamp today so the
-            // rule has a concrete effective-from (one-offs always carry their own dates).
-            if (t.Recurrence != TimeOffRecurrence.OneOff && t.StartDate == null)
-                t.StartDate = DateOnly.FromDateTime(DateTime.Today);
             context.TimeOffs.Add(t);
             await context.SaveChangesAsync();
             logger.LogInformation("TimeOff {TimeOffId} created (facilityId {FacilityId})", t.Id, facilityId);
@@ -77,7 +73,7 @@ namespace Appy.Services
             // nothing to preserve — edit in place.
             bool split = applyFrom.HasValue
                 && t.Recurrence != TimeOffRecurrence.OneOff
-                && (t.StartDate == null || applyFrom.Value > t.StartDate.Value);
+                && applyFrom.Value > t.StartDate;
 
             Validate(dto);
 
@@ -149,25 +145,26 @@ namespace Appy.Services
                     throw new ValidationException(nameof(TimeOffDTO.TimeFrom), "pages.time-off.errors.TIMES_NOT_IN_ORDER");
             }
 
+            // Effective-from is mandatory for every recurrence — never optional.
+            if (dto.StartDate == null)
+                throw new ValidationException(nameof(TimeOffDTO.StartDate), "pages.time-off.errors.MISSING_START_DATE");
+
+            if (dto.EndDate != null && dto.StartDate > dto.EndDate)
+                throw new ValidationException(nameof(TimeOffDTO.StartDate), "pages.time-off.errors.DATES_NOT_IN_ORDER");
+
             switch (dto.Recurrence)
             {
                 case TimeOffRecurrence.OneOff:
-                    if (dto.StartDate == null || dto.EndDate == null)
+                    if (dto.EndDate == null)
                         throw new ValidationException(nameof(TimeOffDTO.StartDate), "pages.time-off.errors.MISSING_DATE_RANGE");
-                    if (dto.StartDate > dto.EndDate)
-                        throw new ValidationException(nameof(TimeOffDTO.StartDate), "pages.time-off.errors.DATES_NOT_IN_ORDER");
                     break;
                 case TimeOffRecurrence.Weekly:
                     if (dto.DayOfWeek == null)
                         throw new ValidationException(nameof(TimeOffDTO.DayOfWeek), "pages.time-off.errors.MISSING_DAY_OF_WEEK");
-                    if (dto.StartDate != null && dto.EndDate != null && dto.StartDate > dto.EndDate)
-                        throw new ValidationException(nameof(TimeOffDTO.StartDate), "pages.time-off.errors.DATES_NOT_IN_ORDER");
                     break;
                 case TimeOffRecurrence.Monthly:
                     if (dto.DayOfMonth == null || dto.DayOfMonth < 1 || dto.DayOfMonth > 31)
                         throw new ValidationException(nameof(TimeOffDTO.DayOfMonth), "pages.time-off.errors.INVALID_DAY_OF_MONTH");
-                    if (dto.StartDate != null && dto.EndDate != null && dto.StartDate > dto.EndDate)
-                        throw new ValidationException(nameof(TimeOffDTO.StartDate), "pages.time-off.errors.DATES_NOT_IN_ORDER");
                     break;
             }
         }
@@ -178,7 +175,7 @@ namespace Appy.Services
             t.Label = dto.Label;
             t.Notes = dto.Notes;
             t.Recurrence = dto.Recurrence;
-            t.StartDate = dto.StartDate;
+            t.StartDate = dto.StartDate!.Value;   // required — guaranteed non-null by Validate
             t.EndDate = dto.EndDate;
             t.DayOfWeek = dto.Recurrence == TimeOffRecurrence.Weekly ? dto.DayOfWeek : null;
             t.DayOfMonth = dto.Recurrence == TimeOffRecurrence.Monthly ? dto.DayOfMonth : null;
@@ -192,7 +189,7 @@ namespace Appy.Services
         // or a day-of-month the calendar skips within a year). Used as a sort key for Recurring/Active.
         public static DateOnly? NextOccurrenceOnOrAfter(TimeOff t, DateOnly from)
         {
-            var anchor = (t.StartDate.HasValue && t.StartDate.Value > from) ? t.StartDate.Value : from;
+            var anchor = t.StartDate > from ? t.StartDate : from;
 
             switch (t.Recurrence)
             {
@@ -264,11 +261,11 @@ namespace Appy.Services
                     return t.StartDate <= date && date <= t.EndDate;
                 case TimeOffRecurrence.Weekly:
                     return t.DayOfWeek == date.DayOfWeek
-                        && (t.StartDate == null || date >= t.StartDate)
+                        && date >= t.StartDate
                         && (t.EndDate == null || date <= t.EndDate);
                 case TimeOffRecurrence.Monthly:
                     return t.DayOfMonth == date.Day
-                        && (t.StartDate == null || date >= t.StartDate)
+                        && date >= t.StartDate
                         && (t.EndDate == null || date <= t.EndDate);
                 default:
                     return false;

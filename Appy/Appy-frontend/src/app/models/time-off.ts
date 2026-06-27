@@ -60,7 +60,13 @@ export class TimeOff extends EditModel<TimeOff> {
       errorCode: "pages.time-off.errors.TIMES_NOT_IN_ORDER"
     },
     {
-      isValid: () => this.recurrence != TimeOffRecurrence.OneOff || (REQUIRED_VALIDATION(this.startDate) && REQUIRED_VALIDATION(this.endDate)),
+      isValid: () => REQUIRED_VALIDATION(this.startDate),
+      propertyName: "startDate",
+      responsibleProperties: ["recurrence"],
+      errorCode: "pages.time-off.errors.MISSING_START_DATE"
+    },
+    {
+      isValid: () => this.recurrence != TimeOffRecurrence.OneOff || REQUIRED_VALIDATION(this.endDate),
       propertyName: "startDate",
       responsibleProperties: ["endDate", "recurrence"],
       errorCode: "pages.time-off.errors.MISSING_DATE_RANGE"

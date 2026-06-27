@@ -270,6 +270,7 @@
                 "MISSING_LABEL": "Naziv je obavezan",
                 "MISSING_TIME": "Početno i završno vrijeme su obavezni",
                 "TIMES_NOT_IN_ORDER": "Početno vrijeme mora biti prije završnog",
+                "MISSING_START_DATE": "Početni datum je obavezan",
                 "MISSING_DATE_RANGE": "Početni i završni datum su obavezni",
                 "DATES_NOT_IN_ORDER": "Početni datum mora biti isti ili prije završnog",
                 "MISSING_DAY_OF_WEEK": "Dan u tjednu je obavezan",

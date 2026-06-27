@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Appy.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    [Migration("20260604142709_AddTimeOff")]
+    [Migration("20260627093904_AddTimeOff")]
     partial class AddTimeOff
     {
         /// <inheritdoc />
@@ -315,7 +315,7 @@ namespace Appy.Migrations
                     b.Property<int>("Recurrence")
                         .HasColumnType("integer");
 
-                    b.Property<DateOnly?>("StartDate")
+                    b.Property<DateOnly>("StartDate")
                         .HasColumnType("date");
 
                     b.Property<TimeOnly?>("TimeFrom")

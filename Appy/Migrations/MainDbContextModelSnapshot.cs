@@ -312,7 +312,7 @@ namespace Appy.Migrations
                     b.Property<int>("Recurrence")
                         .HasColumnType("integer");
 
-                    b.Property<DateOnly?>("StartDate")
+                    b.Property<DateOnly>("StartDate")
                         .HasColumnType("date");
 
                     b.Property<TimeOnly?>("TimeFrom")

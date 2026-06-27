@@ -25,9 +25,9 @@ namespace Appy.Domain
 
         public TimeOffRecurrence Recurrence { get; set; }
 
-        // OneOff: required blocked-from / blocked-to.
-        // Weekly/Monthly: optional effective-from / effective-until bounds (null = open-ended).
-        public DateOnly? StartDate { get; set; }
+        // OneOff: blocked-from / blocked-to (both required).
+        // Weekly/Monthly: effective-from (required) plus an optional effective-until (null = open-ended).
+        public DateOnly StartDate { get; set; }
         public DateOnly? EndDate { get; set; }
 
         public DayOfWeek? DayOfWeek { get; set; }   // Weekly only

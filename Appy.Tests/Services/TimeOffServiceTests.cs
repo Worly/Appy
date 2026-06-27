@@ -103,18 +103,15 @@ namespace Appy.Tests.Services
         }
 
         [Fact]
-        public async Task AddNew_OpenEndedRecurring_StampsTodayAsStart()
+        public async Task AddNew_Throws_WhenRecurringMissingStartDate()
         {
             var dto = ValidOneOff();
             dto.Recurrence = TimeOffRecurrence.Weekly;
             dto.DayOfWeek = DayOfWeek.Monday;
-            dto.StartDate = null;
+            dto.StartDate = null; // effective-from is mandatory for every recurrence
             dto.EndDate = null;
 
-            var result = await service.AddNew(dto, FacilityId);
-
-            Assert.Equal(DateOnly.FromDateTime(DateTime.Today), result.StartDate);
-            Assert.Null(result.EndDate); // still "forever"
+            await Assert.ThrowsAsync<ValidationException>(() => service.AddNew(dto, FacilityId));
         }
 
         [Fact]
@@ -133,9 +130,8 @@ namespace Appy.Tests.Services
         }
 
         [Fact]
-        public async Task AddNew_OneOff_DoesNotStampStart()
+        public async Task AddNew_OneOff_PreservesExplicitStart()
         {
-            // One-offs always carry explicit dates; the today-stamp must not touch them.
             var dto = ValidOneOff(); // StartDate = 2030-06-01
             var result = await service.AddNew(dto, FacilityId);
             Assert.Equal(new DateOnly(2030, 6, 1), result.StartDate);
@@ -162,6 +158,7 @@ namespace Appy.Tests.Services
                 Label = "New",
                 Recurrence = TimeOffRecurrence.Weekly,
                 DayOfWeek = DayOfWeek.Tuesday, // the change applied from the split date onward
+                StartDate = new DateOnly(2030, 6, 15), // the form carries the split date as the new start
                 IsAllDay = true,
             };
 
@@ -197,7 +194,7 @@ namespace Appy.Tests.Services
                 IsAllDay = true,
             });
 
-            var dto = new TimeOffDTO { Label = "New", Recurrence = TimeOffRecurrence.Weekly, DayOfWeek = DayOfWeek.Monday, IsAllDay = true };
+            var dto = new TimeOffDTO { Label = "New", Recurrence = TimeOffRecurrence.Weekly, DayOfWeek = DayOfWeek.Monday, StartDate = new DateOnly(2030, 6, 10), IsAllDay = true };
 
             // applyFrom == start -> historical segment would be empty -> edit in place, no fork.
             var result = await service.Edit(8, dto, FacilityId, applyFrom: new DateOnly(2030, 6, 10));
@@ -249,6 +246,7 @@ namespace Appy.Tests.Services
                 Label = "New",
                 Recurrence = TimeOffRecurrence.Weekly,
                 DayOfWeek = DayOfWeek.Monday,
+                StartDate = new DateOnly(2030, 6, 1),
                 EndDate = new DateOnly(2030, 6, 10), // until before the chosen split date
                 IsAllDay = true,
             };
