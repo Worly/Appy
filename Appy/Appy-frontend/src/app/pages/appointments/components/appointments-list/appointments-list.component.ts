@@ -361,8 +361,8 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
             appointment: entry.appointment,
             dateISO: day.date.format("YYYY-MM-DD"),
             isLast: k === dayKeys.length - 1 && i === timeline.length - 1,
-            isOverlapping: isOverlappingWithPrev,
-            isOnDayOff,
+            // A full-day off draws the same red border as a neighbour overlap, so reuse isOverlapping.
+            isOverlapping: isOverlappingWithPrev || isOnDayOff,
           };
           this.renderedItems.push(item);
           prevRenderedCardItem = item;
@@ -548,7 +548,6 @@ export type RenderedAppointment = RenderedCardItem & {
   dateISO: string;
   appointment: AppointmentView;
   isLast: boolean;
-  isOnDayOff: boolean;   // booked on a day that is a full-day off
 }
 
 type RenderedDate = {
