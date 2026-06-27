@@ -25,7 +25,7 @@ Strings in request-body DTOs are trimmed of leading/trailing whitespace during d
 
 ## Time Off Enums
 
-`TimeOffListType` (`OneOff` / `Recurring`) and `TimeOffScope` (`Active` / `Expired`) are tokens for the time-off list endpoint (`GET /timeOff/getList`). `TimeOffListType` selects which tab of rules to retrieve; `TimeOffScope` selects the temporal filter (active rules vs. expired/archived ones).
+`TimeOffListType` (`OneOff` / `Recurring`) and `TimeOffScope` (`Active` / `History`) are tokens for the time-off list endpoint (`GET /timeOff/getList`). `TimeOffListType` selects which tab of rules to retrieve; `TimeOffScope` selects the temporal filter (active rules vs. ended ones kept as history).
 
 ## AppointmentListPageDTO
 

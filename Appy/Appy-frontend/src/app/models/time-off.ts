@@ -10,7 +10,7 @@ export enum TimeOffRecurrence {
 
 // API-facing tokens for the list endpoint (match the backend enum names exactly).
 export type TimeOffListType = "OneOff" | "Recurring";
-export type TimeOffScope = "Active" | "Expired";
+export type TimeOffScope = "Active" | "History";
 
 export class TimeOffDTO {
   public id: number = 0;

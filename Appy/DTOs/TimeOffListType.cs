@@ -7,10 +7,10 @@ namespace Appy.DTOs
         Recurring,
     }
 
-    // Active = today/future or open-ended; Expired = ended before today.
+    // Active = today/future or open-ended; History = ended before today.
     public enum TimeOffScope
     {
         Active,
-        Expired,
+        History,
     }
 }

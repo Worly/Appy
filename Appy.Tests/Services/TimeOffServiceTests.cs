@@ -505,13 +505,13 @@ namespace Appy.Tests.Services
         }
 
         [Fact]
-        public async Task GetList_OneOffExpired_NewestEndedFirst()
+        public async Task GetList_OneOffHistory_NewestEndedFirst()
         {
             var today = DateOnly.FromDateTime(DateTime.Today);
             Seed(new TimeOff { Id = 1, Recurrence = TimeOffRecurrence.OneOff, StartDate = today.AddDays(-40), EndDate = today.AddDays(-37) });
             Seed(new TimeOff { Id = 2, Recurrence = TimeOffRecurrence.OneOff, StartDate = today.AddDays(-10), EndDate = today.AddDays(-2) });
 
-            var page = await service.GetList(TimeOffListType.OneOff, TimeOffScope.Expired, 0, 20, FacilityId);
+            var page = await service.GetList(TimeOffListType.OneOff, TimeOffScope.History, 0, 20, FacilityId);
 
             Assert.Equal(new[] { 2, 1 }, page.Select(t => t.Id).ToArray()); // 2 ended later -> first
         }

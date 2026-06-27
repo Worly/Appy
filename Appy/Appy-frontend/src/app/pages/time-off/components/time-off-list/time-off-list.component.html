@@ -3,7 +3,7 @@
 <div *ngIf="items != null" data-test="time-off-list">
   <div *ngIf="items.length === 0" class="empty" data-test="time-off-list-empty">
     <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
-    <span>{{ (scope === "Active" ? "pages.time-off.NONE_UPCOMING" : "pages.time-off.NONE_PAST") | translate }}</span>
+    <span>{{ (scope === "Active" ? "pages.time-off.NONE_UPCOMING" : "pages.time-off.NONE_HISTORY") | translate }}</span>
   </div>
 
   <app-single-time-off-list-item

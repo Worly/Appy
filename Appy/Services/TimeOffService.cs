@@ -56,7 +56,7 @@ namespace Appy.Services
                 : query.Where(t => t.EndDate != null && t.EndDate < today);   // ended before today
 
             List<TimeOff> page;
-            if (scope == TimeOffScope.Expired)
+            if (scope == TimeOffScope.History)
             {
                 // Newest-ended first — ordered and paged entirely on the DB.
                 page = await query

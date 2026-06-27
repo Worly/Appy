@@ -26,7 +26,7 @@ export class TimeOffComponent implements OnInit, OnDestroy {
 
   public readonly scopeOptions: SegmentedOption[] = [
     { value: "Active", label: "pages.time-off.UPCOMING", icon: "arrow-right", dataTest: "time-off-scope-upcoming" },
-    { value: "Expired", label: "pages.time-off.HISTORY", icon: "clock-rotate-left", dataTest: "time-off-scope-history" },
+    { value: "History", label: "pages.time-off.HISTORY", icon: "clock-rotate-left", dataTest: "time-off-scope-history" },
   ];
 
   private subs: Subscription[] = [];
@@ -42,7 +42,7 @@ export class TimeOffComponent implements OnInit, OnDestroy {
       const tab = params.get("tab");
       this.activeTab = tab === "recurring" ? "Recurring" : tab === "holidays" ? "Holidays" : "OneOff";
       const scope = params.get("scope");
-      this.scope = scope === "past" ? "Expired" : "Active";
+      this.scope = scope === "history" ? "History" : "Active";
     }));
   }
 
@@ -71,7 +71,7 @@ export class TimeOffComponent implements OnInit, OnDestroy {
   private updateUrl(): void {
     setUrlParams(this.router, this.route, this.location, {
       tab: this.activeTab.toLowerCase(),
-      scope: this.scope === "Expired" ? "past" : "upcoming",
+      scope: this.scope === "History" ? "history" : "upcoming",
     });
   }
 
