@@ -29,7 +29,7 @@ export class ButtonComponent implements OnInit {
   @Input() borderStyle: "solid" | "dashed" | "dotted" | "double" = "solid";
   @Input() borderWidth: string = "2px";
 
-  @Input() alignContent: "left" | "center" | "right" = "left";
+  @Input() alignContent: "left" | "center" | "right" | "space-between" = "left";
   @Input() textAlign: "left" | "center" | "rigth" = "left";
 
   @Input() disabled: boolean = false;

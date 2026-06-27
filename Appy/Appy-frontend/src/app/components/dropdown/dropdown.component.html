@@ -2,7 +2,8 @@
     <app-button #mainButton="elementRef" appElementRef
         [text]="value == null ? (selectString | translate) : display(value)" look="outlined" borderWidth="1px"
         [icon]="hasIcon ? 'caret-down' : undefined" iconPlacement="right"
-        alignContent="center" (onClick)="contextMenu.toggle()">
+        [width]="fullWidth ? '100%' : ''" [alignContent]="fullWidth && hasIcon ? 'space-between' : 'center'"
+        (onClick)="contextMenu.toggle()">
     </app-button>
 
     <app-context-menu #contextMenu [relativeTo]="mainButton.elementRef" [copyOriginWidth]="matchTriggerWidth">

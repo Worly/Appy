@@ -3,10 +3,16 @@
 }
 
 .segmented {
+  // The pill's radius and padding are derived from the app's base --default-border-radius so the
+  // control scales with it. Segments read these (they inherit, unlike --default-border-radius
+  // itself, which my-styles.scss redeclares on every element) to nest their corners concentrically.
+  --pill-radius: calc(var(--default-border-radius) * 3);   // 12px
+  --pill-padding: var(--default-border-radius);            // 4px
+
   display: flex;
   gap: 4px;
-  padding: 4px;
-  border-radius: 12px;
+  padding: var(--pill-padding);
+  border-radius: var(--pill-radius);
   background: rgb(var(--rgb-input-background));
   border: 1px solid rgb(var(--rgb-input-border));
 
@@ -18,9 +24,10 @@
 
   // Compact: a fit-content pill with content-sized segments (e.g. a scope toggle).
   &.compact {
+    --pill-radius: calc(var(--default-border-radius) * 2.5);   // 10px
+    --pill-padding: calc(var(--default-border-radius) * 0.75); // 3px
+
     width: fit-content;
-    padding: 3px;
-    border-radius: 10px;
 
     .segment {
       flex: 0 0 auto;
@@ -28,25 +35,18 @@
   }
 }
 
-// Round each segment's corners to nest concentrically inside the container:
-// inner radius = container radius − padding, so the segment curve runs parallel to the pill.
-// app-button draws its corner on the inner `.my-button` element, which reads
-// `--default-border-radius`. We must set that token ON `.my-button` itself (piercing with
-// ::ng-deep) — setting it on the host does nothing, because the global
-// `* { --default-border-radius: 4px }` in my-styles.scss re-declares it on every element and
-// defeats inheritance.
+// Round each segment's corners to nest concentrically inside the container: inner radius =
+// container radius − padding. app-button draws its corner on the inner `.my-button`, so we set the
+// token there (piercing with ::ng-deep); setting it on the host does nothing because the global
+// `* { --default-border-radius: 4px }` re-declares it on every element and defeats inheritance.
 :host ::ng-deep .segmented .segment .my-button {
-  --default-border-radius: 8px; // 12px container − 4px padding
+  --default-border-radius: calc(var(--pill-radius) - var(--pill-padding));
   // Segments share one row, so they can't afford a standalone button's 15px side padding —
   // with an icon plus a long (especially Croatian) label it overflows into a scrollbar.
   // Trim the padding and the label size so icon + text fit comfortably.
   padding-left: 8px;
   padding-right: 8px;
   font-size: 0.9rem;
-}
-
-:host ::ng-deep .segmented.compact .segment .my-button {
-  --default-border-radius: 7px; // 10px container − 3px padding
 }
 
 // Keep icon + label on one line; if a label still can't fit, clip it rather than show the

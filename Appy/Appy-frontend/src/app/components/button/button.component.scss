@@ -267,6 +267,17 @@
     &-right {
         justify-content: right;
     }
+
+    // Content stretches edge-to-edge with its ends pushed apart — e.g. a select-style trigger
+    // with the label on the left and the caret on the right.
+    &-space-between {
+        justify-content: space-between;
+
+        > .button-content {
+            flex: 1 1 auto;
+            justify-content: space-between;
+        }
+    }
 }
 
 .text-align {

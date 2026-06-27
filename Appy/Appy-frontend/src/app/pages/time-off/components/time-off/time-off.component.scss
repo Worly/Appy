@@ -2,15 +2,6 @@
   display: block;
 }
 
-// Centred column, matching the edit form's width so list and form feel like one screen.
-.page {
-  max-width: 560px;
-  margin: 0 auto;
-}
-
-// Title uses the global .w-title (matching the home screen) — no per-page hero.
-
-// The tabs + scope toggle are now app-segmented-control; just space the tabs above the controls row.
 .tabs {
   display: block;
   margin-bottom: 12px;

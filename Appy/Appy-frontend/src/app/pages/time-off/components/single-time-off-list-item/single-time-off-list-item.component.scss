@@ -1,22 +1,20 @@
-// Mirrors the appointments list-item: [accent bar] [info] [type icon], on an
-// input-background card — but with the editor's softer corners + subtle lift.
+// Mirrors the appointments list-item: [accent bar] [info] [type icon], on an input-background card.
 .time-off-row {
   font-size: 1rem;
   margin-bottom: 10px;
   padding: 10px 14px;
   background-color: rgb(var(--rgb-input-background));
-  border-radius: 10px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border-radius: var(--default-border-radius);
   display: flex;
   align-items: center;
   gap: 14px;
   cursor: pointer;
 
-  // Time-off-themed accent, echoing the service-colour bar on appointment rows.
+  // Time-off-themed accent, echoing the service-colour bar on appointment rows (same width).
   .accent {
-    flex: 0 0 5px;
+    flex: 0 0 6px;
     align-self: stretch;
-    border-radius: 6px;
+    border-radius: var(--default-border-radius);
     background: rgb(var(--rgb-warning));
   }
 
