@@ -119,11 +119,9 @@ namespace Appy.Controllers
                 appointmentsOfTheDay = appointmentsOfTheDay.Where(o => o.Id != ignoreAppointmentId).ToList();
 
             var occurrences = await this.timeOffService.GetOccurrencesForDate(date, HttpContext.SelectedFacility());
-            var blockedIntervals = occurrences.Select(o => o.IsAllDay
-                ? (new TimeOnly(0, 0, 0), new TimeOnly(23, 59, 59))
-                : (o.TimeFrom!.Value, o.TimeTo!.Value)).ToList();
+            var timeOffIntervals = occurrences.Select(o => o.ToInterval()).ToList();
 
-            return this.appointmentService.GetFreeTimes(appointmentsOfTheDay, workingHours, blockedIntervals, service.GetDTO(), duration);
+            return this.appointmentService.GetFreeTimes(appointmentsOfTheDay, workingHours, timeOffIntervals, service.GetDTO(), duration);
         }
 
         [HttpPost("notifyClient/{id}")]

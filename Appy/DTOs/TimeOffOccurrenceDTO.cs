@@ -12,5 +12,11 @@ namespace Appy.DTOs
         public bool IsAllDay { get; set; }
         public TimeOnly? TimeFrom { get; set; }
         public TimeOnly? TimeTo { get; set; }
+
+        // The wall-clock span this occurrence blocks out on its day. All-day covers the whole day.
+        public (TimeOnly From, TimeOnly To) ToInterval()
+            => IsAllDay
+                ? (new TimeOnly(0, 0, 0), new TimeOnly(23, 59, 59))
+                : (TimeFrom!.Value, TimeTo!.Value);
     }
 }
