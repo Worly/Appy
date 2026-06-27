@@ -136,8 +136,6 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
 
     this.pagedResult = this.appointmentService.getList(this.date, appFilterToSmartFilter(this._filter));
 
-    // Appointments and their time-offs arrive in the same paged response; page$ pairs them from one
-    // emission, so we render once per update — no separate fetch, no pop-in, no stale-pair flash.
     this.pagedSubs.push(this.pagedResult.page$.subscribe(({ items: appointments, extras: timeOffs }) => {
       this.appointments = appointments;
       this.timeOffs = this.dedupeOccurrences(timeOffs);
