@@ -1,6 +1,6 @@
-<app-loading *ngIf="items == null"></app-loading>
+<app-loading *ngIf="loading"></app-loading>
 
-<div *ngIf="items != null" data-test="time-off-list">
+<div *ngIf="!loading" data-test="time-off-list">
   <div *ngIf="items.length === 0" class="empty" data-test="time-off-list-empty">
     <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
     <span>{{ (scope === "Active" ? "pages.time-off.NONE_UPCOMING" : "pages.time-off.NONE_HISTORY") | translate }}</span>

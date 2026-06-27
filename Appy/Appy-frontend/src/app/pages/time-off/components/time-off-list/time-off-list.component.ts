@@ -14,7 +14,10 @@ export class TimeOffListComponent implements OnChanges, OnDestroy {
   @Input() scope!: TimeOffScope;
   @Output() openDetails: EventEmitter<number> = new EventEmitter();
 
-  public items: TimeOff[] | null = null;
+  public items: TimeOff[] = [];
+  // Initial anchor load (no data yet) drives the full loader; loadingMore drives the bottom spinner
+  // for subsequent pages. They're distinct because the seam emits an empty page while still pending.
+  public loading: boolean = true;
   public loadingMore: boolean = false;
 
   private pagedResult?: PagedResult<TimeOff, never>;
@@ -42,7 +45,8 @@ export class TimeOffListComponent implements OnChanges, OnDestroy {
 
   private load(): void {
     this.teardown();
-    this.items = null;
+    this.items = [];
+    this.loading = true;
     this.pagedResult = this.timeOffService.getList(this.type, this.scope);
 
     this.subs.push(this.pagedResult.items$.subscribe(items => {
@@ -50,6 +54,7 @@ export class TimeOffListComponent implements OnChanges, OnDestroy {
       // After a render, top up if the first page didn't fill the viewport.
       setTimeout(() => this.checkShouldLoad());
     }));
+    this.subs.push(this.pagedResult.loading$.subscribe(l => this.loading = l));
     this.subs.push(this.pagedResult.loadingForwards$.subscribe(l => this.loadingMore = l));
   }
 
