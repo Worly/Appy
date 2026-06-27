@@ -472,64 +472,70 @@ namespace Appy.Tests.Services
             Assert.Null(TimeOffService.NextOccurrenceOnOrAfter(t, new DateOnly(2030, 6, 21)));
         }
 
-        // ---- BuildListPage ----
+        // ---- OrderRecurringByNextOccurrence ----
 
         private static readonly DateOnly Today = new DateOnly(2030, 6, 10); // a Monday
 
         [Fact]
-        public void BuildListPage_OneOffActive_ExcludesExpiredAndSortsByStartDate()
+        public void OrderRecurringByNextOccurrence_SortsByNextOccurrence_NoOccurrenceLast()
         {
-            var ongoing = new TimeOff { Id = 1, Recurrence = TimeOffRecurrence.OneOff, StartDate = new DateOnly(2030, 6, 1), EndDate = new DateOnly(2030, 6, 20) };
-            var future = new TimeOff { Id = 2, Recurrence = TimeOffRecurrence.OneOff, StartDate = new DateOnly(2030, 7, 1), EndDate = new DateOnly(2030, 7, 5) };
-            var past = new TimeOff { Id = 3, Recurrence = TimeOffRecurrence.OneOff, StartDate = new DateOnly(2030, 5, 1), EndDate = new DateOnly(2030, 5, 9) };
+            var weds = new TimeOff { Id = 1, Recurrence = TimeOffRecurrence.Weekly, DayOfWeek = DayOfWeek.Wednesday }; // next 2030-06-12
+            var tue = new TimeOff { Id = 2, Recurrence = TimeOffRecurrence.Weekly, DayOfWeek = DayOfWeek.Tuesday };   // next 2030-06-11
+            // Has a future end bound but no remaining occurrence: Sunday rule ending the Wednesday before its next Sunday.
+            var dead = new TimeOff { Id = 3, Recurrence = TimeOffRecurrence.Weekly, DayOfWeek = DayOfWeek.Sunday, EndDate = new DateOnly(2030, 6, 12) };
 
-            var page = TimeOffService.BuildListPage(new[] { future, past, ongoing }, TimeOffListType.OneOff, TimeOffScope.Active, Today, 0, 20);
+            var ordered = TimeOffService.OrderRecurringByNextOccurrence(new[] { weds, dead, tue }, Today);
+
+            Assert.Equal(new[] { 2, 1, 3 }, ordered.Select(t => t.Id).ToArray()); // Tue, Wed, then the no-occurrence rule last
+        }
+
+        // ---- GetList (DB-side filter + ordering + paging) ----
+
+        [Fact]
+        public async Task GetList_OneOffActive_ExcludesExpiredAndSortsByStartDate()
+        {
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            Seed(new TimeOff { Id = 1, Recurrence = TimeOffRecurrence.OneOff, StartDate = today.AddDays(-5), EndDate = today.AddDays(10) });   // ongoing
+            Seed(new TimeOff { Id = 2, Recurrence = TimeOffRecurrence.OneOff, StartDate = today.AddDays(20), EndDate = today.AddDays(25) });  // future
+            Seed(new TimeOff { Id = 3, Recurrence = TimeOffRecurrence.OneOff, StartDate = today.AddDays(-40), EndDate = today.AddDays(-31) }); // past
+
+            var page = await service.GetList(TimeOffListType.OneOff, TimeOffScope.Active, 0, 20, FacilityId);
 
             Assert.Equal(new[] { 1, 2 }, page.Select(t => t.Id).ToArray()); // ongoing (earlier start) first, past excluded
         }
 
         [Fact]
-        public void BuildListPage_OneOffExpired_NewestEndedFirst()
+        public async Task GetList_OneOffExpired_NewestEndedFirst()
         {
-            var a = new TimeOff { Id = 1, Recurrence = TimeOffRecurrence.OneOff, StartDate = new DateOnly(2030, 5, 1), EndDate = new DateOnly(2030, 5, 3) };
-            var b = new TimeOff { Id = 2, Recurrence = TimeOffRecurrence.OneOff, StartDate = new DateOnly(2030, 6, 1), EndDate = new DateOnly(2030, 6, 8) };
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            Seed(new TimeOff { Id = 1, Recurrence = TimeOffRecurrence.OneOff, StartDate = today.AddDays(-40), EndDate = today.AddDays(-37) });
+            Seed(new TimeOff { Id = 2, Recurrence = TimeOffRecurrence.OneOff, StartDate = today.AddDays(-10), EndDate = today.AddDays(-2) });
 
-            var page = TimeOffService.BuildListPage(new[] { a, b }, TimeOffListType.OneOff, TimeOffScope.Expired, Today, 0, 20);
+            var page = await service.GetList(TimeOffListType.OneOff, TimeOffScope.Expired, 0, 20, FacilityId);
 
-            Assert.Equal(new[] { 2, 1 }, page.Select(t => t.Id).ToArray()); // b ended later -> first
+            Assert.Equal(new[] { 2, 1 }, page.Select(t => t.Id).ToArray()); // 2 ended later -> first
         }
 
         [Fact]
-        public void BuildListPage_RecurringActive_SortsByNextOccurrence_NoOccurrenceLast()
+        public async Task GetList_RecurringActive_IncludesOpenEnded_ExcludesOneOffs()
         {
-            var weds = new TimeOff { Id = 1, Recurrence = TimeOffRecurrence.Weekly, DayOfWeek = DayOfWeek.Wednesday }; // next 2030-06-12
-            var tue = new TimeOff { Id = 2, Recurrence = TimeOffRecurrence.Weekly, DayOfWeek = DayOfWeek.Tuesday };   // next 2030-06-11
-            // Non-expired by bounds (end in the future) but no remaining occurrence: Sunday rule ending Wed.
-            var dead = new TimeOff { Id = 3, Recurrence = TimeOffRecurrence.Weekly, DayOfWeek = DayOfWeek.Sunday, EndDate = new DateOnly(2030, 6, 12) };
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            Seed(new TimeOff { Id = 1, Recurrence = TimeOffRecurrence.Monthly, DayOfMonth = 15, StartDate = today.AddDays(-100) }); // open-ended recurring
+            Seed(new TimeOff { Id = 2, Recurrence = TimeOffRecurrence.OneOff, StartDate = today, EndDate = today.AddDays(30) });
 
-            var page = TimeOffService.BuildListPage(new[] { weds, dead, tue }, TimeOffListType.Recurring, TimeOffScope.Active, Today, 0, 20);
-
-            Assert.Equal(new[] { 2, 1, 3 }, page.Select(t => t.Id).ToArray()); // Tue, Wed, then the no-occurrence rule last
-        }
-
-        [Fact]
-        public void BuildListPage_RecurringActive_IncludesOpenEnded_ExcludesOneOffs()
-        {
-            var openEnded = new TimeOff { Id = 1, Recurrence = TimeOffRecurrence.Monthly, DayOfMonth = 15 };
-            var oneOff = new TimeOff { Id = 2, Recurrence = TimeOffRecurrence.OneOff, StartDate = new DateOnly(2030, 6, 1), EndDate = new DateOnly(2030, 6, 30) };
-
-            var page = TimeOffService.BuildListPage(new[] { openEnded, oneOff }, TimeOffListType.Recurring, TimeOffScope.Active, Today, 0, 20);
+            var page = await service.GetList(TimeOffListType.Recurring, TimeOffScope.Active, 0, 20, FacilityId);
 
             Assert.Equal(new[] { 1 }, page.Select(t => t.Id).ToArray()); // one-off excluded from Recurring
         }
 
         [Fact]
-        public void BuildListPage_AppliesSkipAndTake()
+        public async Task GetList_AppliesSkipAndTake()
         {
-            var items = Enumerable.Range(1, 5).Select(i =>
-                new TimeOff { Id = i, Recurrence = TimeOffRecurrence.OneOff, StartDate = new DateOnly(2030, 6, i), EndDate = new DateOnly(2030, 7, i) }).ToArray();
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            foreach (var i in Enumerable.Range(1, 5))
+                Seed(new TimeOff { Id = i, Recurrence = TimeOffRecurrence.OneOff, StartDate = today.AddDays(i), EndDate = today.AddDays(30 + i) });
 
-            var page = TimeOffService.BuildListPage(items, TimeOffListType.OneOff, TimeOffScope.Active, Today, 2, 2);
+            var page = await service.GetList(TimeOffListType.OneOff, TimeOffScope.Active, 2, 2, FacilityId);
 
             Assert.Equal(new[] { 3, 4 }, page.Select(t => t.Id).ToArray());
         }

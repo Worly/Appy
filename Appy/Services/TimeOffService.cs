@@ -44,9 +44,41 @@ namespace Appy.Services
 
         public async Task<List<TimeOffDTO>> GetList(TimeOffListType type, TimeOffScope scope, int skip, int take, int facilityId)
         {
-            var all = await GetAll(facilityId);
             var today = DateOnly.FromDateTime(DateTime.Today);
-            return BuildListPage(all, type, scope, today, skip, take).Select(t => t.GetDTO()).ToList();
+
+            // Filter to the requested tab + scope on the DB so we never load the whole table.
+            var query = context.TimeOffs.Where(t => t.FacilityId == facilityId);
+            query = type == TimeOffListType.OneOff
+                ? query.Where(t => t.Recurrence == TimeOffRecurrence.OneOff)
+                : query.Where(t => t.Recurrence != TimeOffRecurrence.OneOff);
+            query = scope == TimeOffScope.Active
+                ? query.Where(t => t.EndDate == null || t.EndDate >= today)   // open-ended or not-yet-ended
+                : query.Where(t => t.EndDate != null && t.EndDate < today);   // ended before today
+
+            List<TimeOff> page;
+            if (scope == TimeOffScope.Expired)
+            {
+                // Newest-ended first — ordered and paged entirely on the DB.
+                page = await query
+                    .OrderByDescending(t => t.EndDate).ThenByDescending(t => t.Id)
+                    .Skip(skip).Take(take).ToListAsync();
+            }
+            else if (type == TimeOffListType.OneOff)
+            {
+                // Ongoing/earliest-start first — ordered and paged entirely on the DB.
+                page = await query
+                    .OrderBy(t => t.StartDate).ThenBy(t => t.EndDate).ThenBy(t => t.Id)
+                    .Skip(skip).Take(take).ToListAsync();
+            }
+            else
+            {
+                // Recurring/Active orders by each rule's next occurrence — recurrence math the DB
+                // can't express — so order and page the (bounded) active-recurring set in memory.
+                var active = await query.ToListAsync();
+                page = OrderRecurringByNextOccurrence(active, today).Skip(skip).Take(take).ToList();
+            }
+
+            return page.Select(t => t.GetDTO()).ToList();
         }
 
         public async Task<TimeOff> AddNew(TimeOffDTO dto, int facilityId)
@@ -217,41 +249,16 @@ namespace Appy.Services
             }
         }
 
-        // Filters a facility's rules to one tab (type) and scope, orders them, and pages.
-        // Active = today/future or open-ended; Expired = ended before today. Pure — `today` is injected.
-        public static List<TimeOff> BuildListPage(IEnumerable<TimeOff> all, TimeOffListType type, TimeOffScope scope, DateOnly today, int skip, int take)
-        {
-            var typed = type == TimeOffListType.OneOff
-                ? all.Where(t => t.Recurrence == TimeOffRecurrence.OneOff)
-                : all.Where(t => t.Recurrence != TimeOffRecurrence.OneOff);
-
-            // OneOff always has EndDate; recurring may be open-ended (null EndDate = never expires).
-            var scoped = scope == TimeOffScope.Active
-                ? typed.Where(t => t.EndDate == null || t.EndDate.Value >= today)
-                : typed.Where(t => t.EndDate != null && t.EndDate.Value < today);
-
-            IEnumerable<TimeOff> ordered;
-            if (scope == TimeOffScope.Expired)
-            {
-                ordered = scoped.OrderByDescending(t => t.EndDate).ThenByDescending(t => t.Id); // newest-ended first
-            }
-            else if (type == TimeOffListType.OneOff)
-            {
-                ordered = scoped.OrderBy(t => t.StartDate).ThenBy(t => t.EndDate).ThenBy(t => t.Id); // ongoing float up
-            }
-            else
-            {
-                // Recurring/Active: sort by next occurrence; rules with none (sort key null) go last.
-                ordered = scoped
-                    .Select(t => new { t, next = NextOccurrenceOnOrAfter(t, today) })
-                    .OrderBy(x => x.next.HasValue ? 0 : 1)
-                    .ThenBy(x => x.next)
-                    .ThenBy(x => x.t.Id)
-                    .Select(x => x.t);
-            }
-
-            return ordered.Skip(skip).Take(take).ToList();
-        }
+        // Recurring/Active sort key: the next occurrence on/after today; rules with none (key null)
+        // go last. Pure and in-memory — the recurrence math has no SQL translation. `today` is injected.
+        public static List<TimeOff> OrderRecurringByNextOccurrence(IEnumerable<TimeOff> rules, DateOnly today)
+            => rules
+                .Select(t => new { t, next = NextOccurrenceOnOrAfter(t, today) })
+                .OrderBy(x => x.next.HasValue ? 0 : 1)
+                .ThenBy(x => x.next)
+                .ThenBy(x => x.t.Id)
+                .Select(x => x.t)
+                .ToList();
 
         public bool AppliesOn(TimeOff t, DateOnly date)
         {
@@ -274,23 +281,52 @@ namespace Appy.Services
 
         public async Task<List<TimeOffOccurrenceDTO>> GetOccurrencesForDate(DateOnly date, int facilityId)
         {
-            var all = await GetAll(facilityId);
-            return all.Where(t => AppliesOn(t, date)).Select(t => ToOccurrence(t, date)).ToList();
+            // AppliesOn for a fixed date is fully expressible in SQL (the weekday / month-day are
+            // constants), so the DB returns only the rules that fire on this date.
+            var dayOfWeek = date.DayOfWeek;
+            var dayOfMonth = date.Day;
+
+            var matching = await context.TimeOffs
+                .Where(t => t.FacilityId == facilityId && (
+                    (t.Recurrence == TimeOffRecurrence.OneOff && t.StartDate <= date && date <= t.EndDate)
+                    || (t.Recurrence == TimeOffRecurrence.Weekly && t.DayOfWeek == dayOfWeek && date >= t.StartDate && (t.EndDate == null || date <= t.EndDate))
+                    || (t.Recurrence == TimeOffRecurrence.Monthly && t.DayOfMonth == dayOfMonth && date >= t.StartDate && (t.EndDate == null || date <= t.EndDate))
+                ))
+                .ToListAsync();
+
+            return matching.Select(t => ToOccurrence(t, date)).ToList();
         }
 
         // Expands rules to occurrences only on the given dates (deduped, date-ordered). Callers pass the
-        // dates they actually render — e.g. the dates that have appointments on a list page — so this is
-        // O(dates × rules) instead of scanning every day in a potentially huge min..max span.
+        // dates they actually render — e.g. the dates that have appointments on a list page. The DB
+        // pre-filters to candidate rules (effective span overlaps the requested range and, for recurring,
+        // the weekday / month-day matches one that's requested); the exact per-date expansion is then done
+        // in memory over that small candidate set rather than scanning the whole table.
         public async Task<List<TimeOffOccurrenceDTO>> GetOccurrencesForDates(IEnumerable<DateOnly> dates, int facilityId)
         {
             var distinct = dates.Distinct().OrderBy(d => d).ToList();
             if (distinct.Count == 0)
                 return new List<TimeOffOccurrenceDTO>();
 
-            var all = await GetAll(facilityId);
+            var min = distinct[0];
+            var max = distinct[^1];
+            var daysOfWeek = distinct.Select(d => d.DayOfWeek).Distinct().ToList();
+            var daysOfMonth = distinct.Select(d => d.Day).Distinct().ToList();
+
+            var candidates = await context.TimeOffs
+                .Where(t => t.FacilityId == facilityId
+                    && t.StartDate <= max
+                    && (t.EndDate == null || t.EndDate >= min)
+                    && (
+                        t.Recurrence == TimeOffRecurrence.OneOff
+                        || (t.Recurrence == TimeOffRecurrence.Weekly && t.DayOfWeek != null && daysOfWeek.Contains(t.DayOfWeek.Value))
+                        || (t.Recurrence == TimeOffRecurrence.Monthly && t.DayOfMonth != null && daysOfMonth.Contains(t.DayOfMonth.Value))
+                    ))
+                .ToListAsync();
+
             var result = new List<TimeOffOccurrenceDTO>();
             foreach (var d in distinct)
-                result.AddRange(all.Where(t => AppliesOn(t, d)).Select(t => ToOccurrence(t, d)));
+                result.AddRange(candidates.Where(t => AppliesOn(t, d)).Select(t => ToOccurrence(t, d)));
             return result;
         }
 
