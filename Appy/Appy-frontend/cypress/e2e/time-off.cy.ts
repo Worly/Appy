@@ -1,66 +1,11 @@
-import { expectURL, getElement, login } from "cypress/support/commands";
 import dayjs from "dayjs";
-import { dateLookup } from "./lookups/date-lookup";
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-/** Select a day from the day-of-week dropdown (found via its label). */
-function selectDayOfWeek(day: string) {
-  cy.get("[data-test=time-off-day-of-week]").find(".my-button").click();
-  cy.contains(day).click();
-}
-
-/** Toggle the app-toggle-switch identified by data-test. */
-function toggleSwitch(dataTest: string) {
-  cy.get(`[data-test=${dataTest}] .switch`).click();
-}
-
-/** Navigate to /time-off (already authenticated) and wait for the tabs to render. */
-function visitTimeOff() {
-  cy.visit("/time-off");
-  expectURL("/time-off");
-  cy.get("[data-test=time-off-tabs]").should("exist");
-}
-
-function clickTab(tab: "oneoff" | "recurring" | "holidays") {
-  cy.get(`[data-test=time-off-tab-${tab}]`).click();
-}
-
-/** From /appointments, switch to the scroller view when currently showing the list. */
-function openScrollerView() {
-  getElement("appointment-view-switch-button").then(btn => {
-    if (btn.attr("data-test-data") === "list") {
-      getElement("appointment-view-switch-button").click();
-    }
-  });
-}
-
-function clickScope(scope: "upcoming" | "past") {
-  // Segments are tagged by their label, not the URL token: upcoming → -upcoming, past → -history.
-  const dataTest = scope === "past" ? "time-off-scope-history" : "time-off-scope-upcoming";
-  cy.get(`[data-test=${dataTest}]`).click();
-}
-
-/** Assert the visible list contains a row with `text`. */
-function expectRow(text: string) {
-  cy.get("[data-test=time-off-list]").find("[data-test=time-off-row]").should("contain", text);
-}
-
-/** Click the list row containing `text`. */
-function clickRow(text: string) {
-  cy.get("[data-test=time-off-list]").find("[data-test=time-off-row]").contains(text).click();
-}
-
-/** Click Delete in the editor action bar. */
-function clickDeleteButton() {
-  cy.contains("Delete").click();
-}
-
-// ---------------------------------------------------------------------------
-// Tests
-// ---------------------------------------------------------------------------
+import { login } from "cypress/support/commands";
+import { appointments } from "./pages/appointments";
+import {
+  timeOff,
+  timeOffSplitDialog,
+  timeOffInAppointments,
+} from "./pages/time-off";
 
 describe("Time Off", () => {
   beforeEach(() => {
@@ -68,346 +13,231 @@ describe("Time Off", () => {
   });
 
   it("creates a one-off partial time off and shows it in the One-offs tab", () => {
-    visitTimeOff();
-    // One-offs tab is the default.
-    getElement("time-off-add").click();
-    expectURL("/time-off/new");
+    timeOff.visit();
+    // One-offs tab is the default. New time-offs default to all-day; turn it off for a 09:00–17:00 range.
+    timeOff.add()
+      .setLabel("One Off Partial")
+      .toggleAllDay()
+      .save();
 
-    getElement("time-off-label").clear().type("One Off Partial");
-    // New time-offs default to all-day; turn it off for a partial 09:00–17:00 range.
-    toggleSwitch("time-off-all-day");
-    cy.contains("Save").click();
-    expectURL("/time-off");
-
-    clickTab("oneoff");
-    clickScope("upcoming");
-    expectRow("One Off Partial");
-    cy.get("[data-test=time-off-list]").find("[data-test=time-off-row]").contains("One Off Partial")
-      .closest("[data-test=time-off-row]").should("contain", "09:00");
+    timeOff.openTab("oneoff").openScope("upcoming");
+    timeOff.list()
+      .expectRow("One Off Partial")
+      .expectRowDetail("One Off Partial", "09:00");
   });
 
   it("creates a weekly all-day time off and shows it in the Recurring tab", () => {
-    visitTimeOff();
-    clickTab("recurring");
-    getElement("time-off-add").click();
-    expectURL("/time-off/new");
-
-    getElement("time-off-label").clear().type("Weekly All Day Off");
+    timeOff.visit();
+    timeOff.openTab("recurring");
     // type=recurring defaults to Weekly; pick Monday explicitly. New time-offs are all-day by default.
-    selectDayOfWeek("Monday");
-    cy.contains("Save").click();
-    expectURL("/time-off");
+    timeOff.add()
+      .setLabel("Weekly All Day Off")
+      .selectDayOfWeek("Monday")
+      .save();
 
-    clickTab("recurring");
-    expectRow("Weekly All Day Off");
-    cy.get("[data-test=time-off-list]").find("[data-test=time-off-row]").contains("Weekly All Day Off")
-      .closest("[data-test=time-off-row]").should("contain", "All day")
-      // Recurring rows show the effective span; a rule created today is open-ended → "From <today>".
-      .and("contain", dayjs().format("DD.MM.YYYY"));
+    timeOff.openTab("recurring");
+    timeOff.list()
+      .expectRow("Weekly All Day Off")
+      .expectRowDetail("Weekly All Day Off", "All day")
+      // A rule created today is open-ended, so its effective span reads "From <today>".
+      .expectRowDetail("Weekly All Day Off", dayjs().format("DD.MM.YYYY"));
   });
 
   it("edits a weekly time off via the details modal and saves the new label", () => {
-    visitTimeOff();
-    clickTab("recurring");
-    getElement("time-off-add").click();
-    getElement("time-off-label").clear().type("Edit Me Weekly");
-    selectDayOfWeek("Monday");
-    toggleSwitch("time-off-all-day");
-    cy.contains("Save").click();
-    expectURL("/time-off");
+    timeOff.visit();
+    timeOff.openTab("recurring");
+    timeOff.add().setLabel("Edit Me Weekly").selectDayOfWeek("Monday").toggleAllDay().save();
 
-    clickTab("recurring");
-    clickRow("Edit Me Weekly");
+    timeOff.openTab("recurring");
+    const view = timeOff.list().openRow("Edit Me Weekly");
     // The details modal shows the recurring effective span (open-ended rule created today → "From <today>").
-    cy.get("app-single-time-off").should("contain", dayjs().format("DD.MM.YYYY"));
-    // Details modal → Edit button → editor.
-    getElement("time-off-edit-button").click();
-    expectURL(/\/time-off\/edit\/\d+/);
+    view.expectContains(dayjs().format("DD.MM.YYYY"));
 
-    getElement("time-off-label").clear().type("Edited Weekly Label");
-    cy.contains("Save").click();
+    view.edit().setLabel("Edited Weekly Label").save();
 
-    // Recurring edits now prompt for the apply-from scope; apply to the entire schedule.
-    getElement("time-off-split-dialog").should("exist");
-    getElement("time-off-split-all").click();
-    getElement("time-off-split-apply").click();
-    expectURL("/time-off");
+    // Recurring edits prompt for the apply-from scope; apply to the entire schedule.
+    timeOffSplitDialog.expectVisible().chooseAllOccurrences().apply();
 
-    clickTab("recurring");
-    cy.get("[data-test=time-off-list]").should("not.contain", "Edit Me Weekly");
-    expectRow("Edited Weekly Label");
+    timeOff.openTab("recurring");
+    timeOff.list().expectNoRow("Edit Me Weekly").expectRow("Edited Weekly Label");
   });
 
   it("deletes a one-off time off from the editor and removes it from the list", () => {
-    visitTimeOff();
-    getElement("time-off-add").click();
-    getElement("time-off-label").clear().type("Delete Me One Off");
-    cy.contains("Save").click();
-    expectURL("/time-off");
+    timeOff.visit();
+    timeOff.add().setLabel("Delete Me One Off").save();
 
-    clickTab("oneoff");
-    clickRow("Delete Me One Off");
-    getElement("time-off-edit-button").click();
-    expectURL(/\/time-off\/edit\/\d+/);
+    timeOff.openTab("oneoff");
+    const edit = timeOff.list().openRow("Delete Me One Off").edit();
 
     // A one-off can't be stopped, so the delete dialog is a plain confirmation.
-    clickDeleteButton();
-    getElement("time-off-delete-dialog").should("exist");
-    getElement("time-off-delete-confirm-message").should("exist");
-    getElement("time-off-delete-confirm").click();
-    expectURL("/time-off");
+    edit.delete().expectVisible().expectPlainConfirm().confirm();
 
-    clickTab("oneoff");
-    cy.get("[data-test=time-off-list]").should("not.contain", "Delete Me One Off");
+    timeOff.openTab("oneoff");
+    timeOff.list().expectNoRow("Delete Me One Off");
   });
 
   it("edits a one-off time off without showing the apply-from dialog", () => {
-    visitTimeOff();
-    getElement("time-off-add").click();
-    getElement("time-off-label").clear().type("One Off No Prompt");
-    cy.contains("Save").click();
-    expectURL("/time-off");
+    timeOff.visit();
+    timeOff.add().setLabel("One Off No Prompt").save();
 
-    clickTab("oneoff");
-    clickRow("One Off No Prompt");
-    getElement("time-off-edit-button").click();
-    expectURL(/\/time-off\/edit\/\d+/);
-
-    getElement("time-off-label").clear().type("One Off Saved Directly");
-    cy.contains("Save").click();
+    timeOff.openTab("oneoff");
+    timeOff.list().openRow("One Off No Prompt").edit()
+      .setLabel("One Off Saved Directly")
+      .save();
 
     // One-offs save straight away — no fork dialog, navigation happens immediately.
-    expectURL("/time-off");
-    cy.get("[data-test=time-off-split-dialog]").should("not.exist");
+    timeOff.checkView();
+    timeOffSplitDialog.expectNotShown();
 
-    clickTab("oneoff");
-    expectRow("One Off Saved Directly");
+    timeOff.openTab("oneoff");
+    timeOff.list().expectRow("One Off Saved Directly");
   });
 
   it("prompts for the apply-from scope when editing a recurring time off", () => {
-    visitTimeOff();
-    clickTab("recurring");
-    getElement("time-off-add").click();
-    getElement("time-off-label").clear().type("Prompt Alpha");
-    selectDayOfWeek("Monday");
-    toggleSwitch("time-off-all-day");
-    cy.contains("Save").click();
-    expectURL("/time-off");
+    timeOff.visit();
+    timeOff.openTab("recurring");
+    timeOff.add().setLabel("Prompt Alpha").selectDayOfWeek("Monday").toggleAllDay().save();
 
-    clickTab("recurring");
-    clickRow("Prompt Alpha");
-    getElement("time-off-edit-button").click();
-    expectURL(/\/time-off\/edit\/\d+/);
+    timeOff.openTab("recurring");
+    timeOff.list().openRow("Prompt Alpha").edit().setLabel("Prompt Beta").save();
 
-    getElement("time-off-label").clear().type("Prompt Beta");
-    cy.contains("Save").click();
+    // The apply-from dialog appears for recurring edits, with both choices. The default "specific
+    // date" is today, which on a rule created today collapses to a plain in-place edit.
+    timeOffSplitDialog.expectVisible().expectFromDateOption().expectAllOption().apply();
 
-    // The apply-from dialog appears for recurring edits, with both choices.
-    getElement("time-off-split-dialog").should("exist");
-    getElement("time-off-split-from-date").should("exist");
-    getElement("time-off-split-all").should("exist");
-
-    // Default "specific date" is today; on a rule created today this collapses to an in-place edit.
-    getElement("time-off-split-apply").click();
-    expectURL("/time-off");
-
-    clickTab("recurring");
-    cy.get("[data-test=time-off-list]").should("not.contain", "Prompt Alpha");
-    expectRow("Prompt Beta");
+    timeOff.openTab("recurring");
+    timeOff.list().expectNoRow("Prompt Alpha").expectRow("Prompt Beta");
   });
 
   it("saves a recurring edit in place without the apply-from dialog when the start date changes", () => {
     const newStart = dayjs().add(14, "day");
 
-    visitTimeOff();
-    clickTab("recurring");
-    getElement("time-off-add").click();
-    getElement("time-off-label").clear().type("Move Start Recurring");
-    selectDayOfWeek("Monday");
-    toggleSwitch("time-off-all-day");
-    cy.contains("Save").click();
-    expectURL("/time-off");
+    timeOff.visit();
+    timeOff.openTab("recurring");
+    timeOff.add().setLabel("Move Start Recurring").selectDayOfWeek("Monday").toggleAllDay().save();
 
-    clickTab("recurring");
-    clickRow("Move Start Recurring");
-    getElement("time-off-edit-button").click();
-    expectURL(/\/time-off\/edit\/\d+/);
+    timeOff.openTab("recurring");
+    const edit = timeOff.list().openRow("Move Start Recurring").edit();
 
-    // Move the start date forward by two weeks — this is the change that triggers the
-    // in-place save path introduced on this branch. Before the fix, ANY recurring save
-    // opened the fork dialog; now a start-date change bypasses it entirely.
-    dateLookup("time-off-start-date").select(newStart);
-    cy.contains("Save").click();
+    // Moving the start date is direct timeline editing, so it saves in place — no fork dialog.
+    edit.startDate().select(newStart);
+    edit.save();
 
-    // Must navigate straight back — no fork dialog shown.
-    expectURL("/time-off");
-    cy.get("[data-test=time-off-split-dialog]").should("not.exist");
+    timeOff.checkView();
+    timeOffSplitDialog.expectNotShown();
 
-    // Confirm the edit actually persisted (guards against a silent save error + router bounce).
-    clickTab("recurring");
-    expectRow("Move Start Recurring");
+    timeOff.openTab("recurring");
+    timeOff.list().expectRow("Move Start Recurring");
   });
 
   it("shows the Holidays tab as a stub with the scope switch and an auto-import button instead of add", () => {
-    visitTimeOff();
-    clickTab("holidays");
-    cy.get("[data-test=time-off-holidays-stub]").should("exist");
-    // No add-new on Holidays; the scope switch and the auto-import config button take its place.
-    cy.get("[data-test=time-off-add]").should("not.exist");
-    cy.get("[data-test=time-off-scope]").should("exist");
-    cy.get("[data-test=time-off-configure-import]").should("exist");
+    timeOff.visit();
+    timeOff.openTab("holidays");
+
+    timeOff
+      .expectHolidaysStub()
+      .expectNoAddButton()
+      .expectScopeSwitch()
+      .expectConfigureImportButton();
   });
 
   it("shows an all-day badge in the appointments list for a day covered by all-day time off", () => {
     const monday = dayjs("2021-02-08");
 
-    visitTimeOff();
-    clickTab("recurring");
-    getElement("time-off-add").click();
-    getElement("time-off-label").clear().type("Closed Mondays");
-    selectDayOfWeek("Monday");
-    // New time-offs are all-day by default — exactly what this badge test needs.
-    // Recurring rules default their effective-from to today; the only seeded appointments (and thus
-    // the only list days a badge can attach to) are in Feb 2021, so pull the start back to that Monday.
-    dateLookup("time-off-start-date").select(monday);
-    cy.contains("Save").click();
-    expectURL("/time-off");
+    timeOff.visit();
+    timeOff.openTab("recurring");
+    // New time-offs are all-day by default. Recurring rules default their effective-from to today;
+    // the only seeded appointments (and thus list days a badge can attach to) are in Feb 2021, so
+    // pull the start back to that Monday.
+    const edit = timeOff.add().setLabel("Closed Mondays").selectDayOfWeek("Monday");
+    edit.startDate().select(monday);
+    edit.save();
 
     cy.visit("/appointments");
-    expectURL("/appointments");
+    appointments.openListView();
+    appointments.jumpToDay(monday);
 
-    getElement("appointment-view-switch-button").then(btn => {
-      if (btn.attr("data-test-data") === "scroller") {
-        getElement("appointment-view-switch-button").click();
-      }
-    });
-    getElement("appointments-list");
-    dateLookup("appointments-date-selector").select(monday);
-    getElement("appointments-list-current-date").should("contain", monday.format("DD.MM.YYYY"));
-
-    cy.get("[data-test=list-all-day-timeoff]").should("exist").and("contain", "Closed Mondays");
-
+    timeOffInAppointments.listAllDayBadge().expectContains("Closed Mondays");
     // Appointments booked on that full-day off get the same red attention border as overlapping ones.
-    cy.get(`app-single-appointment-list-item[data-date='${monday.format("YYYY-MM-DD")}'] .appointment`)
-      .should("have.length.greaterThan", 0)
-      .each($el => cy.wrap($el).should("have.class", "on-day-off"));
+    timeOffInAppointments.expectAppointmentsHighlightedOn(monday);
 
     // A day with a single all-day time-off jumps straight to its details dialog — no pick-list.
-    cy.get("[data-test=list-all-day-timeoff]").contains("Closed Mondays").click();
-    cy.get("[data-test=list-all-day-timeoff-list]").should("not.exist");
-    cy.get("app-single-time-off").should("contain", "Closed Mondays");
-    getElement("time-off-edit-button").should("exist");
+    const view = timeOffInAppointments.listAllDayBadge().open("Closed Mondays");
+    timeOffInAppointments.listAllDayBadge().expectNoPickList();
+    view.expectContains("Closed Mondays").expectEditButton();
   });
 
   it("opens the time-off details when a partial band is clicked in the scroller view", () => {
-    visitTimeOff();
-    // One-offs tab is the default; a one-off defaults to today (the scroller's default day). New
-    // time-offs are all-day by default — turn it off for a partial 09:00–17:00 band that renders
-    // directly on the scroller without any date navigation.
-    getElement("time-off-add").click();
-    getElement("time-off-label").clear().type("Scroller One Off");
-    toggleSwitch("time-off-all-day");
-    cy.contains("Save").click();
-    expectURL("/time-off");
+    timeOff.visit();
+    // One-offs tab is the default; a one-off defaults to today (the scroller's default day). Turn off
+    // all-day for a partial 09:00–17:00 band that renders directly without any date navigation.
+    timeOff.add().setLabel("Scroller One Off").toggleAllDay().save();
 
     cy.visit("/appointments");
-    expectURL("/appointments");
-    openScrollerView();
+    appointments.openScrollerView();
 
-    // The visible band paints over appointments (pointer-events: none); the click is caught by the
-    // transparent hit layer underneath.
-    cy.get("[data-test=scroller-time-off]").should("exist").and("contain", "Scroller One Off");
-    cy.get("[data-test=scroller-time-off-hit]").click();
-    cy.get("app-single-time-off").should("contain", "Scroller One Off");
-    getElement("time-off-edit-button").should("exist");
+    const band = timeOffInAppointments.scrollerBand();
+    band.expectContains("Scroller One Off");
+    band.click().expectContains("Scroller One Off").expectEditButton();
   });
 
   it("opens the time-off details when an all-day band is clicked in the scroller view", () => {
-    visitTimeOff();
-    getElement("time-off-add").click();
-    getElement("time-off-label").clear().type("Scroller All Day");
-    // New time-offs are all-day by default.
-    cy.contains("Save").click();
-    expectURL("/time-off");
+    timeOff.visit();
+    // New time-offs are all-day by default; a one-off defaults to today.
+    timeOff.add().setLabel("Scroller All Day").save();
 
     cy.visit("/appointments");
-    expectURL("/appointments");
-    openScrollerView();
+    appointments.openScrollerView();
 
-    // A single all-day off jumps straight to its details — no pick-list. The visible band is
-    // pointer-events: none (it paints over appointments); the hit layer underneath catches the click.
-    cy.get("[data-test=scroller-time-off]").should("exist").and("contain", "Scroller All Day");
-    cy.get("[data-test=scroller-time-off-hit]").click();
-    cy.get("[data-test=scroller-all-day-timeoff-list]").should("not.exist");
-    cy.get("app-single-time-off").should("contain", "Scroller All Day");
-    getElement("time-off-edit-button").should("exist");
+    const band = timeOffInAppointments.scrollerBand();
+    band.expectContains("Scroller All Day");
+    // A single all-day off jumps straight to its details — no pick-list.
+    const view = band.click();
+    band.expectNoPickList();
+    view.expectContains("Scroller All Day").expectEditButton();
   });
 
-  it("offers stop-vs-delete when deleting an active recurring rule and 'End it' keeps it in Past", () => {
+  it("offers stop-vs-delete when deleting an active recurring rule and 'End it' keeps it in History", () => {
     const lastMonth = dayjs().subtract(1, "month").day(1); // a Monday roughly a month ago
 
-    visitTimeOff();
-    clickTab("recurring");
-    getElement("time-off-add").click();
-    getElement("time-off-label").clear().type("Stoppable Weekly");
-    selectDayOfWeek("Monday");
-    toggleSwitch("time-off-all-day");
+    timeOff.visit();
+    timeOff.openTab("recurring");
+    const edit = timeOff.add().setLabel("Stoppable Weekly").selectDayOfWeek("Monday").toggleAllDay();
     // Recurring rules default their start to today; pull it back so the rule has already started.
-    dateLookup("time-off-start-date").select(lastMonth);
-    cy.contains("Save").click();
-    expectURL("/time-off");
+    edit.startDate().select(lastMonth);
+    edit.save();
 
-    clickTab("recurring");
-    clickRow("Stoppable Weekly");
-    getElement("time-off-edit-button").click();
-    expectURL(/\/time-off\/edit\/\d+/);
+    timeOff.openTab("recurring");
+    const del = timeOff.list().openRow("Stoppable Weekly").edit().delete();
 
-    // Delete now prompts for recurring rules that have already started.
-    clickDeleteButton();
-    getElement("time-off-delete-dialog").should("exist");
-    getElement("time-off-delete-stop").should("exist");
-    getElement("time-off-delete-remove").should("exist");
+    // An already-started recurring rule offers stop vs. delete. "End it" (stop) is the default mode.
+    del.expectVisible().expectStopOption().expectRemoveOption().confirm();
 
-    // "End it" (stop) is the default mode; confirm.
-    getElement("time-off-delete-confirm").click();
-    expectURL("/time-off");
-
-    // It's gone from Active (Upcoming) but present in Past — history kept.
-    clickTab("recurring");
-    clickScope("upcoming");
-    cy.get("[data-test=time-off-list]").should("not.contain", "Stoppable Weekly");
-    clickScope("past");
-    expectRow("Stoppable Weekly");
+    // Gone from Active (Upcoming) but kept in History.
+    timeOff.openTab("recurring").openScope("upcoming");
+    timeOff.list().expectNoRow("Stoppable Weekly");
+    timeOff.openScope("history");
+    timeOff.list().expectRow("Stoppable Weekly");
   });
 
   it("deletes a recurring rule entirely via the 'Delete entirely' option", () => {
     const lastMonth = dayjs().subtract(1, "month").day(1);
 
-    visitTimeOff();
-    clickTab("recurring");
-    getElement("time-off-add").click();
-    getElement("time-off-label").clear().type("Removable Weekly");
-    selectDayOfWeek("Monday");
-    toggleSwitch("time-off-all-day");
-    dateLookup("time-off-start-date").select(lastMonth);
-    cy.contains("Save").click();
-    expectURL("/time-off");
+    timeOff.visit();
+    timeOff.openTab("recurring");
+    const edit = timeOff.add().setLabel("Removable Weekly").selectDayOfWeek("Monday").toggleAllDay();
+    edit.startDate().select(lastMonth);
+    edit.save();
 
-    clickTab("recurring");
-    clickRow("Removable Weekly");
-    getElement("time-off-edit-button").click();
+    timeOff.openTab("recurring");
+    const del = timeOff.list().openRow("Removable Weekly").edit().delete();
 
-    clickDeleteButton();
-    getElement("time-off-delete-dialog").should("exist");
-    getElement("time-off-delete-remove").click();
-    getElement("time-off-delete-confirm").click();
-    expectURL("/time-off");
+    del.expectVisible().chooseRemove().confirm();
 
     // Absent from both scopes — fully removed.
-    clickTab("recurring");
-    clickScope("upcoming");
-    cy.get("[data-test=time-off-list]").should("not.contain", "Removable Weekly");
-    clickScope("past");
-    cy.get("[data-test=time-off-list]").should("not.contain", "Removable Weekly");
+    timeOff.openTab("recurring").openScope("upcoming");
+    timeOff.list().expectNoRow("Removable Weekly");
+    timeOff.openScope("history");
+    timeOff.list().expectNoRow("Removable Weekly");
   });
 });
