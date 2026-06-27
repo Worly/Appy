@@ -190,8 +190,8 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
   public onHasEndDateChange(value: boolean): void {
     this.hasEndDate = value;
     if (value) {
-      // Default the end date when the toggle is first enabled.
-      if (!this.timeOff.endDate) this.timeOff.endDate = dayjs();
+      // Default the end date to the effective-from when the toggle is first enabled.
+      if (!this.timeOff.endDate) this.timeOff.endDate = this.timeOff.startDate ?? dayjs();
     } else {
       // Drop only the end bound — the effective-from (startDate) is always kept.
       this.timeOff.endDate = undefined;
@@ -211,9 +211,9 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
     const previousStart = this.timeOff.startDate;
     this.timeOff.startDate = date;
 
-    // One-off only: when the range was a single day (To == the old From), keep them linked by
-    // dragging the To date along with the From. A multi-day range leaves its To untouched.
-    if (this.type === "oneoff" && previousStart != null && this.timeOff.endDate != null
+    // When the range was a single day (To == the old From), keep them linked by dragging the To date
+    // along with the From. A multi-day range — or no end date at all — leaves its To untouched.
+    if (previousStart != null && this.timeOff.endDate != null
       && this.timeOff.endDate.isSame(previousStart, "date")) {
       this.timeOff.endDate = date;
     }
@@ -245,32 +245,25 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
   }
 
   public confirmSplit(): void {
-    if (this.splitMode === "date") {
-      // A fork only happens when the split date is strictly after the rule's current start
-      // (mirrors the backend's condition). Only then does the split date become the new segment's
-      // start — so only then do we move startDate and validate it against the "until". When the
-      // date is on/before the current start there is no history to preserve: the backend does a
-      // plain in-place edit, and mutating startDate here would silently move the rule's start to
-      // the split date (e.g. accepting the default "today" on a future-dated rule).
-      const forks = this.timeOff.startDate == null || this.splitDate.isAfter(this.timeOff.startDate, "date");
-      if (forks) {
-        this.timeOff.startDate = this.splitDate;
-        if (!this.timeOff.validate()) {
-          this.splitDialog?.close(); // surface the form error (e.g. split date after the "until")
-          return;
-        }
-        this.splitDialog?.close();
-        this.commit(this.splitDate);
-      } else {
-        // No fork → plain in-place edit; leave startDate untouched and send no applyFrom.
-        this.splitDialog?.close();
-        this.commit();
-      }
-    } else {
-      // "Entire schedule" → plain in-place edit, no fork.
-      this.splitDialog?.close();
+    this.splitDialog?.close();
+
+    // "Entire schedule", or a split date on/before the current start, is a plain in-place edit: there
+    // is no history to preserve, and mutating startDate would silently move the rule's start to the
+    // split date (e.g. accepting the default "today" on a future-dated rule). Leave startDate untouched
+    // and send no applyFrom.
+    const forks = this.splitMode === "date"
+      && this.splitDate.isAfter(this.timeOff.startDate, "date");
+    if (!forks) {
       this.commit();
+      return;
     }
+
+    // A fork: the split date becomes the new segment's start, so move startDate and validate it
+    // against the "until" before committing.
+    this.timeOff.startDate = this.splitDate;
+    if (!this.timeOff.validate()) // surface the form error (e.g. split date after the "until")
+      return;
+    this.commit(this.splitDate);
   }
 
   public onSplitDateChange(date: Dayjs): void {
