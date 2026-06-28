@@ -16,7 +16,7 @@ function makeComponent(): TimeOffEditComponent {
   return new TimeOffEditComponent(null as any, null as any, null as any, null as any);
 }
 
-describe("TimeOffEditComponent — one-off From/To linkage", () => {
+describe("TimeOffEditComponent — From/To linkage", () => {
   it("moves the To date to the new From date when To equalled the previous From (single-day range)", () => {
     const c = makeComponent();
     c.type = "oneoff";
@@ -43,7 +43,7 @@ describe("TimeOffEditComponent — one-off From/To linkage", () => {
     expect(c.timeOff.endDate!.format("YYYY-MM-DD")).toBe("2026-01-05");
   });
 
-  it("does not move the To date for recurring rules even when it equals the previous From", () => {
+  it("moves the To date for recurring rules too when To equalled the previous From (single-day range)", () => {
     const c = makeComponent();
     c.type = "recurring";
     c.timeOff.recurrence = TimeOffRecurrence.Weekly;
@@ -53,7 +53,20 @@ describe("TimeOffEditComponent — one-off From/To linkage", () => {
     c.onStartDateChange(dayjs("2026-01-10"));
 
     expect(c.timeOff.startDate!.format("YYYY-MM-DD")).toBe("2026-01-10");
-    expect(c.timeOff.endDate!.format("YYYY-MM-DD")).toBe("2026-01-02");
+    expect(c.timeOff.endDate!.format("YYYY-MM-DD")).toBe("2026-01-10");
+  });
+
+  it("leaves a recurring rule's To date untouched when it differs from the previous From", () => {
+    const c = makeComponent();
+    c.type = "recurring";
+    c.timeOff.recurrence = TimeOffRecurrence.Weekly;
+    c.timeOff.startDate = dayjs("2026-01-02");
+    c.timeOff.endDate = dayjs("2026-01-05");
+
+    c.onStartDateChange(dayjs("2026-01-10"));
+
+    expect(c.timeOff.startDate!.format("YYYY-MM-DD")).toBe("2026-01-10");
+    expect(c.timeOff.endDate!.format("YYYY-MM-DD")).toBe("2026-01-05");
   });
 });
 
