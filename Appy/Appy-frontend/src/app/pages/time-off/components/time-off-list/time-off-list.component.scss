@@ -12,8 +12,9 @@
   }
 }
 
+// app-loading is position:absolute (fills its containing block), so the footer needs a
+// sized, positioned box for the spinner to lay out in — otherwise it collapses to nothing.
 .loading-more {
-  display: flex;
-  justify-content: center;
-  padding: 1rem 0;
+  position: relative;
+  height: 150px;
 }
