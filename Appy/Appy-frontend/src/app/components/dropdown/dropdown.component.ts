@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, HostBinding, Input, OnInit, Output } from '@angular/core';
 
 @Component({
   selector: 'app-dropdown',
@@ -29,6 +29,12 @@ export class DropdownComponent implements OnInit {
 
   @Input() hasIcon: boolean = true;
   @Input() selectString: string = "SELECT";
+  // When true, the options panel is at least as wide as the trigger (useful for full-width dropdowns
+  // so the popup lines up with the input instead of hanging off one edge).
+  @Input() matchTriggerWidth: boolean = false;
+  // Renders the trigger as a full-width, select-style control: it fills its container and (when it
+  // has a caret) pushes the label left and the caret to the far right.
+  @Input() @HostBinding("class.full-width") fullWidth: boolean = false;
 
   constructor() { }
 

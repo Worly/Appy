@@ -1,0 +1,66 @@
+// Mirrors the appointments list-item: [accent bar] [info] [type icon], on an input-background card.
+.time-off-row {
+  font-size: 1rem;
+  margin-bottom: 10px;
+  padding: 10px 14px;
+  background-color: rgb(var(--rgb-input-background));
+  border-radius: var(--default-border-radius);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+
+  // Time-off-themed accent, echoing the service-colour bar on appointment rows (same width).
+  .accent {
+    flex: 0 0 6px;
+    align-self: stretch;
+    border-radius: var(--default-border-radius);
+    background: rgb(var(--rgb-warning));
+  }
+
+  .info {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .label {
+    word-break: break-word;
+  }
+
+  .meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.88rem;
+
+    // Recurrence + time share the top line (both short); the longer effective date range drops to
+    // its own line below, so the three pieces never cram into one overflowing row.
+    .meta-primary {
+      display: flex;
+      flex-wrap: wrap;
+      column-gap: 10px;
+    }
+
+    .schedule {
+      opacity: 0.85;
+    }
+
+    .time {
+      opacity: 0.55;
+    }
+
+    .date-range {
+      opacity: 0.7;
+    }
+  }
+
+  .type-icon {
+    flex: 0 0 auto;
+    align-self: center;
+    color: rgb(var(--rgb-warning));
+    opacity: 0.7;
+  }
+}

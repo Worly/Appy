@@ -12,6 +12,7 @@ import { AuthHttpInterceptor } from "./services/auth/auth-http-interceptor.servi
 import { ErrorInterceptor } from "./services/errors/error-interceptor.service";
 import { ErrorTranslateInterceptor } from "./services/errors/error-translate.service";
 import { ToggleSwitchModule } from "../components/toggle-switch/toggle-switch.module";
+import { SegmentedControlModule } from "../components/segmented-control/segmented-control.module";
 import { ToDurationPipe } from "./pipes/to-duration.pipe";
 import { RelativeDatePipe } from "./pipes/relative-date.pipe";
 import { DateRelationPipe } from "./pipes/date-relation.pipe";
@@ -36,6 +37,7 @@ import { DateRelationPipe } from "./pipes/date-relation.pipe";
         ButtonModule,
         LoadingModule,
         ToggleSwitchModule,
+        SegmentedControlModule,
 
         FilterPipe,
         FormatDurationPipe,

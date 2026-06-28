@@ -17,7 +17,7 @@ namespace Appy.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.7")
+                .HasAnnotation("ProductVersion", "8.0.27")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -279,6 +279,55 @@ namespace Appy.Migrations
                     b.ToTable("Services");
                 });
 
+            modelBuilder.Entity("Appy.Domain.TimeOff", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("DayOfMonth")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("DayOfWeek")
+                        .HasColumnType("integer");
+
+                    b.Property<DateOnly?>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("FacilityId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsAllDay")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Recurrence")
+                        .HasColumnType("integer");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<TimeOnly?>("TimeFrom")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<TimeOnly?>("TimeTo")
+                        .HasColumnType("time without time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FacilityId");
+
+                    b.ToTable("TimeOffs");
+                });
+
             modelBuilder.Entity("Appy.Domain.User", b =>
                 {
                     b.Property<int>("Id")
@@ -448,6 +497,17 @@ namespace Appy.Migrations
                     b.Navigation("Facility");
                 });
 
+            modelBuilder.Entity("Appy.Domain.TimeOff", b =>
+                {
+                    b.HasOne("Appy.Domain.Facility", "Facility")
+                        .WithMany()
+                        .HasForeignKey("FacilityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Facility");
+                });
+
             modelBuilder.Entity("Appy.Domain.WorkingHour", b =>
                 {
                     b.HasOne("Appy.Domain.Facility", "Facility")
@@ -466,8 +526,7 @@ namespace Appy.Migrations
 
             modelBuilder.Entity("Appy.Domain.Facility", b =>
                 {
-                    b.Navigation("ClientNotificationsSettings")
-                        .IsRequired();
+                    b.Navigation("ClientNotificationsSettings");
                 });
 
             modelBuilder.Entity("Appy.Domain.User", b =>

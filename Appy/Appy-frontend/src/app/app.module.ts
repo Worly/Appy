@@ -53,6 +53,7 @@ import { faCalendarWeek } from '@fortawesome/free-solid-svg-icons/faCalendarWeek
 import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons/faRightFromBracket';
 import { faCalendarDays } from "@fortawesome/free-solid-svg-icons/faCalendarDays";
 import { faClock } from "@fortawesome/free-solid-svg-icons/faClock";
+import { faClockRotateLeft } from "@fortawesome/free-solid-svg-icons/faClockRotateLeft";
 import { faTableList } from "@fortawesome/free-solid-svg-icons/faTableList";
 import { faFilter } from "@fortawesome/free-solid-svg-icons/faFilter";
 import { faFileLines } from "@fortawesome/free-regular-svg-icons/faFileLines";
@@ -71,7 +72,12 @@ import { faUserSlash } from '@fortawesome/free-solid-svg-icons/faUserSlash';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons/faArrowLeft';
 import { faReply } from '@fortawesome/free-solid-svg-icons/faReply';
 import { faUserPlus } from '@fortawesome/free-solid-svg-icons/faUserPlus';
+import { faUmbrellaBeach } from '@fortawesome/free-solid-svg-icons/faUmbrellaBeach';
 import { faUser } from '@fortawesome/free-solid-svg-icons/faUser';
+import { faCalendarDay } from '@fortawesome/free-solid-svg-icons/faCalendarDay';
+import { faArrowsRotate } from '@fortawesome/free-solid-svg-icons/faArrowsRotate';
+import { faArrowRight } from '@fortawesome/free-solid-svg-icons/faArrowRight';
+import { faCircleInfo } from '@fortawesome/free-solid-svg-icons/faCircleInfo';
 
 import dayjs from "dayjs";
 import "dayjs/locale/hr";
@@ -162,11 +168,13 @@ export class AppModule {
       faEllipsisV, faGear,
       faBusinessTime,
       faBoxArchive, faUserPlus, faUser,
+      faUmbrellaBeach,
       faCircleCheck, farCircleCheck, faQuestion, faCheck, faTriangleExclamation,
       faHouse, faHandHoldingHeart, faUsers, faCalendarWeek, faRightFromBracket, faUserSlash,
-      faCalendarDays, faClock, faTableList, faFilter, faFileLines,
+      faCalendarDays, faClock, faTableList, faFilter, faFileLines, faClockRotateLeft,
       faWhatsapp, faInstagram,
-      faMoon, faSun, faCircleHalfStroke, faStar, faBell, faEnvelope
+      faMoon, faSun, faCircleHalfStroke, faStar, faBell, faEnvelope,
+      faCalendarDay, faArrowsRotate, faArrowRight, faCircleInfo
     );
   }
 

@@ -18,8 +18,19 @@
         [attr.data-test-data]="i.type" class="item">
         <div #dateElement *ngIf="i.type == 'date'" class="date" [attr.data-date]="i.dateISO"
             [ngClass]="{'empty-date': i.isEmptyDate}">
-            <span class="date-absolute">{{i.dateFormatted}}{{i.isEmptyDate ? " - " + ("pages.appointments.NO_APPOINTMENTS" | translate) : ""}}</span>
-            <span class="date-relative" [ngClass]="i.date | dateRelation">{{i.date | relativeDate}}</span>
+            <div>
+                <div class="date-absolute">{{i.dateFormatted}}{{i.isEmptyDate ? " - " +
+                    ("pages.appointments.NO_APPOINTMENTS" | translate) : ""}}</div>
+                <div class="date-relative" [ngClass]="i.date | dateRelation">{{i.date | relativeDate}}</div>
+            </div>
+            <div *ngIf="i.allDayOccurrences.length > 0" class="whole-day-off" data-test="list-all-day-timeoff"
+                (click)="openAllDayTimeOff(i.allDayOccurrences, timeOffDialog, allDayListDialog)">
+                <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
+                <div class="whole-day-off-text">
+                    <span class="whole-day-off-label">{{ i.allDayOccurrences[0].label }}</span>
+                    <span *ngIf="i.allDayOccurrences.length > 1">+{{i.allDayOccurrences.length - 1}}</span>
+                </div>
+            </div>
         </div>
 
         <app-single-appointment-list-item #appointmentElement *ngIf="i.type == 'appointment'"
@@ -31,6 +42,14 @@
             <fa-icon *ngIf="i.isOverlap" [icon]="['fas', 'triangle-exclamation']" aria-hidden="true"></fa-icon>
             <span>{{ i.duration | formatDuration }}</span>
             <fa-icon *ngIf="i.isOverlap" [icon]="['fas', 'triangle-exclamation']" aria-hidden="true"></fa-icon>
+        </div>
+
+        <div *ngIf="i.type == 'timeoff'" class="time-off-item" [class.overlap]="i.isOverlapping"
+            data-test="list-time-off" (click)="viewingTimeOffId = i.occurrence.id; timeOffDialog.open()">
+            <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
+            <span class="time">{{ i.occurrence.timeFrom?.format("HH:mm") }} - {{ i.occurrence.timeTo?.format("HH:mm")
+                }}</span>
+            <span>{{ i.occurrence.label }}</span>
         </div>
     </div>
 
@@ -49,4 +68,16 @@
 <app-dialog #appointmentDialog>
     <app-single-appointment *ngIf="appointmentDialog.isOpen" [(id)]="viewingAppointmentId"
         (onDone)="appointmentDialog.close()"></app-single-appointment>
+</app-dialog>
+
+<app-dialog #timeOffDialog>
+    <app-single-time-off *ngIf="timeOffDialog.isOpen" [id]="viewingTimeOffId"
+        (onDone)="timeOffDialog.close()"></app-single-time-off>
+</app-dialog>
+
+<app-dialog #allDayListDialog>
+    <app-all-day-time-off-picker *ngIf="allDayListDialog.isOpen" testPrefix="list"
+        [occurrences]="allDayList" [date]="allDayListDate"
+        (pick)="viewingTimeOffId = $event; allDayListDialog.close(); timeOffDialog.open()">
+    </app-all-day-time-off-picker>
 </app-dialog>

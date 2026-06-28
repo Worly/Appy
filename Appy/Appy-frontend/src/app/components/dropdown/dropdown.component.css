@@ -10,3 +10,9 @@
 app-button {
     white-space: nowrap;
 }
+
+:host(.full-width),
+:host(.full-width) .my-container,
+:host(.full-width) app-button {
+    display: block;
+}

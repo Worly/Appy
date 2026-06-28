@@ -21,9 +21,18 @@ export interface QueryResult<T> {
 
 export type PageDirection = "forwards" | "backwards";
 
-/** Result of a bidirectional, infinitely-scrolling list (the list view). */
-export interface PagedResult<T> {
+/** Result of a bidirectional, infinitely-scrolling list (the list view). E is an optional per-page sidecar (e.g. time-offs). */
+export interface PagedResult<T, E = never> {
     items$: Observable<T[]>;
+    /** Per-page sidecar values, accumulated across loaded pages in the same order as items$. */
+    extras$: Observable<E[]>;
+    /**
+     * `items` and `extras` from the same emission, paired. A consumer that needs both should
+     * subscribe to this rather than combining `items$`/`extras$` — those are two projections of one
+     * upstream, so `combineLatest` emits a transient `new-items` / `stale-extras` pair before the
+     * consistent one. `page$` emits once per update, always consistent.
+     */
+    page$: Observable<{ items: T[]; extras: E[] }>;
     /** True while a page is loading in either direction. */
     loading$: Observable<boolean>;
     /** True while the next (forwards) page is loading — for the bottom spinner. */

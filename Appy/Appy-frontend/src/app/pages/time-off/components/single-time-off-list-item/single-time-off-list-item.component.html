@@ -1,0 +1,14 @@
+<div class="time-off-row" (click)="onOpenView.emit()" data-test="time-off-row">
+  <div class="accent"></div>
+  <div class="info">
+    <div class="label">{{ label }}</div>
+    <div class="meta">
+      <div class="meta-primary">
+        <span class="schedule">{{ schedule }}</span>
+        <span class="time">{{ time }}</span>
+      </div>
+      <span class="date-range" *ngIf="dateRange">{{ dateRange }}</span>
+    </div>
+  </div>
+  <fa-icon class="type-icon" [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
+</div>

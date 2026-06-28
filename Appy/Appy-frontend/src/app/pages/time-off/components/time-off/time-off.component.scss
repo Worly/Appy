@@ -1,0 +1,33 @@
+:host {
+  display: block;
+}
+
+.tabs {
+  display: block;
+  margin-bottom: 12px;
+}
+
+// Controls row: scope toggle on the left, the primary action (add / configure import) on the right.
+// Wraps on very narrow widths so the two never collide.
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.holidays-stub {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 3rem 1rem;
+  opacity: 0.6;
+  text-align: center;
+
+  fa-icon {
+    font-size: 2rem;
+  }
+}

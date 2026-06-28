@@ -1,0 +1,195 @@
+<app-loading *ngIf="!isLoaded"></app-loading>
+
+<div class="page" *ngIf="isLoaded">
+  <div class="title-block">
+    <div class="w-title">{{ (isNew ? "pages.time-off.ADD" : "pages.time-off.TIME_OFF") | translate }}</div>
+    <div class="title-sub">{{ (type === 'oneoff' ? "pages.time-off.ONE_OFF" : "pages.time-off.RECURRING") | translate }}</div>
+  </div>
+
+  <!-- Details -->
+  <section class="card">
+    <div class="card-head">
+      <fa-icon [icon]="['fas', 'pen']" aria-hidden="true"></fa-icon>
+      <span>{{ "pages.time-off.DETAILS" | translate }}</span>
+    </div>
+
+    <div class="w-input-container">
+      <label class="w-label">{{ "pages.time-off.LABEL" | translate }}</label>
+      <input class="w-input" type="text" [(ngModel)]="timeOff.label" data-test="time-off-label" />
+      <div class="w-validation-message" *ngIf="timeOff.getValidationErrors('label')">{{ timeOff.getValidationErrors("label") | translate }}</div>
+    </div>
+
+    <div class="w-input-container">
+      <label class="w-label">{{ "pages.time-off.NOTES" | translate }}</label>
+      <textarea class="w-input" rows="2" [(ngModel)]="timeOff.notes"></textarea>
+    </div>
+  </section>
+
+  <!-- When -->
+  <section class="card">
+    <div class="card-head">
+      <fa-icon [icon]="['fas', 'calendar-days']" aria-hidden="true"></fa-icon>
+      <span>{{ "pages.time-off.WHEN" | translate }}</span>
+    </div>
+
+    <!-- One-off: required start + end date (stacked full-width, like the recurring From/To) -->
+    <ng-container *ngIf="type === 'oneoff'">
+      <div class="w-input-container">
+        <label class="w-label">{{ "pages.time-off.FROM_DATE" | translate }}</label>
+        <app-date-selector [showDayOfWeek]="true" [date]="timeOff.startDate!" (dateChange)="onStartDateChange($event)"></app-date-selector>
+      </div>
+      <div class="w-input-container">
+        <div class="label-row">
+          <label class="w-label">{{ "pages.time-off.TO_DATE" | translate }}</label>
+          <span class="day-count" *ngIf="oneOffDayCountText" data-test="time-off-day-count">{{ oneOffDayCountText }}</span>
+        </div>
+        <app-date-selector [showDayOfWeek]="true" [date]="timeOff.endDate!" (dateChange)="onEndDateChange($event)"></app-date-selector>
+      </div>
+      <div class="w-validation-message" *ngIf="timeOff.getValidationErrors('startDate')">{{ timeOff.getValidationErrors("startDate") | translate }}</div>
+    </ng-container>
+
+    <!-- Recurring: Weekly | Monthly segmented control + matching day picker + optional bounds -->
+    <ng-container *ngIf="type === 'recurring'">
+      <app-segmented-control dataTest="time-off-recurrence-segment" [options]="recurrenceOptions"
+        [value]="timeOff.recurrence" (valueChange)="setRecurrence($event)"></app-segmented-control>
+
+      <div class="w-input-container" *ngIf="timeOff.recurrence === TimeOffRecurrence.Weekly" data-test="time-off-day-of-week">
+        <label class="w-label">{{ "pages.time-off.DAY_OF_WEEK" | translate }}</label>
+        <app-dropdown [items]="daysOfWeek" [displayFunction]="formatDayOfWeek" [hasIcon]="true"
+          [fullWidth]="true" [matchTriggerWidth]="true" [value]="timeOff.dayOfWeek" (valueChange)="timeOff.dayOfWeek = $event"></app-dropdown>
+        <div class="w-validation-message" *ngIf="timeOff.getValidationErrors('dayOfWeek')">{{ timeOff.getValidationErrors("dayOfWeek") | translate }}</div>
+      </div>
+
+      <div class="w-input-container" *ngIf="timeOff.recurrence === TimeOffRecurrence.Monthly" data-test="time-off-day-of-month">
+        <label class="w-label">{{ "pages.time-off.DAY_OF_MONTH" | translate }}</label>
+        <app-dropdown [items]="daysOfMonth" [hasIcon]="true" [fullWidth]="true" [matchTriggerWidth]="true"
+          [value]="timeOff.dayOfMonth" (valueChange)="timeOff.dayOfMonth = $event"></app-dropdown>
+        <div class="w-validation-message" *ngIf="timeOff.getValidationErrors('dayOfMonth')">{{ timeOff.getValidationErrors("dayOfMonth") | translate }}</div>
+      </div>
+
+      <!-- Recurring always has an effective-from (defaults to today); the end date is opt-in. -->
+      <div class="w-input-container">
+        <label class="w-label">{{ "pages.time-off.FROM_DATE" | translate }}</label>
+        <app-date-selector data-test="time-off-start-date" [showDayOfWeek]="true" [date]="timeOff.startDate!" (dateChange)="onStartDateChange($event)"></app-date-selector>
+      </div>
+
+      <div class="toggle-row">
+        <span class="toggle-label">{{ "pages.time-off.SET_END_DATE" | translate }}</span>
+        <app-toggle-switch [value]="hasEndDate" (valueChange)="onHasEndDateChange($event)"
+          data-test="time-off-has-end-date"></app-toggle-switch>
+      </div>
+
+      <div class="w-input-container" *ngIf="hasEndDate">
+        <label class="w-label">{{ "pages.time-off.TO_DATE" | translate }}</label>
+        <app-date-selector [showDayOfWeek]="true" [date]="timeOff.endDate!" (dateChange)="onEndDateChange($event)"></app-date-selector>
+      </div>
+      <div class="w-validation-message" *ngIf="timeOff.getValidationErrors('startDate')">{{ timeOff.getValidationErrors("startDate") | translate }}</div>
+    </ng-container>
+  </section>
+
+  <!-- Time -->
+  <section class="card">
+    <div class="card-head">
+      <fa-icon [icon]="['fas', 'clock']" aria-hidden="true"></fa-icon>
+      <span>{{ "pages.time-off.TIME" | translate }}</span>
+    </div>
+
+    <div class="toggle-row">
+      <span class="toggle-label">{{ "pages.time-off.ALL_DAY" | translate }}</span>
+      <app-toggle-switch [value]="timeOff.isAllDay" (valueChange)="timeOff.isAllDay = $event"
+        data-test="time-off-all-day"></app-toggle-switch>
+    </div>
+
+    <ng-container *ngIf="!timeOff.isAllDay">
+      <div class="duo">
+        <div class="w-input-container">
+          <label class="w-label">{{ "pages.time-off.TIME_FROM" | translate }}</label>
+          <div class="time-row">
+            <app-dropdown [items]="hours" [displayFunction]="formatHourMinute" [hasIcon]="false" [fullWidth]="true" [matchTriggerWidth]="true"
+              [value]="timeOff.timeFrom?.hour()" (valueChange)="setFromHour($event)"></app-dropdown>
+            <span class="colon">:</span>
+            <app-dropdown [items]="minutes" [displayFunction]="formatHourMinute" [hasIcon]="false" [fullWidth]="true" [matchTriggerWidth]="true"
+              [value]="timeOff.timeFrom?.minute()" (valueChange)="setFromMinute($event)"></app-dropdown>
+          </div>
+        </div>
+        <div class="w-input-container">
+          <label class="w-label">{{ "pages.time-off.TIME_TO" | translate }}</label>
+          <div class="time-row">
+            <app-dropdown [items]="hours" [displayFunction]="formatHourMinute" [hasIcon]="false" [fullWidth]="true" [matchTriggerWidth]="true"
+              [value]="timeOff.timeTo?.hour()" (valueChange)="setToHour($event)"></app-dropdown>
+            <span class="colon">:</span>
+            <app-dropdown [items]="minutes" [displayFunction]="formatHourMinute" [hasIcon]="false" [fullWidth]="true" [matchTriggerWidth]="true"
+              [value]="timeOff.timeTo?.minute()" (valueChange)="setToMinute($event)"></app-dropdown>
+          </div>
+        </div>
+      </div>
+      <div class="w-validation-message" *ngIf="timeOff.getValidationErrors('timeFrom')">{{ timeOff.getValidationErrors("timeFrom") | translate }}</div>
+    </ng-container>
+  </section>
+
+  <app-action-bar>
+    <app-button *ngIf="!isNew" [text]="'DELETE' | translate" icon="trash" color="danger" look="solid"
+      [disabled]="isLoading" (onClick)="delete()"></app-button>
+    <app-button flex-splitter [text]="'CANCEL' | translate" color="danger" look="normal" [disabled]="isLoading"
+      (onClick)="goBack()"></app-button>
+    <app-button [text]="'SAVE' | translate" color="success" look="solid" [disabled]="isLoading"
+      [isLoading]="isLoading" (onClick)="save()"></app-button>
+  </app-action-bar>
+</div>
+
+<app-dialog #splitDialog>
+  <div class="split-dialog" *ngIf="splitDialog.isOpen" data-test="time-off-split-dialog">
+    <div class="split-title">{{ "pages.time-off.APPLY_FROM_TITLE" | translate }}</div>
+
+    <app-segmented-control [options]="splitModeOptions" [value]="splitMode"
+      (valueChange)="splitMode = $event"></app-segmented-control>
+
+    <!-- Explains the effect of the selected apply-from mode before the user commits. -->
+    <div class="split-hint" data-test="time-off-split-hint">
+      <fa-icon [icon]="['fas', 'circle-info']" aria-hidden="true"></fa-icon>
+      <span>{{ (splitMode === 'date' ? 'pages.time-off.APPLY_FROM_SPECIFIC_HINT' : 'pages.time-off.APPLY_FROM_ALL_HINT') | translate }}</span>
+    </div>
+
+    <div class="w-input-container" *ngIf="splitMode === 'date'">
+      <app-date-selector [showDayOfWeek]="true" [date]="splitDate" (dateChange)="onSplitDateChange($event)"></app-date-selector>
+    </div>
+
+    <div class="split-actions">
+      <app-button [text]="'CANCEL' | translate" color="danger" look="normal"
+        (onClick)="splitDialog.close()"></app-button>
+      <app-button [text]="'APPLY' | translate" color="success" look="solid" [disabled]="isLoading"
+        (onClick)="confirmSplit()" data-test="time-off-split-apply"></app-button>
+    </div>
+  </div>
+</app-dialog>
+
+<app-dialog #deleteDialog>
+  <div class="split-dialog" *ngIf="deleteDialog.isOpen" data-test="time-off-delete-dialog">
+    <div class="split-title">{{ "pages.time-off.DELETE_TITLE" | translate }}</div>
+
+    <!-- Active, already-started recurring rule: choose to stop (keep history) or delete entirely. -->
+    <ng-container *ngIf="canStop">
+      <app-segmented-control [options]="deleteModeOptions" [value]="deleteMode"
+        (valueChange)="deleteMode = $event"></app-segmented-control>
+
+      <!-- Explains the effect of the selected delete mode before the user commits. -->
+      <div class="split-hint" data-test="time-off-delete-hint">
+        <fa-icon [icon]="['fas', 'circle-info']" aria-hidden="true"></fa-icon>
+        <span>{{ (deleteMode === 'stop' ? 'pages.time-off.DELETE_MODE_STOP_HINT' : 'pages.time-off.DELETE_MODE_REMOVE_HINT') | translate }}</span>
+      </div>
+    </ng-container>
+
+    <!-- Every other rule: a plain confirmation before the delete goes through. -->
+    <div class="split-hint" *ngIf="!canStop" data-test="time-off-delete-confirm-message">
+      <fa-icon [icon]="['fas', 'circle-info']" aria-hidden="true"></fa-icon>
+      <span>{{ "pages.time-off.DELETE_CONFIRM" | translate }}</span>
+    </div>
+
+    <div class="split-actions">
+      <app-button [text]="'CANCEL' | translate" color="danger" look="normal"
+        (onClick)="deleteDialog.close()"></app-button>
+      <app-button [text]="'CONFIRM' | translate" color="danger" look="solid" [disabled]="isLoading"
+        (onClick)="confirmDelete()" data-test="time-off-delete-confirm"></app-button>
+    </div>
+  </div>
+</app-dialog>

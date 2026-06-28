@@ -10,7 +10,9 @@ export class DateSelectorComponent implements OnInit {
 
   private _date: Dayjs = dayjs();
   @Input() set date(value: Dayjs) {
-    if (this._date.isSame(value))
+    // Ignore null/undefined so a not-yet-loaded value can't poison _date and crash
+    // every later change-detection cycle (reading .isSame/.format on undefined).
+    if (value == null || this._date.isSame(value))
       return;
 
     this._date = value;
@@ -22,11 +24,21 @@ export class DateSelectorComponent implements OnInit {
 
   @Input() compact: boolean = false;
 
+  // When true, the displayed date is prefixed with its (localized) weekday, e.g. "Monday, 21.06.2026".
+  @Input() showDayOfWeek: boolean = false;
+
   @Output() dateChange: EventEmitter<Dayjs> = new EventEmitter();
 
   constructor() { }
 
   ngOnInit(): void {
+  }
+
+  // Text shown on the date button; with showDayOfWeek the weekday is prefixed in the active locale's
+  // own casing (capitalized in English, lowercase in Croatian — dayjs's localized weekday names).
+  get displayText(): string {
+    const dateFormat = this.compact ? "DD.MM.YY" : "DD.MM.YYYY";
+    return this._date.format(this.showDayOfWeek ? `dddd, ${dateFormat}` : dateFormat);
   }
 
 }

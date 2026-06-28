@@ -53,6 +53,12 @@ export class AppComponent implements OnInit {
       icon: "bell",
       link: "/client-notifications",
       visible: () => this.authService.isLoggedIn() && this.facilityService.getSelected() != null
+    },
+    {
+      name: "pages.time-off.TIME_OFF",
+      icon: "umbrella-beach",
+      link: "/time-off",
+      visible: () => this.authService.isLoggedIn() && this.facilityService.getSelected() != null
     }
   ]
 

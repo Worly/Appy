@@ -19,17 +19,20 @@ namespace Appy.Controllers
         private IServiceService serviceService;
         private IWorkingHourService workingHourService;
         private IClientNotificationsService clientNotificationsService;
+        private ITimeOffService timeOffService;
 
         public AppointmentController(
             IAppointmentService appointmentService,
             IServiceService serviceService,
             IWorkingHourService workingHourService,
-            IClientNotificationsService clientNotificationsService)
+            IClientNotificationsService clientNotificationsService,
+            ITimeOffService timeOffService)
         {
             this.appointmentService = appointmentService;
             this.serviceService = serviceService;
             this.workingHourService = workingHourService;
             this.clientNotificationsService = clientNotificationsService;
+            this.timeOffService = timeOffService;
         }
 
         [HttpGet("getAll")]
@@ -43,7 +46,7 @@ namespace Appy.Controllers
 
         [HttpGet("getList")]
         [Authorize]
-        public async Task<ActionResult<List<AppointmentViewDTO>>> GetList(
+        public async Task<ActionResult<AppointmentListPageDTO>> GetList(
             [FromQuery] DateOnly date, [FromQuery] Direction direction, [FromQuery] int skip, [FromQuery] int take, [FromQuery] SmartFilter? filter)
         {
             var result = await this.appointmentService.GetList(date, direction, skip, take, filter, HttpContext.SelectedFacility());
@@ -115,7 +118,10 @@ namespace Appy.Controllers
             if (ignoreAppointmentId.HasValue)
                 appointmentsOfTheDay = appointmentsOfTheDay.Where(o => o.Id != ignoreAppointmentId).ToList();
 
-            return this.appointmentService.GetFreeTimes(appointmentsOfTheDay, workingHours, service.GetDTO(), duration);
+            var occurrences = await this.timeOffService.GetOccurrencesForDate(date, HttpContext.SelectedFacility());
+            var timeOffIntervals = occurrences.Select(o => o.ToInterval()).ToList();
+
+            return this.appointmentService.GetFreeTimes(appointmentsOfTheDay, workingHours, timeOffIntervals, service.GetDTO(), duration);
         }
 
         [HttpPost("notifyClient/{id}")]

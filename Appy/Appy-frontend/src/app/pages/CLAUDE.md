@@ -15,6 +15,7 @@ Each subdirectory is a feature page with its own CLAUDE.md. **Read that page's C
 | `clients/` | LoggedIn + SelectedFacility | Lazy | `clients/CLAUDE.md` |
 | `services/` | LoggedIn + SelectedFacility | Lazy | `services/CLAUDE.md` |
 | `working-hours/` | LoggedIn + SelectedFacility | Lazy | `working-hours/CLAUDE.md` |
+| `time-off/` | LoggedIn + SelectedFacility | Lazy | `time-off/CLAUDE.md` |
 | `client-notifications/` | LoggedIn + SelectedFacility | Lazy | `client-notifications/CLAUDE.md` |
 
 `SelectedFacilityGuard` lives in `facilities/services/facility.guard.ts` and redirects to `/facilities` when no facility is selected. `PreloadAllModules` preloads lazy modules after the initial render.
@@ -25,3 +26,4 @@ Some page modules export components consumed by other pages:
 - `ClientsModule` exports `ClientLookupComponent` → used by `AppointmentsModule`
 - `ServicesModule` exports `ServiceLookupComponent` → used by `AppointmentsModule`
 - `AppointmentsModule` exports `SingleAppointmentComponent` → used by `DashboardModule`
+- `TimeOffModule` exports `SingleTimeOffComponent` → used by `AppointmentsModule` (time-off details dialog in the appointment list)

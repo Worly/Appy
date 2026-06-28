@@ -7,6 +7,7 @@ import { parseDuration } from "../utils/time-utils";
 import { ClientDTO } from "./client";
 import { IconName, IconPrefix } from "@fortawesome/fontawesome-svg-core";
 import { Color } from "../components/button/button.component";
+import { TimeOffOccurrenceDTO } from "./time-off-occurrence";
 
 export type AppointmentStatus = "Confirmed" | "Unconfirmed" | "NoShow";
 
@@ -55,6 +56,13 @@ export class AppointmentViewDTO {
     public lastUpdatedAt!: string;
 
     public previousAppointment?: AppointmentViewDTO;
+}
+
+// Envelope returned by GET /appointment/getList: a page of appointments plus the
+// time-off occurrences covering that page's date span (see AppointmentService.getList).
+export interface AppointmentListPageDTO {
+    appointments: AppointmentViewDTO[];
+    timeOffs: TimeOffOccurrenceDTO[];
 }
 
 export class AppointmentView extends BaseModel {

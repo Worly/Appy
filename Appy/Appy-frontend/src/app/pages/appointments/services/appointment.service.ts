@@ -6,8 +6,9 @@ import { catchError, map, Observable, tap, throwError } from "rxjs";
 import { appConfig } from "src/app/app.config";
 import { ToastAction, ToastService } from "src/app/components/toast/toast.service";
 import { TranslateService } from "src/app/components/translate/translate.service";
-import { Appointment, AppointmentStatus, AppointmentView, AppointmentViewDTO } from "src/app/models/appointment";
+import { Appointment, AppointmentListPageDTO, AppointmentStatus, AppointmentView, AppointmentViewDTO } from "src/app/models/appointment";
 import { FreeTime, FreeTimeDTO } from "src/app/models/free-time";
+import { TimeOffOccurrence } from "src/app/models/time-off-occurrence";
 import { BaseModelService } from "src/app/shared/services/base-model-service";
 import { PagedResult, QueryResult } from "src/app/shared/services/data/contracts";
 import { appointmentKeys } from "src/app/shared/services/data/keys";
@@ -32,12 +33,17 @@ export class AppointmentService extends BaseModelService<Appointment, Appointmen
         });
     }
 
-    public getList(date: Dayjs, filter: SmartFilter | undefined): PagedResult<AppointmentView> {
+    public getList(date: Dayjs, filter: SmartFilter | undefined): PagedResult<AppointmentView, TimeOffOccurrence> {
         // Filter is part of the cache key so different filters cache as separate lists; the
         // serialized form must match what getListAdvanced sends as the `filter` HTTP param.
-        return this.getListAdvanced(
+        return this.getListAdvanced<TimeOffOccurrence>(
             [...appointmentKeys.list(date.format("YYYY-MM-DD")), filter ? JSON.stringify(filter) : "all"],
-            { date: date.format("YYYY-MM-DD") }, filter);
+            { date: date.format("YYYY-MM-DD") },
+            filter,
+            (raw: AppointmentListPageDTO) => ({
+                items: raw.appointments.map(a => new AppointmentView(a)),
+                extra: raw.timeOffs.map(o => new TimeOffOccurrence(o)),
+            }));
     }
 
     public getFreeTimes(date: Dayjs, serviceId: number, duration: Duration, ignoreAppointmentId?: number): Observable<FreeTime[]> {

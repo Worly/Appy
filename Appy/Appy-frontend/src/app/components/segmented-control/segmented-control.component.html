@@ -1,0 +1,8 @@
+<div class="segmented" [class.compact]="size === 'compact'" [attr.data-test]="dataTest">
+  <app-button *ngFor="let o of options" class="segment"
+    [look]="o.value === value ? 'solid' : 'transparent'"
+    [color]="o.value === value ? 'primary' : 'inherit'"
+    [icon]="o.icon" [text]="o.label | translate" alignContent="center"
+    [attr.data-test]="o.dataTest" (onClick)="select(o)">
+  </app-button>
+</div>

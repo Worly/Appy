@@ -33,15 +33,20 @@
 
 .date {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
     padding-top: 8px;
     padding-bottom: 8px;
     margin-left: 20px;
+    margin-right: 20px;
 
     .date-absolute {
         font-size: 1.1rem;
         font-weight: bold;
         line-height: 1.15;
+        white-space: nowrap;
     }
 
     .date-relative {
@@ -88,7 +93,7 @@
     align-items: center;
     gap: 10px;
 
-    margin: 2px 20px 8px;   // line up with the cards' horizontal inset
+    margin: -7px 2px 3px; // line up with the cards' horizontal inset
 
     font-size: 0.75rem;
     opacity: 0.45;
@@ -125,5 +130,69 @@
             -webkit-mask: $jagged-mask;
             mask: $jagged-mask;
         }
+    }
+}
+
+.whole-day-off {
+    padding: 5px 10px;
+    border-radius: var(--default-border-radius);
+    background: rgba(var(--rgb-danger), 0.15);
+    color: rgb(var(--rgb-danger));
+    font-size: 0.8rem;
+    font-weight: 600;
+    height: min-content;
+    overflow: hidden;
+    cursor: pointer;
+
+    display: flex;
+    gap: 10px;
+    align-items: center;
+
+    .whole-day-off-text {
+        display: flex;
+        gap: 4px;
+        min-width: 0;
+
+        .whole-day-off-label {
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+    }
+}
+
+.time-off-item {
+    // A non-bookable block: hatched background, muted italic label, lining up with the cards' inset.
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: var(--default-border-radius);
+    background: repeating-linear-gradient(45deg, rgba(var(--rgb-warning), 0.05), rgba(var(--rgb-warning), 0.05) 10px, rgba(var(--rgb-input-background)) 10px, rgba(var(--rgb-input-background)) 20px);
+    box-shadow: inset 0 0 0 1.2px rgba(var(--rgb-warning), 0.2);
+    font-size: 0.9rem;
+    cursor: pointer;
+
+    &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgb(var(--rgb-input-background));
+        z-index: -1;
+    }
+    
+    &>fa-icon {
+        color: rgb(var(--rgb-warning))
+    }
+
+    &.overlap {
+        box-shadow: inset 0 0 0 1.2px rgba(var(--rgb-danger), 0.8);
     }
 }

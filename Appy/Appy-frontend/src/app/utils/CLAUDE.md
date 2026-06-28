@@ -7,6 +7,7 @@ Pure helper functions with no Angular DI dependencies. Safe to import anywhere a
 | File | Contents |
 |------|----------|
 | `time-utils.ts` | `parseDuration()` — string to dayjs Duration; `timeOnly()` — strip date from a datetime; `overlap()` — test whether two time ranges intersect; `timeBetweenMs()` — signed ms between end of one appointment and start of the next (positive = gap, zero = back-to-back, negative = overlap) |
+| `list-timeline.ts` | `buildDayTimeline()` — merge appointments + partial time-offs into a sorted list for gap/overlap detection in the list view |
 | `group-by.ts` | `groupBy(array, keyFn)` — bucket array items by a derived key |
 | `smart-subscriber.ts` | `onUnsubscribed()` — Observable that emits when its observer unsubscribes (useful for teardown logic) |
 | `material-dayjs-adapter.ts` | Custom Angular Material `DateAdapter` that uses dayjs instead of the default Moment.js adapter |

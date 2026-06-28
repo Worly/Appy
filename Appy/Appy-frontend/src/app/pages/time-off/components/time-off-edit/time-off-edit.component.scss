@@ -1,0 +1,179 @@
+:host {
+  display: block;
+}
+
+// Mobile-first: a single column of cards that expands to fill the page, like the appointment editor.
+.page {
+  padding-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// Title uses the global .w-title (matching the home screen), with the type as
+// an uppercase eyebrow beneath it.
+.title-block {
+  text-align: center;
+
+  // .w-title carries a 20px bottom margin; collapse it so the eyebrow sits
+  // close under the title (the .page flex gap handles spacing to the cards).
+  .w-title {
+    margin-bottom: 4px;
+  }
+}
+
+.title-sub {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(var(--rgb-primary));
+}
+
+.card {
+  background: rgb(var(--rgb-card-background));
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.55;
+
+  fa-icon {
+    font-size: 0.85rem;
+  }
+}
+
+// The "To" label shares its row with the inclusive day-count summary, pushed to the right.
+.label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+// Inclusive "N days" summary, right-aligned beside the "To" label — a quiet metadata note.
+.day-count {
+  font-size: 0.85rem;
+  opacity: 0.6;
+}
+
+.duo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+
+  // From / To share the row evenly instead of hugging the left.
+  > .w-input-container {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  .toggle-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+}
+
+// Hour : minute grouped tightly so it reads like a clock face. The two dropdowns share the
+// row equally so the pair fills its field instead of sitting as two small boxes on the left.
+.time-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  .colon {
+    font-weight: 700;
+    opacity: 0.5;
+  }
+}
+
+:host ::ng-deep .time-row app-dropdown {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+// The "When" date selectors fill the field width — consistent with the inputs and segmented controls.
+app-date-selector {
+  display: block;
+}
+
+:host ::ng-deep app-date-selector {
+  .my-container {
+    width: 100%;
+  }
+
+  .date-button {
+    flex: 1 1 auto; // the date stretches; the prev/next arrows stay compact
+  }
+}
+
+// Body layout for the apply-from / delete prompts. The host app-dialog already supplies the card
+// surface and its own padding (.dialog-container is a .w-card), so we only own the inner stacking
+// here — adding a background/radius/padding again would double the card and its padding.
+.split-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.split-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+// Explains what the selected apply-from mode will do. Soft tinted panel so it reads as guidance.
+.split-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 11px 13px;
+  border-radius: 10px;
+  background: rgba(var(--rgb-primary), 0.1);
+  color: rgb(var(--rgb-text));
+  font-size: 0.88rem;
+  line-height: 1.4;
+
+  fa-icon {
+    color: rgb(var(--rgb-primary));
+    margin-top: 1px; // optical-align the icon with the first line of text
+  }
+}
+
+.split-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+// The split dialog renders in a CDK overlay (outside :host), so the form's :host-scoped
+// full-width date-selector rule can't reach it. Repeat the width treatment scoped to the
+// dialog element, which keeps its content attribute and matches inside the overlay.
+.split-dialog ::ng-deep app-date-selector {
+  display: block;
+
+  .my-container {
+    width: 100%;
+  }
+
+  .date-button {
+    flex: 1 1 auto;
+  }
+}

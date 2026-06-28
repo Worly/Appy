@@ -1,0 +1,50 @@
+:host {
+  display: block;
+}
+
+.segmented {
+  --pill-padding: 3px;
+
+  display: flex;
+  gap: 4px;
+  padding: var(--pill-padding);
+  border-radius: calc(var(--default-border-radius) + var(--pill-padding));
+  background: rgb(var(--rgb-input-background));
+  border: 1px solid rgb(var(--rgb-input-border));
+
+  .segment {
+    flex: 1 1 0; // default: segments share the full width equally
+    min-width: 0;
+    font-weight: 600;
+  }
+
+  // Compact: a fit-content pill with content-sized segments (e.g. a scope toggle).
+  &.compact {
+    width: fit-content;
+
+    .segment {
+      flex: 0 0 auto;
+    }
+  }
+}
+
+:host ::ng-deep .segmented .segment .my-button {
+  // Segments share one row, so they can't afford a standalone button's 15px side padding —
+  // with an icon plus a long (especially Croatian) label it overflows into a scrollbar.
+  // Trim the padding and the label size so icon + text fit comfortably.
+  padding-left: 8px;
+  padding-right: 8px;
+  font-size: 0.9rem;
+}
+
+// Keep icon + label on one line; if a label still can't fit, clip it rather than show the
+// button-content scrollbar. The icon never shrinks, so it always stays visible.
+:host ::ng-deep .segmented .segment .button-content {
+  overflow: hidden;
+  white-space: nowrap;
+  gap: 6px;
+}
+
+:host ::ng-deep .segmented .segment .my-icon {
+  flex: 0 0 auto;
+}

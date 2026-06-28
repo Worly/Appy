@@ -33,6 +33,7 @@ export class SingleAppointmentListItemComponent {
   @Input()
   showDate: boolean = false;
 
+  // Drawn with a red inset border. Set for a neighbour-overlap or a booking on a full-day off.
   @Input()
   isOverlapping: boolean = false;
 

@@ -14,11 +14,13 @@ namespace Appy.Controllers
     {
         private IAppointmentService appointmentService;
         private IWorkingHourService workingHourService;
+        private ITimeOffService timeOffService;
 
-        public CalendarDayController(IAppointmentService appointmentService, IWorkingHourService workingHourService)
+        public CalendarDayController(IAppointmentService appointmentService, IWorkingHourService workingHourService, ITimeOffService timeOffService)
         {
             this.appointmentService = appointmentService;
             this.workingHourService = workingHourService;
+            this.timeOffService = timeOffService;
         }
 
         [HttpGet("getAll")]
@@ -27,12 +29,14 @@ namespace Appy.Controllers
         {
             var appointments = await this.appointmentService.GetAll(date, HttpContext.SelectedFacility(), findPrevious: true, filter);
             var workingHours = await this.workingHourService.GetWorkingHours(date, HttpContext.SelectedFacility());
+            var timeOffs = await this.timeOffService.GetOccurrencesForDate(date, HttpContext.SelectedFacility());
 
             return Ok(new CalendarDayDTO()
             {
                 Date = date,
                 Appointments = appointments,
-                WorkingHours = workingHours.Select(w => w.GetDTO()).ToList()
+                WorkingHours = workingHours.Select(w => w.GetDTO()).ToList(),
+                TimeOffs = timeOffs
             });
         }
     }

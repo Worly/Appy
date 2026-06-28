@@ -21,12 +21,16 @@ Tests call the backend's `/testing/seed` endpoint at the start of each suite to 
 | Command | Purpose |
 |---------|---------|
 | `cy.login()` | Authenticate as the seeded test user |
-| `cy.getElement(name)` | Select an element by its `data-cy` attribute |
+| `getElement(name)` | Select the single element with the matching `data-test` attribute (`getElements` for one-or-more) |
 | `cy.expectURL(path)` | Assert the current URL path |
+
+## Page Objects (cypress/e2e/pages/)
+
+Each page's UI is wrapped in a page-object module (`appointments.ts`, `time-off.ts`) that exports plain objects whose methods drive the page (click buttons, read rows, open dialogs) and return chained sub-objects. **Specs never call Cypress (`cy.*` / `getElement`) on page elements directly — they go through these helpers**, so the DOM structure lives in one place. A spec may import another page's object to exercise cross-feature flows (e.g. `time-off.cy.ts` imports `appointments` to switch views / navigate dates when checking time-off badges and bands). Page objects live in modules (not `.cy.ts` files) so importing them doesn't re-register another spec's `describe`.
 
 ## Lookup Helpers (cypress/e2e/lookups/)
 
-Reusable interaction abstractions for common UI widgets: client lookup, service lookup, duration picker, date picker. These keep test code focused on behavior rather than DOM structure.
+Reusable interaction abstractions for common UI widgets: client lookup, service lookup, duration picker, date picker, toggle switch. These keep test code focused on behavior rather than DOM structure.
 
 ## Component Helpers (cypress/e2e/)
 
@@ -34,7 +38,7 @@ Reusable interaction abstractions for common UI widgets: client lookup, service 
 
 ## Test Coverage
 
-`appointments.cy.ts` is the primary test file and covers appointment CRUD, both Scroller and List views, date/time picker interactions, status changes, and filter behavior.
+`appointments.cy.ts` is the primary test file and covers appointment CRUD, both Scroller and List views, date/time picker interactions, status changes, and filter behavior. `time-off.cy.ts` covers time-off CRUD across the One-off / Recurring tabs and Upcoming / History scopes, the apply-from (fork) and stop-vs-delete dialogs, and how time-offs surface in the appointment list (all-day badge) and scroller (bands).
 
 ## Filtering Tests (@cypress/grep)
 
@@ -49,6 +53,6 @@ npx cypress run --env grep="when date changes",grepFilterSpecs=true   # also ski
 
 Pinned to **5.x** on purpose: 6.x requires Cypress ≥ 15.10 (the new `Cypress.expose()` API), but this project runs Cypress 14. `cypress/cypress-grep.d.ts` is a type-only shim — the package is `exports`-only with no `main`, which the project's classic `node` moduleResolution (TS 4.9) can't resolve; Cypress's own bundler resolves it fine at runtime. Remove the shim if `moduleResolution` ever moves to `bundler`/`node16`.
 
-## data-cy Convention
+## data-test Convention
 
-Test-selectable elements use `data-cy="<name>"` attributes. Add this attribute to any new interactive element that E2E tests need to target. Never use CSS classes or element IDs for test selection.
+Test-selectable elements use `data-test="<name>"` attributes, resolved via `getElement` / `getElements`. Add this attribute to any new interactive element that E2E tests need to target, and use it **only** for tests — never for styling. Never use CSS classes or element IDs for test selection.

@@ -79,6 +79,12 @@ export function dateLookup(elementSelector: string) {
 }
 
 function parseSelectedDate(text: string): Dayjs {
-  let split = text.trim().split(".");
-  return dayjs(`20${split[2]}-${split[1]}-${split[0]}`);
+  // Date selectors render either compact (DD.MM.YY) or full (DD.MM.YYYY), and may prefix the
+  // localized weekday when showDayOfWeek is set ("Monday, 21.06.2026"). Pull the date out by
+  // pattern so the optional prefix doesn't break parsing; normalise a 2-digit year to 4 digits.
+  let match = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
+  if (match == null)
+    throw new Error(`Could not parse a date from selector text: "${text}"`);
+  let year = match[3].length <= 2 ? `20${match[3]}` : match[3];
+  return dayjs(`${year}-${match[2]}-${match[1]}`);
 }

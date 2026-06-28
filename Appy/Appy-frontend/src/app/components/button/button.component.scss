@@ -164,6 +164,12 @@
         border-color: rgb(var(--rgb-input-border));
     }
 
+    &-primary {
+        background-color: rgb(var(--rgb-primary));
+        color: rgb(var(--rgb-primary));
+        border-color: rgb(var(--rgb-primary));
+    }
+
     &-inherit {
         background-color: inherit;
         color: inherit;
@@ -194,6 +200,10 @@
 
             &-normal {
                 color: rgb(var(--rgb-text-on-normal));
+            }
+
+            &-primary {
+                color: rgb(var(--rgb-text-on-primary));
             }
 
             &-inherit {
@@ -257,6 +267,17 @@
     &-right {
         justify-content: right;
     }
+
+    // Content stretches edge-to-edge with its ends pushed apart — e.g. a select-style trigger
+    // with the label on the left and the caret on the right.
+    &-space-between {
+        justify-content: space-between;
+
+        > .button-content {
+            flex: 1 1 auto;
+            justify-content: space-between;
+        }
+    }
 }
 
 .text-align {
@@ -274,11 +295,11 @@
 }
 
 .icon-placement {
-    &-left {
+    &-left > .button-content {
         flex-direction: row;
     }
 
-    &-right {
+    &-right > .button-content {
         flex-direction: row-reverse;
     }
 }

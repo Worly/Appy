@@ -55,8 +55,18 @@ export class BaseModelService<T extends EditModel<T>, vT extends BaseModel> {
      * the serialized `filter` query param and the pages are shown in the order the backend returns
      * them (see {@link pagedQuery}). The seam does not re-sort or re-filter client-side.
      */
-    public getListAdvanced(queryKey: CacheKey, params: any, filter?: SmartFilter): PagedResult<vT> {
-        let loadPage = (dir: "forwards" | "backwards", skip: number, take: number): Observable<vT[]> => {
+    public getListAdvanced<E = never>(
+        queryKey: CacheKey,
+        params: any,
+        filter?: SmartFilter,
+        mapPage?: (raw: any) => { items: vT[]; extra: E[] }): PagedResult<vT, E> {
+
+        // Default: the endpoint returns a plain array of view DTOs and there are no extras.
+        // Endpoints that return a non-array page body (e.g. an {appointments, timeOffs} envelope)
+        // MUST pass `mapPage` — `raw` is `any` here, so the array assumption isn't type-checked.
+        const mapFn = mapPage ?? ((raw: any) => ({ items: (raw as any[]).map(o => new this.viewTypeFactory(o)), extra: [] as E[] }));
+
+        let loadPage = (dir: "forwards" | "backwards", skip: number, take: number): Observable<{ items: vT[]; extra: E[] }> => {
             let p = {
                 ...params,
                 direction: dir,
@@ -67,11 +77,11 @@ export class BaseModelService<T extends EditModel<T>, vT extends BaseModel> {
             if (filter != null)
                 p.filter = JSON.stringify(filter);
 
-            return this.httpClient.get<any[]>(`${appConfig.apiUrl}${this.controllerName}/getList`, { params: p })
-                .pipe(map(r => r.map(o => new this.viewTypeFactory(o))));
+            return this.httpClient.get<any>(`${appConfig.apiUrl}${this.controllerName}/getList`, { params: p })
+                .pipe(map(r => mapFn(r)));
         };
 
-        return pagedQuery<vT>(this.queryClient, { queryKey, loadPage });
+        return pagedQuery<vT, E>(this.queryClient, { queryKey, loadPage });
     }
 
     /**

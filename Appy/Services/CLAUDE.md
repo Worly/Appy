@@ -16,6 +16,7 @@ Business logic layer. Each service corresponds to one domain concept and is cons
 | `DashboardService` | Dashboard settings upsert (unique per user + facility) |
 | `ClientNotificationsService` | Notification settings and outbound message dispatch; logs per-contact Debug detail, Information on success, Warning before throwing `MESSAGE_FAILED_TO_SEND` |
 | `AppointmentReminderService` | Cron job (every 5 minutes) — sends reminders for the next day's confirmed appointments |
+| `TimeOffService` | Time-off CRUD, validation, and occurrence expansion (recurrence → concrete date intervals). `GetList(type, scope)` filters/orders/pages on the DB; the two SQL-orderable quadrants (One-off/Active, any/History) page entirely in SQL, while Recurring/Active fetches the scoped set and orders it in memory via the pure `OrderRecurringByNextOccurrence` (built on `NextOccurrenceOnOrAfter`). `GetOccurrencesForDate` is a single SQL query; `GetOccurrencesForDates` pre-filters candidate rules in SQL (span overlap + requested weekday/month-day) then expands per date in memory. Effective-from (`StartDate`) is mandatory for every recurrence. Edit(id, dto, facilityId, applyFrom?) forks a recurring rule's timeline at applyFrom (original clamped to applyFrom-1, new segment inserted from applyFrom onward); StopRecurring(id, facilityId) clamps a recurring rule's EndDate to yesterday (keep-history "stop"), rejecting one-offs and never extending an already-ended rule. Logs Information on each successful mutation (create / update / fork / delete / stop) |
 | `TestingService` | Dev-only data seeder, reachable via `TestingController` |
 
 ## Sub-Folders
@@ -28,7 +29,7 @@ Business logic layer. Each service corresponds to one domain concept and is cons
 
 - **Registration email format**: `UserService.Register` rejects malformed emails (`MailAddress` parsing) before the uniqueness check, throwing a `ValidationException` (`EMAIL_INVALID`)
 - **Service/Client deletion blocked** if any `Appointment` references them — caller must archive instead
-- **Appointment time validation**: the slot must fall within a `WorkingHour` range for that day-of-week and must not overlap an existing appointment. Pass `ignoreTimeNotAvailable=true` to bypass
+- **Appointment time validation**: the slot must fall within a `WorkingHour` range for that day-of-week, must not overlap an existing appointment, and must not overlap a time-off interval. Pass `ignoreTimeNotAvailable=true` to bypass
 - **Free-time generation**: 5-minute-interval slots within working hours, minus slots that would overlap existing appointments (and optionally ignoring one appointment ID for edit scenarios)
 - **Reminder deduplication**: `AppointmentReminderService` only reminds once per appointment (`WasReminded` flag prevents repeats across scheduler ticks)
 - **Contact name uniqueness**: `ClientService` enforces case-insensitive name + surname uniqueness per facility

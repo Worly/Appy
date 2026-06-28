@@ -1,7 +1,7 @@
 import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { IconName, IconPrefix } from '@fortawesome/fontawesome-svg-core';
 
-export type Color = "success" | "danger" | "warning" | "normal" | "inherit";
+export type Color = "success" | "danger" | "warning" | "normal" | "inherit" | "primary";
 
 @Component({
   selector: 'app-button',
@@ -29,7 +29,7 @@ export class ButtonComponent implements OnInit {
   @Input() borderStyle: "solid" | "dashed" | "dotted" | "double" = "solid";
   @Input() borderWidth: string = "2px";
 
-  @Input() alignContent: "left" | "center" | "right" = "left";
+  @Input() alignContent: "left" | "center" | "right" | "space-between" = "left";
   @Input() textAlign: "left" | "center" | "rigth" = "left";
 
   @Input() disabled: boolean = false;

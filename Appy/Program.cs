@@ -57,6 +57,7 @@ builder.Services.AddScoped<IServiceService, ServiceService>();
 builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IWorkingHourService, WorkingHourService>();
+builder.Services.AddScoped<ITimeOffService, TimeOffService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IClientNotificationsService, ClientNotificationsService>();
 builder.Services.AddScoped<IAppointmentReminderService, AppointmentReminderService>();

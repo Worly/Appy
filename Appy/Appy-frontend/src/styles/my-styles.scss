@@ -78,6 +78,7 @@ body {
 }
 
 .w-label {
+    display: block;
     font-size: 1.2rem;
     font-weight: bold;
     margin-left: 5px;
@@ -97,6 +98,7 @@ body {
     border-radius: var(--default-border-radius);
     border: 1px solid rgb(var(--rgb-input-border));
     font-size: 1rem;
+    width: 100%;
 
     &:focus {
         outline: 1px solid rgb(var(--rgb-focus-outline));

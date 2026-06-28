@@ -23,6 +23,7 @@ All controllers carry `[Authorize]` (requires a valid JWT from the pipeline) exc
 | `ClientController` | `/client` |
 | `AppointmentController` | `/appointment` |
 | `WorkingHourController` | `/workinghour` |
+| `TimeOffController` | `/timeoff` |
 | `CalendarDayController` | `/calendarday` |
 | `DashboardController` | `/dashboard` |
 | `ClientNotificationsController` | `/clientnotifications` |
@@ -35,6 +36,12 @@ Controllers throw `HttpException` subclasses (from `Exceptions/`) for validation
 ## Appointment-Specific Notes
 
 - `GET /appointment/getAll` and `GET /appointment/getList` accept a `filter` query parameter in Smart Filter DSL format (see `Services/SmartFilter/CLAUDE.md`)
-- `getList` supports pagination: `direction` (Forwards/Backwards), `skip`, `take`
+- `getList` supports pagination: `direction` (Forwards/Backwards), `skip`, `take`; returns an `AppointmentListPageDTO` envelope (the page's appointments + the `TimeOffOccurrence`s for the dates that have appointments on that page)
 - `addNew` and `edit` accept `ignoreTimeNotAvailable=true` to bypass time validation
 - `notifyClient/{id}` accepts a `languageCode` query parameter to select the message language
+
+## Time Off-Specific Notes
+
+- `GET /timeoff/getList?type=&scope=&skip=&take=` — returns a paginated page of `TimeOffDTO` rules for one tab (`type` = `OneOff`|`Recurring`) and scope (`scope` = `Active`|`History`); ordered server-side, forward-paginated
+- `PUT /timeoff/edit/{id}?applyFrom=YYYY-MM-DD` — for recurring rules, `applyFrom` forks the rule: the original row becomes history (ends the day before) and a new row carries the edit from that date onward. Absent (or for one-offs / a date on-or-before the rule's start) → plain in-place edit.
+- `PUT /timeoff/stop/{id}` — clamps a recurring rule's `EndDate` to yesterday (stop-going-forward, keeps past occurrences). Rejects one-offs; no-op if the rule already ended earlier.

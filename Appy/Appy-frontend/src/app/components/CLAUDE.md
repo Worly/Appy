@@ -6,7 +6,8 @@ Presentational building blocks shared across feature pages. No domain logic, no 
 
 | Component | Purpose |
 |-----------|---------|
-| `ButtonComponent` | Unified button with `color` (success/danger/warning/normal/disabled), `look` (solid/outlined/normal), loading spinner state, optional icon |
+| `ButtonComponent` | Unified button with `color` (success/danger/warning/normal/primary/inherit), `look` (solid/outlined/normal/transparent/custom), loading spinner state, optional icon |
+| `SegmentedControlComponent` | Single-select button group / radio-style pill toggle. `[(value)]` + `options` (`{value, label, icon?, dataTest?}` — `icon` is an optional FontAwesome solid icon shown before the label, registered in `app.module`); `size` `default` (full-width) or `compact`. Each segment is an `app-button` (transparent when inactive, solid-`primary` when active); segment corners are nested concentrically inside the pill and labels clip (no scrollbar) rather than overflow. Used for the time-off tabs, scope switch, and editor segments |
 | `DialogComponent` | Modal overlay wrapper with open/close API |
 | `ContextMenuComponent` | Dropdown menu positioned relative to a trigger element; used for navigation sub-menus. Opt-in `fullscreenOnMobile` input renders it as a centered full-screen modal (backdrop + blocked scroll) on mobile-width viewports (`< 992px`) instead of an anchored dropdown — avoids CDK reposition jank when the on-screen keyboard opens (issue #26). In full-screen mode it shows a sticky header bar with an optional `title` and a close (✕) button so it can be dismissed without picking a value. Enabled on the client and service lookups. |
 | `ActionBarComponent` | Flex container for page-level action buttons (add, filter, etc.) with a built-in flex splitter |
@@ -16,9 +17,9 @@ Presentational building blocks shared across feature pages. No domain logic, no 
 | `LoadingComponent` | Spinner indicator |
 | `SearchComponent` | Text input with debounced output for list filtering |
 | `ToggleSwitchComponent` | Boolean toggle input |
-| `DropdownComponent` | Generic labeled option selector |
+| `DropdownComponent` | Generic labeled option selector. `matchTriggerWidth` makes the options panel at least as wide as the trigger (forwards to the context menu's `copyOriginWidth`); `fullWidth` renders the trigger as a full-width, select-style control (fills its container; with a caret, label left + caret far right via the button's `space-between` alignment) |
 | `DurationPickerComponent` | Hour + minute duration input |
-| `DateSelectorComponent` | Date navigation with previous/next/today buttons |
+| `DateSelectorComponent` | Date navigation with previous/next/today buttons. `showDayOfWeek` prefixes the displayed date with its localized weekday (e.g. "Monday, 21.06.2026") |
 | `CalendarDialogComponent` | Full calendar date picker (Angular Material datepicker inside a dialog) with a custom today-header component |
 | `LanguagePickerComponent` | Language selector |
 | `ColorSchemePickerComponent` | Light/dark/system theme selector |
