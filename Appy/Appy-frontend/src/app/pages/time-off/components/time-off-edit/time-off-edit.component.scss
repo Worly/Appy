@@ -54,18 +54,6 @@
   }
 }
 
-// Stacks a label, its input and any validation message; the card's gap spaces the groups apart.
-.input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-textarea.w-input {
-  resize: vertical;
-  min-height: 46px;
-}
-
 // The "To" label shares its row with the inclusive day-count summary, pushed to the right.
 .label-row {
   display: flex;
@@ -86,7 +74,7 @@ textarea.w-input {
   gap: 15px;
 
   // From / To share the row evenly instead of hugging the left.
-  > .input-group {
+  > .w-input-container {
     flex: 1 1 0;
     min-width: 0;
   }

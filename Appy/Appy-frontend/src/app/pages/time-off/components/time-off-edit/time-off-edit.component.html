@@ -13,13 +13,13 @@
       <span>{{ "pages.time-off.DETAILS" | translate }}</span>
     </div>
 
-    <div class="input-group">
+    <div class="w-input-container">
       <label class="w-label">{{ "pages.time-off.LABEL" | translate }}</label>
       <input class="w-input" type="text" [(ngModel)]="timeOff.label" data-test="time-off-label" />
       <div class="w-validation-message" *ngIf="timeOff.getValidationErrors('label')">{{ timeOff.getValidationErrors("label") | translate }}</div>
     </div>
 
-    <div class="input-group">
+    <div class="w-input-container">
       <label class="w-label">{{ "pages.time-off.NOTES" | translate }}</label>
       <textarea class="w-input" rows="2" [(ngModel)]="timeOff.notes"></textarea>
     </div>
@@ -34,11 +34,11 @@
 
     <!-- One-off: required start + end date (stacked full-width, like the recurring From/To) -->
     <ng-container *ngIf="type === 'oneoff'">
-      <div class="input-group">
+      <div class="w-input-container">
         <label class="w-label">{{ "pages.time-off.FROM_DATE" | translate }}</label>
         <app-date-selector [showDayOfWeek]="true" [date]="timeOff.startDate!" (dateChange)="onStartDateChange($event)"></app-date-selector>
       </div>
-      <div class="input-group">
+      <div class="w-input-container">
         <div class="label-row">
           <label class="w-label">{{ "pages.time-off.TO_DATE" | translate }}</label>
           <span class="day-count" *ngIf="oneOffDayCountText" data-test="time-off-day-count">{{ oneOffDayCountText }}</span>
@@ -53,14 +53,14 @@
       <app-segmented-control dataTest="time-off-recurrence-segment" [options]="recurrenceOptions"
         [value]="timeOff.recurrence" (valueChange)="setRecurrence($event)"></app-segmented-control>
 
-      <div class="input-group" *ngIf="timeOff.recurrence === TimeOffRecurrence.Weekly" data-test="time-off-day-of-week">
+      <div class="w-input-container" *ngIf="timeOff.recurrence === TimeOffRecurrence.Weekly" data-test="time-off-day-of-week">
         <label class="w-label">{{ "pages.time-off.DAY_OF_WEEK" | translate }}</label>
         <app-dropdown [items]="daysOfWeek" [displayFunction]="formatDayOfWeek" [hasIcon]="true"
           [fullWidth]="true" [matchTriggerWidth]="true" [value]="timeOff.dayOfWeek" (valueChange)="timeOff.dayOfWeek = $event"></app-dropdown>
         <div class="w-validation-message" *ngIf="timeOff.getValidationErrors('dayOfWeek')">{{ timeOff.getValidationErrors("dayOfWeek") | translate }}</div>
       </div>
 
-      <div class="input-group" *ngIf="timeOff.recurrence === TimeOffRecurrence.Monthly" data-test="time-off-day-of-month">
+      <div class="w-input-container" *ngIf="timeOff.recurrence === TimeOffRecurrence.Monthly" data-test="time-off-day-of-month">
         <label class="w-label">{{ "pages.time-off.DAY_OF_MONTH" | translate }}</label>
         <app-dropdown [items]="daysOfMonth" [hasIcon]="true" [fullWidth]="true" [matchTriggerWidth]="true"
           [value]="timeOff.dayOfMonth" (valueChange)="timeOff.dayOfMonth = $event"></app-dropdown>
@@ -68,7 +68,7 @@
       </div>
 
       <!-- Recurring always has an effective-from (defaults to today); the end date is opt-in. -->
-      <div class="input-group">
+      <div class="w-input-container">
         <label class="w-label">{{ "pages.time-off.FROM_DATE" | translate }}</label>
         <app-date-selector data-test="time-off-start-date" [showDayOfWeek]="true" [date]="timeOff.startDate!" (dateChange)="onStartDateChange($event)"></app-date-selector>
       </div>
@@ -79,7 +79,7 @@
           data-test="time-off-has-end-date"></app-toggle-switch>
       </div>
 
-      <div class="input-group" *ngIf="hasEndDate">
+      <div class="w-input-container" *ngIf="hasEndDate">
         <label class="w-label">{{ "pages.time-off.TO_DATE" | translate }}</label>
         <app-date-selector [showDayOfWeek]="true" [date]="timeOff.endDate!" (dateChange)="onEndDateChange($event)"></app-date-selector>
       </div>
@@ -102,7 +102,7 @@
 
     <ng-container *ngIf="!timeOff.isAllDay">
       <div class="duo">
-        <div class="input-group">
+        <div class="w-input-container">
           <label class="w-label">{{ "pages.time-off.TIME_FROM" | translate }}</label>
           <div class="time-row">
             <app-dropdown [items]="hours" [displayFunction]="formatHourMinute" [hasIcon]="false" [fullWidth]="true" [matchTriggerWidth]="true"
@@ -112,7 +112,7 @@
               [value]="timeOff.timeFrom?.minute()" (valueChange)="setFromMinute($event)"></app-dropdown>
           </div>
         </div>
-        <div class="input-group">
+        <div class="w-input-container">
           <label class="w-label">{{ "pages.time-off.TIME_TO" | translate }}</label>
           <div class="time-row">
             <app-dropdown [items]="hours" [displayFunction]="formatHourMinute" [hasIcon]="false" [fullWidth]="true" [matchTriggerWidth]="true"
@@ -150,7 +150,7 @@
       <span>{{ (splitMode === 'date' ? 'pages.time-off.APPLY_FROM_SPECIFIC_HINT' : 'pages.time-off.APPLY_FROM_ALL_HINT') | translate }}</span>
     </div>
 
-    <div class="input-group" *ngIf="splitMode === 'date'">
+    <div class="w-input-container" *ngIf="splitMode === 'date'">
       <app-date-selector [showDayOfWeek]="true" [date]="splitDate" (dateChange)="onSplitDateChange($event)"></app-date-selector>
     </div>
 
