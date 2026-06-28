@@ -295,11 +295,11 @@
 }
 
 .icon-placement {
-    &-left {
+    &-left > .button-content {
         flex-direction: row;
     }
 
-    &-right {
+    &-right > .button-content {
         flex-direction: row-reverse;
     }
 }

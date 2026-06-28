@@ -68,7 +68,7 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
 
   public readonly daysOfMonth: number[] = Array.from({ length: 31 }, (_, i) => i + 1);
   public readonly hours: number[] = Array.from({ length: 25 }, (_, i) => i);
-  public readonly minutes: number[] = [0, 15, 30, 45];
+  public readonly minutes: number[] = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
 
   public readonly recurrenceOptions: SegmentedOption[] = [
     { value: TimeOffRecurrence.Weekly, label: "pages.time-off.WEEKLY", dataTest: "time-off-recurrence-weekly" },
