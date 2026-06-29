@@ -133,9 +133,18 @@ Active holidays are ordinary `TimeOff` rows, so **booking-block, calendar expans
 
 ## Backend
 
-### Holiday computation
+### Holiday source
 
-Use the **Nager.Date** NuGet package: offline (no API key / network dependency), computes per-year dates including moving holidays (Easter, etc.), exposes the supported-country list, localized names (`LocalName`) and English names (`Name`), and subdivisions. The label stored uses `LocalName` for the configured country.
+Use the **Nager.Date hosted REST API** (`date.nager.at`, v3) — **free, no API key, no auth, no rate limits**:
+
+- Holidays: `GET /api/v3/PublicHolidays/{year}/{countryCode}`
+- Supported countries: `GET /api/v3/AvailableCountries`
+
+Each holiday returns `date`, `localName`, `name`, `countryCode`, `global`, `subdivisionCodes`, and `types`, so we get the localized name and subdivision data directly. We store **`localName`** as the holiday `Name` — always the country's own language, independent of the app's UI language (per requirement).
+
+The offline **NuGet/Docker** variants of Nager.Date require a paid sponsorship license for commercial use, so they are avoided. The hosted API is acceptable here precisely because of the materialization design: holidays are fetched only by the daily job and on-configure, cached per (country, year), and stored in our DB — **runtime booking and list queries never touch the API**, so its availability is on no hot path (a transient outage merely delays a new-year import by a day).
+
+Wrap the provider behind an `IHolidayProvider` interface (fetch holidays for a country + year; list supported countries) so we can later swap to the licensed offline NuGet, the MIT **PublicHoliday** library (fully free / offline, but with less consistent localized names), or a self-hosted Nager Docker instance — without touching the rest of the system.
 
 ### Operations (a `HolidayService` / `HolidayController`, keeping holiday rules in one place)
 
@@ -150,7 +159,7 @@ Mutations invalidate the same cache keys as time-off mutations so the time-off l
 
 ### Daily import job
 
-A once-per-day job via `CronScheduler` (same mechanism as `AppointmentReminderService`). For each configured facility, materialize any not-yet-present holidays out to **today + 1 year**: compute the library's holidays for the range, and for each whose `OriginalDate` has no existing `ImportedHoliday` for that facility, create the `ImportedHoliday` + its linked TimeOff. Existing records (including removed ones — `ImportedHoliday` present, no TimeOff) are skipped, so removals and edits are never clobbered and removed holidays are never resurrected.
+A once-per-day job via `CronScheduler` (same mechanism as `AppointmentReminderService`). For each configured facility, materialize any not-yet-present holidays out to **today + 1 year**: fetch the source's holidays for the range, and for each whose `OriginalDate` has no existing `ImportedHoliday` for that facility, create the `ImportedHoliday` + its linked TimeOff. Existing records (including removed ones — `ImportedHoliday` present, no TimeOff) are skipped, so removals and edits are never clobbered and removed holidays are never resurrected. `ImportedHoliday` rows are **retained indefinitely** (no pruning of past occurrences).
 
 ---
 
@@ -181,6 +190,10 @@ A once-per-day job via `CronScheduler` (same mechanism as `AppointmentReminderSe
 
 ## Open questions
 
-- **Subdivisions/regions:** confirm whether the baseline countries need region selection; if so, add the optional Region select to the configure dialog and `Subdivision` to settings. Country-only otherwise.
-- **Holiday name localization:** baseline uses `LocalName` for the configured country. Decide whether to also surface English names when the app language is `en` (could store both `Name` + `LocalName`).
-- **Old-record pruning:** `ImportedHoliday` rows accumulate (~14/facility/year). Optional cleanup of long-past occurrences; not required for correctness.
+- **Subdivisions/regions:** confirm whether the baseline countries need region selection. The source exposes `subdivisionCodes`, so if needed, add the optional Region select to the configure dialog and `Subdivision` to settings. Country-only otherwise.
+
+## Resolved during review
+
+- **Holiday names** always use the source's `localName` (the import country's own language), regardless of the app's UI language.
+- **No pruning** — `ImportedHoliday` rows are kept indefinitely.
+- **Holiday source** is the free Nager.Date hosted REST API (not the licensed offline NuGet); see *Backend → Holiday source*.
