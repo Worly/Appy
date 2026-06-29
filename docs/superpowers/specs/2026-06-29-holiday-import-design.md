@@ -56,7 +56,7 @@ A small dialog built from the shared `app-dialog` shell, hosted by `TimeOffCompo
 - Footer: **Cancel** / **Import**.
 - A secondary **"Turn off & remove imported holidays"** action when already configured.
 
-**Changing or clearing the country** discards that facility's imported holidays and any edits/removals. If any edits/removals exist, show a confirmation first (`You'll lose changes to 3 holidays`); if none, switch silently.
+**Changing or clearing the country** discards that facility's imported future holidays and any edits/removals of future time-offs, the history stays in tact. Show a confirmation first.
 
 ### List (Holidays tab)
 
@@ -66,7 +66,7 @@ Reuses the existing `app-time-off-list` + `app-single-time-off-list-item` row an
 - **Edited:** an amber **"Edited"** badge beside the name. No inline originals (the default is always all-day with no note, so blanket "originally…" lines would be noise).
 - **Removed:** row **dimmed + name struck through**, a grey **"Removed"** badge, and the **accent bar greyed**.
 
-Reuses the shared **Upcoming | History** scope switch. Upcoming = holidays on/after today; History = past — paginating by year in each direction. Rows sort by **effective date** (the current date for active/edited rows, the original date for removed rows).
+Reuses the shared **Upcoming | History** scope switch. Upcoming = holidays on/after today; History = past. Rows sort by **effective date** (the current date for active/edited rows, the original date for removed rows).
 
 Tapping any row opens the details view.
 
@@ -92,10 +92,11 @@ A holiday's blocking row is a one-off, single-day TimeOff, which this editor alr
 
 Editing changes the linked TimeOff; backend validation keeps an imported holiday's TimeOff single-day and its label intact.
 
-### Remove
+### Remove/revert
 
-Removal is immediate with **no confirmation dialog** — it is reversible via Restore. (Removing an *edited* holiday discards those edits, which Restore will not bring back; edits are trivial to redo, so this is acceptable. An optional inline note in the editor footer can mention it.)
+Removing a holiday opens a confirmation dialog and then deleted the time-off (leaving the ImportedHoliday dangling). 
 
+The ImportedHoliday (without a matching TimeOff) will be returned by the backend and shown in the list. Pressing the removed holiday will open a confirmation dialog to restore it.
 ---
 
 ## Data Model
@@ -104,13 +105,12 @@ Removal is immediate with **no confirmation dialog** — it is reversible via Re
 HolidayImportSettings (per facility)
   FacilityId            (PK/FK, one row per facility)
   CountryCode           ISO country code; null ⇒ not configured
-  Subdivision           optional region code (deferred)
 
 ImportedHoliday (per facility, per holiday occurrence)
   Id
   FacilityId            (FK)
   Name                  holiday name (used as the TimeOff label)
-  OriginalDate          the library-computed date — IMMUTABLE; the import job's match key
+  Date                  the library-computed date — IMMUTABLE; the import job's match key
   (the original snapshot is just OriginalDate + Name: imported holidays are
    always all-day with no note, so no other original fields are needed)
 
@@ -190,10 +190,6 @@ A once-per-day job via `CronScheduler` (same mechanism as `AppointmentReminderSe
 | 5 | Revert date/time to original (note kept); un-delete | Revert resets date/time on the linked TimeOff, preserving notes; Restore recreates a removed holiday's TimeOff from snapshot |
 
 ---
-
-## Open questions
-
-- **Subdivisions/regions:** confirm whether the baseline countries need region selection. The source exposes `subdivisionCodes`, so if needed, add the optional Region select to the configure dialog and `Subdivision` to settings. Country-only otherwise.
 
 ## Resolved during review
 
