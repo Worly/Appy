@@ -197,3 +197,4 @@ A once-per-day job via `CronScheduler` (same mechanism as `AppointmentReminderSe
 - **Holiday names** always use the source's `localName` (the import country's own language), regardless of the app's UI language.
 - **No pruning** — `ImportedHoliday` rows are kept indefinitely.
 - **Holiday source** is the free Nager.Date hosted REST API (not the licensed offline NuGet); see *Backend → Holiday source*.
+- **OpenHolidays API considered and rejected:** more authoritative (official-source) data and richer multi-language names, but only ~38 countries (Europe + BR/MX/ZA — no US/UK/CA/AU/Asia), and its ODbL-1.0 data license carries attribution + share-alike grey areas that MIT-licensed Nager avoids. Coverage breadth and clean licensing win for an unbounded SaaS market. `IHolidayProvider` keeps the door open to revisit or route per-country later.
