@@ -5,7 +5,7 @@
 
 ## Summary
 
-Let a facility owner auto-import their country's public holidays so those days block bookings the same way other time-off does — instead of hand-creating a time-off entry per holiday. Imported holidays are clearly distinguishable from manual time-off, individually editable within tight limits, removable, and revertible to their original imported values.
+Let a facility owner auto-import their country's public holidays so those days block bookings the same way other time-off does — instead of hand-creating a time-off entry per holiday. Imported holidays are clearly distinguishable from manual time-off, individually editable within tight limits, removable, and revertible (date and time) to their imported originals.
 
 ## Goals (the five requirements)
 
@@ -13,11 +13,11 @@ Let a facility owner auto-import their country's public holidays so those days b
 2. The owner can **edit** an imported holiday, but only: its **date** (single day — never multi-day), its **time** (turn off all-day to set a time range), and **notes**.
 3. It is **clear which holidays were edited** and **what the original values were**.
 4. The owner can **remove** an imported holiday.
-5. The owner can **revert** an imported holiday to its original values — and this includes **bringing a removed holiday back**.
+5. The owner can **revert** an imported holiday's **date and time** to their originals (any **note is kept**), and can **bring a removed holiday back**.
 
 ## Non-goals (YAGNI)
 
-- Per-field revert (revert is whole-holiday). With only date/time/notes, "revert just the date" is marginal and adds real cost.
+- Per-field revert (you can't revert *just* the date). Revert resets date and time together; notes are never reverted. Finer-grained revert is marginal and adds real cost.
 - Review-and-select-which-holidays at import time. Import is all-or-nothing; the owner refines afterward by removing individual holidays.
 - Preserving a facility's edits/removals across a country change (they're discarded — see *Configure flow*).
 - A "removed **and** edited" combined state — removing a holiday discards its edits (it falls out of the model naturally; see *Data model*).
@@ -37,11 +37,15 @@ An imported holiday is always in exactly one of three states, each one step from
  default ─remove─▶ removed ─restore─▶ default
 ```
 
-There is no "edited + removed": **removing discards edits**, so a removed holiday is always at original values, and Restore brings it back to the original. Revert (on an edited holiday) and Restore (on a removed one) are the same underlying operation — *make the holiday match its original imported values* — labelled by context.
+There is no "edited + removed": **removing discards edits**, so a removed holiday is always at original values, and Restore brings it back to the original.
+
+**Revert** (on an edited holiday) resets the **date and time** to their originals but **keeps any note** — date/time are canonical holiday data with a real "original" to snap back to, whereas a note is the owner's own annotation with no meaningful original. **Restore** (on a removed holiday) brings back the pure original, with no note, since removal already deleted it. So a note added to an active holiday survives revert but is lost if the holiday is removed.
+
+Notes are otherwise **orthogonal** to this state machine: editable at any time, preserved by Revert, and not themselves an "edit" for badge/revert purposes (so a holiday at its original date/time carrying only a note is treated as `default`).
 
 ### Empty state (nothing imported yet)
 
-The Holidays tab shows an umbrella empty state with a primary **"Choose a country"** CTA. The gear remains in the controls row for reconfiguring later.
+The Holidays tab shows an umbrella empty state with a primary **"Configure"** CTA. The gear remains in the controls row for reconfiguring later.
 
 ### Configure dialog (gear / CTA)
 
@@ -51,8 +55,6 @@ A small dialog built from the shared `app-dialog` shell, hosted by `TimeOffCompo
 - A reassurance preview line: e.g. `14 public holidays a year · next: Corpus Christi, 4 Jun`.
 - Footer: **Cancel** / **Import**.
 - A secondary **"Turn off & remove imported holidays"** action when already configured.
-
-If a chosen country/API exposes **subdivisions** (e.g. US states, German Länder), the dialog gains an optional **Region** select. This is deferred until the holiday library/region requirements are confirmed (see *Open questions*); country-only is the baseline.
 
 **Changing or clearing the country** discards that facility's imported holidays and any edits/removals. If any edits/removals exist, show a confirmation first (`You'll lose changes to 3 holidays`); if none, switch silently.
 
@@ -74,7 +76,7 @@ The existing details dialog detects the imported link and adds holiday treatment
 
 - A provenance line: `🏖 Public holiday · Croatia`.
 - Read-only current values (Date, Time/All day, Notes).
-- **If edited:** a grouped **"Changed from original"** block listing only what differs, as before→after (`Date  6 Apr → 13 Apr`, `Time  All day → 12:00–17:00`), with a single **"↩ Revert to original"** action below it. Originals are quarantined in this one block so the fields stay clean.
+- **If edited** (its date or time differs from the original): a grouped **"Changed from original"** block listing the date/time differences as before→after (`Date  6 Apr → 13 Apr`, `Time  All day → 12:00–17:00`), with a single **"↩ Revert to original"** action below it that resets **date and time only — the Notes field is left intact**. Originals are quarantined in this one block so the fields stay clean.
 - **If removed:** a banner — `You removed this holiday. It won't block bookings.` — with **"↩ Restore"**, and the fields shown greyed.
 - Footer (active/edited): **Remove** and **Edit**.
 
@@ -120,7 +122,7 @@ TimeOff (existing, gains one nullable FK)
 
 ### How the three states map to rows
 
-- **Active / edited** → an `ImportedHoliday` **with** a linked `TimeOff` (a one-off, single-day TimeOff whose `Label` = `Name`). *Edited* = the TimeOff's date/time/notes differ from the snapshot (`StartDate ≠ OriginalDate`, or `IsAllDay = false`, or `Notes` non-empty).
+- **Active / edited** → an `ImportedHoliday` **with** a linked `TimeOff` (a one-off, single-day TimeOff whose `Label` = `Name`). *Edited* = the TimeOff's **date or time** differs from the snapshot (`StartDate ≠ OriginalDate`, or `IsAllDay = false`). **Notes are orthogonal** — the owner may add one at any time; it is preserved by Revert and does not by itself mark the holiday as edited.
 - **Removed** → an `ImportedHoliday` with **no** linked TimeOff (the row was deleted). It cannot block bookings, but the `ImportedHoliday` record persists so it still lists as "Removed" and the import job (matching on `OriginalDate`) will not recreate it. **No `IsRemoved` flag** — absence of the TimeOff *is* the removed state.
 
 This is why removal discards edits for free: deleting the TimeOff deletes the row that held them.
@@ -153,7 +155,8 @@ Wrap the provider behind an `IHolidayProvider` interface (fetch holidays for a c
 - **List holidays** (Upcoming/History, paged by year) — queries `ImportedHoliday` left-joined to its `TimeOff`, derives the edited state, returns holiday DTOs (including removed ones).
 - **Edit** — updates the linked TimeOff (date single-day, all-day/time, notes). Validates that an imported holiday's TimeOff stays one-off, single-day, label unchanged.
 - **Remove** — deletes the linked TimeOff (the `ImportedHoliday` persists).
-- **Revert / Restore** — ensures a TimeOff matching the snapshot exists (all-day on `OriginalDate`, label `Name`, no notes) and is linked; one operation serves both the edited and removed cases.
+- **Revert** (edited holiday) — on the existing linked TimeOff, reset `StartDate`/`EndDate` to `OriginalDate` and set `IsAllDay = true` (clear the time range); **leave `Notes` unchanged**.
+- **Restore** (removed holiday) — recreate the linked TimeOff from the snapshot (all-day on `OriginalDate`, label `Name`, no notes); removal already discarded any note.
 
 Mutations invalidate the same cache keys as time-off mutations so the time-off lists and appointment list refetch.
 
@@ -184,7 +187,7 @@ A once-per-day job via `CronScheduler` (same mechanism as `AppointmentReminderSe
 | 2 | Edit date (single-day) / time / notes only | Constrained `TimeOffEditComponent`; backend validation |
 | 3 | Clear which were edited + originals | "Edited" badge in list; grouped "Changed from original" block in details |
 | 4 | Remove | Remove deletes the linked TimeOff; "Removed" treatment in list/details |
-| 5 | Revert to original incl. un-delete | Single Revert/Restore op; removed = no TimeOff, restore recreates from snapshot |
+| 5 | Revert date/time to original (note kept); un-delete | Revert resets date/time on the linked TimeOff, preserving notes; Restore recreates a removed holiday's TimeOff from snapshot |
 
 ---
 
