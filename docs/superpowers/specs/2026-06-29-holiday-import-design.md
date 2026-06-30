@@ -94,7 +94,7 @@ Editing changes the linked TimeOff; backend validation keeps an imported holiday
 
 ### Remove / restore
 
-Removing a holiday opens a confirmation dialog, then deletes the linked TimeOff (leaving the `ImportedHoliday` dangling, with no `IsRemoved` flag).
+Removing a holiday opens a confirmation dialog, then deletes the linked TimeOff (leaving the `ImportedHoliday` dangling).
 
 The dangling `ImportedHoliday` (no matching TimeOff) is still returned by the backend and shown in the list as **Removed**. Tapping it opens a confirmation dialog to **Restore** — recreating the TimeOff from the snapshot.
 
@@ -128,7 +128,7 @@ TimeOff (existing, gains one nullable FK)
 ### How the three states map to rows
 
 - **Active / edited** → an `ImportedHoliday` **with** a linked `TimeOff` (a one-off, single-day TimeOff whose `Label` = `Name`). *Edited* = the TimeOff's **date or time** differs from the snapshot (`StartDate ≠ ImportedHoliday.Date`, or `IsAllDay = false`). **Notes are orthogonal** — the owner may add one at any time; it is preserved by Revert and does not by itself mark the holiday as edited.
-- **Removed** → an `ImportedHoliday` with **no** linked TimeOff (the row was deleted). It cannot block bookings, but the `ImportedHoliday` record persists so it still lists as "Removed" and the import job (matching on `CountryCode` + `Date`) will not recreate it. **No `IsRemoved` flag** — absence of the TimeOff *is* the removed state.
+- **Removed** → an `ImportedHoliday` with **no** linked TimeOff (the row was deleted) — the absence of the TimeOff *is* the removed state. It cannot block bookings, but the `ImportedHoliday` record persists so it still lists as "Removed" and the import job (matching on `CountryCode` + `Date`) will not recreate it.
 
 This is why removal discards edits for free: deleting the TimeOff deletes the row that held them.
 
