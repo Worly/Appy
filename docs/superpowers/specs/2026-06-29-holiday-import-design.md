@@ -156,7 +156,7 @@ Wrap the provider behind an `IHolidayProvider` interface (fetch holidays for a c
 ### Operations (a `HolidayService` / `HolidayController`, keeping holiday rules in one place)
 
 - **Get supported countries** — for the configure dropdown.
-- **Get / save settings** — read or set the facility's country. Saving a new country triggers an immediate materialization (so results appear at once); changing/clearing deletes only the facility's **future** `ImportedHoliday` rows (`Date >= today`) and their TimeOffs — past rows are kept as history (retaining their `CountryCode` for provenance).
+- **Get / save settings** — read or set the facility's country. Saving a new country triggers an immediate materialization of the same **today → today + 1 year** window (so upcoming results appear at once; past holidays are not back-filled); changing/clearing deletes only the facility's **future** `ImportedHoliday` rows (`Date >= today`) and their TimeOffs — past rows are kept as history (retaining their `CountryCode` for provenance).
 - **List holidays** (Upcoming/History, paged by year) — queries `ImportedHoliday` left-joined to its `TimeOff`, derives the edited state, returns holiday DTOs (including removed ones, across all retained countries).
 - **Edit** — updates the linked TimeOff (date single-day, all-day/time, notes). Validates that an imported holiday's TimeOff stays one-off, single-day, label unchanged.
 - **Remove** — deletes the linked TimeOff (the `ImportedHoliday` persists).
@@ -167,7 +167,7 @@ Mutations invalidate the same cache keys as time-off mutations so the time-off l
 
 ### Daily import job
 
-A once-per-day job via `CronScheduler` (same mechanism as `AppointmentReminderService`). For each configured facility, materialize any not-yet-present holidays out to **today + 1 year**: fetch the source's holidays for the range, and for each whose `Date` has no existing `ImportedHoliday` for that facility **and country**, create the `ImportedHoliday` + its linked TimeOff. Existing records (including removed ones — `ImportedHoliday` present, no TimeOff) are skipped, so removals and edits are never clobbered and removed holidays are never resurrected. `ImportedHoliday` rows are **retained indefinitely** (no pruning of past occurrences).
+A once-per-day job via `CronScheduler` (same mechanism as `AppointmentReminderService`). For each configured facility, materialize any not-yet-present holidays dated from **today** out to **today + 1 year** (holidays already in the past are never imported): fetch the source's holidays for the range, and for each whose `Date` has no existing `ImportedHoliday` for that facility **and country**, create the `ImportedHoliday` + its linked TimeOff. Existing records (including removed ones — `ImportedHoliday` present, no TimeOff) are skipped, so removals and edits are never clobbered and removed holidays are never resurrected. `ImportedHoliday` rows are **retained indefinitely** (no pruning of past occurrences).
 
 ---
 
@@ -201,6 +201,7 @@ A once-per-day job via `CronScheduler` (same mechanism as `AppointmentReminderSe
 - **Holiday names** always use the source's `localName` (the import country's own language), regardless of the app's UI language.
 - **No pruning** — `ImportedHoliday` rows are kept indefinitely.
 - **Country change/disable removes only future holidays** (`Date >= today`); past imported holidays stay as history.
+- **Import never back-fills history** — only holidays dated today or later are materialized; history accrues only from holidays that were imported while still upcoming.
 - **`ImportedHoliday` carries its own `CountryCode`** — retained history can include holidays from a previously-configured country, so provenance and the import-job match key (facility + country + date) can't rely on the single current setting.
 - **Remove and Restore are confirmed** — each opens a confirmation dialog (guards against an accidental tap; removal is still reversible via Restore).
 - **Holiday source** is the free Nager.Date hosted REST API (not the licensed offline NuGet); see *Backend → Holiday source*.
