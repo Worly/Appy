@@ -672,7 +672,7 @@ git commit -m "feat(holiday): settings get/save with future-only reset + materia
 - Modify: `Appy.Tests/Services/HolidayServiceTests.cs` (add list tests)
 
 **Interfaces:**
-- Produces: `Task<List<HolidayDTO>> GetList(TimeOffScope scope, int skip, int take, DateOnly today, int facilityId)` on `IHolidayService`. Reuses the existing `TimeOffScope { Active, History }` enum (`Appy/DTOs/TimeOffListType.cs`).
+- Produces on `IHolidayService`: `Task<List<HolidayDTO>> GetList(TimeOffScope scope, int skip, int take, DateOnly today, int facilityId)` and `Task<HolidayDTO?> GetById(int importedHolidayId, int facilityId)`. Reuses the existing `TimeOffScope { Active, History }` enum (`Appy/DTOs/TimeOffListType.cs`).
 - The effective date = linked `TimeOff.StartDate` if present, else `ImportedHoliday.Date`. `IsRemoved` = no linked TimeOff. `IsEdited` = linked TimeOff exists AND (`StartDate != ImportedHoliday.Date` OR `!IsAllDay`). Active = effective date `>= today`; History = `< today`. Sort ascending by effective date for Active, descending for History.
 
 - [ ] **Step 1: Write the failing tests**
@@ -714,16 +714,35 @@ Add to `HolidayServiceTests`:
             dto.OriginalDate.Should().Be(Today.AddDays(7));
             dto.IsEdited.Should().BeTrue();
         }
+
+        [Fact]
+        public async Task GetById_ReturnsHolidayWithDerivedState()
+        {
+            SeedHoliday(1, Today.AddDays(5), "HR", Linked(Today.AddDays(5), allDay: false));
+
+            var dto = await service.GetById(1, FacilityId);
+
+            dto.Should().NotBeNull();
+            dto!.Id.Should().Be(1);
+            dto.IsEdited.Should().BeTrue();
+            dto.IsRemoved.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task GetById_ReturnsNull_WhenNotFoundForFacility()
+        {
+            (await service.GetById(999, FacilityId)).Should().BeNull();
+        }
 ```
 
 - [ ] **Step 2: Run to verify failure**
 
 Run: `dotnet test --filter "FullyQualifiedName~HolidayServiceTests"`
-Expected: FAIL — `GetList` not defined.
+Expected: FAIL — `GetList` / `GetById` not defined.
 
-- [ ] **Step 3: Implement `GetList`**
+- [ ] **Step 3: Implement `GetList` + `GetById`**
 
-Add the signature to `IHolidayService` and this method to `HolidayService` (add `using Appy.DTOs;` if not present):
+Add the two signatures (`GetList`, `GetById`) to `IHolidayService` and these members to `HolidayService` (add `using Appy.DTOs;` if not present). The DTO projection is extracted into `BuildHolidayDTO` so both list and single-get share it:
 
 ```csharp
         public async Task<List<HolidayDTO>> GetList(TimeOffScope scope, int skip, int take, DateOnly today, int facilityId)
@@ -740,23 +759,7 @@ Add the signature to `IHolidayService` and this method to `HolidayService` (add 
             var dtos = holidays.Select(h =>
             {
                 timeOffByHolidayId.TryGetValue(h.Id, out var t);
-                var isRemoved = t == null;
-                var effectiveDate = t?.StartDate ?? h.Date;
-                var isEdited = t != null && (t.StartDate != h.Date || !t.IsAllDay);
-                return new HolidayDTO
-                {
-                    Id = h.Id,
-                    Name = h.Name,
-                    CountryCode = h.CountryCode,
-                    Date = effectiveDate,
-                    OriginalDate = h.Date,
-                    IsAllDay = t?.IsAllDay ?? true,
-                    TimeFrom = t?.TimeFrom,
-                    TimeTo = t?.TimeTo,
-                    Notes = t?.Notes,
-                    IsEdited = isEdited,
-                    IsRemoved = isRemoved,
-                };
+                return BuildHolidayDTO(h, t);
             });
 
             dtos = scope == TimeOffScope.Active
@@ -765,12 +768,43 @@ Add the signature to `IHolidayService` and this method to `HolidayService` (add 
 
             return dtos.Skip(skip).Take(take).ToList();
         }
+
+        public async Task<HolidayDTO?> GetById(int importedHolidayId, int facilityId)
+        {
+            var holiday = await context.ImportedHolidays
+                .FirstOrDefaultAsync(h => h.Id == importedHolidayId && h.FacilityId == facilityId);
+            if (holiday == null)
+                return null;
+
+            var timeOff = await context.TimeOffs
+                .FirstOrDefaultAsync(t => t.ImportedHolidayId == importedHolidayId && t.FacilityId == facilityId);
+
+            return BuildHolidayDTO(holiday, timeOff);
+        }
+
+        private static HolidayDTO BuildHolidayDTO(ImportedHoliday h, TimeOff? t)
+        {
+            return new HolidayDTO
+            {
+                Id = h.Id,
+                Name = h.Name,
+                CountryCode = h.CountryCode,
+                Date = t?.StartDate ?? h.Date,       // effective date (removed → original)
+                OriginalDate = h.Date,
+                IsAllDay = t?.IsAllDay ?? true,
+                TimeFrom = t?.TimeFrom,
+                TimeTo = t?.TimeTo,
+                Notes = t?.Notes,
+                IsEdited = t != null && (t.StartDate != h.Date || !t.IsAllDay),
+                IsRemoved = t == null,
+            };
+        }
 ```
 
 - [ ] **Step 4: Run to verify passing**
 
 Run: `dotnet test --filter "FullyQualifiedName~HolidayServiceTests"`
-Expected: PASS (6 tests).
+Expected: PASS (8 tests).
 
 - [ ] **Step 5: Commit**
 
@@ -952,7 +986,7 @@ Add signatures to `IHolidayService` and these to `HolidayService`:
 - [ ] **Step 4: Run to verify passing**
 
 Run: `dotnet test --filter "FullyQualifiedName~HolidayServiceTests"`
-Expected: PASS (10 tests).
+Expected: PASS (12 tests).
 
 - [ ] **Step 5: Commit**
 
@@ -977,6 +1011,7 @@ git commit -m "feat(holiday): edit, remove, revert, restore operations"
   - `PUT /holiday/settings` (body `HolidayImportSettingsDTO`) → `HolidayImportSettingsDTO`
   - `GET /holiday/getSupportedCountries` → `List<ProviderCountry>`
   - `GET /holiday/getList?scope=&skip=&take=` → `List<HolidayDTO>`
+  - `GET /holiday/get/{id}` → `HolidayDTO` (404 if not found) — id is the `ImportedHoliday.Id`
   - `PUT /holiday/edit/{id}` (body `HolidayEditDTO`) → 200
   - `PUT /holiday/remove/{id}` → 200
   - `PUT /holiday/revert/{id}` → 200
@@ -1053,6 +1088,16 @@ namespace Appy.Controllers
         public async Task<ActionResult<List<HolidayDTO>>> GetList([FromQuery] TimeOffScope scope, [FromQuery] int skip, [FromQuery] int take)
         {
             var result = await holidayService.GetList(scope, skip, take, Today, HttpContext.SelectedFacility());
+            return Ok(result);
+        }
+
+        [HttpGet("get/{id}")]
+        [Authorize]
+        public async Task<ActionResult<HolidayDTO>> Get(int id)
+        {
+            var result = await holidayService.GetById(id, HttpContext.SelectedFacility());
+            if (result == null)
+                return NotFound();
             return Ok(result);
         }
 
