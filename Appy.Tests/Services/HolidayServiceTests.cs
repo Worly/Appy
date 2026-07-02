@@ -110,5 +110,59 @@ namespace Appy.Tests.Services
 
             dbContextMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
+
+        [Fact]
+        public async Task GetList_Active_ReturnsUpcomingWithEditedAndRemovedFlags()
+        {
+            // untouched upcoming
+            SeedHoliday(1, Today.AddDays(3), "HR", Linked(Today.AddDays(3)));
+            // edited upcoming (time set → not all-day)
+            SeedHoliday(2, Today.AddDays(4), "HR", Linked(Today.AddDays(4), allDay: false));
+            // removed upcoming (no TimeOff)
+            SeedHoliday(3, Today.AddDays(5), "HR");
+            // past → excluded from Active
+            SeedHoliday(4, Today.AddDays(-3), "HR", Linked(Today.AddDays(-3)));
+
+            var result = await service.GetList(TimeOffScope.Active, skip: 0, take: 50, Today, FacilityId);
+
+            result.Should().HaveCount(3);
+            result.Select(r => r.Id).Should().ContainInOrder(1, 2, 3); // ascending by date
+            result.Single(r => r.Id == 1).IsEdited.Should().BeFalse();
+            result.Single(r => r.Id == 2).IsEdited.Should().BeTrue();
+            result.Single(r => r.Id == 3).IsRemoved.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task GetList_EditedDateMove_ReportsEffectiveDateAndOriginalDate()
+        {
+            var linked = Linked(Today.AddDays(9)); // moved 2 days later than original
+            SeedHoliday(1, Today.AddDays(7), "HR", linked);
+
+            var result = await service.GetList(TimeOffScope.Active, 0, 50, Today, FacilityId);
+
+            var dto = result.Single();
+            dto.Date.Should().Be(Today.AddDays(9));
+            dto.OriginalDate.Should().Be(Today.AddDays(7));
+            dto.IsEdited.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task GetById_ReturnsHolidayWithDerivedState()
+        {
+            SeedHoliday(1, Today.AddDays(5), "HR", Linked(Today.AddDays(5), allDay: false));
+
+            var dto = await service.GetById(1, FacilityId);
+
+            dto.Should().NotBeNull();
+            dto!.Id.Should().Be(1);
+            dto.IsEdited.Should().BeTrue();
+            dto.IsRemoved.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task GetById_ReturnsNull_WhenNotFoundForFacility()
+        {
+            (await service.GetById(999, FacilityId)).Should().BeNull();
+        }
     }
 }

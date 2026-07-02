@@ -12,6 +12,8 @@ namespace Appy.Services
         Task<HolidayImportSettings> SaveSettings(int facilityId, string? countryCode, DateOnly today);
         Task Materialize(int facilityId, string countryCode, DateOnly today);
         Task<List<ProviderCountry>> GetSupportedCountries();
+        Task<List<HolidayDTO>> GetList(TimeOffScope scope, int skip, int take, DateOnly today, int facilityId);
+        Task<HolidayDTO?> GetById(int importedHolidayId, int facilityId);
     }
 
     public class HolidayService : IHolidayService
@@ -137,5 +139,60 @@ namespace Appy.Services
         }
 
         public Task<List<ProviderCountry>> GetSupportedCountries() => provider.GetAvailableCountries();
+
+        public async Task<List<HolidayDTO>> GetList(TimeOffScope scope, int skip, int take, DateOnly today, int facilityId)
+        {
+            var holidays = await context.ImportedHolidays
+                .Where(h => h.FacilityId == facilityId)
+                .ToListAsync();
+
+            var linkedTimeOffs = await context.TimeOffs
+                .Where(t => t.FacilityId == facilityId && t.ImportedHolidayId != null)
+                .ToListAsync();
+            var timeOffByHolidayId = linkedTimeOffs.ToDictionary(t => t.ImportedHolidayId!.Value, t => t);
+
+            var dtos = holidays.Select(h =>
+            {
+                timeOffByHolidayId.TryGetValue(h.Id, out var t);
+                return BuildHolidayDTO(h, t);
+            });
+
+            dtos = scope == TimeOffScope.Active
+                ? dtos.Where(d => d.Date >= today).OrderBy(d => d.Date)
+                : dtos.Where(d => d.Date < today).OrderByDescending(d => d.Date);
+
+            return dtos.Skip(skip).Take(take).ToList();
+        }
+
+        public async Task<HolidayDTO?> GetById(int importedHolidayId, int facilityId)
+        {
+            var holiday = await context.ImportedHolidays
+                .FirstOrDefaultAsync(h => h.Id == importedHolidayId && h.FacilityId == facilityId);
+            if (holiday == null)
+                return null;
+
+            var timeOff = await context.TimeOffs
+                .FirstOrDefaultAsync(t => t.ImportedHolidayId == importedHolidayId && t.FacilityId == facilityId);
+
+            return BuildHolidayDTO(holiday, timeOff);
+        }
+
+        private static HolidayDTO BuildHolidayDTO(ImportedHoliday h, TimeOff? t)
+        {
+            return new HolidayDTO
+            {
+                Id = h.Id,
+                Name = h.Name,
+                CountryCode = h.CountryCode,
+                Date = t?.StartDate ?? h.Date,
+                OriginalDate = h.Date,
+                IsAllDay = t?.IsAllDay ?? true,
+                TimeFrom = t?.TimeFrom,
+                TimeTo = t?.TimeTo,
+                Notes = t?.Notes,
+                IsEdited = t != null && (t.StartDate != h.Date || !t.IsAllDay),
+                IsRemoved = t == null,
+            };
+        }
     }
 }

@@ -16,7 +16,7 @@ Tests live in `Services/` and `Utils/`. The `Services/` tests cover four service
 
 - **UserServiceTests**: verifies `Register` rejects malformed email addresses with a `ValidationException` (before the uniqueness check) and accepts well-formed ones.
 
-- **HolidayServiceTests**: verifies `SaveSettings` and `Materialize` — new country materializes holidays in window and adds linked TimeOffs; past holidays (before today) are skipped; already-present dates are not re-added; changing country deletes only future ImportedHolidays + their TimeOffs (past rows survive as history); provider outage (HolidayProviderException) aborts before any SaveChangesAsync call.
+- **HolidayServiceTests**: verifies `SaveSettings` and `Materialize` — new country materializes holidays in window and adds linked TimeOffs; past holidays (before today) are skipped; already-present dates are not re-added; changing country deletes only future ImportedHolidays + their TimeOffs (past rows survive as history); provider outage (HolidayProviderException) aborts before any SaveChangesAsync call. Also verifies `GetList` — active scope returns upcoming holidays ascending (excluding past), history scope excluded; `IsEdited` set when TimeOff has non-all-day time or date differs from original; `IsRemoved` set when no linked TimeOff; effective date uses TimeOff.StartDate over ImportedHoliday.Date. Verifies `GetById` — returns DTO with derived state, returns null for unknown id.
 
 ## How to Run
 
