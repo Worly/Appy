@@ -56,6 +56,7 @@ namespace Appy.Domain
                 IsAllDay = IsAllDay,
                 TimeFrom = TimeFrom,
                 TimeTo = TimeTo,
+                ImportedHolidayId = ImportedHolidayId,
             };
         }
     }

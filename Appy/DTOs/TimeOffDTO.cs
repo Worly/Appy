@@ -17,5 +17,6 @@ namespace Appy.DTOs
         public bool IsAllDay { get; set; }
         public TimeOnly? TimeFrom { get; set; }
         public TimeOnly? TimeTo { get; set; }
+        public int? ImportedHolidayId { get; set; }
     }
 }
