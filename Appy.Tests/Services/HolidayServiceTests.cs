@@ -185,8 +185,24 @@ namespace Appy.Tests.Services
             linked.EndDate.Should().Be(Today.AddDays(6)); // stays single-day
             linked.IsAllDay.Should().BeFalse();
             linked.TimeFrom.Should().Be(new TimeOnly(12, 0));
+            linked.TimeTo.Should().Be(new TimeOnly(17, 0));
             linked.Notes.Should().Be("Closing early");
             dbContextMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task Edit_AllDay_ClearsTimeRange()
+        {
+            var linked = Linked(Today.AddDays(5), allDay: false);
+            linked.TimeFrom = new TimeOnly(12, 0);
+            linked.TimeTo = new TimeOnly(17, 0);
+            SeedHoliday(1, Today.AddDays(5), "HR", linked);
+
+            await service.Edit(1, new HolidayEditDTO { Date = Today.AddDays(5), IsAllDay = true }, FacilityId);
+
+            linked.IsAllDay.Should().BeTrue();
+            linked.TimeFrom.Should().BeNull();
+            linked.TimeTo.Should().BeNull();
         }
 
         [Fact]
