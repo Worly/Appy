@@ -1119,6 +1119,14 @@ git commit -m "feat(holiday): en/hr translations for the holidays UI"
 **Interfaces:**
 - Consumes the `[data-test]` hooks added in Tasks 3–6 (`holidays-configure-cta`, `holiday-configure-dialog`, `holiday-country-dropdown`, `holiday-configure-save`, `time-off-row`, `holiday-badge-edited`, `holiday-badge-removed`, `holiday-details`, `holiday-remove`, `holiday-restore`, `holiday-revert`, and the `*-confirm` buttons).
 
+> **Architecture (required):** These E2E tests MUST follow the architecture of the existing E2E tests exactly (see `cypress/e2e/time-off.cy.ts`, `cypress/e2e/pages/time-off.ts`, `cypress/support/commands.ts`, and `cypress/CLAUDE.md`):
+> - **Page objects only** — specs never call `cy.*` on app elements directly; every selector lives in a page object under `cypress/e2e/pages/`.
+> - **`[data-test]` selection** via the `getElement(...)` helper — never CSS classes or IDs.
+> - Reuse the existing custom commands (`login(...)`, `expectURL`) and the global `POST /testing/seed` reset in `beforeEach` — do not add a parallel auth/seeding mechanism.
+> - Reuse the shared lookup helpers (`toggleSwitch`, `dateLookup`, etc.) rather than re-implementing widget interactions.
+> - Keep the fluent, chained page-object style (`page.action().subAction().expect()`).
+> If any interaction needs a selector that doesn't exist yet, add a `[data-test]` attribute to the component (Tasks 3–6) and a page-object method — never reach into the DOM from the spec.
+
 > **Network note:** these flows configure **Croatia** and assert on fixed-date holidays (e.g. New Year's Day, 01.01), which the live Nager.Date API returns deterministically. The E2E env already runs a live backend with internet. If CI network flakiness appears, the fallback is to seed a couple of `ImportedHoliday` rows + linked `TimeOff`s in the `TestingService` seeder and assert against those instead.
 
 - [ ] **Step 1: Extend the time-off page object**
