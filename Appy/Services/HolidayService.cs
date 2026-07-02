@@ -12,6 +12,7 @@ namespace Appy.Services
         Task<HolidayImportSettings> GetSettings(int facilityId);
         Task<HolidayImportSettings> SaveSettings(int facilityId, string? countryCode, DateOnly today);
         Task Materialize(int facilityId, string countryCode, DateOnly today);
+        Task MaterializeForAllFacilities(DateOnly today);
         Task<List<ProviderCountry>> GetSupportedCountries();
         Task<List<HolidayDTO>> GetList(TimeOffScope scope, int skip, int take, DateOnly today, int facilityId);
         Task<HolidayDTO?> GetById(int importedHolidayId, int facilityId);
@@ -84,6 +85,26 @@ namespace Appy.Services
 
             logger.LogInformation("Holiday import settings saved (country {CountryCode})", countryCode);
             return settings;
+        }
+
+        public async Task MaterializeForAllFacilities(DateOnly today)
+        {
+            var configured = await context.HolidayImportSettings
+                .Where(s => s.CountryCode != null)
+                .Select(s => new { s.FacilityId, s.CountryCode })
+                .ToListAsync();
+
+            foreach (var s in configured)
+            {
+                try
+                {
+                    await Materialize(s.FacilityId, s.CountryCode!, today);
+                }
+                catch (Exception e)
+                {
+                    logger.LogWarning(e, "Holiday materialization failed for facility {FacilityId}", s.FacilityId);
+                }
+            }
         }
 
         public async Task Materialize(int facilityId, string countryCode, DateOnly today)

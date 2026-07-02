@@ -249,5 +249,34 @@ namespace Appy.Tests.Services
                 && t.IsAllDay && t.Notes == null && t.Label == "H1")), Times.Once);
             dbContextMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
+
+        [Fact]
+        public async Task MaterializeForAllFacilities_MaterializesEachConfiguredFacility()
+        {
+            settings.Add(new HolidayImportSettings { FacilityId = 1, CountryCode = "HR" });
+            settings.Add(new HolidayImportSettings { FacilityId = 2, CountryCode = "SI" });
+            settings.Add(new HolidayImportSettings { FacilityId = 3, CountryCode = null }); // disabled → skipped
+            providerMock.Setup(x => x.GetPublicHolidays(It.IsAny<int>(), It.IsAny<string>()))
+                .ReturnsAsync(new List<ProviderHoliday>());
+
+            await service.MaterializeForAllFacilities(Today);
+
+            providerMock.Verify(x => x.GetPublicHolidays(It.IsAny<int>(), "HR"), Times.AtLeastOnce);
+            providerMock.Verify(x => x.GetPublicHolidays(It.IsAny<int>(), "SI"), Times.AtLeastOnce);
+            providerMock.Verify(x => x.GetPublicHolidays(It.IsAny<int>(), It.Is<string>(c => c == null)), Times.Never);
+        }
+
+        [Fact]
+        public async Task MaterializeForAllFacilities_ContinuesWhenOneFacilityProviderFails()
+        {
+            settings.Add(new HolidayImportSettings { FacilityId = 1, CountryCode = "HR" });
+            settings.Add(new HolidayImportSettings { FacilityId = 2, CountryCode = "SI" });
+            providerMock.Setup(x => x.GetPublicHolidays(It.IsAny<int>(), "HR")).ThrowsAsync(new HolidayProviderException("down"));
+            providerMock.Setup(x => x.GetPublicHolidays(It.IsAny<int>(), "SI")).ReturnsAsync(new List<ProviderHoliday>());
+
+            await service.MaterializeForAllFacilities(Today); // must not throw despite HR failing
+
+            providerMock.Verify(x => x.GetPublicHolidays(It.IsAny<int>(), "SI"), Times.AtLeastOnce);
+        }
     }
 }
