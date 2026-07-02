@@ -1,5 +1,6 @@
 using Appy.Domain;
 using Appy.DTOs;
+using Appy.Exceptions;
 using Appy.Services.Holidays;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -14,6 +15,10 @@ namespace Appy.Services
         Task<List<ProviderCountry>> GetSupportedCountries();
         Task<List<HolidayDTO>> GetList(TimeOffScope scope, int skip, int take, DateOnly today, int facilityId);
         Task<HolidayDTO?> GetById(int importedHolidayId, int facilityId);
+        Task Edit(int importedHolidayId, HolidayEditDTO dto, int facilityId);
+        Task Remove(int importedHolidayId, int facilityId);
+        Task Revert(int importedHolidayId, int facilityId);
+        Task Restore(int importedHolidayId, int facilityId);
     }
 
     public class HolidayService : IHolidayService
@@ -194,5 +199,74 @@ namespace Appy.Services
                 IsRemoved = t == null,
             };
         }
+
+        public async Task Edit(int importedHolidayId, HolidayEditDTO dto, int facilityId)
+        {
+            var timeOff = await FindLinkedTimeOff(importedHolidayId, facilityId)
+                ?? throw new NotFoundException();
+
+            timeOff.StartDate = dto.Date;
+            timeOff.EndDate = dto.Date;
+            timeOff.IsAllDay = dto.IsAllDay;
+            timeOff.TimeFrom = dto.IsAllDay ? null : dto.TimeFrom;
+            timeOff.TimeTo = dto.IsAllDay ? null : dto.TimeTo;
+            timeOff.Notes = dto.Notes;
+
+            await context.SaveChangesAsync();
+        }
+
+        public async Task Remove(int importedHolidayId, int facilityId)
+        {
+            var timeOff = await FindLinkedTimeOff(importedHolidayId, facilityId)
+                ?? throw new NotFoundException();
+
+            context.TimeOffs.Remove(timeOff);
+            await context.SaveChangesAsync();
+        }
+
+        public async Task Revert(int importedHolidayId, int facilityId)
+        {
+            var holiday = await FindHoliday(importedHolidayId, facilityId)
+                ?? throw new NotFoundException();
+            var timeOff = await FindLinkedTimeOff(importedHolidayId, facilityId)
+                ?? throw new NotFoundException();
+
+            timeOff.StartDate = holiday.Date;
+            timeOff.EndDate = holiday.Date;
+            timeOff.IsAllDay = true;
+            timeOff.TimeFrom = null;
+            timeOff.TimeTo = null;
+            // Notes are intentionally preserved.
+
+            await context.SaveChangesAsync();
+        }
+
+        public async Task Restore(int importedHolidayId, int facilityId)
+        {
+            var holiday = await FindHoliday(importedHolidayId, facilityId)
+                ?? throw new NotFoundException();
+            var existing = await FindLinkedTimeOff(importedHolidayId, facilityId);
+            if (existing != null)
+                return;
+
+            context.TimeOffs.Add(new TimeOff
+            {
+                FacilityId = facilityId,
+                Label = holiday.Name,
+                Recurrence = TimeOffRecurrence.OneOff,
+                StartDate = holiday.Date,
+                EndDate = holiday.Date,
+                IsAllDay = true,
+                ImportedHolidayId = holiday.Id,
+            });
+
+            await context.SaveChangesAsync();
+        }
+
+        private Task<ImportedHoliday?> FindHoliday(int importedHolidayId, int facilityId)
+            => context.ImportedHolidays.FirstOrDefaultAsync(h => h.Id == importedHolidayId && h.FacilityId == facilityId);
+
+        private Task<TimeOff?> FindLinkedTimeOff(int importedHolidayId, int facilityId)
+            => context.TimeOffs.FirstOrDefaultAsync(t => t.ImportedHolidayId == importedHolidayId && t.FacilityId == facilityId);
     }
 }
