@@ -30,3 +30,9 @@ Strings in request-body DTOs are trimmed of leading/trailing whitespace during d
 ## AppointmentListPageDTO
 
 Envelope returned by `GET /appointment/getList`. Contains `Appointments` (the page of `AppointmentViewDTO`) and `TimeOffs` (the `TimeOffOccurrenceDTO` occurrences for the dates that have appointments on that page — not every day in the min–max span). Empty page → empty `TimeOffs`.
+
+## Holiday DTOs
+
+- `HolidayImportSettingsDTO` — `{ CountryCode? }`: settings snapshot returned by get/save settings endpoints. Produced by `HolidayImportSettings.GetDTO()`.
+- `HolidayDTO` — full holiday view: `Id`, `Name`, `CountryCode`, `Date` (effective), `OriginalDate` (provider date), `IsAllDay`, `TimeFrom?`, `TimeTo?`, `Notes?`, `IsEdited`, `IsRemoved`. Used by the holiday list endpoint (Task 4).
+- `HolidayEditDTO` — request body for editing a holiday's time/notes: `Date`, `IsAllDay`, `TimeFrom?`, `TimeTo?`, `Notes?` (Task 5).

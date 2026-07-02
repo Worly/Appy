@@ -16,6 +16,8 @@ Tests live in `Services/` and `Utils/`. The `Services/` tests cover four service
 
 - **UserServiceTests**: verifies `Register` rejects malformed email addresses with a `ValidationException` (before the uniqueness check) and accepts well-formed ones.
 
+- **HolidayServiceTests**: verifies `SaveSettings` and `Materialize` — new country materializes holidays in window and adds linked TimeOffs; past holidays (before today) are skipped; already-present dates are not re-added; changing country deletes only future ImportedHolidays + their TimeOffs (past rows survive as history); provider outage (HolidayProviderException) aborts before any SaveChangesAsync call.
+
 ## How to Run
 
 ```bash

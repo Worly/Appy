@@ -17,7 +17,7 @@ EF Core entity classes that map directly to PostgreSQL tables. These are the can
 | `TimeOff` | Blocked availability (recurrence: OneOff/Weekly/Monthly; all-day or time range; optional bounds) |
 | `DashboardSettings` | Per-user per-facility UI preferences stored as a JSON blob |
 | `ClientNotificationsSettings` | Instagram API config and message templates for a Facility |
-| `HolidayImportSettings` | Per-facility holiday import config: ISO country code (null = off); PK = FacilityId |
+| `HolidayImportSettings` | Per-facility holiday import config: ISO country code (null = off); PK = FacilityId. `GetDTO()` maps to `HolidayImportSettingsDTO` |
 | `ImportedHoliday` | One row per materialized public holiday occurrence; persists independently of its linked TimeOff |
 
 ## Multi-Tenancy Pattern

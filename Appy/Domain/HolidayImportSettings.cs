@@ -1,3 +1,4 @@
+using Appy.DTOs;
 using System.ComponentModel.DataAnnotations;
 
 #pragma warning disable CS8618
@@ -11,5 +12,10 @@ namespace Appy.Domain
 
         // The currently-configured country (ISO code). null ⇒ auto-import is off.
         public string? CountryCode { get; set; }
+
+        public HolidayImportSettingsDTO GetDTO()
+        {
+            return new HolidayImportSettingsDTO { CountryCode = CountryCode };
+        }
     }
 }
