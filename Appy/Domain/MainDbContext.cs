@@ -12,6 +12,8 @@ namespace Appy.Domain
         public virtual DbSet<Appointment> Appointments { get; set; }
         public virtual DbSet<WorkingHour> WorkingHours { get; set; }
         public virtual DbSet<TimeOff> TimeOffs { get; set; }
+        public virtual DbSet<ImportedHoliday> ImportedHolidays { get; set; }
+        public virtual DbSet<HolidayImportSettings> HolidayImportSettings { get; set; }
         public virtual DbSet<Client> Clients { get; set; }
         public virtual DbSet<DashboardSettings> DashboardSettings { get; set; }
         

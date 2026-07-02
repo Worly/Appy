@@ -211,6 +211,48 @@ namespace Appy.Migrations
                     b.ToTable("Facilities");
                 });
 
+            modelBuilder.Entity("Appy.Domain.HolidayImportSettings", b =>
+                {
+                    b.Property<int>("FacilityId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("CountryCode")
+                        .HasColumnType("text");
+
+                    b.HasKey("FacilityId");
+
+                    b.ToTable("HolidayImportSettings");
+                });
+
+            modelBuilder.Entity("Appy.Domain.ImportedHoliday", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CountryCode")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<int>("FacilityId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FacilityId");
+
+                    b.ToTable("ImportedHolidays");
+                });
+
             modelBuilder.Entity("Appy.Domain.LoginSession", b =>
                 {
                     b.Property<int>("Id")
@@ -299,6 +341,9 @@ namespace Appy.Migrations
                     b.Property<int>("FacilityId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("ImportedHolidayId")
+                        .HasColumnType("integer");
+
                     b.Property<bool>("IsAllDay")
                         .HasColumnType("boolean");
 
@@ -324,6 +369,8 @@ namespace Appy.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("FacilityId");
+
+                    b.HasIndex("ImportedHolidayId");
 
                     b.ToTable("TimeOffs");
                 });
@@ -475,6 +522,26 @@ namespace Appy.Migrations
                     b.Navigation("Owner");
                 });
 
+            modelBuilder.Entity("Appy.Domain.HolidayImportSettings", b =>
+                {
+                    b.HasOne("Appy.Domain.Facility", null)
+                        .WithOne("HolidayImportSettings")
+                        .HasForeignKey("Appy.Domain.HolidayImportSettings", "FacilityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Appy.Domain.ImportedHoliday", b =>
+                {
+                    b.HasOne("Appy.Domain.Facility", "Facility")
+                        .WithMany("ImportedHolidays")
+                        .HasForeignKey("FacilityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Facility");
+                });
+
             modelBuilder.Entity("Appy.Domain.LoginSession", b =>
                 {
                     b.HasOne("Appy.Domain.User", "User")
@@ -505,7 +572,13 @@ namespace Appy.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Appy.Domain.ImportedHoliday", "ImportedHoliday")
+                        .WithMany()
+                        .HasForeignKey("ImportedHolidayId");
+
                     b.Navigation("Facility");
+
+                    b.Navigation("ImportedHoliday");
                 });
 
             modelBuilder.Entity("Appy.Domain.WorkingHour", b =>
@@ -527,6 +600,10 @@ namespace Appy.Migrations
             modelBuilder.Entity("Appy.Domain.Facility", b =>
                 {
                     b.Navigation("ClientNotificationsSettings");
+
+                    b.Navigation("HolidayImportSettings");
+
+                    b.Navigation("ImportedHolidays");
                 });
 
             modelBuilder.Entity("Appy.Domain.User", b =>

@@ -37,6 +37,10 @@ namespace Appy.Domain
         public TimeOnly? TimeFrom { get; set; }      // when !IsAllDay
         public TimeOnly? TimeTo { get; set; }
 
+        // Non-null ⇒ this TimeOff is a materialized imported holiday. See ImportedHoliday.
+        public int? ImportedHolidayId { get; set; }
+        public ImportedHoliday? ImportedHoliday { get; set; }
+
         public TimeOffDTO GetDTO()
         {
             return new TimeOffDTO()

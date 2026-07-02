@@ -13,6 +13,8 @@ namespace Appy.Domain
         public User Owner { get; set; }
 
         public ClientNotificationsSettings? ClientNotificationsSettings { get; set; }
+        public HolidayImportSettings? HolidayImportSettings { get; set; }
+        public List<ImportedHoliday> ImportedHolidays { get; set; } = new();
 
         public FacilityDTO GetDTO()
         {
