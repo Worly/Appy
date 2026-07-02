@@ -191,7 +191,7 @@ git commit -m "feat(holiday): frontend Holiday model + cache keys"
   - `getById(id: number): Observable<Holiday>`
   - `getSettings(): Observable<HolidayImportSettings>`
   - `saveSettings(settings: HolidayImportSettings): Observable<HolidayImportSettings>`
-  - `getSupportedCountries(): Observable<SupportedCountry[]>`
+  - `getSupportedCountries(): QueryResult<SupportedCountry[]>` (cached; the country list is static-ish)
   - `edit(id: number, req: HolidayEditRequest): Observable<void>`
   - `remove(id: number): Observable<void>`, `revert(id): Observable<void>`, `restore(id): Observable<void>`
 - Consumes: `pagedQuery`, `query`, `CacheCoordinator`, `QueryClient` (data seam); `holidayKeys`, `timeOffKeys`, `appointmentKeys`.
@@ -508,7 +508,10 @@ Add to `TimeOffComponent` (inject `HolidayService`, keep existing tab/scope logi
   // Holidays tab state
   public holidays: Holiday[] = [];
   public holidaysLoading: boolean = false;
+  public holidaysLoadingMore: boolean = false;
   public viewingHoliday?: Holiday;
+  public restoringHoliday?: Holiday;
+  private holidayPaged?: PagedResult<Holiday, never>;
 
   // Configure dialog state
   public settings?: HolidayImportSettings;
@@ -516,19 +519,37 @@ Add to `TimeOffComponent` (inject `HolidayService`, keep existing tab/scope logi
   public selectedCountryCode?: string;
   public savingSettings: boolean = false;
 
+  @ViewChild("holidayDetailsDialog") holidayDetailsDialog?: DialogComponent;
   @ViewChild("configureDialog") configureDialog?: DialogComponent;
   @ViewChild("confirmChangeDialog") confirmChangeDialog?: DialogComponent;
+  @ViewChild("restoreDialog") restoreDialog?: DialogComponent;
 
-  // ...in the queryParamMap subscription, when the Holidays tab/scope is active, (re)load:
+  // ...in the queryParamMap subscription, when the Holidays tab/scope is active, (re)load. Paging is
+  // MANDATORY: History grows unbounded across years, so wire forward infinite-scroll exactly like
+  // TimeOffListComponent (subscribe items$/loading$/loadingForwards$, load more on scroll).
   private loadHolidaysIfNeeded(): void {
     if (!this.isHolidays) return;
-    this.holidaysLoading = true;
     this.holidaySub?.unsubscribe();
-    const paged = this.holidayService.getList(this.scope);
-    this.holidaySub = paged.items$.subscribe(items => { this.holidays = items; });
-    paged.loading$.subscribe(l => this.holidaysLoading = l);
-    // (Active is a bounded set; wire loadMore on scroll only if you keep the History scope paging —
-    //  mirror TimeOffListComponent.checkShouldLoad if desired.)
+    this.holidays = [];
+    this.holidaysLoading = true;
+    this.holidayPaged = this.holidayService.getList(this.scope);
+    this.holidaySub = new Subscription();
+    this.holidaySub.add(this.holidayPaged.items$.subscribe(items => {
+      this.holidays = items;
+      setTimeout(() => this.checkShouldLoad()); // top up if the first page didn't fill the viewport
+    }));
+    this.holidaySub.add(this.holidayPaged.loading$.subscribe(l => this.holidaysLoading = l));
+    this.holidaySub.add(this.holidayPaged.loadingForwards$.subscribe(l => this.holidaysLoadingMore = l));
+  }
+
+  @HostListener("window:scroll")
+  public checkShouldLoad(): void {
+    const scrollOffset = 200;
+    if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight - scrollOffset
+        && this.holidayPaged?.hasMore("forwards")) {
+      this.holidayPaged.loadMore("forwards");
+      this.changeDetector.detectChanges();
+    }
   }
 ```
 
@@ -570,9 +591,24 @@ Add the dropdown display function and the configure/save handlers:
       error: () => { this.savingSettings = false; },
     });
   }
+
+  public onHolidayRowClick(h: Holiday): void {
+    // A removed holiday has nothing to view — open the restore confirmation directly (not the details view).
+    if (h.isRemoved) { this.restoringHoliday = h; this.restoreDialog?.open(); return; }
+    this.viewingHoliday = h;
+    this.holidayDetailsDialog?.open();
+  }
+
+  public confirmRestore(): void {
+    if (this.restoringHoliday == null) return;
+    this.holidayService.restore(this.restoringHoliday.id).subscribe(() => {
+      this.restoreDialog?.close();
+      this.loadHolidaysIfNeeded();
+    });
+  }
 ```
 
-Add imports and a `holidaySub?: Subscription`. Call `loadHolidaysIfNeeded()` from the `queryParamMap` subscription (after `activeTab`/`scope` are set) and unsubscribe `holidaySub` in `ngOnDestroy`.
+Inject `ChangeDetectorRef` (used by `checkShouldLoad`) into the constructor. Add imports: `HostListener`, `ViewChild` from `@angular/core`; `Subscription` from `rxjs`; `PagedResult` from `src/app/shared/services/data/contracts`. Add a `holidaySub?: Subscription`, call `loadHolidaysIfNeeded()` from the `queryParamMap` subscription (after `activeTab`/`scope` are set), and unsubscribe `holidaySub` in `ngOnDestroy`.
 
 - [ ] **Step 2: Replace the Holidays stub markup**
 
@@ -591,13 +627,32 @@ In `time-off.component.html`, replace the `holidays-stub` block with the list + 
     </div>
 
     <app-single-time-off-list-item *ngFor="let h of holidays" [holiday]="h"
-      (onOpenView)="viewingHoliday = h; holidayDetailsDialog.open()">
+      (onOpenView)="onHolidayRowClick(h)">
     </app-single-time-off-list-item>
+
+    <div class="loading-more" *ngIf="holidaysLoadingMore"><app-loading [hasShadow]="false"></app-loading></div>
   </ng-container>
 
+<!-- Active/edited holidays open the details view; removed holidays open the restore dialog below. -->
 <app-dialog #holidayDetailsDialog>
   <app-single-time-off *ngIf="holidayDetailsDialog.isOpen" [holiday]="viewingHoliday"
     (onChanged)="loadHolidaysIfNeeded()" (onDone)="holidayDetailsDialog.close()"></app-single-time-off>
+</app-dialog>
+
+<app-dialog #restoreDialog>
+  <div class="configure-dialog" *ngIf="restoreDialog.isOpen && restoringHoliday" data-test="holiday-restore-dialog">
+    <div class="configure-title">{{ restoringHoliday.name }}</div>
+    <div class="configure-sub">{{ "pages.time-off.PUBLIC_HOLIDAY" | translate }} · {{ restoringHoliday.countryCode }} · {{ restoringHoliday.originalDate?.format("DD.MM.YYYY") }}</div>
+    <div class="split-hint">
+      <fa-icon [icon]="['fas', 'circle-info']" aria-hidden="true"></fa-icon>
+      <span>{{ "pages.time-off.RESTORE_CONFIRM" | translate }}</span>
+    </div>
+    <div class="configure-actions">
+      <app-button [text]="'CANCEL' | translate" color="danger" look="normal" (onClick)="restoreDialog.close()"></app-button>
+      <app-button [text]="'pages.time-off.RESTORE' | translate" color="success" look="solid"
+        (onClick)="confirmRestore()" data-test="holiday-restore-confirm"></app-button>
+    </div>
+  </div>
 </app-dialog>
 
 <app-dialog #configureDialog>
@@ -649,7 +704,8 @@ import { Holiday } from "src/app/models/holiday";
 import { HolidayImportSettings } from "src/app/models/holiday";
 
 function make(): TimeOffComponent {
-  return new TimeOffComponent(null as any, null as any, null as any, null as any);
+  // (Router, Location, ActivatedRoute, HolidayService, ChangeDetectorRef)
+  return new TimeOffComponent(null as any, null as any, null as any, null as any, null as any);
 }
 
 describe("TimeOffComponent — configure change gate", () => {
@@ -683,7 +739,7 @@ describe("TimeOffComponent — configure change gate", () => {
 });
 ```
 
-> The constructor arg count must match `TimeOffComponent`'s (Router, Location, ActivatedRoute, + injected `HolidayService`). Pass `null as any` for each; add the `HolidayService` parameter to the constructor when wiring Step 1.
+> The constructor arg count must match `TimeOffComponent`'s after Step 1 wiring — `(Router, Location, ActivatedRoute, HolidayService, ChangeDetectorRef)`. Pass `null as any` for each; add the `HolidayService` and `ChangeDetectorRef` parameters to the constructor in Step 1.
 
 - [ ] **Step 4: Run tests**
 
@@ -702,7 +758,7 @@ git commit -m "feat(holiday): Holidays tab list, empty state, configure dialog"
 
 ---
 
-### Task 5: Details view — holiday treatment (provenance, Changes, Revert/Restore)
+### Task 5: Details view — holiday treatment (provenance, Changes, Revert, Remove)
 
 **Files:**
 - Modify: `.../components/single-time-off/single-time-off.component.ts`
@@ -711,7 +767,7 @@ git commit -m "feat(holiday): Holidays tab list, empty state, configure dialog"
 - Test: `.../components/single-time-off/single-time-off.component.spec.ts` (create)
 
 **Interfaces:**
-- Produces: `SingleTimeOffComponent` gains `@Input() holiday?: Holiday` and `@Output() onChanged` (fires after revert/restore/remove so the container refetches). Renders provenance, current values, a "Changed from original" block (edited), Revert (edited) / Restore (removed) with confirmation, Edit (→ `/time-off/holiday/edit/:id`), Remove (with confirmation). Existing `id` (TimeOff) path is unchanged except: if the loaded TimeOff has `importedHolidayId != null`, it fetches the holiday via `HolidayService.getById` and shows the same treatment (covers the appointments-view reuse).
+- Produces: `SingleTimeOffComponent` gains `@Input() holiday?: Holiday` and `@Output() onChanged` (fires after revert/remove so the container refetches). Renders provenance, current values, a "Changed from original" block (edited), a Revert action (with confirmation), Edit (→ `/time-off/holiday/edit/:id`), and Remove (with confirmation). **Only active/edited holidays reach this view** — removed holidays open the container's restore dialog (Task 4), so there is no removed/restore handling here. Existing `id` (TimeOff) path is unchanged except: if the loaded TimeOff has `importedHolidayId != null`, it fetches the holiday via `HolidayService.getById` and shows the same treatment (covers the appointments-view reuse; those are always active, since removed holidays have no TimeOff).
 - Consumes: `HolidayService`, `Holiday`, `DialogComponent`.
 
 - [ ] **Step 1: Write the failing test (revert flow + change fields)**
@@ -764,15 +820,14 @@ Add to `SingleTimeOffComponent` (constructor gains `private holidayService: Holi
 ```typescript
   @Output() onChanged: EventEmitter<void> = new EventEmitter();
 
+  // Only active/edited holidays reach this view; removed ones open the container's restore dialog.
   public holidayModel?: Holiday;
   public isHolidayEdited = false;
-  public isHolidayRemoved = false;
   public changedDate = false;
   public changedTime = false;
 
   @ViewChild("revertDialog") revertDialog?: DialogComponent;
   @ViewChild("removeDialog") removeDialog?: DialogComponent;
-  @ViewChild("restoreDialog") restoreDialog?: DialogComponent;
 
   private _holiday?: Holiday;
   @Input() set holiday(value: Holiday | undefined) {
@@ -783,7 +838,6 @@ Add to `SingleTimeOffComponent` (constructor gains `private holidayService: Holi
 
   private applyHoliday(h: Holiday): void {
     this.holidayModel = h;
-    this.isHolidayRemoved = h.isRemoved;
     this.isHolidayEdited = h.isEdited;
     this.changedDate = h.date != null && h.originalDate != null && !h.date.isSame(h.originalDate, "date");
     this.changedTime = !h.isAllDay;
@@ -811,10 +865,6 @@ Add to `SingleTimeOffComponent` (constructor gains `private holidayService: Holi
     if (this._holiday == null) return;
     this.holidayService.remove(this._holiday.id).subscribe(() => { this.removeDialog?.close(); this.onChanged.next(); this.onDone.next(); });
   }
-  public confirmRestore(): void {
-    if (this._holiday == null) return;
-    this.holidayService.restore(this._holiday.id).subscribe(() => { this.restoreDialog?.close(); this.onChanged.next(); this.onDone.next(); });
-  }
 ```
 
 In the existing `setDatasource(id)` success handler (TimeOff path), after `this.timeOff = t;` add the appointments-view bridge:
@@ -829,50 +879,42 @@ In the existing `setDatasource(id)` success handler (TimeOff path), after `this.
 
 - [ ] **Step 4: Extend the template**
 
-Wrap holiday treatment in `*ngIf="holidayModel"` (falls back to the existing time-off rendering when not a holiday). Add the provenance line, the Changes block, action buttons, and the three confirm dialogs. Example additions:
+Wrap holiday treatment in `*ngIf="holidayModel"` (falls back to the existing time-off rendering when not a holiday). Add the provenance line, the Changes block, action buttons, and the two confirm dialogs. Example additions:
 
 ```html
 <div *ngIf="holidayModel" class="holiday-details" data-test="holiday-details">
   <div class="header">
     <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
     <div class="title">{{ holidayModel.name }}</div>
-    <span *ngIf="isHolidayRemoved" class="badge badge-removed">{{ "pages.time-off.REMOVED" | translate }}</span>
     <span *ngIf="isHolidayEdited" class="badge badge-edited">{{ "pages.time-off.EDITED" | translate }}</span>
   </div>
   <div class="provenance">{{ "pages.time-off.PUBLIC_HOLIDAY" | translate }} · {{ holidayModel.countryCode }}</div>
 
-  <div *ngIf="isHolidayRemoved" class="removed-banner" data-test="holiday-removed-banner">
-    <span>{{ "pages.time-off.REMOVED_HOLIDAY_INFO" | translate }}</span>
-    <app-button [text]="'pages.time-off.RESTORE' | translate" icon="rotate-left" (onClick)="restoreDialog.open()" data-test="holiday-restore"></app-button>
+  <div class="info-card">
+    <div class="info-row"><fa-icon icon="calendar-days" [fixedWidth]="true"></fa-icon><div>{{ schedule }}</div></div>
+    <div class="info-row"><fa-icon icon="clock" [fixedWidth]="true"></fa-icon><div>{{ time }}</div></div>
+  </div>
+  <div class="notes" *ngIf="holidayModel.notes"><div class="notes-title">{{ "pages.time-off.NOTES" | translate }}</div><div class="notes-body">{{ holidayModel.notes }}</div></div>
+
+  <div *ngIf="isHolidayEdited" class="changes-block" data-test="holiday-changes">
+    <div class="changes-title">{{ "pages.time-off.CHANGED_FROM_ORIGINAL" | translate }}</div>
+    <div class="changes-row" *ngIf="changedDate">
+      <span class="changes-key">{{ "pages.time-off.DATE" | translate }}</span>
+      <span class="changes-old">{{ holidayModel.originalDate?.format("DD.MM.YYYY") }}</span> →
+      <span>{{ holidayModel.date?.format("DD.MM.YYYY") }}</span>
+    </div>
+    <div class="changes-row" *ngIf="changedTime">
+      <span class="changes-key">{{ "pages.time-off.TIME" | translate }}</span>
+      <span class="changes-old">{{ "pages.time-off.ALL_DAY" | translate }}</span> → <span>{{ time }}</span>
+    </div>
+    <app-button class="revert-btn" look="transparent" icon="rotate-left"
+      [text]="'pages.time-off.REVERT_TO_ORIGINAL' | translate" (onClick)="revertDialog.open()" data-test="holiday-revert"></app-button>
   </div>
 
-  <ng-container *ngIf="!isHolidayRemoved">
-    <div class="info-card">
-      <div class="info-row"><fa-icon icon="calendar-days" [fixedWidth]="true"></fa-icon><div>{{ schedule }}</div></div>
-      <div class="info-row"><fa-icon icon="clock" [fixedWidth]="true"></fa-icon><div>{{ time }}</div></div>
-    </div>
-    <div class="notes" *ngIf="holidayModel.notes"><div class="notes-title">{{ "pages.time-off.NOTES" | translate }}</div><div class="notes-body">{{ holidayModel.notes }}</div></div>
-
-    <div *ngIf="isHolidayEdited" class="changes-block" data-test="holiday-changes">
-      <div class="changes-title">{{ "pages.time-off.CHANGED_FROM_ORIGINAL" | translate }}</div>
-      <div class="changes-row" *ngIf="changedDate">
-        <span class="changes-key">{{ "pages.time-off.DATE" | translate }}</span>
-        <span class="changes-old">{{ holidayModel.originalDate?.format("DD.MM.YYYY") }}</span> →
-        <span>{{ holidayModel.date?.format("DD.MM.YYYY") }}</span>
-      </div>
-      <div class="changes-row" *ngIf="changedTime">
-        <span class="changes-key">{{ "pages.time-off.TIME" | translate }}</span>
-        <span class="changes-old">{{ "pages.time-off.ALL_DAY" | translate }}</span> → <span>{{ time }}</span>
-      </div>
-      <app-button class="revert-btn" look="transparent" icon="rotate-left"
-        [text]="'pages.time-off.REVERT_TO_ORIGINAL' | translate" (onClick)="revertDialog.open()" data-test="holiday-revert"></app-button>
-    </div>
-
-    <div class="action-bar">
-      <app-button [text]="'pages.time-off.REMOVE' | translate" icon="trash" color="danger" (onClick)="removeDialog.open()" data-test="holiday-remove"></app-button>
-      <app-button [text]="'EDIT' | translate" icon="pen" (onClick)="goToEditHoliday()" data-test="holiday-edit"></app-button>
-    </div>
-  </ng-container>
+  <div class="action-bar">
+    <app-button [text]="'pages.time-off.REMOVE' | translate" icon="trash" color="danger" (onClick)="removeDialog.open()" data-test="holiday-remove"></app-button>
+    <app-button [text]="'EDIT' | translate" icon="pen" (onClick)="goToEditHoliday()" data-test="holiday-edit"></app-button>
+  </div>
 </div>
 
 <app-dialog #revertDialog>
@@ -884,10 +926,10 @@ Wrap holiday treatment in `*ngIf="holidayModel"` (falls back to the existing tim
     </div>
   </div>
 </app-dialog>
-<!-- #removeDialog and #restoreDialog: same shape, calling confirmRemove()/confirmRestore(), with REMOVE_CONFIRM / RESTORE_CONFIRM copy and data-test holiday-remove-confirm / holiday-restore-confirm -->
+<!-- #removeDialog: same shape as #revertDialog, calling confirmRemove(), with REMOVE_CONFIRM copy and data-test holiday-remove-confirm -->
 ```
 
-Add the two remaining dialogs (`#removeDialog`, `#restoreDialog`) following the `#revertDialog` shape. Add styles for `.provenance`, `.changes-block`, `.removed-banner`, `.badge*` (reuse the list-item badge styles).
+Add the remaining `#removeDialog` (same shape as `#revertDialog`, calling `confirmRemove()`, with `REMOVE_CONFIRM` copy and `data-test="holiday-remove-confirm"`). Add styles for `.provenance`, `.changes-block`, `.badge-edited` (reuse the list-item badge style). No removed/restore markup lives here — that's the container's restore dialog (Task 4).
 
 - [ ] **Step 5: Run tests + commit**
 
@@ -896,7 +938,7 @@ Expected: PASS.
 
 ```bash
 git add src/app/pages/time-off/components/single-time-off/ src/app/models/time-off.ts
-git commit -m "feat(holiday): details view treatment + revert/restore/remove"
+git commit -m "feat(holiday): details view treatment + revert/remove"
 ```
 
 ---
@@ -1048,9 +1090,11 @@ git commit -m "feat(holiday): editor holiday mode (locked name, single date, edi
 - Modify: `Appy/Appy-frontend/src/assets/translations/en.json`
 - Modify: `Appy/Appy-frontend/src/assets/translations/hr.json`
 
+> **Check for duplicates first.** Several of these keys may already exist under `pages.time-off` (`DATE`, and note the templates also use existing `TIME`, `NOTES`, `ALL_DAY`, `CONFIGURE_AUTO_IMPORT`). Before adding a key, search the existing `en.json`/`hr.json` `pages.time-off` block — **add only genuinely-new keys** and reuse the existing ones. Duplicate keys in JSON silently clobber (last wins) and are a real bug.
+
 - [ ] **Step 1: Add keys under `pages.time-off` in both files**
 
-`en.json` (add these; `CONFIGURE_AUTO_IMPORT` already exists — leave it):
+`en.json` (add these NEW keys only; `CONFIGURE_AUTO_IMPORT` already exists — leave it; drop any that already exist, e.g. `DATE`):
 
 ```json
 "EDITED": "Edited",
@@ -1069,8 +1113,7 @@ git commit -m "feat(holiday): editor holiday mode (locked name, single date, edi
 "REMOVE": "Remove",
 "REMOVE_CONFIRM": "Remove this holiday? It won't block bookings. You can restore it later.",
 "RESTORE": "Restore",
-"RESTORE_CONFIRM": "Restore this holiday to its original date and time?",
-"REMOVED_HOLIDAY_INFO": "You removed this holiday. It won't block bookings."
+"RESTORE_CONFIRM": "Restore this holiday to its original date and time?"
 ```
 
 `hr.json` (Croatian):
@@ -1092,8 +1135,7 @@ git commit -m "feat(holiday): editor holiday mode (locked name, single date, edi
 "REMOVE": "Ukloni",
 "REMOVE_CONFIRM": "Ukloniti ovaj praznik? Neće blokirati termine. Možete ga kasnije vratiti.",
 "RESTORE": "Vrati",
-"RESTORE_CONFIRM": "Vratiti ovaj praznik na izvorni datum i vrijeme?",
-"REMOVED_HOLIDAY_INFO": "Uklonili ste ovaj praznik. Neće blokirati termine."
+"RESTORE_CONFIRM": "Vratiti ovaj praznik na izvorni datum i vrijeme?"
 ```
 
 - [ ] **Step 2: Build to confirm JSON is valid**
@@ -1141,6 +1183,8 @@ export let holidays = {
   expectRow(text: string) { getElement("time-off-list").parent().should("contain", text); return this; },
   expectRowContains(text: string) { cy.get("[data-test=time-off-row]").should("contain", text); return this; },
   openRow(text: string) { cy.get("[data-test=time-off-row]").contains(text).click(); return holidayDetails; },
+  // A removed row opens the restore-confirm dialog directly (not the details view).
+  openRemovedRow(text: string) { cy.get("[data-test=time-off-row]").contains(text).click(); return holidayRestore; },
 };
 
 export let holidayConfigure = {
@@ -1154,8 +1198,12 @@ export let holidayDetails = {
   expectChanges() { getElement("holiday-changes").should("exist"); return this; },
   revert() { getElement("holiday-revert").click(); getElement("holiday-revert-confirm").click(); return this; },
   remove() { getElement("holiday-remove").click(); getElement("holiday-remove-confirm").click(); return this; },
-  restore() { getElement("holiday-restore").click(); getElement("holiday-restore-confirm").click(); return this; },
   edit() { getElement("holiday-edit").click(); return timeOffEdit; },
+};
+
+export let holidayRestore = {
+  expectVisible() { getElement("holiday-restore-dialog").should("exist"); return this; },
+  confirm() { getElement("holiday-restore-confirm").click(); },
 };
 ```
 
@@ -1201,7 +1249,7 @@ describe("Holidays", () => {
     holidays.openRow("Nova godina").remove();
 
     holidays.openTab();
-    holidays.openRow("Nova godina").restore();
+    holidays.openRemovedRow("Nova godina").confirm();
   });
 });
 ```
@@ -1231,7 +1279,7 @@ git commit -m "test(holiday): Cypress E2E for import, edit/revert, remove/restor
 
 - [ ] **Step 1: Document the feature**
 
-Update the Time Off page CLAUDE.md: the Holidays tab is now functional — lists `Holiday`s from `HolidayService` (removed holidays have no `TimeOff`), the gear/empty-state opens the configure dialog, details show provenance + Changes + Revert/Restore, the editor has a holiday mode, and imported holidays materialize as one-off `TimeOff`s linked via `TimeOff.ImportedHolidayId`. Add `Holiday`/`HolidayImportSettings` to the models CLAUDE.md and `ImportedHoliday`/`HolidayImportSettings` to `Domain/CLAUDE.md`'s entity table.
+Update the Time Off page CLAUDE.md: the Holidays tab is now functional — lists `Holiday`s from `HolidayService` (removed holidays have no `TimeOff`), the gear/empty-state opens the configure dialog, details show provenance + Changes + Revert + Remove (removed holidays instead open a restore-confirm dialog), the editor has a holiday mode, and imported holidays materialize as one-off `TimeOff`s linked via `TimeOff.ImportedHolidayId`. Add `Holiday`/`HolidayImportSettings` to the models CLAUDE.md and `ImportedHoliday`/`HolidayImportSettings` to `Domain/CLAUDE.md`'s entity table.
 
 - [ ] **Step 2: Commit**
 
@@ -1247,19 +1295,19 @@ git commit -m "docs(holiday): update CLAUDE.md for the holidays feature"
 **Spec coverage:**
 - Configure country + preview + turn-off → Task 4 (dialog) + Task 2 (`saveSettings`/`getSupportedCountries`). ✓
 - List with Upcoming/History, badges, removed dim/strike/grey accent → Tasks 3, 4. ✓
-- Details: provenance, Changes block, Revert (keeps notes), Restore, Edit, Remove → Task 5. ✓
+- Details: provenance, Changes block, Revert (keeps notes), Edit, Remove → Task 5. Restore lives in the container's restore-confirm dialog → Task 4. ✓
 - Editor: locked name, single date, all-day/time, notes, Remove → Task 6. ✓
-- Removed tapping → restore confirmation (not the details view for a removed row is opened, but details renders the removed banner + Restore) → Task 5. ✓ *(Note: the row opens the details dialog which, for a removed holiday, shows only the removed banner + Restore — functionally the restore confirmation. If you prefer the row to open the confirm dialog directly, move the Restore confirm into the container; flagged for the reviewer.)*
+- Removed tapping → a dedicated restore-confirm dialog showing the holiday's name, country, and original date → Task 4 (`onHolidayRowClick` → `#restoreDialog`). The details view is never opened for a removed holiday. ✓
 - Change-country warning → Task 4 (`confirmConfigure` gate). ✓
 - Appointments-view reuse (imported TimeOff shows holiday treatment) → Task 5 (`importedHolidayId` bridge). ✓
 - Invalidation across holiday/time-off/appointment lists → Task 2. ✓
 - en/hr strings → Task 7. ✓
 - E2E → Task 8. ✓
 
-**Placeholder scan:** Template steps (Tasks 4–6) intentionally show the *added* blocks with explicit placement rather than repasting entire 200-line templates; all logic/code an engineer types is concrete. The one open reviewer choice (removed-row → details-with-banner vs a direct confirm dialog) is flagged above, not left as a TODO.
+**Placeholder scan:** Template steps (Tasks 4–6) intentionally show the *added* blocks with explicit placement rather than repasting entire 200-line templates; all logic/code an engineer types is concrete. The earlier removed-row question is resolved — removed rows open a dedicated restore-confirm dialog (Task 4), and the details view has no removed/restore handling.
 
 **Type consistency:** `Holiday`/`HolidayDTO`/`HolidayImportSettings`/`HolidayEditRequest`/`SupportedCountry` (Task 1) are used identically in the service (Task 2) and components (Tasks 3–6). `holidayKeys` and the `HolidayService` method names match across tasks. `TimeOff.importedHolidayId` is added to the frontend model in Task 5 and consumed there.
 
 ## Out of scope
 
-Backend (`docs/superpowers/plans/2026-07-01-holiday-import-backend.md`). Subdivision/region selection remains deferred per the spec. Infinite-scroll paging for the History holiday scope is optional (Active is a bounded set); wire it by mirroring `TimeOffListComponent.checkShouldLoad` if desired.
+Backend (`docs/superpowers/plans/2026-07-01-holiday-import-backend.md`). Subdivision/region selection remains deferred per the spec. (Forward infinite-scroll paging is **mandatory** — wired in Task 4.)

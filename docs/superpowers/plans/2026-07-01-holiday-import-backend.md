@@ -18,6 +18,7 @@
 - **Removed** = `ImportedHoliday` exists with **no** linked `TimeOff`. There is no `IsRemoved` flag.
 - **Country change / disable** deletes only **future** (`Date >= today`) `ImportedHoliday` rows and their `TimeOff`s; past rows stay as history.
 - The import-job / materialize **match key** is `(FacilityId, CountryCode, Date)`.
+- **Provider failure**: the provider throws `HolidayProviderException` on a non-success response. `SaveSettings` pre-fetches the window first and lets it propagate, so a provider outage **persists nothing** (the controller surfaces the error); the **daily job catches it per facility** and continues.
 - **Revert** (edited holiday): reset the linked `TimeOff` to `Date` + all-day, **keep `Notes`**. **Restore** (removed holiday): recreate the `TimeOff` from the snapshot (all-day, no notes).
 - Every controller action carries `[Authorize]`, inherits `[SelectedFacility]`, and reads the facility via `HttpContext.SelectedFacility()`.
 - Test conventions: xUnit `[Fact]`/`[Theory]`, `new Mock<MainDbContext>()` + `.ReturnsDbSet(list)`, `NullLogger<T>.Instance`, assert behavior via `SaveChangesAsync` verification + in-place entity assertions. Test names: `Method_Expected_Condition`.
@@ -172,6 +173,13 @@ namespace Appy.Services.Holidays
         Task<List<ProviderHoliday>> GetPublicHolidays(int year, string countryCode);
         Task<List<ProviderCountry>> GetAvailableCountries();
     }
+
+    // Thrown when the provider is unreachable / returns a non-success response. SaveSettings lets it
+    // propagate (so nothing is persisted); the daily job catches it per-facility and continues.
+    public class HolidayProviderException : Exception
+    {
+        public HolidayProviderException(string message) : base(message) { }
+    }
 }
 ```
 
@@ -191,9 +199,9 @@ namespace Appy.Tests.Services
 {
     public class NagerDateHolidayProviderTests
     {
-        private static NagerDateHolidayProvider MakeProvider(string json)
+        private static NagerDateHolidayProvider MakeProvider(string json, HttpStatusCode status = HttpStatusCode.OK)
         {
-            var handler = new StubHandler(json);
+            var handler = new StubHandler(json, status);
             var httpClient = new HttpClient(handler) { BaseAddress = new Uri("https://date.nager.at") };
             return new NagerDateHolidayProvider(httpClient, NullLogger<NagerDateHolidayProvider>.Instance);
         }
@@ -228,12 +236,21 @@ namespace Appy.Tests.Services
             result.Should().ContainSingle(c => c.CountryCode == "HR" && c.Name == "Croatia");
         }
 
+        [Fact]
+        public async Task GetPublicHolidays_Throws_OnNonSuccess()
+        {
+            var provider = MakeProvider("{}", HttpStatusCode.InternalServerError);
+
+            await Assert.ThrowsAsync<HolidayProviderException>(() => provider.GetPublicHolidays(2026, "HR"));
+        }
+
         private class StubHandler : HttpMessageHandler
         {
             private readonly string json;
-            public StubHandler(string json) { this.json = json; }
+            private readonly HttpStatusCode status;
+            public StubHandler(string json, HttpStatusCode status = HttpStatusCode.OK) { this.json = json; this.status = status; }
             protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-                => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                => Task.FromResult(new HttpResponseMessage(status)
                 {
                     Content = new StringContent(json, Encoding.UTF8, "application/json")
                 });
@@ -272,31 +289,34 @@ namespace Appy.Services.Holidays
         public async Task<List<ProviderHoliday>> GetPublicHolidays(int year, string countryCode)
         {
             var dtos = await Get<List<NagerHolidayDTO>>($"/api/v3/PublicHolidays/{year}/{countryCode}");
-            return dtos?
+            return dtos
                 .Where(d => d.Date != null && d.LocalName != null)
                 .Select(d => new ProviderHoliday(DateOnly.Parse(d.Date!), d.LocalName!, d.CountryCode ?? countryCode))
-                .ToList() ?? new List<ProviderHoliday>();
+                .ToList();
         }
 
         public async Task<List<ProviderCountry>> GetAvailableCountries()
         {
             var dtos = await Get<List<NagerCountryDTO>>("/api/v3/AvailableCountries");
-            return dtos?
+            return dtos
                 .Where(d => d.CountryCode != null && d.Name != null)
                 .Select(d => new ProviderCountry(d.CountryCode!, d.Name!))
-                .ToList() ?? new List<ProviderCountry>();
+                .ToList();
         }
 
-        private async Task<T?> Get<T>(string url)
+        // Throws HolidayProviderException on a non-success response or missing body, so callers can decide
+        // whether to abort (SaveSettings persists nothing) or skip-and-continue (the daily job).
+        private async Task<T> Get<T>(string url)
         {
             using var response = await httpClient.GetAsync(url);
             if (!response.IsSuccessStatusCode)
             {
                 logger.LogWarning("Nager.Date GET '{Url}' failed: {StatusCode}", url, response.StatusCode);
-                return default;
+                throw new HolidayProviderException($"Nager.Date GET '{url}' failed with {response.StatusCode}");
             }
             var stream = await response.Content.ReadAsStreamAsync();
-            return await JsonSerializer.DeserializeAsync<T>(stream, JsonOptions);
+            return await JsonSerializer.DeserializeAsync<T>(stream, JsonOptions)
+                ?? throw new HolidayProviderException($"Nager.Date GET '{url}' returned no data");
         }
 
         private class NagerHolidayDTO
@@ -319,7 +339,7 @@ namespace Appy.Services.Holidays
 - [ ] **Step 5: Run the test to verify it passes**
 
 Run: `dotnet test --filter "FullyQualifiedName~NagerDateHolidayProviderTests"`
-Expected: PASS (2 tests).
+Expected: PASS (3 tests).
 
 - [ ] **Step 6: Commit**
 
@@ -513,6 +533,17 @@ namespace Appy.Tests.Services
             dbContextMock.Verify(x => x.ImportedHolidays.RemoveRange(It.Is<IEnumerable<ImportedHoliday>>(hs => hs.Contains(future) && !hs.Contains(past))), Times.Once);
             dbContextMock.Verify(x => x.TimeOffs.RemoveRange(It.Is<IEnumerable<TimeOff>>(ts => ts.Any(t => t.ImportedHolidayId == 2) && ts.All(t => t.ImportedHolidayId != 1))), Times.Once);
         }
+
+        [Fact]
+        public async Task SaveSettings_ProviderDown_PersistsNothing()
+        {
+            providerMock.Setup(x => x.GetPublicHolidays(It.IsAny<int>(), "HR"))
+                .ThrowsAsync(new HolidayProviderException("down"));
+
+            await Assert.ThrowsAsync<HolidayProviderException>(() => service.SaveSettings(FacilityId, "HR", Today));
+
+            dbContextMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+        }
     }
 }
 ```
@@ -564,34 +595,44 @@ namespace Appy.Services
         public async Task<HolidayImportSettings> SaveSettings(int facilityId, string? countryCode, DateOnly today)
         {
             var settings = await context.HolidayImportSettings.FirstOrDefaultAsync(s => s.FacilityId == facilityId);
+            if (settings != null && settings.CountryCode == countryCode)
+                return settings; // no change → nothing to do
+
+            // Pre-fetch the new country's window BEFORE any DB mutation. If the provider is down this throws
+            // (HolidayProviderException) and we persist NOTHING — the controller surfaces the error.
+            List<ProviderHoliday> inWindow = new();
+            if (countryCode != null)
+                inWindow = await FetchWindow(countryCode, today);
+
             if (settings == null)
             {
                 settings = new HolidayImportSettings { FacilityId = facilityId };
                 context.HolidayImportSettings.Add(settings);
             }
-
-            var changed = settings.CountryCode != countryCode;
             settings.CountryCode = countryCode;
 
-            if (changed)
-            {
-                // Remove only FUTURE imported holidays (and their TimeOffs); past ones stay as history.
-                var futureHolidays = await context.ImportedHolidays
-                    .Where(h => h.FacilityId == facilityId && h.Date >= today)
-                    .ToListAsync();
-                var futureIds = futureHolidays.Select(h => h.Id).ToList();
-                var futureTimeOffs = await context.TimeOffs
-                    .Where(t => t.ImportedHolidayId != null && futureIds.Contains(t.ImportedHolidayId.Value))
-                    .ToListAsync();
+            // Remove only FUTURE imported holidays (and their TimeOffs); past ones stay as history.
+            var futureHolidays = await context.ImportedHolidays
+                .Where(h => h.FacilityId == facilityId && h.Date >= today)
+                .ToListAsync();
+            var futureIds = futureHolidays.Select(h => h.Id).ToList();
+            var futureTimeOffs = await context.TimeOffs
+                .Where(t => t.ImportedHolidayId != null && futureIds.Contains(t.ImportedHolidayId.Value))
+                .ToListAsync();
+            context.TimeOffs.RemoveRange(futureTimeOffs);
+            context.ImportedHolidays.RemoveRange(futureHolidays);
 
-                context.TimeOffs.RemoveRange(futureTimeOffs);
-                context.ImportedHolidays.RemoveRange(futureHolidays);
-            }
+            // Seed existing dates from the SURVIVING (past) rows of the new country, then add the window.
+            var existingDates = (await context.ImportedHolidays
+                .Where(h => h.FacilityId == facilityId && h.CountryCode == countryCode)
+                .Select(h => h.Date)
+                .ToListAsync())
+                .Except(futureHolidays.Select(h => h.Date))
+                .ToHashSet();
+            if (countryCode != null)
+                AddNewHolidays(facilityId, countryCode, inWindow, existingDates);
 
             await context.SaveChangesAsync();
-
-            if (changed && countryCode != null)
-                await Materialize(facilityId, countryCode, today);
 
             logger.LogInformation("Holiday import settings saved (country {CountryCode})", countryCode);
             return settings;
@@ -599,24 +640,38 @@ namespace Appy.Services
 
         public async Task Materialize(int facilityId, string countryCode, DateOnly today)
         {
-            var to = today.AddYears(1);
+            var inWindow = await FetchWindow(countryCode, today);
 
-            var providerHolidays = new List<ProviderHoliday>();
-            for (var year = today.Year; year <= to.Year; year++)
-                providerHolidays.AddRange(await provider.GetPublicHolidays(year, countryCode));
-
-            var inWindow = providerHolidays.Where(h => h.Date >= today && h.Date <= to);
-
-            var existing = await context.ImportedHolidays
+            var existingDates = (await context.ImportedHolidays
                 .Where(h => h.FacilityId == facilityId && h.CountryCode == countryCode)
                 .Select(h => h.Date)
-                .ToListAsync();
-            var existingDates = existing.ToHashSet();
+                .ToListAsync())
+                .ToHashSet();
 
-            var added = false;
+            var before = existingDates.Count;
+            AddNewHolidays(facilityId, countryCode, inWindow, existingDates);
+            if (existingDates.Count != before)
+                await context.SaveChangesAsync();
+        }
+
+        // Fetches the provider's holidays for [today, today + 1yr]. Throws HolidayProviderException if the
+        // provider is unreachable — callers decide whether to abort (SaveSettings) or skip (the daily job).
+        private async Task<List<ProviderHoliday>> FetchWindow(string countryCode, DateOnly today)
+        {
+            var to = today.AddYears(1);
+            var holidays = new List<ProviderHoliday>();
+            for (var year = today.Year; year <= to.Year; year++)
+                holidays.AddRange(await provider.GetPublicHolidays(year, countryCode));
+            return holidays.Where(h => h.Date >= today && h.Date <= to).ToList();
+        }
+
+        // Adds an ImportedHoliday + linked one-off TimeOff for each in-window date not already present.
+        // existingDates is mutated so repeats within the payload are also skipped. No SaveChanges here.
+        private void AddNewHolidays(int facilityId, string countryCode, IEnumerable<ProviderHoliday> inWindow, HashSet<DateOnly> existingDates)
+        {
             foreach (var h in inWindow)
             {
-                if (!existingDates.Add(h.Date)) // already present (also dedups within provider payload)
+                if (!existingDates.Add(h.Date)) // already present (also dedups within the provider payload)
                     continue;
 
                 var imported = new ImportedHoliday
@@ -637,11 +692,7 @@ namespace Appy.Services
                     IsAllDay = true,
                     ImportedHoliday = imported,
                 });
-                added = true;
             }
-
-            if (added)
-                await context.SaveChangesAsync();
         }
 
         public Task<List<ProviderCountry>> GetSupportedCountries() => provider.GetAvailableCountries();
@@ -654,7 +705,7 @@ namespace Appy.Services
 - [ ] **Step 6: Run the tests to verify they pass**
 
 Run: `dotnet test --filter "FullyQualifiedName~HolidayServiceTests"`
-Expected: PASS (4 tests).
+Expected: PASS (5 tests).
 
 - [ ] **Step 7: Commit**
 
@@ -804,7 +855,7 @@ Add the two signatures (`GetList`, `GetById`) to `IHolidayService` and these mem
 - [ ] **Step 4: Run to verify passing**
 
 Run: `dotnet test --filter "FullyQualifiedName~HolidayServiceTests"`
-Expected: PASS (8 tests).
+Expected: PASS (9 tests).
 
 - [ ] **Step 5: Commit**
 
@@ -986,7 +1037,7 @@ Add signatures to `IHolidayService` and these to `HolidayService`:
 - [ ] **Step 4: Run to verify passing**
 
 Run: `dotnet test --filter "FullyQualifiedName~HolidayServiceTests"`
-Expected: PASS (12 tests).
+Expected: PASS (13 tests).
 
 - [ ] **Step 5: Commit**
 
@@ -1184,6 +1235,19 @@ Add to `HolidayServiceTests`:
             providerMock.Verify(x => x.GetPublicHolidays(It.IsAny<int>(), "SI"), Times.AtLeastOnce);
             providerMock.Verify(x => x.GetPublicHolidays(It.IsAny<int>(), It.Is<string>(c => c == null)), Times.Never);
         }
+
+        [Fact]
+        public async Task MaterializeForAllFacilities_ContinuesWhenOneFacilityProviderFails()
+        {
+            settings.Add(new HolidayImportSettings { FacilityId = 1, CountryCode = "HR" });
+            settings.Add(new HolidayImportSettings { FacilityId = 2, CountryCode = "SI" });
+            providerMock.Setup(x => x.GetPublicHolidays(It.IsAny<int>(), "HR")).ThrowsAsync(new HolidayProviderException("down"));
+            providerMock.Setup(x => x.GetPublicHolidays(It.IsAny<int>(), "SI")).ReturnsAsync(new List<ProviderHoliday>());
+
+            await service.MaterializeForAllFacilities(Today); // must not throw despite HR failing
+
+            providerMock.Verify(x => x.GetPublicHolidays(It.IsAny<int>(), "SI"), Times.AtLeastOnce);
+        }
 ```
 
 - [ ] **Step 2: Run to verify failure**
@@ -1204,7 +1268,17 @@ Add the signature to `IHolidayService` and this to `HolidayService`:
                 .ToListAsync();
 
             foreach (var s in configured)
-                await Materialize(s.FacilityId, s.CountryCode!, today);
+            {
+                try
+                {
+                    await Materialize(s.FacilityId, s.CountryCode!, today);
+                }
+                catch (Exception e)
+                {
+                    // One facility's provider failure (or any error) must not abort the batch — log and continue.
+                    logger.LogWarning(e, "Holiday materialization failed for facility {FacilityId}", s.FacilityId);
+                }
+            }
         }
 ```
 
