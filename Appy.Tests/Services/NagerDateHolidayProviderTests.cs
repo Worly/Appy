@@ -42,6 +42,7 @@ namespace Appy.Tests.Services
 
             var result = await provider.GetAvailableCountries();
 
+            result.Should().HaveCount(2);
             result.Should().ContainSingle(c => c.CountryCode == "HR" && c.Name == "Croatia");
         }
 
