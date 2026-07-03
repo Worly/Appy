@@ -1,7 +1,11 @@
-<div class="time-off-row" (click)="onOpenView.emit()" data-test="time-off-row">
-  <div class="accent"></div>
+<div class="time-off-row" [class.removed]="removed" (click)="onOpenView.emit()" data-test="time-off-row">
+  <div class="accent" [class.accent-removed]="removed"></div>
   <div class="info">
-    <div class="label">{{ label }}</div>
+    <div class="label">
+      <span [class.struck]="removed">{{ label }}</span>
+      <span *ngIf="badge === 'edited'" class="badge badge-edited" data-test="holiday-badge-edited">{{ "pages.time-off.EDITED" | translate }}</span>
+      <span *ngIf="badge === 'removed'" class="badge badge-removed" data-test="holiday-badge-removed">{{ "pages.time-off.REMOVED" | translate }}</span>
+    </div>
     <div class="meta">
       <div class="meta-primary">
         <span class="schedule">{{ schedule }}</span>

@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
-import { TimeOff } from "src/app/models/time-off";
+import { Holiday } from "src/app/models/holiday";
+import { TimeOff, TimeOffRecurrence } from "src/app/models/time-off";
 import { TranslateService } from "src/app/components/translate/translate.service";
 import { timeOffRecurringRangeText, timeOffScheduleText, timeOffTimeText } from "../../time-off-display";
 
@@ -24,8 +25,37 @@ export class SingleTimeOffListItemComponent {
   public schedule: string = "";
   public dateRange: string = "";
   public time: string = "";
+  public badge: "none" | "edited" | "removed" = "none";
+  public removed: boolean = false;
+
+  private _holiday?: Holiday;
+  @Input() set holiday(value: Holiday | undefined) {
+    this._holiday = value;
+    this.renderHoliday();
+  }
+  get holiday(): Holiday | undefined { return this._holiday; }
 
   constructor(private translateService: TranslateService) {}
+
+  private renderHoliday(): void {
+    const h = this._holiday;
+    if (h == null) return;
+    const proj = new TimeOff();
+    proj.recurrence = TimeOffRecurrence.OneOff;
+    proj.startDate = h.date;
+    proj.endDate = h.date;
+    proj.isAllDay = h.isAllDay;
+    proj.timeFrom = h.timeFrom;
+    proj.timeTo = h.timeTo;
+
+    const tr = (k: string) => this.translateService.translate(k);
+    this.label = h.name;
+    this.schedule = timeOffScheduleText(proj, tr, this.translateService.getSelectedLanguageCode());
+    this.dateRange = "";
+    this.time = timeOffTimeText(proj, tr);
+    this.removed = h.isRemoved;
+    this.badge = h.isRemoved ? "removed" : (h.isEdited ? "edited" : "none");
+  }
 
   private render(): void {
     const t = this._timeOff;
