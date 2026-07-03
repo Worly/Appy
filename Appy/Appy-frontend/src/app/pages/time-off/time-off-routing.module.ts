@@ -7,6 +7,7 @@ const routes: Routes = [
   { path: "", component: TimeOffComponent },
   { path: "new", component: TimeOffEditComponent },
   { path: "edit/:id", component: TimeOffEditComponent },
+  { path: "holiday/edit/:id", component: TimeOffEditComponent, data: { holiday: true } },
 ];
 
 @NgModule({

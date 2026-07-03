@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import { of } from "rxjs";
 import { TimeOff, TimeOffRecurrence } from "src/app/models/time-off";
 import { DayOfWeek } from "src/app/models/working-hours";
 import { TimeOffEditComponent } from "./time-off-edit.component";
@@ -13,7 +14,7 @@ dayjs.extend(isSameOrBefore);
 // exercise it on a bare instance without Angular's TestBed — matching this codebase's habit of
 // unit-testing logic directly (see time-off-display.spec.ts).
 function makeComponent(): TimeOffEditComponent {
-  return new TimeOffEditComponent(null as any, null as any, null as any, null as any);
+  return new TimeOffEditComponent(null as any, null as any, null as any, null as any, null as any);
 }
 
 describe("TimeOffEditComponent — From/To linkage", () => {
@@ -80,7 +81,7 @@ describe("TimeOffEditComponent — delete confirmation", () => {
       delete: jasmine.createSpy("delete").and.callFake(fakeObs),
       stop: jasmine.createSpy("stop").and.callFake(fakeObs),
     };
-    const c = new TimeOffEditComponent(service as any, null as any, null as any, null as any);
+    const c = new TimeOffEditComponent(service as any, null as any, null as any, null as any, null as any);
     c.isNew = false;
     return { c, service };
   }
@@ -178,7 +179,7 @@ describe("TimeOffEditComponent — recurring save dialog gate", () => {
       saveWithSplit: jasmine.createSpy("saveWithSplit").and.callFake(fakeObs),
       addNew: jasmine.createSpy("addNew").and.callFake(fakeObs),
     };
-    const c = new TimeOffEditComponent(service as any, null as any, null as any, null as any);
+    const c = new TimeOffEditComponent(service as any, null as any, null as any, null as any, null as any);
     c.isNew = false;
     c.type = "recurring";
     c.timeOff.recurrence = TimeOffRecurrence.Weekly;
@@ -231,11 +232,12 @@ describe("TimeOffEditComponent — new time-off defaults", () => {
   function makeNew(type: "oneoff" | "recurring"): TimeOffEditComponent {
     const route = {
       snapshot: {
+        data: {},
         paramMap: { get: () => null },        // no :id → isNew
         queryParamMap: { get: () => type },   // ?type=oneoff|recurring
       },
     };
-    const c = new TimeOffEditComponent(null as any, route as any, null as any, null as any);
+    const c = new TimeOffEditComponent(null as any, route as any, null as any, null as any, null as any);
     c.ngOnInit();
     return c;
   }
@@ -248,5 +250,27 @@ describe("TimeOffEditComponent — new time-off defaults", () => {
   it("defaults a new recurring rule to all-day", () => {
     const c = makeNew("recurring");
     expect(c.timeOff.isAllDay).toBe(true);
+  });
+});
+
+describe("TimeOffEditComponent — holiday mode", () => {
+  it("saves via HolidayService.edit with a single-day date and time", () => {
+    const holidayService = { edit: jasmine.createSpy("edit").and.returnValue(of(undefined)) };
+    // (timeOffService, route, location, translateService, holidayService)
+    const c = new TimeOffEditComponent(null as any, null as any, { back: () => {} } as any, null as any, holidayService as any);
+    c.isHolidayMode = true;
+    c.holidayId = 42;
+    c.isNew = false;
+    c.timeOff.recurrence = TimeOffRecurrence.OneOff;
+    c.timeOff.startDate = dayjs("2026-04-13");
+    c.timeOff.endDate = dayjs("2026-04-13");
+    c.timeOff.isAllDay = false;
+    c.timeOff.timeFrom = dayjs("2026-04-13T12:00:00");
+    c.timeOff.timeTo = dayjs("2026-04-13T17:00:00");
+    c.timeOff.label = "Easter Monday";
+
+    c.save();
+
+    expect(holidayService.edit).toHaveBeenCalledWith(42, jasmine.objectContaining({ date: "2026-04-13", isAllDay: false, timeFrom: "12:00:00", timeTo: "17:00:00" }));
   });
 });

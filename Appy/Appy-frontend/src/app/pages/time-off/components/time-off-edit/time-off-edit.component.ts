@@ -7,6 +7,7 @@ import { Subscription } from 'rxjs';
 import { DayOfWeek } from 'src/app/models/working-hours';
 import { TimeOff, TimeOffRecurrence } from 'src/app/models/time-off';
 import { TimeOffService } from '../../services/time-off.service';
+import { HolidayService } from '../../services/holiday.service';
 import { canStopRecurring, timeOffDayCountText } from '../../time-off-display';
 import { DialogComponent } from 'src/app/components/dialog/dialog.component';
 import { SegmentedOption } from 'src/app/components/segmented-control/segmented-control.component';
@@ -26,6 +27,9 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
   // Recurring rules always carry an effective-from (startDate); this toggle controls only whether
   // they also have an end ("until") date. It never clears the start.
   public hasEndDate: boolean = false;
+
+  public isHolidayMode: boolean = false;
+  public holidayId?: number;
 
   @ViewChild("splitDialog") splitDialog?: DialogComponent;
   @ViewChild("deleteDialog") deleteDialog?: DialogComponent;
@@ -97,9 +101,12 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private location: Location,
     private translateService: TranslateService,
+    private holidayService: HolidayService,
   ) { }
 
   ngOnInit(): void {
+    if (this.route.snapshot.data["holiday"]) { this.initHolidayMode(); return; }
+
     const id = this.route.snapshot.paramMap.get("id");
     if (id != null) {
       this.isNew = false;
@@ -147,6 +154,28 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subs.forEach(s => s.unsubscribe());
+  }
+
+  private initHolidayMode(): void {
+    this.isHolidayMode = true;
+    this.isNew = false;
+    this.type = "oneoff";
+    const id = +this.route.snapshot.paramMap.get("id")!;
+    this.holidayId = id;
+    this.subs.push(this.holidayService.getById(id).subscribe(h => {
+      const t = new TimeOff();
+      t.recurrence = TimeOffRecurrence.OneOff;
+      t.label = h.name;
+      t.startDate = h.date;
+      t.endDate = h.date;
+      t.isAllDay = h.isAllDay;
+      t.timeFrom = h.timeFrom ?? dayjs({ hour: 9 });
+      t.timeTo = h.timeTo ?? dayjs({ hour: 17 });
+      t.notes = h.notes;
+      this.timeOff = t;
+      this.originalStartDate = t.startDate;
+      this.isLoaded = true;
+    }));
   }
 
   // displayFunction for day-of-week dropdown
@@ -224,6 +253,19 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
   }
 
   public save(): void {
+    if (this.isHolidayMode) {
+      if (!this.timeOff.validate()) return;
+      this.isLoading = true;
+      this.subs.push(this.holidayService.edit(this.holidayId!, {
+        date: this.timeOff.startDate!.format("YYYY-MM-DD"),
+        isAllDay: this.timeOff.isAllDay,
+        timeFrom: this.timeOff.isAllDay ? undefined : this.timeOff.timeFrom?.format("HH:mm:ss"),
+        timeTo: this.timeOff.isAllDay ? undefined : this.timeOff.timeTo?.format("HH:mm:ss"),
+        notes: this.timeOff.notes,
+      }).subscribe({ next: () => this.goBack(), error: () => { this.isLoading = false; } }));
+      return;
+    }
+
     if (!this.timeOff.validate()) return;
 
     // A recurring edit can fork the rule's timeline — but only when the user changed the rule's
@@ -285,6 +327,13 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
   public delete(): void {
     if (this.isNew) return;
 
+    if (this.isHolidayMode) {
+      this.canStop = false;
+      this.deleteMode = "remove";
+      this.deleteDialog?.open();
+      return;
+    }
+
     // Every delete goes through a confirmation dialog. For an active, already-started recurring
     // rule it also offers "stop" (keep history) vs full delete; otherwise it's a plain confirm.
     this.canStop = canStopRecurring(this.timeOff, dayjs());
@@ -294,6 +343,11 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
 
   public confirmDelete(): void {
     this.deleteDialog?.close();
+    if (this.isHolidayMode) {
+      this.isLoading = true;
+      this.subs.push(this.holidayService.remove(this.holidayId!).subscribe({ next: () => this.goBack(), error: () => { this.isLoading = false; } }));
+      return;
+    }
     if (this.canStop && this.deleteMode === "stop") this.stop();
     else this.deleteNow();
   }
