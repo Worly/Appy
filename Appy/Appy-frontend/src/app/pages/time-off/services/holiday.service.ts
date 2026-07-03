@@ -1,0 +1,75 @@
+import { Injectable, Injector } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { QueryClient } from "@tanstack/query-core";
+import { map, Observable } from "rxjs";
+import { appConfig } from "src/app/app.config";
+import { TimeOffScope } from "src/app/models/time-off";
+import {
+  Holiday, HolidayDTO, HolidayEditRequest, HolidayImportSettings, HolidayImportSettingsDTO, SupportedCountry,
+} from "src/app/models/holiday";
+import { CacheCoordinator } from "src/app/shared/services/data/cache-coordinator";
+import { PagedResult, QueryResult } from "src/app/shared/services/data/contracts";
+import { query } from "src/app/shared/services/data/query";
+import { pagedQuery } from "src/app/shared/services/data/paged-query";
+import { appointmentKeys, holidayKeys, timeOffKeys } from "src/app/shared/services/data/keys";
+
+@Injectable({ providedIn: "root" })
+export class HolidayService {
+  private readonly controllerName = "holiday";
+
+  private httpClient: HttpClient;
+  private queryClient: QueryClient;
+  private cache: CacheCoordinator;
+
+  constructor(injector: Injector) {
+    this.httpClient = injector.get(HttpClient);
+    this.queryClient = injector.get(QueryClient);
+    this.cache = injector.get(CacheCoordinator);
+  }
+
+  public getList(scope: TimeOffScope): PagedResult<Holiday, never> {
+    return pagedQuery<Holiday, never>(this.queryClient, {
+      queryKey: [...holidayKeys.list(scope)],
+      loadPage: (direction, skip, take) =>
+        this.httpClient.get<HolidayDTO[]>(`${appConfig.apiUrl}${this.controllerName}/getList`, {
+          params: { scope, skip, take, direction },
+        }).pipe(map(r => ({ items: r.map(d => new Holiday(d)), extra: [] as never[] }))),
+    });
+  }
+
+  public getById(id: number): Observable<Holiday> {
+    return this.httpClient.get<HolidayDTO>(`${appConfig.apiUrl}${this.controllerName}/get/${id}`)
+      .pipe(map(d => new Holiday(d)));
+  }
+
+  public getSettings(): Observable<HolidayImportSettings> {
+    return this.httpClient.get<HolidayImportSettingsDTO>(`${appConfig.apiUrl}${this.controllerName}/settings`)
+      .pipe(map(dto => new HolidayImportSettings(dto)));
+  }
+
+  public saveSettings(settings: HolidayImportSettings): Observable<HolidayImportSettings> {
+    return this.httpClient.put<HolidayImportSettingsDTO>(`${appConfig.apiUrl}${this.controllerName}/settings`, settings.getDTO())
+      .pipe(map(dto => {
+        this.cache.invalidate(holidayKeys.all, timeOffKeys.all, appointmentKeys.all);
+        return new HolidayImportSettings(dto);
+      }));
+  }
+
+  public getSupportedCountries(): QueryResult<SupportedCountry[]> {
+    return query(this.queryClient, [...holidayKeys.countries], () =>
+      this.httpClient.get<SupportedCountry[]>(`${appConfig.apiUrl}${this.controllerName}/getSupportedCountries`));
+  }
+
+  public edit(id: number, req: HolidayEditRequest): Observable<void> {
+    return this.mutate(`edit/${id}`, req);
+  }
+
+  public remove(id: number): Observable<void> { return this.mutate(`remove/${id}`, null); }
+  public revert(id: number): Observable<void> { return this.mutate(`revert/${id}`, null); }
+  public restore(id: number): Observable<void> { return this.mutate(`restore/${id}`, null); }
+
+  private mutate(path: string, body: any): Observable<void> {
+    return this.httpClient.put<void>(`${appConfig.apiUrl}${this.controllerName}/${path}`, body)
+      .pipe(map(() => { this.cache.invalidate(holidayKeys.all, timeOffKeys.all, appointmentKeys.all); }));
+  }
+}
