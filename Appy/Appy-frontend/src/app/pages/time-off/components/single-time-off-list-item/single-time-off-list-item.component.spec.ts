@@ -19,6 +19,8 @@ describe("SingleTimeOffListItemComponent — holiday mode", () => {
     expect(c.label).toBe("Easter Monday");
     expect(c.badge).toBe("edited");
     expect(c.removed).toBe(false);
+    expect(c.schedule).not.toBe("");
+    expect(c.time).not.toBe("");
   });
 
   it("marks a removed holiday", () => {

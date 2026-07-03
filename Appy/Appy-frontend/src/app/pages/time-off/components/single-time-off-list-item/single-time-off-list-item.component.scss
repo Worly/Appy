@@ -16,6 +16,10 @@
     align-self: stretch;
     border-radius: var(--default-border-radius);
     background: rgb(var(--rgb-warning));
+
+    &.accent-removed {
+      background: rgba(var(--rgb-text), 0.45);
+    }
   }
 
   .info {
@@ -66,7 +70,6 @@
 }
 
 .time-off-row.removed { opacity: 0.55; }
-.accent.accent-removed { background: rgba(var(--rgb-text), 0.45); }
 .struck { text-decoration: line-through; }
 .badge {
   font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
