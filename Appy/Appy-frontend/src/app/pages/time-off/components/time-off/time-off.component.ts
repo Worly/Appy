@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { Location } from "@angular/common";
 import { ActivatedRoute, Router } from "@angular/router";
-import { Subscription } from "rxjs";
+import { Subscription, filter, take } from "rxjs";
 import { setUrlParams } from "src/app/utils/dynamic-url-params";
 import { TimeOffListType, TimeOffScope } from "src/app/models/time-off";
 import { Holiday, HolidayImportSettings, SupportedCountry } from "src/app/models/holiday";
@@ -140,7 +140,9 @@ export class TimeOffComponent implements OnInit, OnDestroy {
     this.holidayService.getSettings().subscribe(s => {
       this.settings = s;
       this.selectedCountryCode = s.countryCode;
-      this.holidayService.getSupportedCountries().data$.subscribe(cs => this.countries = cs ?? []);
+      this.holidayService.getSupportedCountries().data$
+        .pipe(filter(cs => cs != null), take(1))
+        .subscribe(cs => this.countries = cs ?? []);
       this.configureDialog?.open();
     });
   }
