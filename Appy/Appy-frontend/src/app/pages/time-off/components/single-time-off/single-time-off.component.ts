@@ -1,9 +1,12 @@
-import { Component, EventEmitter, Input, OnDestroy, Output } from "@angular/core";
+import { Component, EventEmitter, Input, OnDestroy, Output, ViewChild } from "@angular/core";
 import { Router } from "@angular/router";
 import { Subscription } from "rxjs";
-import { TimeOff } from "src/app/models/time-off";
+import { TimeOff, TimeOffRecurrence } from "src/app/models/time-off";
+import { Holiday } from "src/app/models/holiday";
 import { TranslateService } from "src/app/components/translate/translate.service";
+import { DialogComponent } from "src/app/components/dialog/dialog.component";
 import { TimeOffService } from "../../services/time-off.service";
+import { HolidayService } from "../../services/holiday.service";
 import { timeOffDayCountText, timeOffRecurringRangeText, timeOffScheduleText, timeOffTimeText } from "../../time-off-display";
 
 @Component({
@@ -23,13 +26,30 @@ export class SingleTimeOffComponent implements OnDestroy {
   }
 
   @Output() onDone: EventEmitter<void> = new EventEmitter();
+  @Output() onChanged: EventEmitter<void> = new EventEmitter();
 
   public timeOff?: TimeOff;
   public isLoading: boolean = false;
   public schedule: string = "";
   public dateRange: string = "";
-  public dayCount: string = ""; // inclusive "N days" — populated only for one-offs
+  public dayCount: string = "";
   public time: string = "";
+
+  // Only active/edited holidays reach this view; removed ones open the container's restore dialog.
+  public holidayModel?: Holiday;
+  public isHolidayEdited = false;
+  public changedDate = false;
+  public changedTime = false;
+
+  @ViewChild("revertDialog") revertDialog?: DialogComponent;
+  @ViewChild("removeDialog") removeDialog?: DialogComponent;
+
+  private _holiday?: Holiday;
+  @Input() set holiday(value: Holiday | undefined) {
+    this._holiday = value;
+    if (value != null) this.applyHoliday(value);
+  }
+  get holiday(): Holiday | undefined { return this._holiday; }
 
   private sub?: Subscription;
 
@@ -37,10 +57,31 @@ export class SingleTimeOffComponent implements OnDestroy {
     private timeOffService: TimeOffService,
     private translateService: TranslateService,
     private router: Router,
+    private holidayService: HolidayService,
   ) {}
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+  }
+
+  private applyHoliday(h: Holiday): void {
+    this.holidayModel = h;
+    this.isHolidayEdited = h.isEdited;
+    this.changedDate = h.date != null && h.originalDate != null && !h.date.isSame(h.originalDate, "date");
+    this.changedTime = !h.isAllDay;
+    // Build via DTO constructor so property setters (which trigger validation) fire only once, after initProperties.
+    const proj = new TimeOff({
+      id: 0,
+      recurrence: TimeOffRecurrence.OneOff,
+      startDate: h.date?.format("YYYY-MM-DD"),
+      endDate: h.date?.format("YYYY-MM-DD"),
+      isAllDay: h.isAllDay,
+      timeFrom: h.timeFrom?.format("HH:mm:ss"),
+      timeTo: h.timeTo?.format("HH:mm:ss"),
+    });
+    const tr = (k: string) => this.translateService.translate(k);
+    this.schedule = timeOffScheduleText(proj, tr, this.translateService.getSelectedLanguageCode());
+    this.time = timeOffTimeText(proj, tr);
   }
 
   private setDatasource(id: number | undefined): void {
@@ -57,6 +98,10 @@ export class SingleTimeOffComponent implements OnDestroy {
       this.dayCount = timeOffDayCountText(t, tr, this.translateService.getSelectedLanguageCode());
       this.time = timeOffTimeText(t, tr);
       this.isLoading = false;
+
+      if (t.importedHolidayId != null) {
+        this.holidayService.getById(t.importedHolidayId).subscribe(h => this.applyHoliday(h));
+      }
     });
   }
 
@@ -64,5 +109,29 @@ export class SingleTimeOffComponent implements OnDestroy {
     if (this._id == null) return;
     this.router.navigate(["time-off", "edit", this._id]);
     this.onDone.next();
+  }
+
+  public goToEditHoliday(): void {
+    if (this._holiday == null) return;
+    this.router.navigate(["time-off", "holiday", "edit", this._holiday.id]);
+    this.onDone.next();
+  }
+
+  public confirmRevert(): void {
+    if (this._holiday == null) return;
+    this.holidayService.revert(this._holiday.id).subscribe(() => {
+      this.revertDialog?.close();
+      this.onChanged.next();
+      this.onDone.next();
+    });
+  }
+
+  public confirmRemove(): void {
+    if (this._holiday == null) return;
+    this.holidayService.remove(this._holiday.id).subscribe(() => {
+      this.removeDialog?.close();
+      this.onChanged.next();
+      this.onDone.next();
+    });
   }
 }

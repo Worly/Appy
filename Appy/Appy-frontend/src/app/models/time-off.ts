@@ -24,6 +24,7 @@ export class TimeOffDTO {
   public isAllDay?: boolean;
   public timeFrom?: string;
   public timeTo?: string;
+  public importedHolidayId?: number;
 }
 
 export class TimeOff extends EditModel<TimeOff> {
@@ -40,6 +41,7 @@ export class TimeOff extends EditModel<TimeOff> {
   public isAllDay: boolean = false;
   public timeFrom?: Dayjs;
   public timeTo?: Dayjs;
+  public importedHolidayId?: number;
 
   override validations: Validation<TimeOff>[] = [
     {
@@ -105,6 +107,7 @@ export class TimeOff extends EditModel<TimeOff> {
     this.isAllDay = dto.isAllDay ?? false;
     this.timeFrom = dto.timeFrom ? dayjs(dto.timeFrom, "HH:mm:ss") : undefined;
     this.timeTo = dto.timeTo ? dayjs(dto.timeTo, "HH:mm:ss") : undefined;
+    this.importedHolidayId = dto.importedHolidayId;
 
     this.initProperties();
   }

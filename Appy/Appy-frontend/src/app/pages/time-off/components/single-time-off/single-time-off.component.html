@@ -1,6 +1,6 @@
 <app-loading *ngIf="isLoading"></app-loading>
 
-<div *ngIf="!isLoading && timeOff != null" class="time-off-details">
+<div *ngIf="!isLoading && timeOff != null && holidayModel == null" class="time-off-details">
   <div class="header">
     <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
     <div class="title">{{ timeOff.label }}</div>
@@ -36,3 +36,74 @@
     </app-button>
   </div>
 </div>
+
+<div *ngIf="holidayModel" class="holiday-details" data-test="holiday-details">
+  <div class="header">
+    <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
+    <div class="title">{{ holidayModel.name }}</div>
+    <span *ngIf="isHolidayEdited" class="badge badge-edited">{{ "pages.time-off.EDITED" | translate }}</span>
+  </div>
+  <div class="provenance">{{ "pages.time-off.PUBLIC_HOLIDAY" | translate }} · {{ holidayModel.countryCode }}</div>
+
+  <div class="info-card">
+    <div class="info-row">
+      <fa-icon icon="calendar-days" [fixedWidth]="true"></fa-icon>
+      <div>{{ schedule }}</div>
+    </div>
+    <div class="info-row">
+      <fa-icon icon="clock" [fixedWidth]="true"></fa-icon>
+      <div>{{ time }}</div>
+    </div>
+  </div>
+
+  <div class="notes" *ngIf="holidayModel.notes">
+    <div class="notes-title">{{ "pages.time-off.NOTES" | translate }}</div>
+    <div class="notes-body">{{ holidayModel.notes }}</div>
+  </div>
+
+  <div *ngIf="isHolidayEdited" class="changes-block" data-test="holiday-changes">
+    <div class="changes-title">{{ "pages.time-off.CHANGED_FROM_ORIGINAL" | translate }}</div>
+    <div class="changes-row" *ngIf="changedDate">
+      <span class="changes-key">{{ "pages.time-off.DATE" | translate }}</span>
+      <span class="changes-old">{{ holidayModel.originalDate?.format("DD.MM.YYYY") }}</span> →
+      <span>{{ holidayModel.date?.format("DD.MM.YYYY") }}</span>
+    </div>
+    <div class="changes-row" *ngIf="changedTime">
+      <span class="changes-key">{{ "pages.time-off.TIME" | translate }}</span>
+      <span class="changes-old">{{ "pages.time-off.ALL_DAY" | translate }}</span> → <span>{{ time }}</span>
+    </div>
+    <app-button class="revert-btn" look="transparent" icon="rotate-left"
+      [text]="'pages.time-off.REVERT_TO_ORIGINAL' | translate" (onClick)="revertDialog.open()" data-test="holiday-revert"></app-button>
+  </div>
+
+  <div class="action-bar">
+    <app-button [text]="'pages.time-off.REMOVE' | translate" icon="trash" color="danger" (onClick)="removeDialog.open()" data-test="holiday-remove"></app-button>
+    <app-button [text]="'EDIT' | translate" icon="pen" (onClick)="goToEditHoliday()" data-test="holiday-edit"></app-button>
+  </div>
+</div>
+
+<app-dialog #revertDialog>
+  <div class="split-dialog" *ngIf="revertDialog.isOpen" data-test="holiday-revert-dialog">
+    <div class="split-hint">
+      <fa-icon [icon]="['fas', 'circle-info']"></fa-icon>
+      <span>{{ "pages.time-off.REVERT_CONFIRM" | translate }}</span>
+    </div>
+    <div class="split-actions">
+      <app-button [text]="'CANCEL' | translate" color="danger" look="normal" (onClick)="revertDialog.close()"></app-button>
+      <app-button [text]="'CONFIRM' | translate" color="success" look="solid" (onClick)="confirmRevert()" data-test="holiday-revert-confirm"></app-button>
+    </div>
+  </div>
+</app-dialog>
+
+<app-dialog #removeDialog>
+  <div class="split-dialog" *ngIf="removeDialog.isOpen" data-test="holiday-remove-dialog">
+    <div class="split-hint">
+      <fa-icon [icon]="['fas', 'circle-info']"></fa-icon>
+      <span>{{ "pages.time-off.REMOVE_CONFIRM" | translate }}</span>
+    </div>
+    <div class="split-actions">
+      <app-button [text]="'CANCEL' | translate" color="danger" look="normal" (onClick)="removeDialog.close()"></app-button>
+      <app-button [text]="'CONFIRM' | translate" color="success" look="solid" (onClick)="confirmRemove()" data-test="holiday-remove-confirm"></app-button>
+    </div>
+  </div>
+</app-dialog>
