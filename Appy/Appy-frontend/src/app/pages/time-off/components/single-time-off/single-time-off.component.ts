@@ -65,6 +65,7 @@ export class SingleTimeOffComponent implements OnDestroy {
   }
 
   private applyHoliday(h: Holiday): void {
+    this._holiday = h;
     this.holidayModel = h;
     this.isHolidayEdited = h.isEdited;
     this.changedDate = h.date != null && h.originalDate != null && !h.date.isSame(h.originalDate, "date");
