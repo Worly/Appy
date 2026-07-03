@@ -24,13 +24,83 @@
     (openDetails)="viewingId = $event; detailsDialog.open()">
   </app-time-off-list>
 
-  <div *ngIf="isHolidays" class="holidays-stub" data-test="time-off-holidays-stub">
-    <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
-    <div>{{ "pages.time-off.HOLIDAYS_COMING_SOON" | translate }}</div>
-  </div>
+  <!-- Holidays tab -->
+  <ng-container *ngIf="isHolidays">
+    <app-loading *ngIf="holidaysLoading"></app-loading>
+
+    <div *ngIf="!holidaysLoading && holidays.length === 0" class="holidays-empty" data-test="holidays-empty">
+      <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
+      <div>{{ "pages.time-off.HOLIDAYS_EMPTY" | translate }}</div>
+      <app-button color="success" look="solid" [text]="'pages.time-off.HOLIDAYS_CONFIGURE_CTA' | translate"
+        (onClick)="configureAutoImport()" data-test="holidays-configure-cta"></app-button>
+    </div>
+
+    <app-single-time-off-list-item *ngFor="let h of holidays" [holiday]="h"
+      (onOpenView)="onHolidayRowClick(h)">
+    </app-single-time-off-list-item>
+
+    <div class="loading-more" *ngIf="holidaysLoadingMore"><app-loading [hasShadow]="false"></app-loading></div>
+  </ng-container>
 </div>
 
 <app-dialog #detailsDialog>
   <app-single-time-off *ngIf="detailsDialog.isOpen" [id]="viewingId"
     (onDone)="detailsDialog.close()"></app-single-time-off>
+</app-dialog>
+
+<!-- Active/edited holidays open the details view; removed holidays open the restore dialog below. -->
+<app-dialog #holidayDetailsDialog>
+  <app-single-time-off *ngIf="holidayDetailsDialog.isOpen" [holiday]="viewingHoliday"
+    (onChanged)="loadHolidaysIfNeeded()" (onDone)="holidayDetailsDialog.close()"></app-single-time-off>
+</app-dialog>
+
+<app-dialog #restoreDialog>
+  <div class="configure-dialog" *ngIf="restoreDialog.isOpen && restoringHoliday" data-test="holiday-restore-dialog">
+    <div class="configure-title">{{ restoringHoliday.name }}</div>
+    <div class="configure-sub">{{ "pages.time-off.PUBLIC_HOLIDAY" | translate }} · {{ restoringHoliday.countryCode }} · {{ restoringHoliday.originalDate?.format("DD.MM.YYYY") }}</div>
+    <div class="split-hint">
+      <fa-icon [icon]="['fas', 'circle-info']" aria-hidden="true"></fa-icon>
+      <span>{{ "pages.time-off.RESTORE_CONFIRM" | translate }}</span>
+    </div>
+    <div class="configure-actions">
+      <app-button [text]="'CANCEL' | translate" color="danger" look="normal" (onClick)="restoreDialog.close()"></app-button>
+      <app-button [text]="'pages.time-off.RESTORE' | translate" color="success" look="solid"
+        (onClick)="confirmRestore()" data-test="holiday-restore-confirm"></app-button>
+    </div>
+  </div>
+</app-dialog>
+
+<app-dialog #configureDialog>
+  <div class="configure-dialog" *ngIf="configureDialog.isOpen" data-test="holiday-configure-dialog">
+    <div class="configure-title">{{ "pages.time-off.CONFIGURE_AUTO_IMPORT" | translate }}</div>
+    <div class="configure-sub">{{ "pages.time-off.CONFIGURE_SUB" | translate }}</div>
+
+    <div class="w-input-container">
+      <label class="w-label">{{ "pages.time-off.COUNTRY" | translate }}</label>
+      <app-dropdown [items]="countries" [displayFunction]="countryDisplay" [fullWidth]="true" [matchTriggerWidth]="true"
+        [value]="selectedCountry" (valueChange)="selectedCountryCode = $event?.countryCode"
+        data-test="holiday-country-dropdown"></app-dropdown>
+    </div>
+
+    <div class="configure-actions">
+      <app-button [text]="'CANCEL' | translate" color="danger" look="normal" (onClick)="configureDialog.close()"></app-button>
+      <app-button [text]="'pages.time-off.IMPORT' | translate" color="success" look="solid"
+        [disabled]="savingSettings" [isLoading]="savingSettings" (onClick)="confirmConfigure()"
+        data-test="holiday-configure-save"></app-button>
+    </div>
+  </div>
+</app-dialog>
+
+<app-dialog #confirmChangeDialog>
+  <div class="configure-dialog" *ngIf="confirmChangeDialog.isOpen" data-test="holiday-change-confirm-dialog">
+    <div class="split-hint">
+      <fa-icon [icon]="['fas', 'circle-info']" aria-hidden="true"></fa-icon>
+      <span>{{ "pages.time-off.CHANGE_COUNTRY_WARNING" | translate }}</span>
+    </div>
+    <div class="configure-actions">
+      <app-button [text]="'CANCEL' | translate" color="danger" look="normal" (onClick)="confirmChangeDialog.close()"></app-button>
+      <app-button [text]="'CONFIRM' | translate" color="danger" look="solid" [disabled]="savingSettings"
+        (onClick)="saveSettings()" data-test="holiday-change-confirm"></app-button>
+    </div>
+  </div>
 </app-dialog>
