@@ -59,11 +59,6 @@ export let timeOff = {
     return this;
   },
 
-  expectHolidaysStub() {
-    getElement("time-off-holidays-stub").should("exist");
-    return this;
-  },
-
   list() {
     this.checkView();
 

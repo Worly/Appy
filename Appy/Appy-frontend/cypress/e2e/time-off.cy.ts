@@ -130,12 +130,11 @@ describe("Time Off", () => {
     timeOff.list().expectRow("Move Start Recurring");
   });
 
-  it("shows the Holidays tab as a stub with the scope switch and an auto-import button instead of add", () => {
+  it("shows the Holidays tab with the scope switch and a configure-import button instead of add", () => {
     timeOff.visit();
     timeOff.openTab("holidays");
 
     timeOff
-      .expectHolidaysStub()
       .expectNoAddButton()
       .expectScopeSwitch()
       .expectConfigureImportButton();
