@@ -89,11 +89,13 @@ export class TimeOffComponent implements OnInit, OnDestroy {
   public setTab(tab: TimeOffTab): void {
     this.activeTab = tab;
     this.updateUrl();
+    this.loadHolidaysIfNeeded();
   }
 
   public setScope(scope: TimeOffScope): void {
     this.scope = scope;
     this.updateUrl();
+    this.loadHolidaysIfNeeded();
   }
 
   private updateUrl(): void {

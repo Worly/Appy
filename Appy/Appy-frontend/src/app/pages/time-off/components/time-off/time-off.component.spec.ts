@@ -1,10 +1,22 @@
+import { of } from "rxjs";
 import { TimeOffComponent } from "./time-off.component";
 import { Holiday } from "src/app/models/holiday";
 import { HolidayImportSettings } from "src/app/models/holiday";
 
-function make(): TimeOffComponent {
+function make(holidayService?: any): TimeOffComponent {
   // (Router, Location, ActivatedRoute, HolidayService, ChangeDetectorRef)
-  return new TimeOffComponent(null as any, null as any, null as any, null as any, null as any);
+  return new TimeOffComponent(null as any, null as any, null as any, holidayService ?? null as any, null as any);
+}
+
+function makeHolidayServiceStub() {
+  const pagedResult = {
+    items$: of([]),
+    loading$: of(false),
+    loadingForwards$: of(false),
+    hasMore: () => false,
+    loadMore: () => {},
+  };
+  return { getList: jasmine.createSpy("getList").and.returnValue(pagedResult) };
 }
 
 describe("TimeOffComponent — configure change gate", () => {
@@ -34,5 +46,30 @@ describe("TimeOffComponent — configure change gate", () => {
     c.confirmConfigure();
 
     expect(saveSpy).toHaveBeenCalled();
+  });
+});
+
+describe("TimeOffComponent — holiday list reload on tab/scope change", () => {
+  it("loads the holiday list when switching to the Holidays tab", () => {
+    const holidayService = makeHolidayServiceStub();
+    const c = make(holidayService);
+    c.activeTab = "OneOff";
+    spyOn(c as any, "updateUrl");
+
+    c.setTab("Holidays");
+
+    expect(holidayService.getList).toHaveBeenCalled();
+  });
+
+  it("reloads the holiday list when changing scope while on the Holidays tab", () => {
+    const holidayService = makeHolidayServiceStub();
+    const c = make(holidayService);
+    c.activeTab = "Holidays";
+    spyOn(c as any, "updateUrl");
+    holidayService.getList.calls.reset();
+
+    c.setScope("History");
+
+    expect(holidayService.getList).toHaveBeenCalled();
   });
 });
