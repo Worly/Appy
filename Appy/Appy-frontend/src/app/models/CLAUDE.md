@@ -26,6 +26,9 @@ TypeScript classes representing domain data on the frontend. Split into two tier
 | `TimeOffOccurrence` | `TimeOffOccurrenceDTO` | Single expanded on-date time-off instance |
 | `FreeTime` | `FreeTimeDTO` | Available booking slot (from/to/toIncludingDuration) |
 | `CalendarDay` | `CalendarDayDTO` | A date bundled with its appointments and working hours |
+| `Holiday` | `HolidayDTO` | Public holiday with name, country, date, time, and edit/remove state |
+| `HolidayImportSettings` | `HolidayImportSettingsDTO` | Holiday import config snapshot (country code) |
+| `SupportedCountry` | (inline) | Country code + name pair for the supported-countries list |
 | `ClientNotificationsSettings` | (settings DTO) | Instagram config and message templates |
 
 ## Enums
