@@ -230,7 +230,6 @@
             "MONTHLY": "Monthly",
             "RECURRING": "Recurring",
             "HOLIDAYS": "Holidays",
-            "HOLIDAYS_COMING_SOON": "Imported public holidays are coming soon.",
             "CONFIGURE_AUTO_IMPORT": "Configure auto-import",
             "HOLIDAYS_EMPTY": "No holidays imported",
             "HOLIDAYS_CONFIGURE_CTA": "Configure",

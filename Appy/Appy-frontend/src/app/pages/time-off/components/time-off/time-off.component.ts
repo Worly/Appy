@@ -128,6 +128,7 @@ export class TimeOffComponent implements OnInit, OnDestroy {
 
   @HostListener("window:scroll")
   public checkShouldLoad(): void {
+    if (!this.isHolidays) return;
     const scrollOffset = 200;
     if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight - scrollOffset
         && this.holidayPaged?.hasMore("forwards")) {
