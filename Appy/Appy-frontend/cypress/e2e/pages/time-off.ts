@@ -222,7 +222,6 @@ export let holidays = {
   openTab() { timeOff.visit(); getElement("time-off-tab-holidays").click(); return this; },
   configure() { getElement("time-off-configure-import").click(); return holidayConfigure; },
   configureViaEmptyState() { getElement("holidays-configure-cta").click(); return holidayConfigure; },
-  expectRow(text: string) { getElement("time-off-list").parent().should("contain", text); return this; },
   expectRowContains(text: string) { cy.get("[data-test=time-off-row]").should("contain", text); return this; },
   openRow(text: string) { cy.get("[data-test=time-off-row]").contains(text).click(); return holidayDetails; },
   // A removed row opens the restore-confirm dialog directly (not the details view).
@@ -240,6 +239,7 @@ export let holidayConfigure = {
 export let holidayDetails = {
   expectVisible() { getElement("holiday-details").should("exist"); return this; },
   expectChanges() { getElement("holiday-changes").should("exist"); return this; },
+  expectNoChanges() { cy.get("[data-test=holiday-changes]").should("not.exist"); return this; },
   revert() { getElement("holiday-revert").click(); getElement("holiday-revert-confirm").click(); return this; },
   remove() { getElement("holiday-remove").click(); getElement("holiday-remove-confirm").click(); return this; },
   edit() { getElement("holiday-edit").click(); return timeOffEdit; },

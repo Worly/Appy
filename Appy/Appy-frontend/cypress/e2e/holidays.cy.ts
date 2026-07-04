@@ -24,6 +24,9 @@ describe("Holidays", () => {
     const d2 = holidays.openRow("Nova Godina");
     d2.expectVisible().expectChanges();
     d2.revert();
+
+    holidays.openTab();
+    holidays.openRow("Nova Godina").expectVisible().expectNoChanges();
   });
 
   it("removes a holiday then restores it", () => {
@@ -35,5 +38,8 @@ describe("Holidays", () => {
 
     holidays.openTab();
     holidays.openRemovedRow("Nova Godina").confirm();
+
+    holidays.openTab();
+    holidays.openRow("Nova Godina").expectVisible();
   });
 });
