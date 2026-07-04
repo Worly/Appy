@@ -2,7 +2,7 @@
 
 <div class="page" *ngIf="isLoaded">
   <div class="title-block">
-    <div class="w-title">{{ (isHolidayMode ? timeOff.label : (isNew ? "pages.time-off.ADD" : "pages.time-off.TIME_OFF") | translate) }}</div>
+    <div class="w-title">{{ isHolidayMode ? timeOff.label : ((isNew ? "pages.time-off.ADD" : "pages.time-off.TIME_OFF") | translate) }}</div>
     <div class="title-sub" *ngIf="!isHolidayMode">{{ (type === 'oneoff' ? "pages.time-off.ONE_OFF" : "pages.time-off.RECURRING") | translate }}</div>
   </div>
 

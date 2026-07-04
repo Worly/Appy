@@ -273,4 +273,38 @@ describe("TimeOffEditComponent — holiday mode", () => {
 
     expect(holidayService.edit).toHaveBeenCalledWith(42, jasmine.objectContaining({ date: "2026-04-13", isAllDay: false, timeFrom: "12:00:00", timeTo: "17:00:00" }));
   });
+
+  it("saves all-day holiday via HolidayService.edit with nulled time fields", () => {
+    const holidayService = { edit: jasmine.createSpy("edit").and.returnValue(of(undefined)) };
+    const c = new TimeOffEditComponent(null as any, null as any, { back: () => {} } as any, null as any, holidayService as any);
+    c.isHolidayMode = true;
+    c.holidayId = 42;
+    c.isNew = false;
+    c.timeOff.recurrence = TimeOffRecurrence.OneOff;
+    c.timeOff.startDate = dayjs("2026-04-13");
+    c.timeOff.endDate = dayjs("2026-04-13");
+    c.timeOff.isAllDay = true;
+    c.timeOff.label = "Easter Monday";
+
+    c.save();
+
+    expect(holidayService.edit).toHaveBeenCalledWith(42, jasmine.objectContaining({ date: "2026-04-13", isAllDay: true, timeFrom: undefined, timeTo: undefined }));
+  });
+
+  it("deletes holiday via HolidayService.remove", () => {
+    const holidayService = { remove: jasmine.createSpy("remove").and.returnValue(of(undefined)) };
+    const c = new TimeOffEditComponent(null as any, null as any, { back: () => {} } as any, null as any, holidayService as any);
+    c.isHolidayMode = true;
+    c.holidayId = 42;
+    c.isNew = false;
+    c.timeOff.recurrence = TimeOffRecurrence.OneOff;
+    c.timeOff.startDate = dayjs("2026-04-13");
+    c.timeOff.endDate = dayjs("2026-04-13");
+    c.timeOff.label = "Easter Monday";
+
+    c.delete();
+    c.confirmDelete();
+
+    expect(holidayService.remove).toHaveBeenCalledWith(42);
+  });
 });
