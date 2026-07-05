@@ -1,10 +1,9 @@
-import { Component, EventEmitter, Input, OnDestroy, Output, ViewChild } from "@angular/core";
+import { Component, EventEmitter, Input, OnDestroy, Output } from "@angular/core";
 import { Router } from "@angular/router";
-import { Subscription } from "rxjs";
+import { Observable, Subscription } from "rxjs";
 import { TimeOff, TimeOffRecurrence } from "src/app/models/time-off";
 import { Holiday } from "src/app/models/holiday";
 import { TranslateService } from "src/app/components/translate/translate.service";
-import { DialogComponent } from "src/app/components/dialog/dialog.component";
 import { TimeOffService } from "../../services/time-off.service";
 import { HolidayService } from "../../services/holiday.service";
 import { timeOffDayCountText, timeOffRecurringRangeText, timeOffScheduleText, timeOffTimeText } from "../../time-off-display";
@@ -49,6 +48,10 @@ export class SingleTimeOffComponent implements OnDestroy {
   }
   get holiday(): Holiday | undefined { return this._holiday; }
 
+  public get isHoliday(): boolean { return this.holidayModel != null; }
+  public get title(): string { return this.holidayModel?.name ?? this.timeOff?.label ?? ""; }
+  public get notes(): string | undefined { return this.holidayModel?.notes ?? this.timeOff?.notes; }
+
   private sub?: Subscription;
 
   constructor(
@@ -82,6 +85,9 @@ export class SingleTimeOffComponent implements OnDestroy {
     const tr = (k: string) => this.translateService.translate(k);
     this.schedule = timeOffScheduleText(proj, tr, this.translateService.getSelectedLanguageCode());
     this.time = timeOffTimeText(proj, tr);
+    // A holiday is always a single day: no recurring span or multi-day count to show.
+    this.dateRange = "";
+    this.dayCount = "";
   }
 
   private setDatasource(id: number | undefined): void {
@@ -105,36 +111,35 @@ export class SingleTimeOffComponent implements OnDestroy {
     });
   }
 
-  public goToEdit(): void {
+  public edit(): void {
+    if (this.isHoliday) this.goToEditHoliday();
+    else this.goToEdit();
+  }
+
+  private goToEdit(): void {
     if (this._id == null) return;
     this.router.navigate(["time-off", "edit", this._id]);
     this.onDone.next();
   }
 
-  public goToEditHoliday(): void {
+  private goToEditHoliday(): void {
     if (this._holiday == null) return;
     this.router.navigate(["time-off", "holiday", "edit", this._holiday.id]);
     this.onDone.next();
   }
 
   public openRevertDialog(): void {
-    this.notifyDialogService.yesNoDialog(this.translateService.translate("pages.time-off.REVERT_CONFIRM")).subscribe((ok: boolean) => {
-      if (!ok) return;
-      if (this._holiday == null) return;
-
-      this.holidayService.revert(this._holiday.id).subscribe(() => {
-        this.onChanged.next();
-        this.onDone.next();
-      });
-    });
+    this.confirmHolidayAction("pages.time-off.REVERT_CONFIRM", "holiday-revert-confirm", id => this.holidayService.revert(id));
   }
 
   public openRemoveDialog(): void {
-    this.notifyDialogService.yesNoDialog(this.translateService.translate("pages.time-off.REMOVE_CONFIRM")).subscribe((ok: boolean) => {
-      if (!ok) return;
-      if (this._holiday == null) return;
+    this.confirmHolidayAction("pages.time-off.REMOVE_CONFIRM", "holiday-remove-confirm", id => this.holidayService.remove(id));
+  }
 
-      this.holidayService.remove(this._holiday.id).subscribe(() => {
+  private confirmHolidayAction(confirmKey: string, confirmDataTest: string, action: (id: number) => Observable<void>): void {
+    this.notifyDialogService.yesNoDialog(this.translateService.translate(confirmKey), { confirmDataTest }).subscribe((ok: boolean) => {
+      if (!ok || this._holiday == null) return;
+      action(this._holiday.id).subscribe(() => {
         this.onChanged.next();
         this.onDone.next();
       });

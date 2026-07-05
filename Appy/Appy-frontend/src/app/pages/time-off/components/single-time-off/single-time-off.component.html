@@ -1,9 +1,15 @@
 <app-loading *ngIf="isLoading"></app-loading>
 
-<div *ngIf="!isLoading && timeOff != null && holidayModel == null" class="time-off-details">
+<div *ngIf="!isLoading && (timeOff != null || holidayModel != null)" class="time-off-details"
+  [attr.data-test]="isHoliday ? 'holiday-details' : null">
   <div class="header">
     <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
-    <div class="title">{{ timeOff.label }}</div>
+    <div class="title">{{ title }}</div>
+    <span *ngIf="isHolidayEdited" class="badge badge-edited">{{ "pages.time-off.EDITED" | translate }}</span>
+  </div>
+
+  <div class="provenance" *ngIf="isHoliday">
+    {{ "pages.time-off.PUBLIC_HOLIDAY" | translate }} · {{ holidayModel?.countryCode }}
   </div>
 
   <div class="info-card">
@@ -25,48 +31,17 @@
     </div>
   </div>
 
-  <div class="notes" *ngIf="timeOff.notes != null && timeOff.notes != ''">
+  <div class="notes" *ngIf="notes">
     <div class="notes-title">{{ "pages.time-off.NOTES" | translate }}</div>
-    <div class="notes-body">{{ timeOff.notes }}</div>
-  </div>
-
-  <div class="action-bar">
-    <app-button data-test="time-off-edit-button" style="margin-left: auto" icon="pen" [text]="'EDIT' | translate"
-      (onClick)="goToEdit()">
-    </app-button>
-  </div>
-</div>
-
-<div *ngIf="holidayModel" class="holiday-details" data-test="holiday-details">
-  <div class="header">
-    <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
-    <div class="title">{{ holidayModel.name }}</div>
-    <span *ngIf="isHolidayEdited" class="badge badge-edited">{{ "pages.time-off.EDITED" | translate }}</span>
-  </div>
-  <div class="provenance">{{ "pages.time-off.PUBLIC_HOLIDAY" | translate }} · {{ holidayModel.countryCode }}</div>
-
-  <div class="info-card">
-    <div class="info-row">
-      <fa-icon icon="calendar-days" [fixedWidth]="true"></fa-icon>
-      <div>{{ schedule }}</div>
-    </div>
-    <div class="info-row">
-      <fa-icon icon="clock" [fixedWidth]="true"></fa-icon>
-      <div>{{ time }}</div>
-    </div>
-  </div>
-
-  <div class="notes" *ngIf="holidayModel.notes">
-    <div class="notes-title">{{ "pages.time-off.NOTES" | translate }}</div>
-    <div class="notes-body">{{ holidayModel.notes }}</div>
+    <div class="notes-body">{{ notes }}</div>
   </div>
 
   <div *ngIf="isHolidayEdited" class="info-card changes-block" data-test="holiday-changes">
     <div class="changes-title">{{ "pages.time-off.CHANGED_FROM_ORIGINAL" | translate }}</div>
     <div class="changes-row" *ngIf="changedDate">
       <span class="changes-key">{{ "pages.time-off.DATE" | translate }}</span>
-      <span class="changes-old">{{ holidayModel.originalDate?.format("DD.MM.YYYY") }}</span> →
-      <span>{{ holidayModel.date?.format("DD.MM.YYYY") }}</span>
+      <span class="changes-old">{{ holidayModel?.originalDate?.format("DD.MM.YYYY") }}</span> →
+      <span>{{ holidayModel?.date?.format("DD.MM.YYYY") }}</span>
     </div>
     <div class="changes-row" *ngIf="changedTime">
       <span class="changes-key">{{ "pages.time-off.TIME" | translate }}</span>
@@ -78,9 +53,10 @@
   </div>
 
   <div class="action-bar">
-    <app-button [text]="'pages.time-off.REMOVE' | translate" icon="trash" color="danger" (onClick)="openRemoveDialog()"
-      data-test="holiday-remove" style="margin-left: auto"></app-button>
-    <app-button [text]="'EDIT' | translate" icon="pen" (onClick)="goToEditHoliday()"
-      data-test="holiday-edit"></app-button>
+    <app-button *ngIf="isHoliday" [text]="'pages.time-off.REMOVE' | translate" icon="trash" color="danger"
+      (onClick)="openRemoveDialog()" data-test="holiday-remove" style="margin-left: auto"></app-button>
+    <app-button [text]="'EDIT' | translate" icon="pen" (onClick)="edit()"
+      [attr.data-test]="isHoliday ? 'holiday-edit' : 'time-off-edit-button'"
+      [style.margin-left]="isHoliday ? null : 'auto'"></app-button>
   </div>
 </div>

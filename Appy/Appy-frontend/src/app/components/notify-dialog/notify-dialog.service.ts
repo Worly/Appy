@@ -24,10 +24,10 @@ export class NotifyDialogService {
         return [overlayRef, overlayRef.attach(new ComponentPortal(NotifyDialogComponent)).instance];
     }
 
-    public yesNoDialog(text: string): Observable<boolean> {
+    public yesNoDialog(text: string, opts?: { confirmDataTest?: string }): Observable<boolean> {
         return new Observable<boolean>(s => {
             let [overlayRef, dialog] = this.createDialog();
-            
+
             dialog.text = text;
             dialog.buttons = [
                 {
@@ -43,6 +43,7 @@ export class NotifyDialogService {
                     text: this.translateService.translate("YES"),
                     look: "solid",
                     color: "success",
+                    dataTest: opts?.confirmDataTest,
                     onClick: () => {
                         s.next(true),
                         overlayRef.dispose();
