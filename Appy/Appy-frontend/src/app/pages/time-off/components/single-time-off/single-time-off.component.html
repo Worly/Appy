@@ -31,8 +31,8 @@
   </div>
 
   <div class="action-bar">
-    <app-button data-test="time-off-edit-button" style="margin-left: auto" icon="pen"
-      [text]="'EDIT' | translate" (onClick)="goToEdit()">
+    <app-button data-test="time-off-edit-button" style="margin-left: auto" icon="pen" [text]="'EDIT' | translate"
+      (onClick)="goToEdit()">
     </app-button>
   </div>
 </div>
@@ -61,7 +61,7 @@
     <div class="notes-body">{{ holidayModel.notes }}</div>
   </div>
 
-  <div *ngIf="isHolidayEdited" class="changes-block" data-test="holiday-changes">
+  <div *ngIf="isHolidayEdited" class="info-card changes-block" data-test="holiday-changes">
     <div class="changes-title">{{ "pages.time-off.CHANGED_FROM_ORIGINAL" | translate }}</div>
     <div class="changes-row" *ngIf="changedDate">
       <span class="changes-key">{{ "pages.time-off.DATE" | translate }}</span>
@@ -72,38 +72,15 @@
       <span class="changes-key">{{ "pages.time-off.TIME" | translate }}</span>
       <span class="changes-old">{{ "pages.time-off.ALL_DAY" | translate }}</span> → <span>{{ time }}</span>
     </div>
-    <app-button class="revert-btn" look="transparent" icon="rotate-left"
-      [text]="'pages.time-off.REVERT_TO_ORIGINAL' | translate" (onClick)="revertDialog.open()" data-test="holiday-revert"></app-button>
+    <app-button class="revert-btn" look="transparent" icon="rotate-left" color="success"
+      [text]="'pages.time-off.REVERT_TO_ORIGINAL' | translate" (onClick)="openRevertDialog()"
+      data-test="holiday-revert"></app-button>
   </div>
 
   <div class="action-bar">
-    <app-button [text]="'pages.time-off.REMOVE' | translate" icon="trash" color="danger" (onClick)="removeDialog.open()" data-test="holiday-remove"></app-button>
-    <app-button [text]="'EDIT' | translate" icon="pen" (onClick)="goToEditHoliday()" data-test="holiday-edit"></app-button>
+    <app-button [text]="'pages.time-off.REMOVE' | translate" icon="trash" color="danger" (onClick)="openRemoveDialog()"
+      data-test="holiday-remove" style="margin-left: auto"></app-button>
+    <app-button [text]="'EDIT' | translate" icon="pen" (onClick)="goToEditHoliday()"
+      data-test="holiday-edit"></app-button>
   </div>
 </div>
-
-<app-dialog #revertDialog>
-  <div class="split-dialog" *ngIf="revertDialog.isOpen" data-test="holiday-revert-dialog">
-    <div class="split-hint">
-      <fa-icon [icon]="['fas', 'circle-info']"></fa-icon>
-      <span>{{ "pages.time-off.REVERT_CONFIRM" | translate }}</span>
-    </div>
-    <div class="split-actions">
-      <app-button [text]="'CANCEL' | translate" color="danger" look="normal" (onClick)="revertDialog.close()"></app-button>
-      <app-button [text]="'CONFIRM' | translate" color="success" look="solid" (onClick)="confirmRevert()" data-test="holiday-revert-confirm"></app-button>
-    </div>
-  </div>
-</app-dialog>
-
-<app-dialog #removeDialog>
-  <div class="split-dialog" *ngIf="removeDialog.isOpen" data-test="holiday-remove-dialog">
-    <div class="split-hint">
-      <fa-icon [icon]="['fas', 'circle-info']"></fa-icon>
-      <span>{{ "pages.time-off.REMOVE_CONFIRM" | translate }}</span>
-    </div>
-    <div class="split-actions">
-      <app-button [text]="'CANCEL' | translate" color="danger" look="normal" (onClick)="removeDialog.close()"></app-button>
-      <app-button [text]="'CONFIRM' | translate" color="success" look="solid" (onClick)="confirmRemove()" data-test="holiday-remove-confirm"></app-button>
-    </div>
-  </div>
-</app-dialog>

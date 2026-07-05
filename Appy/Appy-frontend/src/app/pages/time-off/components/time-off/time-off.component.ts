@@ -137,7 +137,7 @@ export class TimeOffComponent implements OnInit, OnDestroy {
     }
   }
 
-  public countryDisplay = (c: SupportedCountry): string => c?.name ?? "";
+  public countryDisplay = (c: SupportedCountry): string => c.countryCode + " - " + c.name;
 
   public configureAutoImport(): void {
     this.holidayService.getSettings().subscribe(s => {

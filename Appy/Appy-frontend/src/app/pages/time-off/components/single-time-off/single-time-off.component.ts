@@ -8,6 +8,7 @@ import { DialogComponent } from "src/app/components/dialog/dialog.component";
 import { TimeOffService } from "../../services/time-off.service";
 import { HolidayService } from "../../services/holiday.service";
 import { timeOffDayCountText, timeOffRecurringRangeText, timeOffScheduleText, timeOffTimeText } from "../../time-off-display";
+import { NotifyDialogService } from "src/app/components/notify-dialog/notify-dialog.service";
 
 @Component({
   selector: "app-single-time-off",
@@ -35,14 +36,11 @@ export class SingleTimeOffComponent implements OnDestroy {
   public dayCount: string = "";
   public time: string = "";
 
-  // Only active/edited holidays reach this view; removed ones open the container's restore dialog.
+  // Only active/edited holidays reach this view; removed ones open the restore dialog.
   public holidayModel?: Holiday;
   public isHolidayEdited = false;
   public changedDate = false;
   public changedTime = false;
-
-  @ViewChild("revertDialog") revertDialog?: DialogComponent;
-  @ViewChild("removeDialog") removeDialog?: DialogComponent;
 
   private _holiday?: Holiday;
   @Input() set holiday(value: Holiday | undefined) {
@@ -58,7 +56,8 @@ export class SingleTimeOffComponent implements OnDestroy {
     private translateService: TranslateService,
     private router: Router,
     private holidayService: HolidayService,
-  ) {}
+    private notifyDialogService: NotifyDialogService
+  ) { }
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
@@ -118,21 +117,27 @@ export class SingleTimeOffComponent implements OnDestroy {
     this.onDone.next();
   }
 
-  public confirmRevert(): void {
-    if (this._holiday == null) return;
-    this.holidayService.revert(this._holiday.id).subscribe(() => {
-      this.revertDialog?.close();
-      this.onChanged.next();
-      this.onDone.next();
+  public openRevertDialog(): void {
+    this.notifyDialogService.yesNoDialog(this.translateService.translate("pages.time-off.REVERT_CONFIRM")).subscribe((ok: boolean) => {
+      if (!ok) return;
+      if (this._holiday == null) return;
+
+      this.holidayService.revert(this._holiday.id).subscribe(() => {
+        this.onChanged.next();
+        this.onDone.next();
+      });
     });
   }
 
-  public confirmRemove(): void {
-    if (this._holiday == null) return;
-    this.holidayService.remove(this._holiday.id).subscribe(() => {
-      this.removeDialog?.close();
-      this.onChanged.next();
-      this.onDone.next();
+  public openRemoveDialog(): void {
+    this.notifyDialogService.yesNoDialog(this.translateService.translate("pages.time-off.REMOVE_CONFIRM")).subscribe((ok: boolean) => {
+      if (!ok) return;
+      if (this._holiday == null) return;
+
+      this.holidayService.remove(this._holiday.id).subscribe(() => {
+        this.onChanged.next();
+        this.onDone.next();
+      });
     });
   }
 }
