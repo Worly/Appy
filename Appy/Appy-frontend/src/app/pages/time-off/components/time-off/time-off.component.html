@@ -48,26 +48,10 @@
     (onDone)="detailsDialog.close()"></app-single-time-off>
 </app-dialog>
 
-<!-- Active/edited holidays open the details view; removed holidays open the restore dialog below. -->
+<!-- Every holiday (active, edited, or removed) opens the same details view; removed ones show a Restore action there. -->
 <app-dialog #holidayDetailsDialog>
   <app-single-time-off *ngIf="holidayDetailsDialog.isOpen" [holiday]="viewingHoliday"
     (onChanged)="loadHolidaysIfNeeded()" (onDone)="holidayDetailsDialog.close()"></app-single-time-off>
-</app-dialog>
-
-<app-dialog #restoreDialog>
-  <div class="configure-dialog" *ngIf="restoreDialog.isOpen && restoringHoliday" data-test="holiday-restore-dialog">
-    <div class="configure-title">{{ restoringHoliday.name }}</div>
-    <div class="configure-sub">{{ "pages.time-off.PUBLIC_HOLIDAY" | translate }} · {{ restoringHoliday.countryCode }} · {{ restoringHoliday.originalDate?.format("DD.MM.YYYY, dddd") }}</div>
-    <div class="split-hint">
-      <fa-icon [icon]="['fas', 'circle-info']" aria-hidden="true"></fa-icon>
-      <span>{{ "pages.time-off.RESTORE_CONFIRM" | translate }}</span>
-    </div>
-    <div class="configure-actions">
-      <app-button [text]="'CANCEL' | translate" color="danger" look="normal" (onClick)="restoreDialog.close()"></app-button>
-      <app-button [text]="'pages.time-off.RESTORE' | translate" color="success" look="solid"
-        (onClick)="confirmRestore()" data-test="holiday-restore-confirm"></app-button>
-    </div>
-  </div>
 </app-dialog>
 
 <app-dialog #configureDialog>

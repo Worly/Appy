@@ -37,7 +37,7 @@ describe("Holidays", () => {
     holidays.openRow("Nova Godina").remove();
 
     holidays.openTab();
-    holidays.openRemovedRow("Nova Godina").confirm();
+    holidays.openRemovedRow("Nova Godina").restore();
 
     holidays.openTab();
     holidays.openRow("Nova Godina").expectVisible();

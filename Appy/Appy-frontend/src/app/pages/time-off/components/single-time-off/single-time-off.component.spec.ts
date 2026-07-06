@@ -35,4 +35,20 @@ describe("SingleTimeOffComponent — holiday mode", () => {
 
     c.openRevertDialog();
   });
+
+  it("treats a removed holiday as removed, suppressing the edited treatment", () => {
+    const c = make({});
+    c.holiday = new Holiday({ id: 1, name: "New Year", countryCode: "HR", date: "2026-01-01", originalDate: "2026-01-01", isAllDay: true, isEdited: true, isRemoved: true });
+    expect(c.isHolidayRemoved).toBe(true);
+    expect(c.isHolidayEdited).toBe(false);
+  });
+
+  it("restores and emits onChanged", (done) => {
+    const restore = jasmine.createSpy("restore").and.returnValue(of(undefined));
+    const c = make({ restore }, { yesNoDialog: () => of(true) });
+    c.holiday = new Holiday({ id: 7, name: "x", countryCode: "HR", date: "2026-01-01", originalDate: "2026-01-01", isAllDay: true, isEdited: false, isRemoved: true });
+    c.onChanged.subscribe(() => { expect(restore).toHaveBeenCalledWith(7); done(); });
+
+    c.openRestoreDialog();
+  });
 });

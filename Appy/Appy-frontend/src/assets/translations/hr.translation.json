@@ -229,6 +229,7 @@
             "WEEKLY": "Tjedno",
             "MONTHLY": "Mjesečno",
             "RECURRING": "Ponavljajući",
+            "HOLIDAY": "Praznik",
             "HOLIDAYS": "Praznici",
             "CONFIGURE_AUTO_IMPORT": "Postavi automatski uvoz",
             "HOLIDAYS_EMPTY": "Nema uvezenih praznika",

@@ -24,6 +24,10 @@
     font-size: 1.4rem;
     font-weight: bold;
     word-break: break-word;
+
+    &.struck {
+      text-decoration: line-through;
+    }
   }
 }
 
@@ -72,6 +76,16 @@
   border-radius: 100px;
   background: rgba(var(--rgb-warning), 0.2);
   color: rgb(var(--rgb-warning));
+}
+
+.badge-removed {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 100px;
+  background: rgb(var(--rgb-input-background));
+  color: rgba(var(--rgb-text), 0.45);
 }
 
 .changes-block {

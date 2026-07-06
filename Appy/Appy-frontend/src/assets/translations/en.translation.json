@@ -229,6 +229,7 @@
             "WEEKLY": "Weekly",
             "MONTHLY": "Monthly",
             "RECURRING": "Recurring",
+            "HOLIDAY": "Holiday",
             "HOLIDAYS": "Holidays",
             "CONFIGURE_AUTO_IMPORT": "Configure auto-import",
             "HOLIDAYS_EMPTY": "No holidays imported",

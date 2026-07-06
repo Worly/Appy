@@ -219,8 +219,8 @@ export let holidays = {
   configureViaEmptyState() { getElement("holidays-configure-cta").click(); return holidayConfigure; },
   expectRowContains(text: string) { cy.get("[data-test=time-off-row]").should("contain", text); return this; },
   openRow(text: string) { cy.get("[data-test=time-off-row]").contains(text).click(); return holidayDetails; },
-  // A removed row opens the restore-confirm dialog directly (not the details view).
-  openRemovedRow(text: string) { cy.get("[data-test=time-off-row]").contains(text).click(); return holidayRestore; },
+  // A removed row opens the details view, where its only action is Restore.
+  openRemovedRow(text: string) { cy.get("[data-test=time-off-row]").contains(text).click(); return holidayDetails; },
 };
 
 // The country-configure dialog for the Holidays tab's auto-import setting.
@@ -237,13 +237,8 @@ export let holidayDetails = {
   expectNoChanges() { cy.get("[data-test=holiday-changes]").should("not.exist"); return this; },
   revert() { getElement("holiday-revert").click(); getElement("holiday-revert-confirm").click(); return this; },
   remove() { getElement("holiday-remove").click(); getElement("holiday-remove-confirm").click(); return this; },
+  restore() { getElement("holiday-restore").click(); getElement("holiday-restore-confirm").click(); return this; },
   edit() { getElement("holiday-edit").click(); return timeOffEdit; },
-};
-
-// The restore-confirmation dialog opened when a removed holiday row is clicked.
-export let holidayRestore = {
-  expectVisible() { getElement("holiday-restore-dialog").should("exist"); return this; },
-  confirm() { getElement("holiday-restore-confirm").click(); },
 };
 
 // Time-off as it surfaces inside the appointment views (badges/bands). Pair with the imported

@@ -38,7 +38,6 @@ export class TimeOffComponent implements OnInit, OnDestroy {
   public holidaysLoading: boolean = false;
   public holidaysLoadingMore: boolean = false;
   public viewingHoliday?: Holiday;
-  public restoringHoliday?: Holiday;
   private holidayPaged?: PagedResult<Holiday, never>;
   private holidaySub?: Subscription;
 
@@ -51,7 +50,6 @@ export class TimeOffComponent implements OnInit, OnDestroy {
   @ViewChild("holidayDetailsDialog") holidayDetailsDialog?: DialogComponent;
   @ViewChild("configureDialog") configureDialog?: DialogComponent;
   @ViewChild("confirmChangeDialog") confirmChangeDialog?: DialogComponent;
-  @ViewChild("restoreDialog") restoreDialog?: DialogComponent;
 
   private subs: Subscription[] = [];
 
@@ -180,16 +178,7 @@ export class TimeOffComponent implements OnInit, OnDestroy {
   }
 
   public onHolidayRowClick(h: Holiday): void {
-    if (h.isRemoved) { this.restoringHoliday = h; this.restoreDialog?.open(); return; }
     this.viewingHoliday = h;
     this.holidayDetailsDialog?.open();
-  }
-
-  public confirmRestore(): void {
-    if (this.restoringHoliday == null) return;
-    this.holidayService.restore(this.restoringHoliday.id).subscribe(() => {
-      this.restoreDialog?.close();
-      this.loadHolidaysIfNeeded();
-    });
   }
 }

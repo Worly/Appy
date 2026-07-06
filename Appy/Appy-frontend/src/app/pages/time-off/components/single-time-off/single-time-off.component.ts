@@ -35,7 +35,6 @@ export class SingleTimeOffComponent implements OnDestroy {
   public dayCount: string = "";
   public time: string = "";
 
-  // Only active/edited holidays reach this view; removed ones open the restore dialog.
   public holidayModel?: Holiday;
   public isHolidayEdited = false;
   public changedDate = false;
@@ -49,6 +48,7 @@ export class SingleTimeOffComponent implements OnDestroy {
   get holiday(): Holiday | undefined { return this._holiday; }
 
   public get isHoliday(): boolean { return this.holidayModel != null; }
+  public get isHolidayRemoved(): boolean { return this.holidayModel?.isRemoved === true; }
   public get title(): string { return this.holidayModel?.name ?? this.timeOff?.label ?? ""; }
   public get notes(): string | undefined { return this.holidayModel?.notes ?? this.timeOff?.notes; }
 
@@ -69,7 +69,8 @@ export class SingleTimeOffComponent implements OnDestroy {
   private applyHoliday(h: Holiday): void {
     this._holiday = h;
     this.holidayModel = h;
-    this.isHolidayEdited = h.isEdited;
+    // A removed holiday shows only its Restore action — never the edited badge, changes block, or Revert.
+    this.isHolidayEdited = h.isEdited && !h.isRemoved;
     this.changedDate = h.date != null && h.originalDate != null && !h.date.isSame(h.originalDate, "date");
     this.changedTime = !h.isAllDay;
     // Build via DTO constructor so property setters (which trigger validation) fire only once, after initProperties.
@@ -134,6 +135,10 @@ export class SingleTimeOffComponent implements OnDestroy {
 
   public openRemoveDialog(): void {
     this.confirmHolidayAction("pages.time-off.REMOVE_CONFIRM", "holiday-remove-confirm", id => this.holidayService.remove(id));
+  }
+
+  public openRestoreDialog(): void {
+    this.confirmHolidayAction("pages.time-off.RESTORE_CONFIRM", "holiday-restore-confirm", id => this.holidayService.restore(id));
   }
 
   private confirmHolidayAction(confirmKey: string, confirmDataTest: string, action: (id: number) => Observable<void>): void {
