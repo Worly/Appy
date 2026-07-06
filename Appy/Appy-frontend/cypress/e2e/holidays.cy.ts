@@ -1,5 +1,5 @@
 import { login } from "../support/commands";
-import { holidays, holidayConfigure } from "./pages/time-off";
+import { holidays, holidayConfigure, timeOff } from "./pages/time-off";
 
 describe("Holidays", () => {
   beforeEach(() => login("appointments"));
@@ -10,6 +10,14 @@ describe("Holidays", () => {
 
     holidays.openTab();
     holidays.expectRowContains("Nova Godina"); // New Year's Day (01.01), deterministic
+  });
+
+  it("keeps imported holidays out of the one-off time-off list", () => {
+    holidays.openTab().configureViaEmptyState();
+    holidayConfigure.selectCountry("Croatia").import();
+
+    timeOff.visit(); // defaults to the One-off tab
+    timeOff.list().expectNoRow("Nova Godina");
   });
 
   it("edits a holiday's time, shows the Changes block, then reverts", () => {

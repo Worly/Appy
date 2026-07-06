@@ -47,7 +47,8 @@ namespace Appy.Services
             var today = DateOnly.FromDateTime(DateTime.Today);
 
             // Filter to the requested tab + scope on the DB so we never load the whole table.
-            var query = context.TimeOffs.Where(t => t.FacilityId == facilityId);
+            // Imported holidays live on the dedicated Holidays tab, so they never surface here.
+            var query = context.TimeOffs.Where(t => t.FacilityId == facilityId && t.ImportedHolidayId == null);
             query = type == TimeOffListType.OneOff
                 ? query.Where(t => t.Recurrence == TimeOffRecurrence.OneOff)
                 : query.Where(t => t.Recurrence != TimeOffRecurrence.OneOff);

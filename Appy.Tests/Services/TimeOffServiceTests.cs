@@ -529,6 +529,18 @@ namespace Appy.Tests.Services
         }
 
         [Fact]
+        public async Task GetList_OneOff_ExcludesImportedHolidays()
+        {
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            Seed(new TimeOff { Id = 1, Recurrence = TimeOffRecurrence.OneOff, StartDate = today.AddDays(-5), EndDate = today.AddDays(10) });
+            Seed(new TimeOff { Id = 2, Recurrence = TimeOffRecurrence.OneOff, StartDate = today, EndDate = today, ImportedHolidayId = 99 }); // imported holiday
+
+            var page = await service.GetList(TimeOffListType.OneOff, TimeOffScope.Active, 0, 20, FacilityId);
+
+            Assert.Equal(new[] { 1 }, page.Select(t => t.Id).ToArray()); // imported holiday excluded
+        }
+
+        [Fact]
         public async Task GetList_AppliesSkipAndTake()
         {
             var today = DateOnly.FromDateTime(DateTime.Today);
