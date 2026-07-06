@@ -57,7 +57,7 @@
 <app-dialog #restoreDialog>
   <div class="configure-dialog" *ngIf="restoreDialog.isOpen && restoringHoliday" data-test="holiday-restore-dialog">
     <div class="configure-title">{{ restoringHoliday.name }}</div>
-    <div class="configure-sub">{{ "pages.time-off.PUBLIC_HOLIDAY" | translate }} · {{ restoringHoliday.countryCode }} · {{ restoringHoliday.originalDate?.format("DD.MM.YYYY") }}</div>
+    <div class="configure-sub">{{ "pages.time-off.PUBLIC_HOLIDAY" | translate }} · {{ restoringHoliday.countryCode }} · {{ restoringHoliday.originalDate?.format("DD.MM.YYYY, dddd") }}</div>
     <div class="split-hint">
       <fa-icon [icon]="['fas', 'circle-info']" aria-hidden="true"></fa-icon>
       <span>{{ "pages.time-off.RESTORE_CONFIRM" | translate }}</span>

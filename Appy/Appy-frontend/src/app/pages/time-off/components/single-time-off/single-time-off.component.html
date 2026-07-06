@@ -40,8 +40,8 @@
     <div class="changes-title">{{ "pages.time-off.CHANGED_FROM_ORIGINAL" | translate }}</div>
     <div class="changes-row" *ngIf="changedDate">
       <span class="changes-key">{{ "pages.time-off.DATE" | translate }}</span>
-      <span class="changes-old">{{ holidayModel?.originalDate?.format("DD.MM.YYYY") }}</span> →
-      <span>{{ holidayModel?.date?.format("DD.MM.YYYY") }}</span>
+      <span class="changes-old">{{ holidayModel?.originalDate?.format("DD.MM.YYYY, dddd") }}</span> →
+      <span>{{ holidayModel?.date?.format("DD.MM.YYYY, dddd") }}</span>
     </div>
     <div class="changes-row" *ngIf="changedTime">
       <span class="changes-key">{{ "pages.time-off.TIME" | translate }}</span>

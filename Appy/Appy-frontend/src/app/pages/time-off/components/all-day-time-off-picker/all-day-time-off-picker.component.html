@@ -3,7 +3,7 @@
     <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
     <div class="all-day-heading">
       <div class="all-day-title">{{ "pages.time-off.ALL_DAY_TIME_OFF" | translate }}</div>
-      <div class="all-day-date" *ngIf="date">{{ date.format("dddd, DD.MM.YYYY") }}</div>
+      <div class="all-day-date" *ngIf="date">{{ date.format("DD.MM.YYYY, dddd") }}</div>
     </div>
   </div>
   <div class="all-day-rows">

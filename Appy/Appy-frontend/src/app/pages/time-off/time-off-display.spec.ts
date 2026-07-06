@@ -16,7 +16,7 @@ describe("time-off-display", () => {
     t.recurrence = TimeOffRecurrence.OneOff;
     t.startDate = dayjs("2026-01-02");
     t.endDate = dayjs("2026-01-05");
-    expect(timeOffScheduleText(t, tr)).toBe("02.01.2026 – 05.01.2026");
+    expect(timeOffScheduleText(t, tr)).toBe("02.01.2026, Friday – 05.01.2026, Monday");
   });
 
   it("shows a single date when a one-off starts and ends on the same day", () => {
@@ -24,7 +24,7 @@ describe("time-off-display", () => {
     t.recurrence = TimeOffRecurrence.OneOff;
     t.startDate = dayjs("2026-01-02");
     t.endDate = dayjs("2026-01-02");
-    expect(timeOffScheduleText(t, tr)).toBe("02.01.2026");
+    expect(timeOffScheduleText(t, tr)).toBe("02.01.2026, Friday");
   });
 
   it("formats a weekly schedule", () => {
@@ -75,7 +75,7 @@ describe("time-off-display", () => {
     t.dayOfWeek = DayOfWeek.Monday;
     t.startDate = dayjs("2026-06-22");
     t.endDate = dayjs("2026-12-31");
-    expect(timeOffRecurringRangeText(t, tr)).toBe("22.06.2026 – 31.12.2026");
+    expect(timeOffRecurringRangeText(t, tr)).toBe("22.06.2026, Monday – 31.12.2026, Thursday");
   });
 
   it("shows an open-ended recurring rule's effective range as From <date>", () => {
@@ -83,7 +83,7 @@ describe("time-off-display", () => {
     t.recurrence = TimeOffRecurrence.Weekly;
     t.dayOfWeek = DayOfWeek.Monday;
     t.startDate = dayjs("2026-06-22");
-    expect(timeOffRecurringRangeText(t, tr)).toBe("pages.time-off.FROM_DATE 22.06.2026");
+    expect(timeOffRecurringRangeText(t, tr)).toBe("pages.time-off.FROM_DATE 22.06.2026, Monday");
   });
 
   it("has no effective range for one-offs (their schedule already is the date range)", () => {
