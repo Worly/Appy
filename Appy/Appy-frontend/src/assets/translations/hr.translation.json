@@ -233,6 +233,7 @@
             "HOLIDAYS": "Praznici",
             "CONFIGURE_AUTO_IMPORT": "Postavi automatski uvoz",
             "HOLIDAYS_EMPTY": "Nema uvezenih praznika",
+            "HOLIDAYS_EMPTY_HISTORY": "Nema praznika u povijesti",
             "HOLIDAYS_CONFIGURE_CTA": "Postavi",
             "CONFIGURE_SUB": "Državni praznici odabrane zemlje dodaju se kao slobodni dani i ažuriraju svake godine.",
             "COUNTRY": "Država",

@@ -217,6 +217,8 @@ export let holidays = {
   openTab() { timeOff.visit(); getElement("time-off-tab-holidays").click(); return this; },
   configure() { getElement("time-off-configure-import").click(); return holidayConfigure; },
   configureViaEmptyState() { getElement("holidays-configure-cta").click(); return holidayConfigure; },
+  expectEmpty() { getElement("holidays-empty").should("exist"); return this; },
+  expectNoConfigureCTA() { cy.get("[data-test=holidays-configure-cta]").should("not.exist"); return this; },
   expectRowContains(text: string) { cy.get("[data-test=time-off-row]").should("contain", text); return this; },
   openRow(text: string) { cy.get("[data-test=time-off-row]").contains(text).click(); return holidayDetails; },
   // A removed row opens the details view, where its only action is Restore.

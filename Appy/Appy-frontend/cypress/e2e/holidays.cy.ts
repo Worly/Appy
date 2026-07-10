@@ -12,6 +12,12 @@ describe("Holidays", () => {
     holidays.expectRowContains("Nova Godina"); // New Year's Day (01.01), deterministic
   });
 
+  it("offers no configure CTA on the empty holiday history", () => {
+    holidays.openTab();
+    timeOff.openScope("history"); // fresh seed: no holidays in history
+    holidays.expectEmpty().expectNoConfigureCTA();
+  });
+
   it("keeps imported holidays out of the one-off time-off list", () => {
     holidays.openTab().configureViaEmptyState();
     holidayConfigure.selectCountry("Croatia").import();

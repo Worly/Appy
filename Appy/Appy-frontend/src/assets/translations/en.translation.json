@@ -233,6 +233,7 @@
             "HOLIDAYS": "Holidays",
             "CONFIGURE_AUTO_IMPORT": "Configure auto-import",
             "HOLIDAYS_EMPTY": "No holidays imported",
+            "HOLIDAYS_EMPTY_HISTORY": "No holidays in history",
             "HOLIDAYS_CONFIGURE_CTA": "Configure",
             "CONFIGURE_SUB": "Public holidays for the chosen country are added as time-off and kept up to date each year.",
             "COUNTRY": "Country",

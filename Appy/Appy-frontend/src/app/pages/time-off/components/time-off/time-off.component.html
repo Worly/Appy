@@ -30,9 +30,17 @@
 
     <div *ngIf="!holidaysLoading && holidays.length === 0" class="holidays-empty" data-test="holidays-empty">
       <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
-      <div>{{ "pages.time-off.HOLIDAYS_EMPTY" | translate }}</div>
-      <app-button color="success" look="solid" [text]="'pages.time-off.HOLIDAYS_CONFIGURE_CTA' | translate"
-        (onClick)="configureAutoImport()" data-test="holidays-configure-cta"></app-button>
+
+      <!-- History has no configure CTA: importing only ever fills upcoming dates, never the past. -->
+      <ng-container *ngIf="scope === 'History'">
+        <div>{{ "pages.time-off.HOLIDAYS_EMPTY_HISTORY" | translate }}</div>
+      </ng-container>
+
+      <ng-container *ngIf="scope !== 'History'">
+        <div>{{ "pages.time-off.HOLIDAYS_EMPTY" | translate }}</div>
+        <app-button color="success" look="solid" [text]="'pages.time-off.HOLIDAYS_CONFIGURE_CTA' | translate"
+          (onClick)="configureAutoImport()" data-test="holidays-configure-cta"></app-button>
+      </ng-container>
     </div>
 
     <app-single-time-off-list-item *ngFor="let h of holidays" [holiday]="h"
