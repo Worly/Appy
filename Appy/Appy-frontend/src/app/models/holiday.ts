@@ -5,7 +5,7 @@ import dayjs, { Dayjs } from "dayjs";
 export interface HolidayListDTO {
   id: number;
   name: string;
-  date?: string;
+  date: string;
   isAllDay: boolean;
   timeFrom?: string;
   timeTo?: string;
@@ -16,7 +16,7 @@ export interface HolidayListDTO {
 export class HolidayListItem {
   public id: number;
   public name: string;
-  public date?: Dayjs;
+  public date: Dayjs;
   public isAllDay: boolean;
   public timeFrom?: Dayjs;
   public timeTo?: Dayjs;
@@ -29,7 +29,7 @@ export class HolidayListItem {
   constructor(dto: HolidayListDTO) {
     this.id = dto.id;
     this.name = dto.name;
-    this.date = dto.date ? dayjs(dto.date, "YYYY-MM-DD") : undefined;
+    this.date = dayjs(dto.date, "YYYY-MM-DD");
     this.isAllDay = dto.isAllDay;
     this.timeFrom = dto.timeFrom ? dayjs(dto.timeFrom, "HH:mm:ss") : undefined;
     this.timeTo = dto.timeTo ? dayjs(dto.timeTo, "HH:mm:ss") : undefined;
@@ -44,20 +44,20 @@ export interface HolidayDTO {
   id: number;
   name: string;
   countryCode: string;
-  date?: string;
+  date: string;
 }
 
 export class Holiday {
   public id: number;
   public name: string;
   public countryCode: string;
-  public date?: Dayjs;
+  public date: Dayjs;
 
   constructor(dto: HolidayDTO) {
     this.id = dto.id;
     this.name = dto.name;
     this.countryCode = dto.countryCode;
-    this.date = dto.date ? dayjs(dto.date, "YYYY-MM-DD") : undefined;
+    this.date = dayjs(dto.date, "YYYY-MM-DD");
   }
 }
 

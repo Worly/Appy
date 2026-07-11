@@ -24,7 +24,7 @@ describe("TimeOffComponent — configure change gate", () => {
     const c = make();
     (c as any).settings = new HolidayImportSettings({ countryCode: "HR" });
     c.selectedCountryCode = "SI";
-    c.holidayRows = [{ holiday: new HolidayListItem({ id: 1, name: "x", isAllDay: true, isEdited: false, linkedTimeOffId: 1 }), view: {} as any }];
+    c.holidayRows = [{ holiday: new HolidayListItem({ id: 1, name: "x", date: "2026-01-01", isAllDay: true, isEdited: false, linkedTimeOffId: 1 }), view: {} as any }];
     const configure = { close: jasmine.createSpy("close") };
     const confirm = { open: jasmine.createSpy("open") };
     (c as any).configureDialog = configure; (c as any).confirmChangeDialog = confirm;

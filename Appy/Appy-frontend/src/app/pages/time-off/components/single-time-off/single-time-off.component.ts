@@ -83,7 +83,7 @@ export class SingleTimeOffComponent implements OnDestroy {
         // A holiday is a single day, so no multi-day count. Edited = the TimeOff differs from the
         // original snapshot (a different date, or not all-day).
         this.dayCount = "";
-        this.changedDate = t.startDate != null && t.holiday.date != null && !t.startDate.isSame(t.holiday.date, "date");
+        this.changedDate = t.startDate != null && !t.startDate.isSame(t.holiday.date, "date");
         this.changedTime = !t.isAllDay;
         this.isHolidayEdited = this.changedDate || this.changedTime;
       } else {

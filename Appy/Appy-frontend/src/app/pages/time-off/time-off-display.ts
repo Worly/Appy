@@ -94,12 +94,12 @@ function isPluralOne(count: number, languageCode: string): boolean {
  * the full Holiday or the lean HolidayListItem — only its date/time fields matter here. Built via the
  * DTO constructor so the model's validating setters fire once, after initProperties.
  */
-export function holidayAsTimeOff(h: { date?: Dayjs; isAllDay: boolean; timeFrom?: Dayjs; timeTo?: Dayjs }): TimeOff {
+export function holidayAsTimeOff(h: { date: Dayjs; isAllDay: boolean; timeFrom?: Dayjs; timeTo?: Dayjs }): TimeOff {
   return new TimeOff({
     id: 0,
     recurrence: TimeOffRecurrence.OneOff,
-    startDate: h.date?.format("YYYY-MM-DD"),
-    endDate: h.date?.format("YYYY-MM-DD"),
+    startDate: h.date.format("YYYY-MM-DD"),
+    endDate: h.date.format("YYYY-MM-DD"),
     isAllDay: h.isAllDay,
     timeFrom: h.timeFrom?.format("HH:mm:ss"),
     timeTo: h.timeTo?.format("HH:mm:ss"),

@@ -15,6 +15,6 @@ describe("Holiday model", () => {
     expect(h.id).toBe(5);
     expect(h.name).toBe("Nova godina");
     expect(h.countryCode).toBe("HR");
-    expect(h.date!.format("YYYY-MM-DD")).toBe("2026-04-06");
+    expect(h.date.format("YYYY-MM-DD")).toBe("2026-04-06");
   });
 });
