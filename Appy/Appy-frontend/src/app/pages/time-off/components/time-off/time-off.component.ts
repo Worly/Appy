@@ -9,8 +9,15 @@ import { SegmentedOption } from "src/app/components/segmented-control/segmented-
 import { DialogComponent } from "src/app/components/dialog/dialog.component";
 import { PagedResult } from "src/app/shared/services/data/contracts";
 import { HolidayService } from "../../services/holiday.service";
+import { TranslateService } from "src/app/components/translate/translate.service";
+import { TimeOffRowView, holidayRowView } from "../../time-off-display";
 
 type TimeOffTab = "OneOff" | "Recurring" | "Holidays";
+
+interface HolidayRow {
+  holiday: HolidayListItem;
+  view: TimeOffRowView;
+}
 
 @Component({
   selector: "app-time-off",
@@ -34,7 +41,7 @@ export class TimeOffComponent implements OnInit, OnDestroy {
   ];
 
   // Holidays tab state
-  public holidays: HolidayListItem[] = [];
+  public holidayRows: HolidayRow[] = [];
   public holidaysLoading: boolean = false;
   public holidaysLoadingMore: boolean = false;
   public viewingRemovedHolidayId?: number;
@@ -60,6 +67,7 @@ export class TimeOffComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private holidayService: HolidayService,
     private changeDetector: ChangeDetectorRef,
+    private translateService: TranslateService,
   ) {}
 
   ngOnInit(): void {
@@ -113,12 +121,14 @@ export class TimeOffComponent implements OnInit, OnDestroy {
   public loadHolidaysIfNeeded(): void {
     if (!this.isHolidays) return;
     this.holidaySub?.unsubscribe();
-    this.holidays = [];
+    this.holidayRows = [];
     this.holidaysLoading = true;
     this.holidayPaged = this.holidayService.getList(this.scope);
     this.holidaySub = new Subscription();
     this.holidaySub.add(this.holidayPaged.items$.subscribe(items => {
-      this.holidays = items;
+      const tr = (k: string) => this.translateService.translate(k);
+      const lang = this.translateService.getSelectedLanguageCode();
+      this.holidayRows = items.map(h => ({ holiday: h, view: holidayRowView(h, tr, lang) }));
       setTimeout(() => this.checkShouldLoad());
     }));
     this.holidaySub.add(this.holidayPaged.loading$.subscribe(l => this.holidaysLoading = l));
@@ -155,7 +165,7 @@ export class TimeOffComponent implements OnInit, OnDestroy {
 
   public confirmConfigure(): void {
     const changing = this.selectedCountryCode !== this.settings?.countryCode;
-    const hasImported = this.holidays.length > 0;
+    const hasImported = this.holidayRows.length > 0;
     if (changing && hasImported && this.settings?.countryCode != null) {
       this.configureDialog?.close();
       this.confirmChangeDialog?.open();

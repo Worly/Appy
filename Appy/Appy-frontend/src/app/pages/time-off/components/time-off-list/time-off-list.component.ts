@@ -3,6 +3,13 @@ import { Subscription } from "rxjs";
 import { TimeOff, TimeOffListType, TimeOffScope } from "src/app/models/time-off";
 import { PagedResult } from "src/app/shared/services/data/contracts";
 import { TimeOffService } from "../../services/time-off.service";
+import { TranslateService } from "src/app/components/translate/translate.service";
+import { TimeOffRowView, timeOffRowView } from "../../time-off-display";
+
+interface TimeOffRow {
+  id: number;
+  view: TimeOffRowView;
+}
 
 @Component({
   selector: "app-time-off-list",
@@ -14,7 +21,7 @@ export class TimeOffListComponent implements OnChanges, OnDestroy {
   @Input() scope!: TimeOffScope;
   @Output() openDetails: EventEmitter<number> = new EventEmitter();
 
-  public items: TimeOff[] = [];
+  public rows: TimeOffRow[] = [];
   // Initial anchor load (no data yet) drives the full loader; loadingMore drives the bottom spinner
   // for subsequent pages. They're distinct because the seam emits an empty page while still pending.
   public loading: boolean = true;
@@ -27,6 +34,7 @@ export class TimeOffListComponent implements OnChanges, OnDestroy {
   constructor(
     private timeOffService: TimeOffService,
     private changeDetector: ChangeDetectorRef,
+    private translateService: TranslateService,
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -45,12 +53,14 @@ export class TimeOffListComponent implements OnChanges, OnDestroy {
 
   private load(): void {
     this.teardown();
-    this.items = [];
+    this.rows = [];
     this.loading = true;
     this.pagedResult = this.timeOffService.getList(this.type, this.scope);
 
     this.subs.push(this.pagedResult.items$.subscribe(items => {
-      this.items = items;
+      const tr = (k: string) => this.translateService.translate(k);
+      const lang = this.translateService.getSelectedLanguageCode();
+      this.rows = items.map(t => ({ id: t.id, view: timeOffRowView(t, tr, lang) }));
       // After a render, top up if the first page didn't fill the viewport.
       setTimeout(() => this.checkShouldLoad());
     }));

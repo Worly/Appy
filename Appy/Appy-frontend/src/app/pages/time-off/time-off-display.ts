@@ -1,5 +1,6 @@
 import { Dayjs } from "dayjs";
 import { TimeOff, TimeOffRecurrence } from "src/app/models/time-off";
+import { HolidayListItem } from "src/app/models/holiday";
 import { DayOfWeek } from "src/app/models/working-hours";
 
 const DAY_OF_WEEK_KEYS: Record<DayOfWeek, string> = {
@@ -110,6 +111,42 @@ export function timeOffTimeText(t: TimeOff, translate: (key: string) => string):
   return t.isAllDay
     ? translate("pages.time-off.ALL_DAY")
     : `${t.timeFrom?.format("HH:mm") ?? ""} – ${t.timeTo?.format("HH:mm") ?? ""}`;
+}
+
+// The flattened view a list row renders — the single shape both a TimeOff and a Holiday collapse to,
+// so the row component stays purely presentational and unaware of which one it came from.
+export interface TimeOffRowView {
+  label: string;
+  schedule: string;
+  dateRange: string;
+  time: string;
+  badge: "none" | "edited" | "removed";
+  removed: boolean;
+}
+
+/** Row view for a time-off rule (One-off / Recurring lists) — never edited/removed (those are holiday-only badges). */
+export function timeOffRowView(t: TimeOff, translate: (key: string) => string, languageCode: string = "en"): TimeOffRowView {
+  return {
+    label: t.label ?? "",
+    schedule: timeOffScheduleText(t, translate, languageCode),
+    dateRange: timeOffRecurringRangeText(t, translate),
+    time: timeOffTimeText(t, translate),
+    badge: "none",
+    removed: false,
+  };
+}
+
+/** Row view for a holiday (Holidays tab) — a single-day projection, carrying its edited/removed badge. */
+export function holidayRowView(h: HolidayListItem, translate: (key: string) => string, languageCode: string = "en"): TimeOffRowView {
+  const proj = holidayAsTimeOff(h);
+  return {
+    label: h.name,
+    schedule: timeOffScheduleText(proj, translate, languageCode),
+    dateRange: "",
+    time: timeOffTimeText(proj, translate),
+    badge: h.isRemoved ? "removed" : (h.isEdited ? "edited" : "none"),
+    removed: h.isRemoved,
+  };
 }
 
 /**

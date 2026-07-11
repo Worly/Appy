@@ -28,7 +28,7 @@
   <ng-container *ngIf="isHolidays">
     <app-loading *ngIf="holidaysLoading"></app-loading>
 
-    <div *ngIf="!holidaysLoading && holidays.length === 0" class="holidays-empty" data-test="holidays-empty">
+    <div *ngIf="!holidaysLoading && holidayRows.length === 0" class="holidays-empty" data-test="holidays-empty">
       <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
 
       <!-- History has no configure CTA: importing only ever fills upcoming dates, never the past. -->
@@ -43,8 +43,8 @@
       </ng-container>
     </div>
 
-    <app-single-time-off-list-item *ngFor="let h of holidays" [holiday]="h"
-      (onOpenView)="onHolidayRowClick(h)">
+    <app-single-time-off-list-item *ngFor="let row of holidayRows" [view]="row.view"
+      (onOpenView)="onHolidayRowClick(row.holiday)">
     </app-single-time-off-list-item>
 
     <div class="loading-more" *ngIf="holidaysLoadingMore"><app-loading [hasShadow]="false"></app-loading></div>

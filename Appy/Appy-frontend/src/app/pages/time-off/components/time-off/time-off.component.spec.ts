@@ -3,8 +3,9 @@ import { TimeOffComponent } from "./time-off.component";
 import { HolidayImportSettings, HolidayListItem } from "src/app/models/holiday";
 
 function make(holidayService?: any): TimeOffComponent {
-  // (Router, Location, ActivatedRoute, HolidayService, ChangeDetectorRef)
-  return new TimeOffComponent(null as any, null as any, null as any, holidayService ?? null as any, null as any);
+  // (Router, Location, ActivatedRoute, HolidayService, ChangeDetectorRef, TranslateService)
+  const translate = { translate: (k: string) => k, getSelectedLanguageCode: () => "en" };
+  return new TimeOffComponent(null as any, null as any, null as any, holidayService ?? null as any, null as any, translate as any);
 }
 
 function makeHolidayServiceStub() {
@@ -23,7 +24,7 @@ describe("TimeOffComponent — configure change gate", () => {
     const c = make();
     (c as any).settings = new HolidayImportSettings({ countryCode: "HR" });
     c.selectedCountryCode = "SI";
-    c.holidays = [new HolidayListItem({ id: 1, name: "x", isAllDay: true, isEdited: false, linkedTimeOffId: 1 })];
+    c.holidayRows = [{ holiday: new HolidayListItem({ id: 1, name: "x", isAllDay: true, isEdited: false, linkedTimeOffId: 1 }), view: {} as any }];
     const configure = { close: jasmine.createSpy("close") };
     const confirm = { open: jasmine.createSpy("open") };
     (c as any).configureDialog = configure; (c as any).confirmChangeDialog = confirm;
@@ -39,7 +40,7 @@ describe("TimeOffComponent — configure change gate", () => {
     const c = make();
     (c as any).settings = new HolidayImportSettings({ countryCode: undefined });
     c.selectedCountryCode = "HR";
-    c.holidays = [];
+    c.holidayRows = [];
     const saveSpy = spyOn(c, "saveSettings");
 
     c.confirmConfigure();
