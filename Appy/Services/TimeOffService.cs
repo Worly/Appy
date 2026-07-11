@@ -36,7 +36,9 @@ namespace Appy.Services
 
         public async Task<TimeOff> GetById(int id, int facilityId)
         {
-            var t = await context.TimeOffs.FirstOrDefaultAsync(t => t.Id == id && t.FacilityId == facilityId);
+            var t = await context.TimeOffs
+                .Include(t => t.ImportedHoliday)
+                .FirstOrDefaultAsync(t => t.Id == id && t.FacilityId == facilityId);
             if (t == null)
                 throw new NotFoundException();
             return t;

@@ -6,7 +6,7 @@ Plain C# records used to transfer data across the HTTP boundary. No business log
 
 - **Request DTOs**: named after the action (e.g. `LogInDTO`, `AppointmentEditDTO`)
 - **Response DTOs**: named with `View` or `Response` suffix (e.g. `AppointmentViewDTO`, `LogInResponseDTO`)
-- **Time-off DTOs**: `TimeOffDTO` represents the recurrence rule (CRUD); `TimeOffOccurrenceDTO` represents a single expanded on-date instance (views) and carries an `Id` (the source `TimeOff` rule's id), used by the frontend to dedupe occurrences that repeat across page boundaries. It also exposes `ToInterval()` — the one shared mapping from an occurrence to the blocked `(From, To)` wall-clock span (all-day → whole day) — reused by both the appointment free-time controller and `AppointmentService`
+- **Time-off DTOs**: `TimeOffDTO` represents the recurrence rule (CRUD); when the rule is a materialized imported holiday it also carries the full `Holiday` (a `HolidayDTO`, populated only where the `ImportedHoliday` nav is loaded — e.g. `get/{id}`), so the frontend details view needs no second fetch. `TimeOffOccurrenceDTO` represents a single expanded on-date instance (views) and carries an `Id` (the source `TimeOff` rule's id), used by the frontend to dedupe occurrences that repeat across page boundaries. It also exposes `ToInterval()` — the one shared mapping from an occurrence to the blocked `(From, To)` wall-clock span (all-day → whole day) — reused by both the appointment free-time controller and `AppointmentService`
 
 ## Separation from Domain Entities
 
@@ -34,5 +34,5 @@ Envelope returned by `GET /appointment/getList`. Contains `Appointments` (the pa
 ## Holiday DTOs
 
 - `HolidayImportSettingsDTO` — `{ CountryCode? }`: settings snapshot returned by get/save settings endpoints. Produced by `HolidayImportSettings.GetDTO()`.
-- `HolidayDTO` — full holiday view: `Id`, `Name`, `CountryCode`, `Date` (effective), `OriginalDate` (provider date), `IsAllDay`, `TimeFrom?`, `TimeTo?`, `Notes?`, `IsEdited`, `IsRemoved`. Used by the holiday list endpoint (Task 4).
+- `HolidayDTO` — full holiday view: `Id`, `Name`, `CountryCode`, `Date` (effective), `OriginalDate` (provider date), `IsAllDay`, `TimeFrom?`, `TimeTo?`, `Notes?`, `IsEdited`, `IsRemoved`. Built by `ImportedHoliday.GetDTO(TimeOff?)`. Used by the holiday list/get endpoints and embedded in `TimeOffDTO.Holiday`.
 - `HolidayEditDTO` — request body for editing a holiday's time/notes: `Date`, `IsAllDay`, `TimeFrom?`, `TimeTo?`, `Notes?` (Task 5).

@@ -106,9 +106,7 @@ export class SingleTimeOffComponent implements OnDestroy {
       this.time = timeOffTimeText(t, tr);
       this.isLoading = false;
 
-      if (t.importedHolidayId != null) {
-        this.holidayService.getById(t.importedHolidayId).subscribe(h => this.applyHoliday(h));
-      }
+      if (t.holiday != null) this.applyHoliday(t.holiday);
     });
   }
 

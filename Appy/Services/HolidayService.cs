@@ -180,7 +180,7 @@ namespace Appy.Services
             var dtos = holidays.Select(h =>
             {
                 timeOffByHolidayId.TryGetValue(h.Id, out var t);
-                return BuildHolidayDTO(h, t);
+                return h.GetDTO(t);
             });
 
             dtos = scope == TimeOffScope.Active
@@ -200,25 +200,7 @@ namespace Appy.Services
             var timeOff = await context.TimeOffs
                 .FirstOrDefaultAsync(t => t.ImportedHolidayId == importedHolidayId && t.FacilityId == facilityId);
 
-            return BuildHolidayDTO(holiday, timeOff);
-        }
-
-        private static HolidayDTO BuildHolidayDTO(ImportedHoliday h, TimeOff? t)
-        {
-            return new HolidayDTO
-            {
-                Id = h.Id,
-                Name = h.Name,
-                CountryCode = h.CountryCode,
-                Date = t?.StartDate ?? h.Date,
-                OriginalDate = h.Date,
-                IsAllDay = t?.IsAllDay ?? true,
-                TimeFrom = t?.TimeFrom,
-                TimeTo = t?.TimeTo,
-                Notes = t?.Notes,
-                IsEdited = t != null && (t.StartDate != h.Date || !t.IsAllDay),
-                IsRemoved = t == null,
-            };
+            return holiday.GetDTO(timeOff);
         }
 
         public async Task Edit(int importedHolidayId, HolidayEditDTO dto, int facilityId)

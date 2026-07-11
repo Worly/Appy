@@ -1,6 +1,7 @@
 import { EditModel, REQUIRED_VALIDATION, Validation } from "./base-model";
 import dayjs, { Dayjs } from "dayjs";
 import { DayOfWeek } from "./working-hours";
+import { Holiday, HolidayDTO } from "./holiday";
 
 export enum TimeOffRecurrence {
   OneOff = "OneOff",
@@ -24,7 +25,7 @@ export class TimeOffDTO {
   public isAllDay?: boolean;
   public timeFrom?: string;
   public timeTo?: string;
-  public importedHolidayId?: number;
+  public holiday?: HolidayDTO;
 }
 
 export class TimeOff extends EditModel<TimeOff> {
@@ -41,7 +42,8 @@ export class TimeOff extends EditModel<TimeOff> {
   public isAllDay: boolean = false;
   public timeFrom?: Dayjs;
   public timeTo?: Dayjs;
-  public importedHolidayId?: number;
+  // When this time-off is a materialized imported holiday, the backend embeds the full holiday view here.
+  public holiday?: Holiday;
 
   override validations: Validation<TimeOff>[] = [
     {
@@ -107,7 +109,7 @@ export class TimeOff extends EditModel<TimeOff> {
     this.isAllDay = dto.isAllDay ?? false;
     this.timeFrom = dto.timeFrom ? dayjs(dto.timeFrom, "HH:mm:ss") : undefined;
     this.timeTo = dto.timeTo ? dayjs(dto.timeTo, "HH:mm:ss") : undefined;
-    this.importedHolidayId = dto.importedHolidayId;
+    this.holiday = dto.holiday ? new Holiday(dto.holiday) : undefined;
 
     this.initProperties();
   }

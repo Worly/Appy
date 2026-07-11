@@ -1,3 +1,5 @@
+using Appy.DTOs;
+
 #pragma warning disable CS8618
 
 namespace Appy.Domain
@@ -19,5 +21,26 @@ namespace Appy.Domain
 
         // The provider-computed date — immutable; the import job's match key together with (FacilityId, CountryCode).
         public DateOnly Date { get; set; }
+
+        // The holiday view merges immutable provenance (this row) with its current linked TimeOff.
+        // A null linkedTimeOff means the holiday was removed; the effective date/time then fall back
+        // to the provider snapshot.
+        public HolidayDTO GetDTO(TimeOff? linkedTimeOff)
+        {
+            return new HolidayDTO
+            {
+                Id = Id,
+                Name = Name,
+                CountryCode = CountryCode,
+                Date = linkedTimeOff?.StartDate ?? Date,
+                OriginalDate = Date,
+                IsAllDay = linkedTimeOff?.IsAllDay ?? true,
+                TimeFrom = linkedTimeOff?.TimeFrom,
+                TimeTo = linkedTimeOff?.TimeTo,
+                Notes = linkedTimeOff?.Notes,
+                IsEdited = linkedTimeOff != null && (linkedTimeOff.StartDate != Date || !linkedTimeOff.IsAllDay),
+                IsRemoved = linkedTimeOff == null,
+            };
+        }
     }
 }

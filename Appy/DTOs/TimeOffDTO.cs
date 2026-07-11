@@ -17,6 +17,9 @@ namespace Appy.DTOs
         public bool IsAllDay { get; set; }
         public TimeOnly? TimeFrom { get; set; }
         public TimeOnly? TimeTo { get; set; }
-        public int? ImportedHolidayId { get; set; }
+
+        // Non-null ⇒ this time-off is a materialized imported holiday; carries the full holiday view
+        // so the frontend needs no second fetch. Populated only where the ImportedHoliday nav is loaded.
+        public HolidayDTO? Holiday { get; set; }
     }
 }
