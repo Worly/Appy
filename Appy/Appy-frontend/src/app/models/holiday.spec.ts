@@ -10,7 +10,7 @@ describe("Holiday model", () => {
       id: 5, name: "Nova godina", countryCode: "HR",
       date: "2026-04-13", originalDate: "2026-04-06",
       isAllDay: false, timeFrom: "12:00:00", timeTo: "17:00:00",
-      notes: "note", isEdited: true, isRemoved: false,
+      notes: "note", isEdited: true, linkedTimeOffId: 42,
     };
 
     const h = new Holiday(dto);
@@ -21,6 +21,6 @@ describe("Holiday model", () => {
     expect(h.originalDate!.format("YYYY-MM-DD")).toBe("2026-04-06");
     expect(h.timeFrom!.format("HH:mm")).toBe("12:00");
     expect(h.isEdited).toBe(true);
-    expect(h.isRemoved).toBe(false);
+    expect(h.isRemoved).toBe(false); // has a linked TimeOff
   });
 });

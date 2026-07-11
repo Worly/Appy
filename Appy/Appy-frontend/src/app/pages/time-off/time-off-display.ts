@@ -1,6 +1,5 @@
 import { Dayjs } from "dayjs";
 import { TimeOff, TimeOffRecurrence } from "src/app/models/time-off";
-import { Holiday } from "src/app/models/holiday";
 import { DayOfWeek } from "src/app/models/working-hours";
 
 const DAY_OF_WEEK_KEYS: Record<DayOfWeek, string> = {
@@ -90,10 +89,11 @@ function isPluralOne(count: number, languageCode: string): boolean {
 }
 
 /**
- * A holiday projected onto the one-off, single-day TimeOff shape the display helpers expect.
- * Built via the DTO constructor so the model's validating setters fire once, after initProperties.
+ * A holiday projected onto the one-off, single-day TimeOff shape the display helpers expect. Accepts
+ * the full Holiday or the lean HolidayListItem — only its date/time fields matter here. Built via the
+ * DTO constructor so the model's validating setters fire once, after initProperties.
  */
-export function holidayAsTimeOff(h: Holiday): TimeOff {
+export function holidayAsTimeOff(h: { date?: Dayjs; isAllDay: boolean; timeFrom?: Dayjs; timeTo?: Dayjs }): TimeOff {
   return new TimeOff({
     id: 0,
     recurrence: TimeOffRecurrence.OneOff,

@@ -1,7 +1,6 @@
 import { of } from "rxjs";
 import { TimeOffComponent } from "./time-off.component";
-import { Holiday } from "src/app/models/holiday";
-import { HolidayImportSettings } from "src/app/models/holiday";
+import { HolidayImportSettings, HolidayListItem } from "src/app/models/holiday";
 
 function make(holidayService?: any): TimeOffComponent {
   // (Router, Location, ActivatedRoute, HolidayService, ChangeDetectorRef)
@@ -24,7 +23,7 @@ describe("TimeOffComponent — configure change gate", () => {
     const c = make();
     (c as any).settings = new HolidayImportSettings({ countryCode: "HR" });
     c.selectedCountryCode = "SI";
-    c.holidays = [new Holiday({ id: 1, name: "x", countryCode: "HR", isAllDay: true, isEdited: false, isRemoved: false })];
+    c.holidays = [new HolidayListItem({ id: 1, name: "x", isAllDay: true, isEdited: false, linkedTimeOffId: 1 })];
     const configure = { close: jasmine.createSpy("close") };
     const confirm = { open: jasmine.createSpy("open") };
     (c as any).configureDialog = configure; (c as any).confirmChangeDialog = confirm;

@@ -14,7 +14,7 @@ namespace Appy.Services
         Task Materialize(int facilityId, string countryCode, DateOnly today);
         Task MaterializeForAllFacilities(DateOnly today);
         Task<List<ProviderCountry>> GetSupportedCountries();
-        Task<List<HolidayDTO>> GetList(TimeOffScope scope, int skip, int take, DateOnly today, int facilityId);
+        Task<List<HolidayListItemDTO>> GetList(TimeOffScope scope, int skip, int take, DateOnly today, int facilityId);
         Task<HolidayDTO?> GetById(int importedHolidayId, int facilityId);
         Task Edit(int importedHolidayId, HolidayEditDTO dto, int facilityId);
         Task Remove(int importedHolidayId, int facilityId);
@@ -166,7 +166,7 @@ namespace Appy.Services
 
         public Task<List<ProviderCountry>> GetSupportedCountries() => provider.GetAvailableCountries();
 
-        public async Task<List<HolidayDTO>> GetList(TimeOffScope scope, int skip, int take, DateOnly today, int facilityId)
+        public async Task<List<HolidayListItemDTO>> GetList(TimeOffScope scope, int skip, int take, DateOnly today, int facilityId)
         {
             var holidays = await context.ImportedHolidays
                 .Where(h => h.FacilityId == facilityId)
@@ -180,7 +180,7 @@ namespace Appy.Services
             var dtos = holidays.Select(h =>
             {
                 timeOffByHolidayId.TryGetValue(h.Id, out var t);
-                return h.GetDTO(t);
+                return h.GetListDTO(t);
             });
 
             dtos = scope == TimeOffScope.Active

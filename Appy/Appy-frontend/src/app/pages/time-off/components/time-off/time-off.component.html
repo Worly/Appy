@@ -51,15 +51,16 @@
   </ng-container>
 </div>
 
+<!-- One-off/Recurring rows and active (linked) holidays alike open the time-off by id. -->
 <app-dialog #detailsDialog>
   <app-single-time-off *ngIf="detailsDialog.isOpen" [id]="viewingId"
-    (onDone)="detailsDialog.close()"></app-single-time-off>
+    (onChanged)="loadHolidaysIfNeeded()" (onDone)="detailsDialog.close()"></app-single-time-off>
 </app-dialog>
 
-<!-- Every holiday (active, edited, or removed) opens the same details view; removed ones show a Restore action there. -->
-<app-dialog #holidayDetailsDialog>
-  <app-single-time-off *ngIf="holidayDetailsDialog.isOpen" [holiday]="viewingHoliday"
-    (onChanged)="loadHolidaysIfNeeded()" (onDone)="holidayDetailsDialog.close()"></app-single-time-off>
+<!-- A removed holiday has no TimeOff to load by id, so it has its own view keyed on the ImportedHoliday. -->
+<app-dialog #removedHolidayDialog>
+  <app-removed-holiday *ngIf="removedHolidayDialog.isOpen" [importedHolidayId]="viewingRemovedHolidayId"
+    (onChanged)="loadHolidaysIfNeeded()" (onDone)="removedHolidayDialog.close()"></app-removed-holiday>
 </app-dialog>
 
 <app-dialog #configureDialog>

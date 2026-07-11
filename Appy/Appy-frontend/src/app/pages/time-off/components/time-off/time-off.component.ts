@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { Subscription, filter, take } from "rxjs";
 import { setUrlParams } from "src/app/utils/dynamic-url-params";
 import { TimeOffListType, TimeOffScope } from "src/app/models/time-off";
-import { Holiday, HolidayImportSettings, SupportedCountry } from "src/app/models/holiday";
+import { HolidayImportSettings, HolidayListItem, SupportedCountry } from "src/app/models/holiday";
 import { SegmentedOption } from "src/app/components/segmented-control/segmented-control.component";
 import { DialogComponent } from "src/app/components/dialog/dialog.component";
 import { PagedResult } from "src/app/shared/services/data/contracts";
@@ -34,11 +34,11 @@ export class TimeOffComponent implements OnInit, OnDestroy {
   ];
 
   // Holidays tab state
-  public holidays: Holiday[] = [];
+  public holidays: HolidayListItem[] = [];
   public holidaysLoading: boolean = false;
   public holidaysLoadingMore: boolean = false;
-  public viewingHoliday?: Holiday;
-  private holidayPaged?: PagedResult<Holiday, never>;
+  public viewingRemovedHolidayId?: number;
+  private holidayPaged?: PagedResult<HolidayListItem, never>;
   private holidaySub?: Subscription;
 
   // Configure dialog state
@@ -47,7 +47,8 @@ export class TimeOffComponent implements OnInit, OnDestroy {
   public selectedCountryCode?: string;
   public savingSettings: boolean = false;
 
-  @ViewChild("holidayDetailsDialog") holidayDetailsDialog?: DialogComponent;
+  @ViewChild("detailsDialog") detailsDialog?: DialogComponent;
+  @ViewChild("removedHolidayDialog") removedHolidayDialog?: DialogComponent;
   @ViewChild("configureDialog") configureDialog?: DialogComponent;
   @ViewChild("confirmChangeDialog") confirmChangeDialog?: DialogComponent;
 
@@ -177,8 +178,15 @@ export class TimeOffComponent implements OnInit, OnDestroy {
     });
   }
 
-  public onHolidayRowClick(h: Holiday): void {
-    this.viewingHoliday = h;
-    this.holidayDetailsDialog?.open();
+  // A holiday with a linked TimeOff is just a time-off — open it by id like any other. A removed one
+  // has no TimeOff, so it goes to the dedicated view that fetches it by ImportedHoliday id.
+  public onHolidayRowClick(h: HolidayListItem): void {
+    if (h.linkedTimeOffId != null) {
+      this.viewingId = h.linkedTimeOffId;
+      this.detailsDialog?.open();
+    } else {
+      this.viewingRemovedHolidayId = h.id;
+      this.removedHolidayDialog?.open();
+    }
   }
 }

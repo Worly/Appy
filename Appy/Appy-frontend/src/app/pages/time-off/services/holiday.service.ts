@@ -5,7 +5,8 @@ import { map, Observable } from "rxjs";
 import { appConfig } from "src/app/app.config";
 import { TimeOffScope } from "src/app/models/time-off";
 import {
-  Holiday, HolidayDTO, HolidayEditRequest, HolidayImportSettings, HolidayImportSettingsDTO, SupportedCountry,
+  Holiday, HolidayDTO, HolidayEditRequest, HolidayImportSettings, HolidayImportSettingsDTO,
+  HolidayListItem, HolidayListItemDTO, SupportedCountry,
 } from "src/app/models/holiday";
 import { CacheCoordinator } from "src/app/shared/services/data/cache-coordinator";
 import { PagedResult, QueryResult } from "src/app/shared/services/data/contracts";
@@ -27,13 +28,13 @@ export class HolidayService {
     this.cache = injector.get(CacheCoordinator);
   }
 
-  public getList(scope: TimeOffScope): PagedResult<Holiday, never> {
-    return pagedQuery<Holiday, never>(this.queryClient, {
+  public getList(scope: TimeOffScope): PagedResult<HolidayListItem, never> {
+    return pagedQuery<HolidayListItem, never>(this.queryClient, {
       queryKey: [...holidayKeys.list(scope)],
       loadPage: (direction, skip, take) =>
-        this.httpClient.get<HolidayDTO[]>(`${appConfig.apiUrl}${this.controllerName}/getList`, {
+        this.httpClient.get<HolidayListItemDTO[]>(`${appConfig.apiUrl}${this.controllerName}/getList`, {
           params: { scope, skip, take, direction },
-        }).pipe(map(r => ({ items: r.map(d => new Holiday(d)), extra: [] as never[] }))),
+        }).pipe(map(r => ({ items: r.map(d => new HolidayListItem(d)), extra: [] as never[] }))),
     });
   }
 

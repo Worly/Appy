@@ -1,54 +1,64 @@
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import { of } from "rxjs";
-import { Holiday } from "src/app/models/holiday";
+import { HolidayDTO } from "src/app/models/holiday";
+import { TimeOff, TimeOffRecurrence } from "src/app/models/time-off";
 import { SingleTimeOffComponent } from "./single-time-off.component";
 
 dayjs.extend(customParseFormat);
 
-function make(holidayService: any, notifyDialogService: any = { yesNoDialog: () => of(true) }) {
+function make(opts: { timeOffService?: any; holidayService?: any; notifyDialogService?: any } = {}) {
   // (timeOffService, translateService, router, holidayService, notifyDialogService)
   return new SingleTimeOffComponent(
-    null as any,
+    opts.timeOffService ?? null as any,
     { translate: (k: string) => k, getSelectedLanguageCode: () => "en" } as any,
     null as any,
-    holidayService,
-    notifyDialogService,
+    opts.holidayService ?? {},
+    opts.notifyDialogService ?? { yesNoDialog: () => of(true) },
   );
 }
 
+// A TimeOff carrying its embedded holiday, exactly as GET /timeoff/get/{id} returns for an imported holiday.
+function holidayTimeOff(holiday: Partial<HolidayDTO> = {}): TimeOff {
+  const h: HolidayDTO = {
+    id: 1, name: "Easter Monday", countryCode: "HR", date: "2026-04-13", originalDate: "2026-04-06",
+    isAllDay: true, isEdited: false, linkedTimeOffId: 5, ...holiday,
+  };
+  return new TimeOff({
+    id: h.linkedTimeOffId ?? 0, label: h.name, recurrence: TimeOffRecurrence.OneOff,
+    startDate: h.date, endDate: h.date, isAllDay: h.isAllDay, timeFrom: h.timeFrom, timeTo: h.timeTo,
+    holiday: h,
+  });
+}
+
 describe("SingleTimeOffComponent — holiday mode", () => {
-  it("computes the Changes rows for an edited holiday", () => {
-    const c = make({});
-    c.holiday = new Holiday({ id: 1, name: "Easter Monday", countryCode: "HR", date: "2026-04-13", originalDate: "2026-04-06", isAllDay: false, timeFrom: "12:00:00", timeTo: "17:00:00", isEdited: true, isRemoved: false });
+  it("applies the embedded holiday and computes the Changes rows for an edited one", () => {
+    const t = holidayTimeOff({ date: "2026-04-13", originalDate: "2026-04-06", isAllDay: false, timeFrom: "12:00:00", timeTo: "17:00:00", isEdited: true });
+    const c = make({ timeOffService: { get: () => of(t) } });
+    c.id = 5;
+
     expect(c.isHoliday).toBe(true);
     expect(c.isHolidayEdited).toBe(true);
     expect(c.changedDate).toBe(true);   // 13 Apr vs 06 Apr
     expect(c.changedTime).toBe(true);   // timed vs all-day
   });
 
-  it("reverts and emits onChanged", (done) => {
+  it("reverts and emits onChanged, keyed on the ImportedHoliday id", (done) => {
     const revert = jasmine.createSpy("revert").and.returnValue(of(undefined));
-    const c = make({ revert }, { yesNoDialog: () => of(true) });
-    c.holiday = new Holiday({ id: 9, name: "x", countryCode: "HR", date: "2026-04-13", originalDate: "2026-04-06", isAllDay: true, isEdited: true, isRemoved: false });
+    const t = holidayTimeOff({ id: 9, isEdited: true, isAllDay: false, timeFrom: "12:00:00", timeTo: "17:00:00" });
+    const c = make({ timeOffService: { get: () => of(t) }, holidayService: { revert } });
+    c.id = 5;
     c.onChanged.subscribe(() => { expect(revert).toHaveBeenCalledWith(9); done(); });
 
     c.openRevertDialog();
   });
 
-  it("treats a removed holiday as removed, suppressing the edited treatment", () => {
-    const c = make({});
-    c.holiday = new Holiday({ id: 1, name: "New Year", countryCode: "HR", date: "2026-01-01", originalDate: "2026-01-01", isAllDay: true, isEdited: true, isRemoved: true });
-    expect(c.isHolidayRemoved).toBe(true);
-    expect(c.isHolidayEdited).toBe(false);
-  });
+  it("treats a plain time-off (no embedded holiday) as not a holiday", () => {
+    const t = new TimeOff({ id: 3, label: "Vacation", recurrence: TimeOffRecurrence.OneOff, startDate: "2026-04-13", endDate: "2026-04-15", isAllDay: true });
+    const c = make({ timeOffService: { get: () => of(t) } });
+    c.id = 3;
 
-  it("restores and emits onChanged", (done) => {
-    const restore = jasmine.createSpy("restore").and.returnValue(of(undefined));
-    const c = make({ restore }, { yesNoDialog: () => of(true) });
-    c.holiday = new Holiday({ id: 7, name: "x", countryCode: "HR", date: "2026-01-01", originalDate: "2026-01-01", isAllDay: true, isEdited: false, isRemoved: true });
-    c.onChanged.subscribe(() => { expect(restore).toHaveBeenCalledWith(7); done(); });
-
-    c.openRestoreDialog();
+    expect(c.isHoliday).toBe(false);
+    expect(c.schedule).not.toBe("");
   });
 });

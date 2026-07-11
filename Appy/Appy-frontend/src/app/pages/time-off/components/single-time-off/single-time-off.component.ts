@@ -35,20 +35,14 @@ export class SingleTimeOffComponent implements OnDestroy {
   public dayCount: string = "";
   public time: string = "";
 
+  // Set when the loaded TimeOff is a materialized (active) holiday. Removed holidays have no TimeOff
+  // and are shown by app-removed-holiday, not here.
   public holidayModel?: Holiday;
   public isHolidayEdited = false;
   public changedDate = false;
   public changedTime = false;
 
-  private _holiday?: Holiday;
-  @Input() set holiday(value: Holiday | undefined) {
-    this._holiday = value;
-    if (value != null) this.applyHoliday(value);
-  }
-  get holiday(): Holiday | undefined { return this._holiday; }
-
   public get isHoliday(): boolean { return this.holidayModel != null; }
-  public get isHolidayRemoved(): boolean { return this.holidayModel?.isRemoved === true; }
   public get title(): string { return this.holidayModel?.name ?? this.timeOff?.label ?? ""; }
   public get notes(): string | undefined { return this.holidayModel?.notes ?? this.timeOff?.notes; }
 
@@ -67,10 +61,8 @@ export class SingleTimeOffComponent implements OnDestroy {
   }
 
   private applyHoliday(h: Holiday): void {
-    this._holiday = h;
     this.holidayModel = h;
-    // A removed holiday shows only its Restore action — never the edited badge, changes block, or Revert.
-    this.isHolidayEdited = h.isEdited && !h.isRemoved;
+    this.isHolidayEdited = h.isEdited;
     this.changedDate = h.date != null && h.originalDate != null && !h.date.isSame(h.originalDate, "date");
     this.changedTime = !h.isAllDay;
     const proj = holidayAsTimeOff(h);
@@ -85,6 +77,7 @@ export class SingleTimeOffComponent implements OnDestroy {
   private setDatasource(id: number | undefined): void {
     this.sub?.unsubscribe();
     this.timeOff = undefined;
+    this.holidayModel = undefined;
     if (id == null) return;
 
     this.isLoading = true;
@@ -118,8 +111,8 @@ export class SingleTimeOffComponent implements OnDestroy {
   }
 
   private goToEditHoliday(): void {
-    if (this._holiday == null) return;
-    this.router.navigate(["time-off", "holiday", "edit", this._holiday.id]);
+    if (this.holidayModel == null) return;
+    this.router.navigate(["time-off", "holiday", "edit", this.holidayModel.id]);
     this.onDone.next();
   }
 
@@ -131,14 +124,10 @@ export class SingleTimeOffComponent implements OnDestroy {
     this.confirmHolidayAction("pages.time-off.REMOVE_CONFIRM", "holiday-remove-confirm", id => this.holidayService.remove(id));
   }
 
-  public openRestoreDialog(): void {
-    this.confirmHolidayAction("pages.time-off.RESTORE_CONFIRM", "holiday-restore-confirm", id => this.holidayService.restore(id));
-  }
-
   private confirmHolidayAction(confirmKey: string, confirmDataTest: string, action: (id: number) => Observable<void>): void {
     this.notifyDialogService.yesNoDialog(this.translateService.translate(confirmKey), { confirmDataTest }).subscribe((ok: boolean) => {
-      if (!ok || this._holiday == null) return;
-      action(this._holiday.id).subscribe(() => {
+      if (!ok || this.holidayModel == null) return;
+      action(this.holidayModel.id).subscribe(() => {
         this.onChanged.next();
         this.onDone.next();
       });

@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
-import { Holiday } from "src/app/models/holiday";
+import { HolidayListItem } from "src/app/models/holiday";
 import { SingleTimeOffListItemComponent } from "./single-time-off-list-item.component";
 
 dayjs.extend(customParseFormat);
@@ -15,7 +15,7 @@ function makeItem(): SingleTimeOffListItemComponent {
 describe("SingleTimeOffListItemComponent — holiday mode", () => {
   it("shows the edited badge for an edited holiday", () => {
     const c = makeItem();
-    c.holiday = new Holiday({ id: 1, name: "Easter Monday", countryCode: "HR", date: "2026-04-13", originalDate: "2026-04-06", isAllDay: true, isEdited: true, isRemoved: false });
+    c.holiday = new HolidayListItem({ id: 1, name: "Easter Monday", date: "2026-04-13", isAllDay: true, isEdited: true, linkedTimeOffId: 10 });
     expect(c.label).toBe("Easter Monday");
     expect(c.badge).toBe("edited");
     expect(c.removed).toBe(false);
@@ -25,7 +25,7 @@ describe("SingleTimeOffListItemComponent — holiday mode", () => {
 
   it("marks a removed holiday", () => {
     const c = makeItem();
-    c.holiday = new Holiday({ id: 2, name: "Labour Day", countryCode: "HR", date: "2026-05-01", originalDate: "2026-05-01", isAllDay: true, isEdited: false, isRemoved: true });
+    c.holiday = new HolidayListItem({ id: 2, name: "Labour Day", date: "2026-05-01", isAllDay: true, isEdited: false, linkedTimeOffId: undefined });
     expect(c.badge).toBe("removed");
     expect(c.removed).toBe(true);
   });

@@ -12,6 +12,8 @@ namespace Appy.DTOs
         public TimeOnly? TimeTo { get; set; }
         public string? Notes { get; set; }
         public bool IsEdited { get; set; }
-        public bool IsRemoved { get; set; }
+
+        // The id of the linked TimeOff, or null when the holiday has been removed (no linked TimeOff).
+        public int? LinkedTimeOffId { get; set; }
     }
 }

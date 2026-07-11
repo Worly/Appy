@@ -38,9 +38,29 @@ namespace Appy.Domain
                 TimeFrom = linkedTimeOff?.TimeFrom,
                 TimeTo = linkedTimeOff?.TimeTo,
                 Notes = linkedTimeOff?.Notes,
-                IsEdited = linkedTimeOff != null && (linkedTimeOff.StartDate != Date || !linkedTimeOff.IsAllDay),
-                IsRemoved = linkedTimeOff == null,
+                IsEdited = IsEditedBy(linkedTimeOff),
+                LinkedTimeOffId = linkedTimeOff?.Id,
             };
         }
+
+        // Lean list projection: only what a holidays-list row renders, plus LinkedTimeOffId for navigation.
+        public HolidayListItemDTO GetListDTO(TimeOff? linkedTimeOff)
+        {
+            return new HolidayListItemDTO
+            {
+                Id = Id,
+                Name = Name,
+                Date = linkedTimeOff?.StartDate ?? Date,
+                IsAllDay = linkedTimeOff?.IsAllDay ?? true,
+                TimeFrom = linkedTimeOff?.TimeFrom,
+                TimeTo = linkedTimeOff?.TimeTo,
+                IsEdited = IsEditedBy(linkedTimeOff),
+                LinkedTimeOffId = linkedTimeOff?.Id,
+            };
+        }
+
+        // Edited ⇔ a linked TimeOff exists whose date differs from the provider snapshot, or is not all-day.
+        private bool IsEditedBy(TimeOff? linkedTimeOff)
+            => linkedTimeOff != null && (linkedTimeOff.StartDate != Date || !linkedTimeOff.IsAllDay);
     }
 }

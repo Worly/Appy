@@ -1,5 +1,43 @@
 import dayjs, { Dayjs } from "dayjs";
 
+// Lean list projection returned by GET /holiday/getList — only what a row renders, plus the link.
+export interface HolidayListItemDTO {
+  id: number;
+  name: string;
+  date?: string;
+  isAllDay: boolean;
+  timeFrom?: string;
+  timeTo?: string;
+  isEdited: boolean;
+  linkedTimeOffId?: number;
+}
+
+export class HolidayListItem {
+  public id: number;
+  public name: string;
+  public date?: Dayjs;
+  public isAllDay: boolean;
+  public timeFrom?: Dayjs;
+  public timeTo?: Dayjs;
+  public isEdited: boolean;
+  public linkedTimeOffId?: number;
+
+  // Removed ⇔ no linked TimeOff.
+  public get isRemoved(): boolean { return this.linkedTimeOffId == null; }
+
+  constructor(dto: HolidayListItemDTO) {
+    this.id = dto.id;
+    this.name = dto.name;
+    this.date = dto.date ? dayjs(dto.date, "YYYY-MM-DD") : undefined;
+    this.isAllDay = dto.isAllDay;
+    this.timeFrom = dto.timeFrom ? dayjs(dto.timeFrom, "HH:mm:ss") : undefined;
+    this.timeTo = dto.timeTo ? dayjs(dto.timeTo, "HH:mm:ss") : undefined;
+    this.isEdited = dto.isEdited;
+    this.linkedTimeOffId = dto.linkedTimeOffId;
+  }
+}
+
+// Full holiday view returned by GET /holiday/get/{id} (and embedded in a TimeOff).
 export interface HolidayDTO {
   id: number;
   name: string;
@@ -11,7 +49,7 @@ export interface HolidayDTO {
   timeTo?: string;
   notes?: string;
   isEdited: boolean;
-  isRemoved: boolean;
+  linkedTimeOffId?: number;
 }
 
 export class Holiday {
@@ -25,7 +63,10 @@ export class Holiday {
   public timeTo?: Dayjs;
   public notes?: string;
   public isEdited: boolean;
-  public isRemoved: boolean;
+  public linkedTimeOffId?: number;
+
+  // Removed ⇔ no linked TimeOff.
+  public get isRemoved(): boolean { return this.linkedTimeOffId == null; }
 
   constructor(dto: HolidayDTO) {
     this.id = dto.id;
@@ -38,7 +79,7 @@ export class Holiday {
     this.timeTo = dto.timeTo ? dayjs(dto.timeTo, "HH:mm:ss") : undefined;
     this.notes = dto.notes;
     this.isEdited = dto.isEdited;
-    this.isRemoved = dto.isRemoved;
+    this.linkedTimeOffId = dto.linkedTimeOffId;
   }
 }
 

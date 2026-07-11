@@ -1,12 +1,11 @@
 <app-loading *ngIf="isLoading"></app-loading>
 
-<div *ngIf="!isLoading && (timeOff != null || holidayModel != null)" class="time-off-details"
+<div *ngIf="!isLoading && timeOff != null" class="time-off-details"
   [attr.data-test]="isHoliday ? 'holiday-details' : null">
   <div class="header">
     <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
-    <div class="title" [class.struck]="isHolidayRemoved">{{ title }}</div>
+    <div class="title">{{ title }}</div>
     <span *ngIf="isHolidayEdited" class="badge badge-edited">{{ "pages.time-off.EDITED" | translate }}</span>
-    <span *ngIf="isHolidayRemoved" class="badge badge-removed" data-test="holiday-badge-removed">{{ "pages.time-off.REMOVED" | translate }}</span>
   </div>
 
   <div class="provenance" *ngIf="isHoliday">
@@ -54,15 +53,10 @@
   </div>
 
   <div class="action-bar">
-    <app-button *ngIf="isHolidayRemoved" [text]="'pages.time-off.RESTORE' | translate" icon="rotate-left" color="success"
-      (onClick)="openRestoreDialog()" data-test="holiday-restore" style="margin-left: auto"></app-button>
-
-    <ng-container *ngIf="!isHolidayRemoved">
-      <app-button *ngIf="isHoliday" [text]="'pages.time-off.REMOVE' | translate" icon="trash" color="danger"
-        (onClick)="openRemoveDialog()" data-test="holiday-remove" style="margin-left: auto"></app-button>
-      <app-button [text]="'EDIT' | translate" icon="pen" (onClick)="edit()"
-        [attr.data-test]="isHoliday ? 'holiday-edit' : 'time-off-edit-button'"
-        [style.margin-left]="isHoliday ? null : 'auto'"></app-button>
-    </ng-container>
+    <app-button *ngIf="isHoliday" [text]="'pages.time-off.REMOVE' | translate" icon="trash" color="danger"
+      (onClick)="openRemoveDialog()" data-test="holiday-remove" style="margin-left: auto"></app-button>
+    <app-button [text]="'EDIT' | translate" icon="pen" (onClick)="edit()"
+      [attr.data-test]="isHoliday ? 'holiday-edit' : 'time-off-edit-button'"
+      [style.margin-left]="isHoliday ? null : 'auto'"></app-button>
   </div>
 </div>

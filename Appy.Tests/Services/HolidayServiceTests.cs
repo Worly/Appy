@@ -129,21 +129,21 @@ namespace Appy.Tests.Services
             result.Should().HaveCount(3);
             result.Select(r => r.Id).Should().ContainInOrder(1, 2, 3); // ascending by date
             result.Single(r => r.Id == 1).IsEdited.Should().BeFalse();
+            result.Single(r => r.Id == 1).LinkedTimeOffId.Should().NotBeNull();
             result.Single(r => r.Id == 2).IsEdited.Should().BeTrue();
-            result.Single(r => r.Id == 3).IsRemoved.Should().BeTrue();
+            result.Single(r => r.Id == 3).LinkedTimeOffId.Should().BeNull(); // removed: no linked TimeOff
         }
 
         [Fact]
-        public async Task GetList_EditedDateMove_ReportsEffectiveDateAndOriginalDate()
+        public async Task GetList_EditedDateMove_ReportsEffectiveDate()
         {
-            var linked = Linked(Today.AddDays(9)); // moved 2 days later than original
+            var linked = Linked(Today.AddDays(9)); // effective date two days after the original snapshot
             SeedHoliday(1, Today.AddDays(7), "HR", linked);
 
             var result = await service.GetList(TimeOffScope.Active, 0, 50, Today, FacilityId);
 
             var dto = result.Single();
             dto.Date.Should().Be(Today.AddDays(9));
-            dto.OriginalDate.Should().Be(Today.AddDays(7));
             dto.IsEdited.Should().BeTrue();
         }
 
@@ -157,7 +157,7 @@ namespace Appy.Tests.Services
             dto.Should().NotBeNull();
             dto!.Id.Should().Be(1);
             dto.IsEdited.Should().BeTrue();
-            dto.IsRemoved.Should().BeFalse();
+            dto.LinkedTimeOffId.Should().NotBeNull();
         }
 
         [Fact]

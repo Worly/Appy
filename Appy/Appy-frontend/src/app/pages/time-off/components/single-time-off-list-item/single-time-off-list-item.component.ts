@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
-import { Holiday } from "src/app/models/holiday";
+import { HolidayListItem } from "src/app/models/holiday";
 import { TimeOff } from "src/app/models/time-off";
 import { TranslateService } from "src/app/components/translate/translate.service";
 import { holidayAsTimeOff, timeOffRecurringRangeText, timeOffScheduleText, timeOffTimeText } from "../../time-off-display";
@@ -28,12 +28,12 @@ export class SingleTimeOffListItemComponent {
   public badge: "none" | "edited" | "removed" = "none";
   public removed: boolean = false;
 
-  private _holiday?: Holiday;
-  @Input() set holiday(value: Holiday | undefined) {
+  private _holiday?: HolidayListItem;
+  @Input() set holiday(value: HolidayListItem | undefined) {
     this._holiday = value;
     this.renderHoliday();
   }
-  get holiday(): Holiday | undefined { return this._holiday; }
+  get holiday(): HolidayListItem | undefined { return this._holiday; }
 
   constructor(private translateService: TranslateService) {}
 
