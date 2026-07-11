@@ -2,7 +2,8 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { of } from "rxjs";
-import { TimeOff, TimeOffRecurrence } from "src/app/models/time-off";
+import { TimeOffRecurrence } from "src/app/models/time-off";
+import { Holiday } from "src/app/models/holiday";
 import { DayOfWeek } from "src/app/models/working-hours";
 import { TimeOffEditComponent } from "./time-off-edit.component";
 
@@ -259,7 +260,7 @@ describe("TimeOffEditComponent — holiday mode", () => {
     // (timeOffService, route, location, translateService, holidayService)
     const c = new TimeOffEditComponent(null as any, null as any, { back: () => {} } as any, null as any, holidayService as any);
     c.isHolidayMode = true;
-    c.holidayId = 42;
+    c.timeOff.holiday = new Holiday({ id: 42, name: "Easter Monday", countryCode: "HR", date: "2026-04-06" });
     c.isNew = false;
     c.timeOff.recurrence = TimeOffRecurrence.OneOff;
     c.timeOff.startDate = dayjs("2026-04-13");
@@ -278,7 +279,7 @@ describe("TimeOffEditComponent — holiday mode", () => {
     const holidayService = { edit: jasmine.createSpy("edit").and.returnValue(of(undefined)) };
     const c = new TimeOffEditComponent(null as any, null as any, { back: () => {} } as any, null as any, holidayService as any);
     c.isHolidayMode = true;
-    c.holidayId = 42;
+    c.timeOff.holiday = new Holiday({ id: 42, name: "Easter Monday", countryCode: "HR", date: "2026-04-06" });
     c.isNew = false;
     c.timeOff.recurrence = TimeOffRecurrence.OneOff;
     c.timeOff.startDate = dayjs("2026-04-13");
@@ -295,7 +296,7 @@ describe("TimeOffEditComponent — holiday mode", () => {
     const holidayService = { remove: jasmine.createSpy("remove").and.returnValue(of(undefined)) };
     const c = new TimeOffEditComponent(null as any, null as any, { back: () => {} } as any, null as any, holidayService as any);
     c.isHolidayMode = true;
-    c.holidayId = 42;
+    c.timeOff.holiday = new Holiday({ id: 42, name: "Easter Monday", countryCode: "HR", date: "2026-04-06" });
     c.isNew = false;
     c.timeOff.recurrence = TimeOffRecurrence.OneOff;
     c.timeOff.startDate = dayjs("2026-04-13");

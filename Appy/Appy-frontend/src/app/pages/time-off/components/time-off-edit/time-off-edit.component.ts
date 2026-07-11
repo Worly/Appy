@@ -28,8 +28,9 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
   // they also have an end ("until") date. It never clears the start.
   public hasEndDate: boolean = false;
 
+  // A holiday-linked time-off edits in "holiday mode": read-only label, single date, no recurrence
+  // or fork dialog, saved/removed via HolidayService. Derived from the loaded TimeOff's embedded holiday.
   public isHolidayMode: boolean = false;
-  public holidayId?: number;
 
   @ViewChild("splitDialog") splitDialog?: DialogComponent;
   @ViewChild("deleteDialog") deleteDialog?: DialogComponent;
@@ -105,8 +106,6 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
-    if (this.route.snapshot.data["holiday"]) { this.initHolidayMode(); return; }
-
     const id = this.route.snapshot.paramMap.get("id");
     if (id != null) {
       this.isNew = false;
@@ -124,6 +123,8 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
           this.hasEndDate = t.endDate != null;
         }
 
+        // A time-off carrying an embedded holiday edits in holiday mode.
+        this.isHolidayMode = t.holiday != null;
         this.type = t.recurrence === TimeOffRecurrence.OneOff ? "oneoff" : "recurring";
         this.timeOff = t;
         this.originalStartDate = t.startDate;
@@ -154,28 +155,6 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subs.forEach(s => s.unsubscribe());
-  }
-
-  private initHolidayMode(): void {
-    this.isHolidayMode = true;
-    this.isNew = false;
-    this.type = "oneoff";
-    const id = +this.route.snapshot.paramMap.get("id")!;
-    this.holidayId = id;
-    this.subs.push(this.holidayService.getById(id).subscribe(h => {
-      const t = new TimeOff();
-      t.recurrence = TimeOffRecurrence.OneOff;
-      t.label = h.name;
-      t.startDate = h.date;
-      t.endDate = h.date;
-      t.isAllDay = h.isAllDay;
-      t.timeFrom = h.timeFrom ?? dayjs({ hour: 9 });
-      t.timeTo = h.timeTo ?? dayjs({ hour: 17 });
-      t.notes = h.notes;
-      this.timeOff = t;
-      this.originalStartDate = t.startDate;
-      this.isLoaded = true;
-    }));
   }
 
   // displayFunction for day-of-week dropdown
@@ -256,7 +235,7 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
     if (this.isHolidayMode) {
       if (!this.timeOff.validate()) return;
       this.isLoading = true;
-      this.subs.push(this.holidayService.edit(this.holidayId!, {
+      this.subs.push(this.holidayService.edit(this.timeOff.holiday!.id, {
         date: this.timeOff.startDate!.format("YYYY-MM-DD"),
         isAllDay: this.timeOff.isAllDay,
         timeFrom: this.timeOff.isAllDay ? undefined : this.timeOff.timeFrom?.format("HH:mm:ss"),
@@ -345,7 +324,7 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
     this.deleteDialog?.close();
     if (this.isHolidayMode) {
       this.isLoading = true;
-      this.subs.push(this.holidayService.remove(this.holidayId!).subscribe({ next: () => this.goBack(), error: () => { this.isLoading = false; } }));
+      this.subs.push(this.holidayService.remove(this.timeOff.holiday!.id).subscribe({ next: () => this.goBack(), error: () => { this.isLoading = false; } }));
       return;
     }
     if (this.canStop && this.deleteMode === "stop") this.stop();

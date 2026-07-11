@@ -14,7 +14,7 @@ namespace Appy.Services
         Task Materialize(int facilityId, string countryCode, DateOnly today);
         Task MaterializeForAllFacilities(DateOnly today);
         Task<List<ProviderCountry>> GetSupportedCountries();
-        Task<List<HolidayListItemDTO>> GetList(TimeOffScope scope, int skip, int take, DateOnly today, int facilityId);
+        Task<List<HolidayListDTO>> GetList(TimeOffScope scope, int skip, int take, DateOnly today, int facilityId);
         Task<HolidayDTO?> GetById(int importedHolidayId, int facilityId);
         Task Edit(int importedHolidayId, HolidayEditDTO dto, int facilityId);
         Task Remove(int importedHolidayId, int facilityId);
@@ -166,7 +166,7 @@ namespace Appy.Services
 
         public Task<List<ProviderCountry>> GetSupportedCountries() => provider.GetAvailableCountries();
 
-        public async Task<List<HolidayListItemDTO>> GetList(TimeOffScope scope, int skip, int take, DateOnly today, int facilityId)
+        public async Task<List<HolidayListDTO>> GetList(TimeOffScope scope, int skip, int take, DateOnly today, int facilityId)
         {
             var holidays = await context.ImportedHolidays
                 .Where(h => h.FacilityId == facilityId)
@@ -190,17 +190,13 @@ namespace Appy.Services
             return dtos.Skip(skip).Take(take).ToList();
         }
 
+        // Returns the original provider snapshot. Consumed by the removed-holiday view, which needs only
+        // the immutable data — an active holiday's edited state travels with its TimeOff, not here.
         public async Task<HolidayDTO?> GetById(int importedHolidayId, int facilityId)
         {
             var holiday = await context.ImportedHolidays
                 .FirstOrDefaultAsync(h => h.Id == importedHolidayId && h.FacilityId == facilityId);
-            if (holiday == null)
-                return null;
-
-            var timeOff = await context.TimeOffs
-                .FirstOrDefaultAsync(t => t.ImportedHolidayId == importedHolidayId && t.FacilityId == facilityId);
-
-            return holiday.GetDTO(timeOff);
+            return holiday?.GetDTO();
         }
 
         public async Task Edit(int importedHolidayId, HolidayEditDTO dto, int facilityId)

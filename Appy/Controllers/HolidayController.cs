@@ -46,7 +46,7 @@ namespace Appy.Controllers
 
         [HttpGet("getList")]
         [Authorize]
-        public async Task<ActionResult<List<HolidayListItemDTO>>> GetList([FromQuery] TimeOffScope scope, [FromQuery] int skip, [FromQuery] int take)
+        public async Task<ActionResult<List<HolidayListDTO>>> GetList([FromQuery] TimeOffScope scope, [FromQuery] int skip, [FromQuery] int take)
         {
             var result = await holidayService.GetList(scope, skip, take, Today, HttpContext.SelectedFacility());
             return Ok(result);

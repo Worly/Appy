@@ -6,7 +6,7 @@ import { appConfig } from "src/app/app.config";
 import { TimeOffScope } from "src/app/models/time-off";
 import {
   Holiday, HolidayDTO, HolidayEditRequest, HolidayImportSettings, HolidayImportSettingsDTO,
-  HolidayListItem, HolidayListItemDTO, SupportedCountry,
+  HolidayListItem, HolidayListDTO, SupportedCountry,
 } from "src/app/models/holiday";
 import { CacheCoordinator } from "src/app/shared/services/data/cache-coordinator";
 import { PagedResult, QueryResult } from "src/app/shared/services/data/contracts";
@@ -32,7 +32,7 @@ export class HolidayService {
     return pagedQuery<HolidayListItem, never>(this.queryClient, {
       queryKey: [...holidayKeys.list(scope)],
       loadPage: (direction, skip, take) =>
-        this.httpClient.get<HolidayListItemDTO[]>(`${appConfig.apiUrl}${this.controllerName}/getList`, {
+        this.httpClient.get<HolidayListDTO[]>(`${appConfig.apiUrl}${this.controllerName}/getList`, {
           params: { scope, skip, take, direction },
         }).pipe(map(r => ({ items: r.map(d => new HolidayListItem(d)), extra: [] as never[] }))),
     });

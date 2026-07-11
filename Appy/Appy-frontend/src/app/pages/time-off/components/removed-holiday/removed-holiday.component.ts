@@ -53,7 +53,8 @@ export class RemovedHolidayComponent implements OnDestroy {
     this.isLoading = true;
     this.sub = this.holidayService.getById(id).subscribe(h => {
       this.holiday = h;
-      const proj = holidayAsTimeOff(h);
+      // A removed holiday reverts to its original all-day date.
+      const proj = holidayAsTimeOff({ date: h.date, isAllDay: true });
       const tr = (k: string) => this.translateService.translate(k);
       this.schedule = timeOffScheduleText(proj, tr, this.translateService.getSelectedLanguageCode());
       this.time = timeOffTimeText(proj, tr);

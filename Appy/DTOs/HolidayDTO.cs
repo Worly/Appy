@@ -1,19 +1,13 @@
 namespace Appy.DTOs
 {
+    // The immutable public-holiday provenance — a 1:1 view of the ImportedHoliday row. Embedded in
+    // TimeOffDTO (the TimeOff carries the edited values; this carries the original) and returned by
+    // GET /holiday/get/{id} for the removed-holiday view (a removed holiday is only its original).
     public class HolidayDTO
     {
         public int Id { get; set; }
         public string Name { get; set; } = "";
         public string CountryCode { get; set; } = "";
         public DateOnly Date { get; set; }
-        public DateOnly OriginalDate { get; set; }
-        public bool IsAllDay { get; set; }
-        public TimeOnly? TimeFrom { get; set; }
-        public TimeOnly? TimeTo { get; set; }
-        public string? Notes { get; set; }
-        public bool IsEdited { get; set; }
-
-        // The id of the linked TimeOff, or null when the holiday has been removed (no linked TimeOff).
-        public int? LinkedTimeOffId { get; set; }
     }
 }

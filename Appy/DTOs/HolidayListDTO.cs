@@ -2,10 +2,10 @@
 
 namespace Appy.DTOs
 {
-    // Lean projection for the holidays list — only what a row renders, plus LinkedTimeOffId for
-    // navigation (non-null → open the linked TimeOff; null → the holiday is removed). Full details
-    // (country, original date, notes) are fetched on open, not carried in the list.
-    public class HolidayListItemDTO
+    // Merged holiday view for the holidays list — the ImportedHoliday flattened together with its
+    // linked TimeOff's current (edited) state, so a row can render date/time and the edited badge
+    // without a second fetch. LinkedTimeOffId is null when the holiday has been removed.
+    public class HolidayListDTO
     {
         public int Id { get; set; }
         public string Name { get; set; }

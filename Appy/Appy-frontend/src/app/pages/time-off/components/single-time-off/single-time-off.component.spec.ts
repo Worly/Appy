@@ -18,34 +18,43 @@ function make(opts: { timeOffService?: any; holidayService?: any; notifyDialogSe
   );
 }
 
-// A TimeOff carrying its embedded holiday, exactly as GET /timeoff/get/{id} returns for an imported holiday.
-function holidayTimeOff(holiday: Partial<HolidayDTO> = {}): TimeOff {
-  const h: HolidayDTO = {
-    id: 1, name: "Easter Monday", countryCode: "HR", date: "2026-04-13", originalDate: "2026-04-06",
-    isAllDay: true, isEdited: false, linkedTimeOffId: 5, ...holiday,
-  };
+// A holiday-linked TimeOff: the TimeOff carries the current (possibly edited) values, the embedded
+// holiday is the immutable original snapshot.
+function holidayTimeOff(current: Partial<{ startDate: string; isAllDay: boolean; timeFrom: string; timeTo: string }>, original: Partial<HolidayDTO> = {}): TimeOff {
+  const holiday: HolidayDTO = { id: 1, name: "Easter Monday", countryCode: "HR", date: "2026-04-06", ...original };
   return new TimeOff({
-    id: h.linkedTimeOffId ?? 0, label: h.name, recurrence: TimeOffRecurrence.OneOff,
-    startDate: h.date, endDate: h.date, isAllDay: h.isAllDay, timeFrom: h.timeFrom, timeTo: h.timeTo,
-    holiday: h,
+    id: 5, label: holiday.name, recurrence: TimeOffRecurrence.OneOff,
+    startDate: current.startDate ?? holiday.date, endDate: current.startDate ?? holiday.date,
+    isAllDay: current.isAllDay ?? true, timeFrom: current.timeFrom, timeTo: current.timeTo,
+    holiday,
   });
 }
 
 describe("SingleTimeOffComponent — holiday mode", () => {
-  it("applies the embedded holiday and computes the Changes rows for an edited one", () => {
-    const t = holidayTimeOff({ date: "2026-04-13", originalDate: "2026-04-06", isAllDay: false, timeFrom: "12:00:00", timeTo: "17:00:00", isEdited: true });
+  it("derives the edited state by comparing the TimeOff against the original snapshot", () => {
+    // Original 06 Apr all-day; current moved to 13 Apr and timed.
+    const t = holidayTimeOff({ startDate: "2026-04-13", isAllDay: false, timeFrom: "12:00:00", timeTo: "17:00:00" }, { date: "2026-04-06" });
     const c = make({ timeOffService: { get: () => of(t) } });
     c.id = 5;
 
     expect(c.isHoliday).toBe(true);
-    expect(c.isHolidayEdited).toBe(true);
     expect(c.changedDate).toBe(true);   // 13 Apr vs 06 Apr
     expect(c.changedTime).toBe(true);   // timed vs all-day
+    expect(c.isHolidayEdited).toBe(true);
+  });
+
+  it("treats an untouched holiday as not edited", () => {
+    const t = holidayTimeOff({ startDate: "2026-04-06", isAllDay: true }, { date: "2026-04-06" });
+    const c = make({ timeOffService: { get: () => of(t) } });
+    c.id = 5;
+
+    expect(c.isHoliday).toBe(true);
+    expect(c.isHolidayEdited).toBe(false);
   });
 
   it("reverts and emits onChanged, keyed on the ImportedHoliday id", (done) => {
     const revert = jasmine.createSpy("revert").and.returnValue(of(undefined));
-    const t = holidayTimeOff({ id: 9, isEdited: true, isAllDay: false, timeFrom: "12:00:00", timeTo: "17:00:00" });
+    const t = holidayTimeOff({ startDate: "2026-04-13", isAllDay: false, timeFrom: "12:00:00", timeTo: "17:00:00" }, { id: 9, date: "2026-04-06" });
     const c = make({ timeOffService: { get: () => of(t) }, holidayService: { revert } });
     c.id = 5;
     c.onChanged.subscribe(() => { expect(revert).toHaveBeenCalledWith(9); done(); });

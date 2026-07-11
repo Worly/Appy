@@ -16,10 +16,7 @@ function make(holidayService: any, notifyDialogService: any = { yesNoDialog: () 
 }
 
 function removedHoliday(id: number): Holiday {
-  return new Holiday({
-    id, name: "New Year", countryCode: "HR", date: "2026-01-01", originalDate: "2026-01-01",
-    isAllDay: true, isEdited: false, linkedTimeOffId: undefined,
-  });
+  return new Holiday({ id, name: "New Year", countryCode: "HR", date: "2026-01-01" });
 }
 
 describe("RemovedHolidayComponent", () => {

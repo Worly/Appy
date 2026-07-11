@@ -22,31 +22,24 @@ namespace Appy.Domain
         // The provider-computed date — immutable; the import job's match key together with (FacilityId, CountryCode).
         public DateOnly Date { get; set; }
 
-        // The holiday view merges immutable provenance (this row) with its current linked TimeOff.
-        // A null linkedTimeOff means the holiday was removed; the effective date/time then fall back
-        // to the provider snapshot.
-        public HolidayDTO GetDTO(TimeOff? linkedTimeOff)
+        // The immutable provider snapshot — a 1:1 view of this row. Embedded in the TimeOff DTO, which
+        // separately carries the edited values, so "edited" is derived by comparing the two.
+        public HolidayDTO GetDTO()
         {
             return new HolidayDTO
             {
                 Id = Id,
                 Name = Name,
                 CountryCode = CountryCode,
-                Date = linkedTimeOff?.StartDate ?? Date,
-                OriginalDate = Date,
-                IsAllDay = linkedTimeOff?.IsAllDay ?? true,
-                TimeFrom = linkedTimeOff?.TimeFrom,
-                TimeTo = linkedTimeOff?.TimeTo,
-                Notes = linkedTimeOff?.Notes,
-                IsEdited = IsEditedBy(linkedTimeOff),
-                LinkedTimeOffId = linkedTimeOff?.Id,
+                Date = Date,
             };
         }
 
-        // Lean list projection: only what a holidays-list row renders, plus LinkedTimeOffId for navigation.
-        public HolidayListItemDTO GetListDTO(TimeOff? linkedTimeOff)
+        // Merged list projection: this row flattened with its linked TimeOff's current (edited) state.
+        // A null linkedTimeOff means the holiday was removed.
+        public HolidayListDTO GetListDTO(TimeOff? linkedTimeOff)
         {
-            return new HolidayListItemDTO
+            return new HolidayListDTO
             {
                 Id = Id,
                 Name = Name,
@@ -54,13 +47,9 @@ namespace Appy.Domain
                 IsAllDay = linkedTimeOff?.IsAllDay ?? true,
                 TimeFrom = linkedTimeOff?.TimeFrom,
                 TimeTo = linkedTimeOff?.TimeTo,
-                IsEdited = IsEditedBy(linkedTimeOff),
+                IsEdited = linkedTimeOff != null && (linkedTimeOff.StartDate != Date || !linkedTimeOff.IsAllDay),
                 LinkedTimeOffId = linkedTimeOff?.Id,
             };
         }
-
-        // Edited ⇔ a linked TimeOff exists whose date differs from the provider snapshot, or is not all-day.
-        private bool IsEditedBy(TimeOff? linkedTimeOff)
-            => linkedTimeOff != null && (linkedTimeOff.StartDate != Date || !linkedTimeOff.IsAllDay);
     }
 }

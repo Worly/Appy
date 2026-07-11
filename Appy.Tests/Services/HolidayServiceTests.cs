@@ -148,16 +148,18 @@ namespace Appy.Tests.Services
         }
 
         [Fact]
-        public async Task GetById_ReturnsHolidayWithDerivedState()
+        public async Task GetById_ReturnsOriginalSnapshot_IgnoringLinkedTimeOffEdits()
         {
-            SeedHoliday(1, Today.AddDays(5), "HR", Linked(Today.AddDays(5), allDay: false));
+            // Linked TimeOff moved to +9 and made timed, but GetById reports the original provider snapshot.
+            SeedHoliday(1, Today.AddDays(5), "HR", Linked(Today.AddDays(9), allDay: false));
 
             var dto = await service.GetById(1, FacilityId);
 
             dto.Should().NotBeNull();
             dto!.Id.Should().Be(1);
-            dto.IsEdited.Should().BeTrue();
-            dto.LinkedTimeOffId.Should().NotBeNull();
+            dto.Name.Should().Be("H1");
+            dto.CountryCode.Should().Be("HR");
+            dto.Date.Should().Be(Today.AddDays(5)); // original date, not the edited +9
         }
 
         [Fact]
