@@ -12,6 +12,7 @@ import { SingleTimeOffListItemComponent } from "./components/single-time-off-lis
 import { TimeOffListComponent } from "./components/time-off-list/time-off-list.component";
 import { SingleTimeOffComponent } from "./components/single-time-off/single-time-off.component";
 import { RemovedHolidayComponent } from "./components/removed-holiday/removed-holiday.component";
+import { TimeOffDetailsCardComponent } from "./components/time-off-details-card/time-off-details-card.component";
 import { AllDayTimeOffPickerComponent } from "./components/all-day-time-off-picker/all-day-time-off-picker.component";
 
 @NgModule({
@@ -22,6 +23,7 @@ import { AllDayTimeOffPickerComponent } from "./components/all-day-time-off-pick
     TimeOffListComponent,
     SingleTimeOffComponent,
     RemovedHolidayComponent,
+    TimeOffDetailsCardComponent,
     AllDayTimeOffPickerComponent,
   ],
   imports: [

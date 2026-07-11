@@ -1,29 +1,11 @@
 <app-loading *ngIf="isLoading"></app-loading>
 
-<div *ngIf="!isLoading && holiday != null" class="time-off-details" data-test="holiday-details">
-  <div class="header">
-    <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
-    <div class="title struck">{{ holiday.name }}</div>
-    <span class="badge badge-removed" data-test="holiday-badge-removed">{{ "pages.time-off.REMOVED" | translate }}</span>
-  </div>
-
-  <div class="provenance">
-    {{ "pages.time-off.PUBLIC_HOLIDAY" | translate }} · {{ holiday.countryCode }}
-  </div>
-
-  <div class="info-card">
-    <div class="info-row">
-      <fa-icon icon="calendar-days" [fixedWidth]="true"></fa-icon>
-      <div>{{ schedule }}</div>
-    </div>
-    <div class="info-row">
-      <fa-icon icon="clock" [fixedWidth]="true"></fa-icon>
-      <div>{{ time }}</div>
-    </div>
-  </div>
-
+<app-time-off-details-card *ngIf="!isLoading && holiday != null"
+  [label]="holiday.name" [struck]="true" badge="removed"
+  [countryCode]="holiday.countryCode"
+  [schedule]="schedule" [time]="time" dataTest="holiday-details">
   <div class="action-bar">
     <app-button [text]="'pages.time-off.RESTORE' | translate" icon="rotate-left" color="success"
       (onClick)="openRestoreDialog()" data-test="holiday-restore" style="margin-left: auto"></app-button>
   </div>
-</div>
+</app-time-off-details-card>

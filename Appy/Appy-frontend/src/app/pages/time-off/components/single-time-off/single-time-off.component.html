@@ -1,42 +1,18 @@
 <app-loading *ngIf="isLoading"></app-loading>
 
-<div *ngIf="!isLoading && timeOff != null" class="time-off-details"
-  [attr.data-test]="isHoliday ? 'holiday-details' : null">
-  <div class="header">
-    <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
-    <div class="title">{{ title }}</div>
-    <span *ngIf="isHolidayEdited" class="badge badge-edited">{{ "pages.time-off.EDITED" | translate }}</span>
-  </div>
-
-  <div class="provenance" *ngIf="isHoliday">
-    {{ "pages.time-off.PUBLIC_HOLIDAY" | translate }} · {{ holidayModel?.countryCode }}
-  </div>
-
-  <div class="info-card">
-    <div class="info-row">
-      <fa-icon icon="calendar-days" [fixedWidth]="true"></fa-icon>
-      <div>{{ schedule }}</div>
-    </div>
-    <div class="info-row" *ngIf="dateRange">
-      <fa-icon icon="calendar-week" [fixedWidth]="true"></fa-icon>
-      <div>{{ dateRange }}</div>
-    </div>
-    <div class="info-row" *ngIf="dayCount" data-test="time-off-day-count">
-      <fa-icon icon="calendar-day" [fixedWidth]="true"></fa-icon>
-      <div>{{ dayCount }}</div>
-    </div>
-    <div class="info-row">
-      <fa-icon icon="clock" [fixedWidth]="true"></fa-icon>
-      <div>{{ time }}</div>
-    </div>
-  </div>
+<app-time-off-details-card *ngIf="!isLoading && timeOff != null"
+  [label]="title"
+  [badge]="isHolidayEdited ? 'edited' : undefined"
+  [countryCode]="isHoliday ? holidayModel?.countryCode : undefined"
+  [schedule]="schedule" [dateRange]="dateRange" [dayCount]="dayCount" [time]="time"
+  [dataTest]="isHoliday ? 'holiday-details' : undefined">
 
   <div class="notes" *ngIf="notes">
     <div class="notes-title">{{ "pages.time-off.NOTES" | translate }}</div>
     <div class="notes-body">{{ notes }}</div>
   </div>
 
-  <div *ngIf="isHolidayEdited" class="info-card changes-block" data-test="holiday-changes">
+  <div *ngIf="isHolidayEdited" class="changes-block" data-test="holiday-changes">
     <div class="changes-title">{{ "pages.time-off.CHANGED_FROM_ORIGINAL" | translate }}</div>
     <div class="changes-row" *ngIf="changedDate">
       <span class="changes-key">{{ "pages.time-off.DATE" | translate }}</span>
@@ -59,4 +35,4 @@
       [attr.data-test]="isHoliday ? 'holiday-edit' : 'time-off-edit-button'"
       [style.margin-left]="isHoliday ? null : 'auto'"></app-button>
   </div>
-</div>
+</app-time-off-details-card>
