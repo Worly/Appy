@@ -1,25 +1,25 @@
 <app-loading *ngIf="isLoading"></app-loading>
 
 <app-time-off-details-card *ngIf="!isLoading && timeOff != null"
-  [label]="title"
+  [label]="timeOff.label!"
   [badge]="isHolidayEdited ? 'edited' : undefined"
-  [countryCode]="isHoliday ? holidayModel?.countryCode : undefined"
+  [countryCode]="timeOff.holiday?.countryCode ?? undefined"
   [schedule]="schedule" [dateRange]="dateRange" [dayCount]="dayCount" [time]="time"
-  [dataTest]="isHoliday ? 'holiday-details' : undefined">
+  [dataTest]="timeOff.holiday != null ? 'holiday-details' : undefined">
 
-  <div class="notes" *ngIf="notes">
+  <div class="notes" *ngIf="timeOff.notes">
     <div class="notes-title">{{ "pages.time-off.NOTES" | translate }}</div>
-    <div class="notes-body">{{ notes }}</div>
+    <div class="notes-body">{{ timeOff.notes }}</div>
   </div>
 
-  <div *ngIf="isHolidayEdited" class="changes-block" data-test="holiday-changes">
+  <div *ngIf="timeOff.holiday != null && isHolidayEdited" class="changes-block" data-test="holiday-changes">
     <div class="changes-title">{{ "pages.time-off.CHANGED_FROM_ORIGINAL" | translate }}</div>
-    <div class="changes-row" *ngIf="changedDate">
+    <div class="changes-row" *ngIf="!timeOff.startDate!.isSame(timeOff.holiday.date, 'date')">
       <span class="changes-key">{{ "pages.time-off.DATE" | translate }}</span>
-      <span class="changes-old">{{ holidayModel?.date.format("DD.MM.YYYY, dddd") }}</span> →
-      <span>{{ timeOff?.startDate?.format("DD.MM.YYYY, dddd") }}</span>
+      <span class="changes-old">{{ timeOff.holiday.date.format("DD.MM.YYYY, dddd") }}</span> →
+      <span>{{ timeOff.startDate!.format("DD.MM.YYYY, dddd") }}</span>
     </div>
-    <div class="changes-row" *ngIf="changedTime">
+    <div class="changes-row" *ngIf="!timeOff.isAllDay">
       <span class="changes-key">{{ "pages.time-off.TIME" | translate }}</span>
       <span class="changes-old">{{ "pages.time-off.ALL_DAY" | translate }}</span> → <span>{{ time }}</span>
     </div>
@@ -29,10 +29,10 @@
   </div>
 
   <div class="action-bar">
-    <app-button *ngIf="isHoliday" [text]="'pages.time-off.REMOVE' | translate" icon="trash" color="danger"
+    <app-button *ngIf="timeOff.holiday != null" [text]="'pages.time-off.REMOVE' | translate" icon="trash" color="danger"
       (onClick)="openRemoveDialog()" data-test="holiday-remove" style="margin-left: auto"></app-button>
     <app-button [text]="'EDIT' | translate" icon="pen" (onClick)="edit()"
-      [attr.data-test]="isHoliday ? 'holiday-edit' : 'time-off-edit-button'"
-      [style.margin-left]="isHoliday ? null : 'auto'"></app-button>
+      [attr.data-test]="timeOff.holiday != null ? 'holiday-edit' : 'time-off-edit-button'"
+      [style.margin-left]="timeOff.holiday != null ? null : 'auto'"></app-button>
   </div>
 </app-time-off-details-card>

@@ -35,16 +35,10 @@ export class SingleTimeOffComponent implements OnDestroy {
   public dayCount: string = "";
   public time: string = "";
 
-  // The immutable holiday snapshot embedded in the loaded TimeOff (null for a plain time-off). The
-  // TimeOff carries the current/edited values; "edited" is derived by comparing the two.
-  public holidayModel?: Holiday;
   public isHolidayEdited = false;
   public changedDate = false;
   public changedTime = false;
 
-  public get isHoliday(): boolean { return this.holidayModel != null; }
-  public get title(): string { return this.holidayModel?.name ?? this.timeOff?.label ?? ""; }
-  public get notes(): string | undefined { return this.timeOff?.notes; }
 
   private sub?: Subscription;
 
@@ -63,7 +57,6 @@ export class SingleTimeOffComponent implements OnDestroy {
   private setDatasource(id: number | undefined): void {
     this.sub?.unsubscribe();
     this.timeOff = undefined;
-    this.holidayModel = undefined;
     this.isHolidayEdited = this.changedDate = this.changedTime = false;
     if (id == null) return;
 
@@ -77,17 +70,12 @@ export class SingleTimeOffComponent implements OnDestroy {
       this.schedule = timeOffScheduleText(t, tr, lang);
       this.dateRange = timeOffRecurringRangeText(t, tr);
       this.time = timeOffTimeText(t, tr);
+      this.dayCount = timeOffDayCountText(t, tr, lang);
 
-      this.holidayModel = t.holiday;
       if (t.holiday != null) {
-        // A holiday is a single day, so no multi-day count. Edited = the TimeOff differs from the
-        // original snapshot (a different date, or not all-day).
-        this.dayCount = "";
         this.changedDate = t.startDate != null && !t.startDate.isSame(t.holiday.date, "date");
         this.changedTime = !t.isAllDay;
         this.isHolidayEdited = this.changedDate || this.changedTime;
-      } else {
-        this.dayCount = timeOffDayCountText(t, tr, lang);
       }
     });
   }
@@ -109,8 +97,8 @@ export class SingleTimeOffComponent implements OnDestroy {
 
   private confirmHolidayAction(confirmKey: string, confirmDataTest: string, action: (id: number) => Observable<void>): void {
     this.notifyDialogService.yesNoDialog(this.translateService.translate(confirmKey), { confirmDataTest }).subscribe((ok: boolean) => {
-      if (!ok || this.holidayModel == null) return;
-      action(this.holidayModel.id).subscribe(() => {
+      if (!ok || this.timeOff?.holiday == null) return;
+      action(this.timeOff.holiday.id).subscribe(() => {
         this.onChanged.next();
         this.onDone.next();
       });
