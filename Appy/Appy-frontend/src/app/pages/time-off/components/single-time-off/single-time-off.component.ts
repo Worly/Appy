@@ -1,12 +1,12 @@
 import { Component, EventEmitter, Input, OnDestroy, Output } from "@angular/core";
 import { Router } from "@angular/router";
 import { Observable, Subscription } from "rxjs";
-import { TimeOff, TimeOffRecurrence } from "src/app/models/time-off";
+import { TimeOff } from "src/app/models/time-off";
 import { Holiday } from "src/app/models/holiday";
 import { TranslateService } from "src/app/components/translate/translate.service";
 import { TimeOffService } from "../../services/time-off.service";
 import { HolidayService } from "../../services/holiday.service";
-import { timeOffDayCountText, timeOffRecurringRangeText, timeOffScheduleText, timeOffTimeText } from "../../time-off-display";
+import { holidayAsTimeOff, timeOffDayCountText, timeOffRecurringRangeText, timeOffScheduleText, timeOffTimeText } from "../../time-off-display";
 import { NotifyDialogService } from "src/app/components/notify-dialog/notify-dialog.service";
 
 @Component({
@@ -73,16 +73,7 @@ export class SingleTimeOffComponent implements OnDestroy {
     this.isHolidayEdited = h.isEdited && !h.isRemoved;
     this.changedDate = h.date != null && h.originalDate != null && !h.date.isSame(h.originalDate, "date");
     this.changedTime = !h.isAllDay;
-    // Build via DTO constructor so property setters (which trigger validation) fire only once, after initProperties.
-    const proj = new TimeOff({
-      id: 0,
-      recurrence: TimeOffRecurrence.OneOff,
-      startDate: h.date?.format("YYYY-MM-DD"),
-      endDate: h.date?.format("YYYY-MM-DD"),
-      isAllDay: h.isAllDay,
-      timeFrom: h.timeFrom?.format("HH:mm:ss"),
-      timeTo: h.timeTo?.format("HH:mm:ss"),
-    });
+    const proj = holidayAsTimeOff(h);
     const tr = (k: string) => this.translateService.translate(k);
     this.schedule = timeOffScheduleText(proj, tr, this.translateService.getSelectedLanguageCode());
     this.time = timeOffTimeText(proj, tr);
@@ -99,14 +90,19 @@ export class SingleTimeOffComponent implements OnDestroy {
     this.isLoading = true;
     this.sub = this.timeOffService.get(id).subscribe(t => {
       this.timeOff = t;
+      this.isLoading = false;
+
+      // An imported holiday carries its full holiday view; applyHoliday owns all display state for it.
+      if (t.holiday != null) {
+        this.applyHoliday(t.holiday);
+        return;
+      }
+
       const tr = (k: string) => this.translateService.translate(k);
       this.schedule = timeOffScheduleText(t, tr, this.translateService.getSelectedLanguageCode());
       this.dateRange = timeOffRecurringRangeText(t, tr);
       this.dayCount = timeOffDayCountText(t, tr, this.translateService.getSelectedLanguageCode());
       this.time = timeOffTimeText(t, tr);
-      this.isLoading = false;
-
-      if (t.holiday != null) this.applyHoliday(t.holiday);
     });
   }
 

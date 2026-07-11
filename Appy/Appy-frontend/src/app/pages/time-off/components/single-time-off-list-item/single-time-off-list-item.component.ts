@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { Holiday } from "src/app/models/holiday";
-import { TimeOff, TimeOffRecurrence } from "src/app/models/time-off";
+import { TimeOff } from "src/app/models/time-off";
 import { TranslateService } from "src/app/components/translate/translate.service";
-import { timeOffRecurringRangeText, timeOffScheduleText, timeOffTimeText } from "../../time-off-display";
+import { holidayAsTimeOff, timeOffRecurringRangeText, timeOffScheduleText, timeOffTimeText } from "../../time-off-display";
 
 @Component({
   selector: "app-single-time-off-list-item",
@@ -40,13 +40,7 @@ export class SingleTimeOffListItemComponent {
   private renderHoliday(): void {
     const h = this._holiday;
     if (h == null) return;
-    const proj = new TimeOff();
-    proj.recurrence = TimeOffRecurrence.OneOff;
-    proj.startDate = h.date;
-    proj.endDate = h.date;
-    proj.isAllDay = h.isAllDay;
-    proj.timeFrom = h.timeFrom;
-    proj.timeTo = h.timeTo;
+    const proj = holidayAsTimeOff(h);
 
     const tr = (k: string) => this.translateService.translate(k);
     this.label = h.name;
