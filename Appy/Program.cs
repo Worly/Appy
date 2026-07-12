@@ -90,7 +90,9 @@ builder.Services.AddScheduler(config =>
     {
         c.CronSchedule = "0 3 * * *"; // daily at 03:00 UTC
         c.CronTimeZone = "utc";
-        c.RunImmediately = false;
+        // Also run on startup: materialization is idempotent and cheap, and this guarantees a server
+        // that's never up at 03:00 UTC still fills the window.
+        c.RunImmediately = true;
     });
 
     config.AddUnobservedTaskExceptionHandler(sp =>
