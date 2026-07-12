@@ -40,6 +40,7 @@ namespace Appy.Domain
         {
             Appointment.OnModelCreating(modelBuilder);
             Client.OnModelCreating(modelBuilder);
+            ImportedHoliday.OnModelCreating(modelBuilder);
         }
 
         public void UpdateDatabase()

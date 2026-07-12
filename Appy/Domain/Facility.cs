@@ -14,7 +14,6 @@ namespace Appy.Domain
 
         public ClientNotificationsSettings? ClientNotificationsSettings { get; set; }
         public HolidayImportSettings? HolidayImportSettings { get; set; }
-        public List<ImportedHoliday> ImportedHolidays { get; set; } = new();
 
         public FacilityDTO GetDTO()
         {

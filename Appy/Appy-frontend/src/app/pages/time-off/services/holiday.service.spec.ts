@@ -14,14 +14,6 @@ describe("HolidayService — cache invalidation", () => {
     return { svc, http, cache };
   }
 
-  it("remove() invalidates holiday, time-off and appointment keys", (done) => {
-    const { svc, cache } = make();
-    svc.remove(7).subscribe(() => {
-      expect(cache.invalidate).toHaveBeenCalledWith(holidayKeys.all, timeOffKeys.all, appointmentKeys.all);
-      done();
-    });
-  });
-
   it("revert() and restore() invalidate the same keys", (done) => {
     const { svc, cache } = make();
     svc.revert(7).subscribe(() => {

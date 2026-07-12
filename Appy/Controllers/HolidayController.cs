@@ -62,22 +62,6 @@ namespace Appy.Controllers
             return Ok(result);
         }
 
-        [HttpPut("edit/{id}")]
-        [Authorize]
-        public async Task<ActionResult> Edit(int id, HolidayEditDTO dto)
-        {
-            await holidayService.Edit(id, dto, HttpContext.SelectedFacility());
-            return Ok();
-        }
-
-        [HttpPut("remove/{id}")]
-        [Authorize]
-        public async Task<ActionResult> Remove(int id)
-        {
-            await holidayService.Remove(id, HttpContext.SelectedFacility());
-            return Ok();
-        }
-
         [HttpPut("revert/{id}")]
         [Authorize]
         public async Task<ActionResult> Revert(int id)

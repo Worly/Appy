@@ -2,7 +2,6 @@ import { Component, EventEmitter, Input, OnDestroy, Output } from "@angular/core
 import { Router } from "@angular/router";
 import { Observable, Subscription } from "rxjs";
 import { TimeOff } from "src/app/models/time-off";
-import { Holiday } from "src/app/models/holiday";
 import { TranslateService } from "src/app/components/translate/translate.service";
 import { TimeOffService } from "../../services/time-off.service";
 import { HolidayService } from "../../services/holiday.service";
@@ -88,17 +87,21 @@ export class SingleTimeOffComponent implements OnDestroy {
   }
 
   public openRevertDialog(): void {
-    this.confirmHolidayAction("pages.time-off.REVERT_CONFIRM", "holiday-revert-confirm", id => this.holidayService.revert(id));
+    // Reverting resets the holiday to its original snapshot, keyed on the ImportedHoliday id.
+    this.confirmHolidayAction("pages.time-off.REVERT_CONFIRM", "holiday-revert-confirm",
+      () => this.holidayService.revert(this.timeOff!.holiday!.id));
   }
 
   public openRemoveDialog(): void {
-    this.confirmHolidayAction("pages.time-off.REMOVE_CONFIRM", "holiday-remove-confirm", id => this.holidayService.remove(id));
+    // Removing a holiday is just deleting its TimeOff; the ImportedHoliday snapshot persists (dangling).
+    this.confirmHolidayAction("pages.time-off.REMOVE_CONFIRM", "holiday-remove-confirm",
+      () => this.timeOffService.delete(this._id!));
   }
 
-  private confirmHolidayAction(confirmKey: string, confirmDataTest: string, action: (id: number) => Observable<void>): void {
+  private confirmHolidayAction(confirmKey: string, confirmDataTest: string, action: () => Observable<void>): void {
     this.notifyDialogService.yesNoDialog(this.translateService.translate(confirmKey), { confirmDataTest }).subscribe((ok: boolean) => {
       if (!ok || this.timeOff?.holiday == null) return;
-      action(this.timeOff.holiday.id).subscribe(() => {
+      action().subscribe(() => {
         this.onChanged.next();
         this.onDone.next();
       });

@@ -1,7 +1,6 @@
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
-import { of } from "rxjs";
 import { TimeOffRecurrence } from "src/app/models/time-off";
 import { Holiday } from "src/app/models/holiday";
 import { DayOfWeek } from "src/app/models/working-hours";
@@ -15,7 +14,7 @@ dayjs.extend(isSameOrBefore);
 // exercise it on a bare instance without Angular's TestBed — matching this codebase's habit of
 // unit-testing logic directly (see time-off-display.spec.ts).
 function makeComponent(): TimeOffEditComponent {
-  return new TimeOffEditComponent(null as any, null as any, null as any, null as any, null as any);
+  return new TimeOffEditComponent(null as any, null as any, null as any, null as any);
 }
 
 describe("TimeOffEditComponent — From/To linkage", () => {
@@ -82,7 +81,7 @@ describe("TimeOffEditComponent — delete confirmation", () => {
       delete: jasmine.createSpy("delete").and.callFake(fakeObs),
       stop: jasmine.createSpy("stop").and.callFake(fakeObs),
     };
-    const c = new TimeOffEditComponent(service as any, null as any, null as any, null as any, null as any);
+    const c = new TimeOffEditComponent(service as any, null as any, null as any, null as any);
     c.isNew = false;
     return { c, service };
   }
@@ -180,7 +179,7 @@ describe("TimeOffEditComponent — recurring save dialog gate", () => {
       saveWithSplit: jasmine.createSpy("saveWithSplit").and.callFake(fakeObs),
       addNew: jasmine.createSpy("addNew").and.callFake(fakeObs),
     };
-    const c = new TimeOffEditComponent(service as any, null as any, null as any, null as any, null as any);
+    const c = new TimeOffEditComponent(service as any, null as any, null as any, null as any);
     c.isNew = false;
     c.type = "recurring";
     c.timeOff.recurrence = TimeOffRecurrence.Weekly;
@@ -238,7 +237,7 @@ describe("TimeOffEditComponent — new time-off defaults", () => {
         queryParamMap: { get: () => type },   // ?type=oneoff|recurring
       },
     };
-    const c = new TimeOffEditComponent(null as any, route as any, null as any, null as any, null as any);
+    const c = new TimeOffEditComponent(null as any, route as any, null as any, null as any);
     c.ngOnInit();
     return c;
   }
@@ -255,57 +254,42 @@ describe("TimeOffEditComponent — new time-off defaults", () => {
 });
 
 describe("TimeOffEditComponent — holiday mode", () => {
-  it("saves via HolidayService.edit with a single-day date and time", () => {
-    const holidayService = { edit: jasmine.createSpy("edit").and.returnValue(of(undefined)) };
-    // (timeOffService, route, location, translateService, holidayService)
-    const c = new TimeOffEditComponent(null as any, null as any, { back: () => {} } as any, null as any, holidayService as any);
+  const fakeObs = () => ({ subscribe: () => ({ unsubscribe() {} }) });
+
+  // A holiday is a plain one-off TimeOff carrying a snapshot, so it saves/deletes through the same
+  // TimeOffService paths as any one-off — never a holiday-specific endpoint.
+  function makeHoliday(service: any): TimeOffEditComponent {
+    const c = new TimeOffEditComponent(service as any, null as any, { back: () => {} } as any, null as any);
     c.isHolidayMode = true;
     c.timeOff.holiday = new Holiday({ id: 42, name: "Easter Monday", countryCode: "HR", date: "2026-04-06" });
     c.isNew = false;
+    c.type = "oneoff";
     c.timeOff.recurrence = TimeOffRecurrence.OneOff;
     c.timeOff.startDate = dayjs("2026-04-13");
     c.timeOff.endDate = dayjs("2026-04-13");
+    c.timeOff.label = "Easter Monday";
+    return c;
+  }
+
+  it("saves the holiday's TimeOff in place via TimeOffService (no fork dialog)", () => {
+    const service = { saveWithSplit: jasmine.createSpy("saveWithSplit").and.callFake(fakeObs) };
+    const c = makeHoliday(service);
     c.timeOff.isAllDay = false;
     c.timeOff.timeFrom = dayjs("2026-04-13T12:00:00");
     c.timeOff.timeTo = dayjs("2026-04-13T17:00:00");
-    c.timeOff.label = "Easter Monday";
 
     c.save();
 
-    expect(holidayService.edit).toHaveBeenCalledWith(42, jasmine.objectContaining({ date: "2026-04-13", isAllDay: false, timeFrom: "12:00:00", timeTo: "17:00:00" }));
+    expect(service.saveWithSplit).toHaveBeenCalledWith(c.timeOff, undefined);
   });
 
-  it("saves all-day holiday via HolidayService.edit with nulled time fields", () => {
-    const holidayService = { edit: jasmine.createSpy("edit").and.returnValue(of(undefined)) };
-    const c = new TimeOffEditComponent(null as any, null as any, { back: () => {} } as any, null as any, holidayService as any);
-    c.isHolidayMode = true;
-    c.timeOff.holiday = new Holiday({ id: 42, name: "Easter Monday", countryCode: "HR", date: "2026-04-06" });
-    c.isNew = false;
-    c.timeOff.recurrence = TimeOffRecurrence.OneOff;
-    c.timeOff.startDate = dayjs("2026-04-13");
-    c.timeOff.endDate = dayjs("2026-04-13");
-    c.timeOff.isAllDay = true;
-    c.timeOff.label = "Easter Monday";
-
-    c.save();
-
-    expect(holidayService.edit).toHaveBeenCalledWith(42, jasmine.objectContaining({ date: "2026-04-13", isAllDay: true, timeFrom: undefined, timeTo: undefined }));
-  });
-
-  it("deletes holiday via HolidayService.remove", () => {
-    const holidayService = { remove: jasmine.createSpy("remove").and.returnValue(of(undefined)) };
-    const c = new TimeOffEditComponent(null as any, null as any, { back: () => {} } as any, null as any, holidayService as any);
-    c.isHolidayMode = true;
-    c.timeOff.holiday = new Holiday({ id: 42, name: "Easter Monday", countryCode: "HR", date: "2026-04-06" });
-    c.isNew = false;
-    c.timeOff.recurrence = TimeOffRecurrence.OneOff;
-    c.timeOff.startDate = dayjs("2026-04-13");
-    c.timeOff.endDate = dayjs("2026-04-13");
-    c.timeOff.label = "Easter Monday";
+  it("deletes the holiday's TimeOff via TimeOffService after confirmation", () => {
+    const service = { delete: jasmine.createSpy("delete").and.callFake(fakeObs) };
+    const c = makeHoliday(service);
 
     c.delete();
     c.confirmDelete();
 
-    expect(holidayService.remove).toHaveBeenCalledWith(42);
+    expect(service.delete).toHaveBeenCalledWith(c.timeOff.id);
   });
 });

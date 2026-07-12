@@ -81,12 +81,3 @@ export class HolidayImportSettings {
     return { countryCode: this.countryCode };
   }
 }
-
-// Body for PUT /holiday/edit/{id}.
-export interface HolidayEditRequest {
-  date: string;        // YYYY-MM-DD
-  isAllDay: boolean;
-  timeFrom?: string;   // HH:mm:ss
-  timeTo?: string;     // HH:mm:ss
-  notes?: string;
-}

@@ -37,7 +37,7 @@ describe("SingleTimeOffComponent — holiday mode", () => {
     const c = make({ timeOffService: { get: () => of(t) } });
     c.id = 5;
 
-    expect(c.isHoliday).toBe(true);
+    expect(c.timeOff?.holiday).toBeTruthy();
     expect(c.changedDate).toBe(true);   // 13 Apr vs 06 Apr
     expect(c.changedTime).toBe(true);   // timed vs all-day
     expect(c.isHolidayEdited).toBe(true);
@@ -48,7 +48,7 @@ describe("SingleTimeOffComponent — holiday mode", () => {
     const c = make({ timeOffService: { get: () => of(t) } });
     c.id = 5;
 
-    expect(c.isHoliday).toBe(true);
+    expect(c.timeOff?.holiday).toBeTruthy();
     expect(c.isHolidayEdited).toBe(false);
   });
 
@@ -62,12 +62,22 @@ describe("SingleTimeOffComponent — holiday mode", () => {
     c.openRevertDialog();
   });
 
+  it("removes the holiday by deleting its linked TimeOff via TimeOffService", (done) => {
+    const del = jasmine.createSpy("delete").and.returnValue(of(undefined));
+    const t = holidayTimeOff({ startDate: "2026-04-06", isAllDay: true }, { date: "2026-04-06" });
+    const c = make({ timeOffService: { get: () => of(t), delete: del } });
+    c.id = 5;
+    c.onChanged.subscribe(() => { expect(del).toHaveBeenCalledWith(5); done(); }); // the TimeOff id, not the holiday id
+
+    c.openRemoveDialog();
+  });
+
   it("treats a plain time-off (no embedded holiday) as not a holiday", () => {
     const t = new TimeOff({ id: 3, label: "Vacation", recurrence: TimeOffRecurrence.OneOff, startDate: "2026-04-13", endDate: "2026-04-15", isAllDay: true });
     const c = make({ timeOffService: { get: () => of(t) } });
     c.id = 3;
 
-    expect(c.isHoliday).toBe(false);
+    expect(c.timeOff?.holiday).toBeUndefined();
     expect(c.schedule).not.toBe("");
   });
 });

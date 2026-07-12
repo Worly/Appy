@@ -7,7 +7,6 @@ import { Subscription } from 'rxjs';
 import { DayOfWeek } from 'src/app/models/working-hours';
 import { TimeOff, TimeOffRecurrence } from 'src/app/models/time-off';
 import { TimeOffService } from '../../services/time-off.service';
-import { HolidayService } from '../../services/holiday.service';
 import { canStopRecurring, timeOffDayCountText } from '../../time-off-display';
 import { DialogComponent } from 'src/app/components/dialog/dialog.component';
 import { SegmentedOption } from 'src/app/components/segmented-control/segmented-control.component';
@@ -29,7 +28,8 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
   public hasEndDate: boolean = false;
 
   // A holiday-linked time-off edits in "holiday mode": read-only label, single date, no recurrence
-  // or fork dialog, saved/removed via HolidayService. Derived from the loaded TimeOff's embedded holiday.
+  // or fork dialog. It still saves/deletes as the plain one-off TimeOff it is. Derived from the
+  // loaded TimeOff's embedded holiday.
   public isHolidayMode: boolean = false;
 
   @ViewChild("splitDialog") splitDialog?: DialogComponent;
@@ -102,7 +102,6 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private location: Location,
     private translateService: TranslateService,
-    private holidayService: HolidayService,
   ) { }
 
   ngOnInit(): void {
@@ -232,19 +231,6 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
   }
 
   public save(): void {
-    if (this.isHolidayMode) {
-      if (!this.timeOff.validate()) return;
-      this.isLoading = true;
-      this.subs.push(this.holidayService.edit(this.timeOff.holiday!.id, {
-        date: this.timeOff.startDate!.format("YYYY-MM-DD"),
-        isAllDay: this.timeOff.isAllDay,
-        timeFrom: this.timeOff.isAllDay ? undefined : this.timeOff.timeFrom?.format("HH:mm:ss"),
-        timeTo: this.timeOff.isAllDay ? undefined : this.timeOff.timeTo?.format("HH:mm:ss"),
-        notes: this.timeOff.notes,
-      }).subscribe({ next: () => this.goBack(), error: () => { this.isLoading = false; } }));
-      return;
-    }
-
     if (!this.timeOff.validate()) return;
 
     // A recurring edit can fork the rule's timeline — but only when the user changed the rule's
@@ -306,15 +292,9 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
   public delete(): void {
     if (this.isNew) return;
 
-    if (this.isHolidayMode) {
-      this.canStop = false;
-      this.deleteMode = "remove";
-      this.deleteDialog?.open();
-      return;
-    }
-
     // Every delete goes through a confirmation dialog. For an active, already-started recurring
-    // rule it also offers "stop" (keep history) vs full delete; otherwise it's a plain confirm.
+    // rule it also offers "stop" (keep history) vs full delete; otherwise (one-offs, including
+    // holidays) it's a plain confirm that deletes the TimeOff outright.
     this.canStop = canStopRecurring(this.timeOff, dayjs());
     this.deleteMode = "stop";
     this.deleteDialog?.open();
@@ -322,11 +302,6 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
 
   public confirmDelete(): void {
     this.deleteDialog?.close();
-    if (this.isHolidayMode) {
-      this.isLoading = true;
-      this.subs.push(this.holidayService.remove(this.timeOff.holiday!.id).subscribe({ next: () => this.goBack(), error: () => { this.isLoading = false; } }));
-      return;
-    }
     if (this.canStop && this.deleteMode === "stop") this.stop();
     else this.deleteNow();
   }

@@ -5,7 +5,7 @@ import { map, Observable } from "rxjs";
 import { appConfig } from "src/app/app.config";
 import { TimeOffScope } from "src/app/models/time-off";
 import {
-  Holiday, HolidayDTO, HolidayEditRequest, HolidayImportSettings, HolidayImportSettingsDTO,
+  Holiday, HolidayDTO, HolidayImportSettings, HolidayImportSettingsDTO,
   HolidayListItem, HolidayListDTO, SupportedCountry,
 } from "src/app/models/holiday";
 import { CacheCoordinator } from "src/app/shared/services/data/cache-coordinator";
@@ -61,11 +61,6 @@ export class HolidayService {
       this.httpClient.get<SupportedCountry[]>(`${appConfig.apiUrl}${this.controllerName}/getSupportedCountries`));
   }
 
-  public edit(id: number, req: HolidayEditRequest): Observable<void> {
-    return this.mutate(`edit/${id}`, req);
-  }
-
-  public remove(id: number): Observable<void> { return this.mutate(`remove/${id}`, null); }
   public revert(id: number): Observable<void> { return this.mutate(`revert/${id}`, null); }
   public restore(id: number): Observable<void> { return this.mutate(`restore/${id}`, null); }
 

@@ -34,6 +34,6 @@ Envelope returned by `GET /appointment/getList`. Contains `Appointments` (the pa
 ## Holiday DTOs
 
 - `HolidayImportSettingsDTO` — `{ CountryCode? }`: settings snapshot returned by get/save settings endpoints. Produced by `HolidayImportSettings.GetDTO()`.
-- `HolidayListDTO` — merged list projection for `GET /holiday/getList`: `Id`, `Name`, `Date` (effective), `IsAllDay`, `TimeFrom?`, `TimeTo?`, `IsEdited`, `LinkedTimeOffId?` (null ⇒ removed). The ImportedHoliday flattened with its linked TimeOff's current state — what a row renders plus the link. Built by `ImportedHoliday.GetListDTO(TimeOff?)`.
+- `HolidayListDTO` — merged list projection for `GET /holiday/getList`: `Id`, `Name`, `Date` (effective), `IsAllDay`, `TimeFrom?`, `TimeTo?`, `IsEdited`, `LinkedTimeOffId?` (null ⇒ removed). The ImportedHoliday flattened with its linked TimeOff's current state — what a row renders plus the link. Built by `ImportedHoliday.GetListDTO()` (reads its `LinkedTimeOff` nav).
 - `HolidayDTO` — the **original** provider snapshot, 1:1 with the `ImportedHoliday` row: `Id`, `Name`, `CountryCode`, `Date`. Built by `ImportedHoliday.GetDTO()`. Embedded in `TimeOffDTO.Holiday` (the TimeOff carries the edits) and returned by `GET /holiday/get/{id}` for the removed-holiday view.
-- `HolidayEditDTO` — request body for editing a holiday's time/notes: `Date`, `IsAllDay`, `TimeFrom?`, `TimeTo?`, `Notes?` (Task 5).
+- Editing/removing a holiday reuses `TimeOffDTO` via `TimeOffController` (a holiday is a one-off TimeOff), so there is no holiday-specific edit DTO.

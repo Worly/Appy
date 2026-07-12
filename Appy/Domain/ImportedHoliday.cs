@@ -1,4 +1,5 @@
 using Appy.DTOs;
+using Microsoft.EntityFrameworkCore;
 
 #pragma warning disable CS8618
 
@@ -22,6 +23,10 @@ namespace Appy.Domain
         // The provider-computed date — immutable; the import job's match key together with (FacilityId, CountryCode).
         public DateOnly Date { get; set; }
 
+        // The TimeOff materialized from this holiday, or null when the holiday was removed. The TimeOff
+        // owns the FK (ImportedHolidayId); this is its 1:1 inverse so callers can Include it directly.
+        public TimeOff? LinkedTimeOff { get; set; }
+
         // The immutable provider snapshot — a 1:1 view of this row. Embedded in the TimeOff DTO, which
         // separately carries the edited values, so "edited" is derived by comparing the two.
         public HolidayDTO GetDTO()
@@ -36,20 +41,46 @@ namespace Appy.Domain
         }
 
         // Merged list projection: this row flattened with its linked TimeOff's current (edited) state.
-        // A null linkedTimeOff means the holiday was removed.
-        public HolidayListDTO GetListDTO(TimeOff? linkedTimeOff)
+        // A null LinkedTimeOff means the holiday was removed.
+        public HolidayListDTO GetListDTO()
         {
             return new HolidayListDTO
             {
                 Id = Id,
                 Name = Name,
-                Date = linkedTimeOff?.StartDate ?? Date,
-                IsAllDay = linkedTimeOff?.IsAllDay ?? true,
-                TimeFrom = linkedTimeOff?.TimeFrom,
-                TimeTo = linkedTimeOff?.TimeTo,
-                IsEdited = linkedTimeOff != null && (linkedTimeOff.StartDate != Date || !linkedTimeOff.IsAllDay),
-                LinkedTimeOffId = linkedTimeOff?.Id,
+                Date = LinkedTimeOff?.StartDate ?? Date,
+                IsAllDay = LinkedTimeOff?.IsAllDay ?? true,
+                TimeFrom = LinkedTimeOff?.TimeFrom,
+                TimeTo = LinkedTimeOff?.TimeTo,
+                IsEdited = LinkedTimeOff != null && (LinkedTimeOff.StartDate != Date || !LinkedTimeOff.IsAllDay),
+                LinkedTimeOffId = LinkedTimeOff?.Id,
             };
+        }
+
+        // A fresh all-day one-off TimeOff for this holiday's original date, linked back to this row.
+        // The single source of the holiday→TimeOff shape, used when materializing and when restoring.
+        public TimeOff ToTimeOff()
+        {
+            return new TimeOff
+            {
+                FacilityId = FacilityId,
+                Label = Name,
+                Recurrence = TimeOffRecurrence.OneOff,
+                StartDate = Date,
+                EndDate = Date,
+                IsAllDay = true,
+                ImportedHoliday = this,
+            };
+        }
+
+        public static void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder
+                .Entity<ImportedHoliday>()
+                .HasOne(h => h.LinkedTimeOff)
+                .WithOne(t => t.ImportedHoliday)
+                .HasForeignKey<TimeOff>(t => t.ImportedHolidayId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

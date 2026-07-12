@@ -1,6 +1,5 @@
 using Appy.Domain;
 using Appy.DTOs;
-using Appy.Exceptions;
 using Appy.Services;
 using Appy.Services.Holidays;
 using FluentAssertions;
@@ -35,7 +34,7 @@ namespace Appy.Tests.Services
         {
             var h = new ImportedHoliday { Id = id, FacilityId = FacilityId, CountryCode = country, Name = "H" + id, Date = date };
             holidays.Add(h);
-            if (timeOff != null) { timeOff.ImportedHolidayId = id; timeOff.ImportedHoliday = h; timeOffs.Add(timeOff); }
+            if (timeOff != null) { timeOff.ImportedHolidayId = id; timeOff.ImportedHoliday = h; h.LinkedTimeOff = timeOff; timeOffs.Add(timeOff); }
             return h;
         }
 
@@ -169,58 +168,6 @@ namespace Appy.Tests.Services
         }
 
         [Fact]
-        public async Task Edit_SetsTimeOnLinkedTimeOff_KeepingSingleDay()
-        {
-            var linked = Linked(Today.AddDays(5));
-            SeedHoliday(1, Today.AddDays(5), "HR", linked);
-
-            await service.Edit(1, new HolidayEditDTO
-            {
-                Date = Today.AddDays(6),
-                IsAllDay = false,
-                TimeFrom = new TimeOnly(12, 0),
-                TimeTo = new TimeOnly(17, 0),
-                Notes = "Closing early",
-            }, FacilityId);
-
-            linked.StartDate.Should().Be(Today.AddDays(6));
-            linked.EndDate.Should().Be(Today.AddDays(6)); // stays single-day
-            linked.IsAllDay.Should().BeFalse();
-            linked.TimeFrom.Should().Be(new TimeOnly(12, 0));
-            linked.TimeTo.Should().Be(new TimeOnly(17, 0));
-            linked.Notes.Should().Be("Closing early");
-            dbContextMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-        }
-
-        [Fact]
-        public async Task Edit_AllDay_ClearsTimeRange()
-        {
-            var linked = Linked(Today.AddDays(5), allDay: false);
-            linked.TimeFrom = new TimeOnly(12, 0);
-            linked.TimeTo = new TimeOnly(17, 0);
-            SeedHoliday(1, Today.AddDays(5), "HR", linked);
-
-            await service.Edit(1, new HolidayEditDTO { Date = Today.AddDays(5), IsAllDay = true }, FacilityId);
-
-            linked.IsAllDay.Should().BeTrue();
-            linked.TimeFrom.Should().BeNull();
-            linked.TimeTo.Should().BeNull();
-        }
-
-        [Fact]
-        public async Task Remove_DeletesLinkedTimeOff_KeepsImportedHoliday()
-        {
-            var linked = Linked(Today.AddDays(5));
-            SeedHoliday(1, Today.AddDays(5), "HR", linked);
-
-            await service.Remove(1, FacilityId);
-
-            dbContextMock.Verify(x => x.TimeOffs.Remove(linked), Times.Once);
-            dbContextMock.Verify(x => x.ImportedHolidays.Remove(It.IsAny<ImportedHoliday>()), Times.Never);
-            dbContextMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-        }
-
-        [Fact]
         public async Task Revert_ResetsDateAndTime_KeepsNotes()
         {
             var linked = Linked(Today.AddDays(9), allDay: false);
@@ -247,7 +194,7 @@ namespace Appy.Tests.Services
             await service.Restore(1, FacilityId);
 
             dbContextMock.Verify(x => x.TimeOffs.Add(It.Is<TimeOff>(t =>
-                t.ImportedHolidayId == 1 && t.StartDate == Today.AddDays(5) && t.EndDate == Today.AddDays(5)
+                t.ImportedHoliday!.Id == 1 && t.StartDate == Today.AddDays(5) && t.EndDate == Today.AddDays(5)
                 && t.IsAllDay && t.Notes == null && t.Label == "H1")), Times.Once);
             dbContextMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
