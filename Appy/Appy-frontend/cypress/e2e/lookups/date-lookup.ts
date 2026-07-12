@@ -62,7 +62,11 @@ export function dateLookup(elementSelector: string) {
           cy.get("mat-calendar").contains(wantedDate.format("MMM"), { matchCase: false }).click();
         }
 
-        cy.get("mat-calendar").contains(wantedDate.date()).click().then(() => {
+        // Match the day cell exactly and scope to the body cells — a bare contains(26) also matches
+        // the period label's year (e.g. "2026"), clicking the wrong element. The cell text carries
+        // surrounding whitespace, so tolerate it around the day number.
+        cy.get("mat-calendar .mat-calendar-body-cell-content")
+          .contains(new RegExp(`^\\s*${wantedDate.date()}\\s*$`)).click().then(() => {
           let cal = cy.$$("mat-calendar")
           if (cal.length > 0) {
             // If the calendar is still open, close it
