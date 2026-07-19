@@ -103,6 +103,11 @@ body {
     &:focus {
         outline: 1px solid rgb(var(--rgb-focus-outline));
     }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
 }
 
 .w-validation-message {

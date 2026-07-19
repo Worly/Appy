@@ -1,13 +1,17 @@
-<div class="time-off-row" (click)="onOpenView.emit()" data-test="time-off-row">
-  <div class="accent"></div>
+<div class="time-off-row" [class.removed]="view.removed" (click)="onOpenView.emit()" data-test="time-off-row">
+  <div class="accent" [class.accent-removed]="view.removed"></div>
   <div class="info">
-    <div class="label">{{ label }}</div>
+    <div class="label">
+      <span [class.struck]="view.removed">{{ view.label }}</span>
+      <span *ngIf="view.badge === 'edited'" class="badge badge-edited" data-test="holiday-badge-edited">{{ "pages.time-off.EDITED" | translate }}</span>
+      <span *ngIf="view.badge === 'removed'" class="badge badge-removed" data-test="holiday-badge-removed">{{ "pages.time-off.REMOVED" | translate }}</span>
+    </div>
     <div class="meta">
       <div class="meta-primary">
-        <span class="schedule">{{ schedule }}</span>
-        <span class="time">{{ time }}</span>
+        <span class="schedule">{{ view.schedule }}</span>
+        <span class="time">{{ view.time }}</span>
       </div>
-      <span class="date-range" *ngIf="dateRange">{{ dateRange }}</span>
+      <span class="date-range" *ngIf="view.dateRange">{{ view.dateRange }}</span>
     </div>
   </div>
   <fa-icon class="type-icon" [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>

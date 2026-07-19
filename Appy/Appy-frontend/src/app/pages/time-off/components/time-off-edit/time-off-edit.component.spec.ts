@@ -1,7 +1,8 @@
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
-import { TimeOff, TimeOffRecurrence } from "src/app/models/time-off";
+import { TimeOffRecurrence } from "src/app/models/time-off";
+import { Holiday } from "src/app/models/holiday";
 import { DayOfWeek } from "src/app/models/working-hours";
 import { TimeOffEditComponent } from "./time-off-edit.component";
 
@@ -231,6 +232,7 @@ describe("TimeOffEditComponent — new time-off defaults", () => {
   function makeNew(type: "oneoff" | "recurring"): TimeOffEditComponent {
     const route = {
       snapshot: {
+        data: {},
         paramMap: { get: () => null },        // no :id → isNew
         queryParamMap: { get: () => type },   // ?type=oneoff|recurring
       },
@@ -248,5 +250,46 @@ describe("TimeOffEditComponent — new time-off defaults", () => {
   it("defaults a new recurring rule to all-day", () => {
     const c = makeNew("recurring");
     expect(c.timeOff.isAllDay).toBe(true);
+  });
+});
+
+describe("TimeOffEditComponent — holiday mode", () => {
+  const fakeObs = () => ({ subscribe: () => ({ unsubscribe() {} }) });
+
+  // A holiday is a plain one-off TimeOff carrying a snapshot, so it saves/deletes through the same
+  // TimeOffService paths as any one-off — never a holiday-specific endpoint.
+  function makeHoliday(service: any): TimeOffEditComponent {
+    const c = new TimeOffEditComponent(service as any, null as any, { back: () => {} } as any, null as any);
+    c.isHolidayMode = true;
+    c.timeOff.holiday = new Holiday({ id: 42, name: "Easter Monday", countryCode: "HR", date: "2026-04-06" });
+    c.isNew = false;
+    c.type = "oneoff";
+    c.timeOff.recurrence = TimeOffRecurrence.OneOff;
+    c.timeOff.startDate = dayjs("2026-04-13");
+    c.timeOff.endDate = dayjs("2026-04-13");
+    c.timeOff.label = "Easter Monday";
+    return c;
+  }
+
+  it("saves the holiday's TimeOff in place via TimeOffService (no fork dialog)", () => {
+    const service = { saveWithSplit: jasmine.createSpy("saveWithSplit").and.callFake(fakeObs) };
+    const c = makeHoliday(service);
+    c.timeOff.isAllDay = false;
+    c.timeOff.timeFrom = dayjs("2026-04-13T12:00:00");
+    c.timeOff.timeTo = dayjs("2026-04-13T17:00:00");
+
+    c.save();
+
+    expect(service.saveWithSplit).toHaveBeenCalledWith(c.timeOff, undefined);
+  });
+
+  it("deletes the holiday's TimeOff via TimeOffService after confirmation", () => {
+    const service = { delete: jasmine.createSpy("delete").and.callFake(fakeObs) };
+    const c = makeHoliday(service);
+
+    c.delete();
+    c.confirmDelete();
+
+    expect(service.delete).toHaveBeenCalledWith(c.timeOff.id);
   });
 });

@@ -8,5 +8,6 @@ Registered as the first application middleware — immediately before `Exception
 - Opens a logging scope with `RequestId` = `HttpContext.TraceIdentifier`, so every log emitted while handling the request is correlated.
 - Times the request and logs one summary line on completion: method, path, status code, elapsed ms.
 - Picks the level by outcome: `< 500` → Information, `5xx` → Error.
+- Suppresses the summary line for successful `/health` checks (the Docker healthcheck polls every 10s), so they don't drown the log; a failing (`5xx`) health check is still logged at Error.
 
 See `Appy/CLAUDE.md` → Logging for the level conventions and the other correlation scopes (`UserId`, `FacilityId`).

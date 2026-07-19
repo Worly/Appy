@@ -78,6 +78,7 @@ import { faCalendarDay } from '@fortawesome/free-solid-svg-icons/faCalendarDay';
 import { faArrowsRotate } from '@fortawesome/free-solid-svg-icons/faArrowsRotate';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons/faArrowRight';
 import { faCircleInfo } from '@fortawesome/free-solid-svg-icons/faCircleInfo';
+import { faRotateLeft } from '@fortawesome/free-solid-svg-icons/faRotateLeft';
 
 import dayjs from "dayjs";
 import "dayjs/locale/hr";
@@ -161,7 +162,7 @@ export class AppModule {
     library.addIcons(
       faBars,
       faSpinner,
-      faAngleUp, faAngleDown, faAngleLeft, faAngleRight,
+      faAngleUp, faAngleDown, faAngleLeft, faAngleRight, faRotateLeft,
       faTimes, faPlus,
       faCaretDown, faCaretUp, faCaretLeft, faCaretRight, faArrowUp, faArrowLeft,
       faTrash, faPen, faReply,

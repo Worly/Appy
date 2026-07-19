@@ -1,38 +1,38 @@
 <app-loading *ngIf="isLoading"></app-loading>
 
-<div *ngIf="!isLoading && timeOff != null" class="time-off-details">
-  <div class="header">
-    <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
-    <div class="title">{{ timeOff.label }}</div>
-  </div>
+<app-time-off-details-card *ngIf="!isLoading && timeOff != null"
+  [label]="timeOff.label!"
+  [badge]="isHolidayEdited ? 'edited' : undefined"
+  [countryCode]="timeOff.holiday?.countryCode ?? undefined"
+  [timeOff]="timeOff"
+  [dataTest]="timeOff.holiday != null ? 'holiday-details' : undefined">
 
-  <div class="info-card">
-    <div class="info-row">
-      <fa-icon icon="calendar-days" [fixedWidth]="true"></fa-icon>
-      <div>{{ schedule }}</div>
-    </div>
-    <div class="info-row" *ngIf="dateRange">
-      <fa-icon icon="calendar-week" [fixedWidth]="true"></fa-icon>
-      <div>{{ dateRange }}</div>
-    </div>
-    <div class="info-row" *ngIf="dayCount" data-test="time-off-day-count">
-      <fa-icon icon="calendar-day" [fixedWidth]="true"></fa-icon>
-      <div>{{ dayCount }}</div>
-    </div>
-    <div class="info-row">
-      <fa-icon icon="clock" [fixedWidth]="true"></fa-icon>
-      <div>{{ time }}</div>
-    </div>
-  </div>
-
-  <div class="notes" *ngIf="timeOff.notes != null && timeOff.notes != ''">
+  <div class="notes" *ngIf="timeOff.notes">
     <div class="notes-title">{{ "pages.time-off.NOTES" | translate }}</div>
     <div class="notes-body">{{ timeOff.notes }}</div>
   </div>
 
-  <div class="action-bar">
-    <app-button data-test="time-off-edit-button" style="margin-left: auto" icon="pen"
-      [text]="'EDIT' | translate" (onClick)="goToEdit()">
-    </app-button>
+  <div *ngIf="timeOff.holiday != null && isHolidayEdited" class="changes-block" data-test="holiday-changes">
+    <div class="changes-title">{{ "pages.time-off.CHANGED_FROM_ORIGINAL" | translate }}</div>
+    <div class="changes-row" *ngIf="!timeOff.startDate!.isSame(timeOff.holiday.date, 'date')">
+      <span class="changes-key">{{ "pages.time-off.DATE" | translate }}</span>
+      <span class="changes-old">{{ timeOff.holiday.date.format("DD.MM.YYYY, dddd") }}</span> →
+      <span>{{ timeOff.startDate!.format("DD.MM.YYYY, dddd") }}</span>
+    </div>
+    <div class="changes-row" *ngIf="!timeOff.isAllDay">
+      <span class="changes-key">{{ "pages.time-off.TIME" | translate }}</span>
+      <span class="changes-old">{{ "pages.time-off.ALL_DAY" | translate }}</span> → <span>{{ time }}</span>
+    </div>
+    <app-button class="revert-btn" look="transparent" icon="rotate-left" color="success"
+      [text]="'pages.time-off.REVERT_TO_ORIGINAL' | translate" (onClick)="openRevertDialog()"
+      data-test="holiday-revert"></app-button>
   </div>
-</div>
+
+  <div class="action-bar">
+    <app-button *ngIf="timeOff.holiday != null" [text]="'pages.time-off.REMOVE' | translate" icon="trash" color="danger"
+      (onClick)="openRemoveDialog()" data-test="holiday-remove" style="margin-left: auto"></app-button>
+    <app-button [text]="'EDIT' | translate" icon="pen" (onClick)="edit()"
+      [attr.data-test]="timeOff.holiday != null ? 'holiday-edit' : 'time-off-edit-button'"
+      [style.margin-left]="timeOff.holiday != null ? null : 'auto'"></app-button>
+  </div>
+</app-time-off-details-card>

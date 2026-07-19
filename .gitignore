@@ -41,3 +41,5 @@ msbuild.wrn
 
 # Local Claude Code notes (machine-specific, not for PRs)
 .claude/
+# Superpowers brainstorming companion (local-only mockups)
+.superpowers/

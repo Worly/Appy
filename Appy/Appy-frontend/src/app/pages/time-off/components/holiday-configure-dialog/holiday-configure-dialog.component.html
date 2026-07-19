@@ -1,0 +1,34 @@
+<app-dialog #configureDialog>
+  <div class="configure-dialog" *ngIf="configureDialog.isOpen" data-test="holiday-configure-dialog">
+    <div class="configure-title">{{ "pages.time-off.CONFIGURE_AUTO_IMPORT" | translate }}</div>
+    <div class="configure-sub">{{ "pages.time-off.CONFIGURE_SUB" | translate }}</div>
+
+    <div class="w-input-container">
+      <label class="w-label">{{ "pages.time-off.COUNTRY" | translate }}</label>
+      <app-dropdown [items]="countries" [displayFunction]="countryDisplay" [fullWidth]="true" [matchTriggerWidth]="true"
+        [value]="selectedCountry" (valueChange)="selectedCountryCode = $event?.countryCode"
+        data-test="holiday-country-dropdown"></app-dropdown>
+    </div>
+
+    <div class="configure-actions">
+      <app-button [text]="'CANCEL' | translate" color="danger" look="normal" (onClick)="configureDialog.close()"></app-button>
+      <app-button [text]="'pages.time-off.IMPORT' | translate" color="success" look="solid"
+        [disabled]="savingSettings" [isLoading]="savingSettings" (onClick)="confirmConfigure()"
+        data-test="holiday-configure-save"></app-button>
+    </div>
+  </div>
+</app-dialog>
+
+<app-dialog #confirmChangeDialog>
+  <div class="configure-dialog" *ngIf="confirmChangeDialog.isOpen" data-test="holiday-change-confirm-dialog">
+    <div class="split-hint">
+      <fa-icon [icon]="['fas', 'circle-info']" aria-hidden="true"></fa-icon>
+      <span>{{ "pages.time-off.CHANGE_COUNTRY_WARNING" | translate }}</span>
+    </div>
+    <div class="configure-actions">
+      <app-button [text]="'CANCEL' | translate" color="danger" look="normal" (onClick)="confirmChangeDialog.close()"></app-button>
+      <app-button [text]="'CONFIRM' | translate" color="danger" look="solid" [disabled]="savingSettings"
+        (onClick)="saveSettings()" data-test="holiday-change-confirm"></app-button>
+    </div>
+  </div>
+</app-dialog>

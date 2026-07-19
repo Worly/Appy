@@ -17,6 +17,8 @@ EF Core entity classes that map directly to PostgreSQL tables. These are the can
 | `TimeOff` | Blocked availability (recurrence: OneOff/Weekly/Monthly; all-day or time range; optional bounds) |
 | `DashboardSettings` | Per-user per-facility UI preferences stored as a JSON blob |
 | `ClientNotificationsSettings` | Instagram API config and message templates for a Facility |
+| `HolidayImportSettings` | Per-facility holiday import config: ISO country code (null = off); PK = FacilityId. `GetDTO()` maps to `HolidayImportSettingsDTO` |
+| `ImportedHoliday` | One row per materialized public holiday occurrence; persists independently of its linked TimeOff (its 1:1 `LinkedTimeOff` nav). `GetDTO()` returns the original snapshot as a `HolidayDTO` (1:1 with this row); `GetListDTO()` merges it with `LinkedTimeOff`'s current state into a `HolidayListDTO` (`LinkedTimeOffId == null` ⇒ removed); `ToTimeOff()` builds a fresh all-day one-off TimeOff linked back to this row (used when materializing and restoring). Relationship configured in its `OnModelCreating` |
 
 ## Multi-Tenancy Pattern
 
@@ -28,6 +30,8 @@ Every data entity except `User` and `LoginSession` carries a `FacilityId` foreig
 - `User` → many `LoginSession`
 - `Facility` → many `Service`, `Client`, `Appointment`, `WorkingHour`
 - `Facility` → one `ClientNotificationsSettings`
+- `Facility` → one `HolidayImportSettings`; owns `ImportedHoliday` rows via their `FacilityId` (no collection nav on `Facility`, matching the other entities)
+- `TimeOff` ↔ `ImportedHoliday` — optional 1:1 (`TimeOff.ImportedHolidayId` FK / `ImportedHoliday.LinkedTimeOff` inverse; unique index; NoAction delete — removing a TimeOff does not delete the ImportedHoliday)
 - `Client` → many `ClientContact` (auto-included in all EF queries via `modelBuilder`)
 - `Appointment` → one `Service`, one `Client` — delete behavior is **NoAction**: appointments must be deleted before their referenced service/client can be deleted
 

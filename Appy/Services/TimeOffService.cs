@@ -36,7 +36,9 @@ namespace Appy.Services
 
         public async Task<TimeOff> GetById(int id, int facilityId)
         {
-            var t = await context.TimeOffs.FirstOrDefaultAsync(t => t.Id == id && t.FacilityId == facilityId);
+            var t = await context.TimeOffs
+                .Include(t => t.ImportedHoliday)
+                .FirstOrDefaultAsync(t => t.Id == id && t.FacilityId == facilityId);
             if (t == null)
                 throw new NotFoundException();
             return t;
@@ -47,7 +49,8 @@ namespace Appy.Services
             var today = DateOnly.FromDateTime(DateTime.Today);
 
             // Filter to the requested tab + scope on the DB so we never load the whole table.
-            var query = context.TimeOffs.Where(t => t.FacilityId == facilityId);
+            // Imported holidays live on the dedicated Holidays tab, so they never surface here.
+            var query = context.TimeOffs.Where(t => t.FacilityId == facilityId && t.ImportedHolidayId == null);
             query = type == TimeOffListType.OneOff
                 ? query.Where(t => t.Recurrence == TimeOffRecurrence.OneOff)
                 : query.Where(t => t.Recurrence != TimeOffRecurrence.OneOff);
@@ -108,6 +111,9 @@ namespace Appy.Services
                 && applyFrom.Value > t.StartDate;
 
             Validate(dto);
+
+            if (t.ImportedHolidayId != null)
+                ValidateHolidayEdit(t, dto);
 
             if (split)
             {
@@ -199,6 +205,19 @@ namespace Appy.Services
                         throw new ValidationException(nameof(TimeOffDTO.DayOfMonth), "pages.time-off.errors.INVALID_DAY_OF_MONTH");
                     break;
             }
+        }
+
+        // A materialized holiday is a single-day one-off whose label mirrors the provider's holiday name.
+        // The editor only exposes its date / time / notes; enforce the rest here so a request that bypasses
+        // the form can't turn a holiday into a multi-day or recurring block, or relabel it.
+        private static void ValidateHolidayEdit(TimeOff holiday, TimeOffDTO dto)
+        {
+            if (dto.Recurrence != TimeOffRecurrence.OneOff)
+                throw new ValidationException(nameof(TimeOffDTO.Recurrence), "pages.time-off.errors.HOLIDAY_RECURRENCE");
+            if (dto.EndDate != dto.StartDate)
+                throw new ValidationException(nameof(TimeOffDTO.EndDate), "pages.time-off.errors.HOLIDAY_SINGLE_DAY");
+            if (dto.Label != holiday.Label)
+                throw new ValidationException(nameof(TimeOffDTO.Label), "pages.time-off.errors.HOLIDAY_LABEL");
         }
 
         // Normalizes the entity: fields irrelevant to the chosen recurrence / all-day are nulled.

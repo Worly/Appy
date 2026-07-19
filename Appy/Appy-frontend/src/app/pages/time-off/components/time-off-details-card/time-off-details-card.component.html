@@ -1,0 +1,33 @@
+<div class="time-off-details" [attr.data-test]="dataTest ?? null">
+  <div class="header">
+    <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
+    <div class="title" [class.struck]="struck">{{ label }}</div>
+    <span *ngIf="badge === 'edited'" class="badge badge-edited">{{ "pages.time-off.EDITED" | translate }}</span>
+    <span *ngIf="badge === 'removed'" class="badge badge-removed" data-test="holiday-badge-removed">{{ "pages.time-off.REMOVED" | translate }}</span>
+  </div>
+
+  <div class="provenance" *ngIf="countryCode">
+    {{ "pages.time-off.PUBLIC_HOLIDAY" | translate }} · {{ countryCode }}
+  </div>
+
+  <div class="info-card">
+    <div class="info-row">
+      <fa-icon icon="calendar-days" [fixedWidth]="true"></fa-icon>
+      <div>{{ schedule }}</div>
+    </div>
+    <div class="info-row" *ngIf="dateRange">
+      <fa-icon icon="calendar-week" [fixedWidth]="true"></fa-icon>
+      <div>{{ dateRange }}</div>
+    </div>
+    <div class="info-row" *ngIf="dayCount" data-test="time-off-day-count">
+      <fa-icon icon="calendar-day" [fixedWidth]="true"></fa-icon>
+      <div>{{ dayCount }}</div>
+    </div>
+    <div class="info-row">
+      <fa-icon icon="clock" [fixedWidth]="true"></fa-icon>
+      <div>{{ time }}</div>
+    </div>
+  </div>
+
+  <ng-content></ng-content>
+</div>

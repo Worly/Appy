@@ -1,5 +1,6 @@
 import { Dayjs } from "dayjs";
 import { TimeOff, TimeOffRecurrence } from "src/app/models/time-off";
+import { HolidayListItem } from "src/app/models/holiday";
 import { DayOfWeek } from "src/app/models/working-hours";
 
 const DAY_OF_WEEK_KEYS: Record<DayOfWeek, string> = {
@@ -12,13 +13,18 @@ const DAY_OF_WEEK_KEYS: Record<DayOfWeek, string> = {
   [DayOfWeek.Saturday]: "SATURDAY",
 };
 
-/** Humanized recurrence schedule, e.g. "02.01.2026 – 05.01.2026", "02.01.2026" (single day), "Every Monday", "Every 9th of month". */
+/** A calendar date with its localized weekday after it, e.g. "21.06.2026, Monday". */
+export function timeOffDateText(d: Dayjs): string {
+  return d.format("DD.MM.YYYY, dddd");
+}
+
+/** Humanized recurrence schedule, e.g. "02.01.2026, Friday – 05.01.2026, Monday", "02.01.2026, Friday" (single day), "Every Monday", "Every 9th of month". */
 export function timeOffScheduleText(t: TimeOff, translate: (key: string) => string, languageCode: string = "en"): string {
   switch (t.recurrence) {
     case TimeOffRecurrence.OneOff: {
-      const start = t.startDate?.format("DD.MM.YYYY") ?? "";
-      const end = t.endDate?.format("DD.MM.YYYY") ?? "";
-      // Collapse a single-day one-off (identical start/end) to one date instead of "from – to".
+      const start = t.startDate != null ? timeOffDateText(t.startDate) : "";
+      const end = t.endDate != null ? timeOffDateText(t.endDate) : "";
+      // A single-day one-off (identical start/end) renders as one date; a span renders as "from – to".
       return start === end ? start : `${start} – ${end}`;
     }
     case TimeOffRecurrence.Weekly:
@@ -49,14 +55,14 @@ function ordinalDay(day: number, languageCode: string): string {
 }
 
 /**
- * Effective date span for a recurring rule, e.g. "22.06.2026 – 31.12.2026" (bounded) or
- * "From 22.06.2026" (open-ended). Empty for one-offs, whose schedule text already is their date range.
+ * Effective date span for a recurring rule, e.g. "22.06.2026, Monday – 31.12.2026, Thursday" (bounded)
+ * or "From 22.06.2026, Monday" (open-ended). Empty for one-offs, whose schedule text already is their date range.
  */
 export function timeOffRecurringRangeText(t: TimeOff, translate: (key: string) => string): string {
   if (t.recurrence === TimeOffRecurrence.OneOff || t.startDate == null) return "";
-  const start = t.startDate.format("DD.MM.YYYY");
+  const start = timeOffDateText(t.startDate);
   return t.endDate != null
-    ? `${start} – ${t.endDate.format("DD.MM.YYYY")}`
+    ? `${start} – ${timeOffDateText(t.endDate)}`
     : `${translate("pages.time-off.FROM_DATE")} ${start}`;
 }
 
@@ -83,11 +89,64 @@ function isPluralOne(count: number, languageCode: string): boolean {
   return count % 10 === 1 && count % 100 !== 11;
 }
 
+/**
+ * A holiday projected onto the one-off, single-day TimeOff shape the display helpers expect. Accepts
+ * the full Holiday or the lean HolidayListItem — only its date/time fields matter here. Built via the
+ * DTO constructor so the model's validating setters fire once, after initProperties.
+ */
+export function holidayAsTimeOff(h: { date: Dayjs; isAllDay: boolean; timeFrom?: Dayjs; timeTo?: Dayjs }): TimeOff {
+  return new TimeOff({
+    id: 0,
+    recurrence: TimeOffRecurrence.OneOff,
+    startDate: h.date.format("YYYY-MM-DD"),
+    endDate: h.date.format("YYYY-MM-DD"),
+    isAllDay: h.isAllDay,
+    timeFrom: h.timeFrom?.format("HH:mm:ss"),
+    timeTo: h.timeTo?.format("HH:mm:ss"),
+  });
+}
+
 /** "All day" or a "HH:mm – HH:mm" range. */
 export function timeOffTimeText(t: TimeOff, translate: (key: string) => string): string {
   return t.isAllDay
     ? translate("pages.time-off.ALL_DAY")
     : `${t.timeFrom?.format("HH:mm") ?? ""} – ${t.timeTo?.format("HH:mm") ?? ""}`;
+}
+
+// The flattened view a list row renders — the single shape both a TimeOff and a Holiday collapse to,
+// so the row component stays purely presentational and unaware of which one it came from.
+export interface TimeOffRowView {
+  label: string;
+  schedule: string;
+  dateRange: string;
+  time: string;
+  badge: "none" | "edited" | "removed";
+  removed: boolean;
+}
+
+/** Row view for a time-off rule (One-off / Recurring lists) — never edited/removed (those are holiday-only badges). */
+export function timeOffRowView(t: TimeOff, translate: (key: string) => string, languageCode: string = "en"): TimeOffRowView {
+  return {
+    label: t.label ?? "",
+    schedule: timeOffScheduleText(t, translate, languageCode),
+    dateRange: timeOffRecurringRangeText(t, translate),
+    time: timeOffTimeText(t, translate),
+    badge: "none",
+    removed: false,
+  };
+}
+
+/** Row view for a holiday (Holidays tab) — a single-day projection, carrying its edited/removed badge. */
+export function holidayRowView(h: HolidayListItem, translate: (key: string) => string, languageCode: string = "en"): TimeOffRowView {
+  const proj = holidayAsTimeOff(h);
+  return {
+    label: h.name,
+    schedule: timeOffScheduleText(proj, translate, languageCode),
+    dateRange: "",
+    time: timeOffTimeText(proj, translate),
+    badge: h.isRemoved ? "removed" : (h.isEdited ? "edited" : "none"),
+    removed: h.isRemoved,
+  };
 }
 
 /**

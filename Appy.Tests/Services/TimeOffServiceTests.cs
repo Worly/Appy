@@ -255,6 +255,87 @@ namespace Appy.Tests.Services
                 service.Edit(10, dto, FacilityId, applyFrom: new DateOnly(2030, 6, 20)));
         }
 
+        // ---- Editing a materialized holiday (a one-off TimeOff with ImportedHolidayId) ----
+
+        private TimeOff SeedHoliday() => Seed(new TimeOff
+        {
+            Id = 30,
+            Recurrence = TimeOffRecurrence.OneOff,
+            StartDate = new DateOnly(2030, 12, 25),
+            EndDate = new DateOnly(2030, 12, 25),
+            Label = "Christmas",
+            IsAllDay = true,
+            ImportedHolidayId = 99,
+        });
+
+        [Fact]
+        public async Task Edit_Holiday_ThrowsWhenMadeMultiDay()
+        {
+            SeedHoliday();
+            var dto = new TimeOffDTO
+            {
+                Label = "Christmas",
+                Recurrence = TimeOffRecurrence.OneOff,
+                StartDate = new DateOnly(2030, 12, 25),
+                EndDate = new DateOnly(2030, 12, 26),
+                IsAllDay = true,
+            };
+            await Assert.ThrowsAsync<ValidationException>(() => service.Edit(30, dto, FacilityId));
+        }
+
+        [Fact]
+        public async Task Edit_Holiday_ThrowsWhenMadeRecurring()
+        {
+            SeedHoliday();
+            var dto = new TimeOffDTO
+            {
+                Label = "Christmas",
+                Recurrence = TimeOffRecurrence.Weekly,
+                DayOfWeek = DayOfWeek.Monday,
+                StartDate = new DateOnly(2030, 12, 25),
+                IsAllDay = true,
+            };
+            await Assert.ThrowsAsync<ValidationException>(() => service.Edit(30, dto, FacilityId));
+        }
+
+        [Fact]
+        public async Task Edit_Holiday_ThrowsWhenLabelChanged()
+        {
+            SeedHoliday();
+            var dto = new TimeOffDTO
+            {
+                Label = "Xmas",
+                Recurrence = TimeOffRecurrence.OneOff,
+                StartDate = new DateOnly(2030, 12, 25),
+                EndDate = new DateOnly(2030, 12, 25),
+                IsAllDay = true,
+            };
+            await Assert.ThrowsAsync<ValidationException>(() => service.Edit(30, dto, FacilityId));
+        }
+
+        [Fact]
+        public async Task Edit_Holiday_AllowsDateAndTimeChange()
+        {
+            var holiday = SeedHoliday();
+            var dto = new TimeOffDTO
+            {
+                Label = "Christmas",
+                Recurrence = TimeOffRecurrence.OneOff,
+                StartDate = new DateOnly(2030, 12, 26),
+                EndDate = new DateOnly(2030, 12, 26),
+                IsAllDay = false,
+                TimeFrom = new TimeOnly(9, 0),
+                TimeTo = new TimeOnly(17, 0),
+            };
+
+            var result = await service.Edit(30, dto, FacilityId);
+
+            Assert.Same(holiday, result);
+            Assert.Equal(new DateOnly(2030, 12, 26), result.StartDate);
+            Assert.False(result.IsAllDay);
+            Assert.Equal(new TimeOnly(9, 0), result.TimeFrom);
+        }
+
         // ---- StopRecurring ----
 
         [Fact]
@@ -526,6 +607,18 @@ namespace Appy.Tests.Services
             var page = await service.GetList(TimeOffListType.Recurring, TimeOffScope.Active, 0, 20, FacilityId);
 
             Assert.Equal(new[] { 1 }, page.Select(t => t.Id).ToArray()); // one-off excluded from Recurring
+        }
+
+        [Fact]
+        public async Task GetList_OneOff_ExcludesImportedHolidays()
+        {
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            Seed(new TimeOff { Id = 1, Recurrence = TimeOffRecurrence.OneOff, StartDate = today.AddDays(-5), EndDate = today.AddDays(10) });
+            Seed(new TimeOff { Id = 2, Recurrence = TimeOffRecurrence.OneOff, StartDate = today, EndDate = today, ImportedHolidayId = 99 }); // imported holiday
+
+            var page = await service.GetList(TimeOffListType.OneOff, TimeOffScope.Active, 0, 20, FacilityId);
+
+            Assert.Equal(new[] { 1 }, page.Select(t => t.Id).ToArray()); // imported holiday excluded
         }
 
         [Fact]

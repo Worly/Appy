@@ -2,6 +2,7 @@ using Appy.Domain;
 using Appy.Exceptions;
 using Appy.Services;
 using Appy.Services.Facilities;
+using Appy.Services.Holidays;
 using Appy.Services.MessagingServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -49,6 +50,10 @@ builder.Services.AddHttpClient<InstagramMessagingService>(client =>
 {
     client.BaseAddress = new Uri("https://graph.instagram.com/v21.0");
 });
+builder.Services.AddHttpClient<IHolidayProvider, NagerDateHolidayProvider>(client =>
+{
+    client.BaseAddress = new Uri("https://date.nager.at");
+});
 builder.Services.AddScoped<IMessagingServiceManager, MessagingServiceManager>();
 
 builder.Services.AddScoped<IUserService, UserService>();
@@ -58,6 +63,7 @@ builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IWorkingHourService, WorkingHourService>();
 builder.Services.AddScoped<ITimeOffService, TimeOffService>();
+builder.Services.AddScoped<IHolidayService, HolidayService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IClientNotificationsService, ClientNotificationsService>();
 builder.Services.AddScoped<IAppointmentReminderService, AppointmentReminderService>();
@@ -79,7 +85,15 @@ builder.Services.AddScheduler(config =>
         c.CronSchedule = "*/5 * * * *";
         c.CronTimeZone = "utc";
         c.RunImmediately = true;
-    }); 
+    });
+    config.AddJob<HolidayImportScheduledJob>(configure: c =>
+    {
+        c.CronSchedule = "0 3 * * *"; // daily at 03:00 UTC
+        c.CronTimeZone = "utc";
+        // Also run on startup: materialization is idempotent and cheap, and this guarantees a server
+        // that's never up at 03:00 UTC still fills the window.
+        c.RunImmediately = true;
+    });
 
     config.AddUnobservedTaskExceptionHandler(sp =>
     {

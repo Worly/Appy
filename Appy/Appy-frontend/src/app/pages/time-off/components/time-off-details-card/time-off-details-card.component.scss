@@ -1,0 +1,70 @@
+:host {
+  display: block;
+}
+
+.time-off-details {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  &>fa-icon {
+    color: rgb(var(--rgb-warning));
+    font-size: 1.2rem;
+  }
+
+  .title {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 1.4rem;
+    font-weight: bold;
+    word-break: break-word;
+
+    &.struck {
+      text-decoration: line-through;
+    }
+  }
+}
+
+.provenance {
+  font-size: 0.85rem;
+  color: rgba(var(--rgb-text), 0.6);
+}
+
+.info-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border-radius: var(--default-border-radius);
+  background-color: rgb(var(--rgb-input-background));
+
+  .info-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+}
+
+.badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 100px;
+}
+
+.badge-edited {
+  background: rgba(var(--rgb-warning), 0.2);
+  color: rgb(var(--rgb-warning));
+}
+
+.badge-removed {
+  background: rgb(var(--rgb-input-background));
+  color: rgba(var(--rgb-text), 0.45);
+}

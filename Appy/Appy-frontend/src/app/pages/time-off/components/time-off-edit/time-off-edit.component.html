@@ -2,8 +2,8 @@
 
 <div class="page" *ngIf="isLoaded">
   <div class="title-block">
-    <div class="w-title">{{ (isNew ? "pages.time-off.ADD" : "pages.time-off.TIME_OFF") | translate }}</div>
-    <div class="title-sub">{{ (type === 'oneoff' ? "pages.time-off.ONE_OFF" : "pages.time-off.RECURRING") | translate }}</div>
+    <div class="w-title">{{ (isHolidayMode ? "pages.time-off.HOLIDAY" : (isNew ? "pages.time-off.ADD" : "pages.time-off.TIME_OFF")) | translate }}</div>
+    <div class="title-sub" *ngIf="!isHolidayMode">{{ (type === 'oneoff' ? "pages.time-off.ONE_OFF" : "pages.time-off.RECURRING") | translate }}</div>
   </div>
 
   <!-- Details -->
@@ -15,7 +15,7 @@
 
     <div class="w-input-container">
       <label class="w-label">{{ "pages.time-off.LABEL" | translate }}</label>
-      <input class="w-input" type="text" [(ngModel)]="timeOff.label" data-test="time-off-label" />
+      <input class="w-input" type="text" [(ngModel)]="timeOff.label" [disabled]="isHolidayMode" data-test="time-off-label" />
       <div class="w-validation-message" *ngIf="timeOff.getValidationErrors('label')">{{ timeOff.getValidationErrors("label") | translate }}</div>
     </div>
 
@@ -35,10 +35,11 @@
     <!-- One-off: required start + end date (stacked full-width, like the recurring From/To) -->
     <ng-container *ngIf="type === 'oneoff'">
       <div class="w-input-container">
-        <label class="w-label">{{ "pages.time-off.FROM_DATE" | translate }}</label>
+        <label class="w-label">{{ (isHolidayMode ? "pages.time-off.DATE" : "pages.time-off.FROM_DATE") | translate }}</label>
         <app-date-selector [showDayOfWeek]="true" [date]="timeOff.startDate!" (dateChange)="onStartDateChange($event)"></app-date-selector>
       </div>
-      <div class="w-input-container">
+      <!-- Holiday: always single-day, so the To-date and day-count are not shown -->
+      <div class="w-input-container" *ngIf="!isHolidayMode">
         <div class="label-row">
           <label class="w-label">{{ "pages.time-off.TO_DATE" | translate }}</label>
           <span class="day-count" *ngIf="oneOffDayCountText" data-test="time-off-day-count">{{ oneOffDayCountText }}</span>
@@ -49,7 +50,7 @@
     </ng-container>
 
     <!-- Recurring: Weekly | Monthly segmented control + matching day picker + optional bounds -->
-    <ng-container *ngIf="type === 'recurring'">
+    <ng-container *ngIf="type === 'recurring' && !isHolidayMode">
       <app-segmented-control dataTest="time-off-recurrence-segment" [options]="recurrenceOptions"
         [value]="timeOff.recurrence" (valueChange)="setRecurrence($event)"></app-segmented-control>
 

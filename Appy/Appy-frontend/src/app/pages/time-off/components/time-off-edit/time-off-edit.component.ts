@@ -27,6 +27,11 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
   // they also have an end ("until") date. It never clears the start.
   public hasEndDate: boolean = false;
 
+  // A holiday-linked time-off edits in "holiday mode": read-only label, single date, no recurrence
+  // or fork dialog. It still saves/deletes as the plain one-off TimeOff it is. Derived from the
+  // loaded TimeOff's embedded holiday.
+  public isHolidayMode: boolean = false;
+
   @ViewChild("splitDialog") splitDialog?: DialogComponent;
   @ViewChild("deleteDialog") deleteDialog?: DialogComponent;
 
@@ -117,6 +122,8 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
           this.hasEndDate = t.endDate != null;
         }
 
+        // A time-off carrying an embedded holiday edits in holiday mode.
+        this.isHolidayMode = t.holiday != null;
         this.type = t.recurrence === TimeOffRecurrence.OneOff ? "oneoff" : "recurring";
         this.timeOff = t;
         this.originalStartDate = t.startDate;
@@ -286,7 +293,8 @@ export class TimeOffEditComponent implements OnInit, OnDestroy {
     if (this.isNew) return;
 
     // Every delete goes through a confirmation dialog. For an active, already-started recurring
-    // rule it also offers "stop" (keep history) vs full delete; otherwise it's a plain confirm.
+    // rule it also offers "stop" (keep history) vs full delete; otherwise (one-offs, including
+    // holidays) it's a plain confirm that deletes the TimeOff outright.
     this.canStop = canStopRecurring(this.timeOff, dayjs());
     this.deleteMode = "stop";
     this.deleteDialog?.open();

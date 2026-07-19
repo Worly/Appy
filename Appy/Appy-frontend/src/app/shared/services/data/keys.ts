@@ -48,3 +48,11 @@ export const timeOffKeys = {
     list: (type: string, scope: string) => ["timeOff", "list", type, scope] as const,
     detail: (id: number) => ["timeOff", "detail", id] as const,
 } satisfies EntityKeyFactory;
+
+export const holidayKeys = {
+    all: ["holiday"] as const,
+    list: (scope: string) => ["holiday", "list", scope] as const,
+    detail: (id: number) => ["holiday", "detail", id] as const,
+    settings: ["holiday", "settings"] as const,
+    countries: ["holiday", "countries"] as const,
+};

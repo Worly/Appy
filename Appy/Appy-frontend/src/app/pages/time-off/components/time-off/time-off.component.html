@@ -15,7 +15,7 @@
       data-test="time-off-add" [attr.title]="'pages.time-off.ADD' | translate"
       [attr.aria-label]="'pages.time-off.ADD' | translate"></app-button>
 
-    <app-button *ngIf="isHolidays" icon="gear" alignContent="center" (onClick)="configureAutoImport()"
+    <app-button *ngIf="isHolidays" icon="gear" alignContent="center" (onClick)="openConfigure()"
       data-test="time-off-configure-import" [attr.title]="'pages.time-off.CONFIGURE_AUTO_IMPORT' | translate"
       [attr.aria-label]="'pages.time-off.CONFIGURE_AUTO_IMPORT' | translate"></app-button>
   </div>
@@ -24,13 +24,13 @@
     (openDetails)="viewingId = $event; detailsDialog.open()">
   </app-time-off-list>
 
-  <div *ngIf="isHolidays" class="holidays-stub" data-test="time-off-holidays-stub">
-    <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
-    <div>{{ "pages.time-off.HOLIDAYS_COMING_SOON" | translate }}</div>
-  </div>
+  <app-holiday-list *ngIf="isHolidays" [scope]="scope" (configure)="openConfigure()"></app-holiday-list>
 </div>
 
+<!-- The One-off/Recurring list rows open the time-off details dialog by id. -->
 <app-dialog #detailsDialog>
   <app-single-time-off *ngIf="detailsDialog.isOpen" [id]="viewingId"
     (onDone)="detailsDialog.close()"></app-single-time-off>
 </app-dialog>
+
+<app-holiday-configure-dialog (saved)="onSettingsSaved()"></app-holiday-configure-dialog>

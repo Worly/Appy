@@ -2,6 +2,6 @@
     <div>{{text}}</div>
     <div class="my-buttons">
         <app-button *ngFor="let button of buttons" [text]="button.text" [look]="button.look" [color]="button.color" [width]="'100px'" alignContent="center"
-            (onClick)="buttonClicked(button)"></app-button>
+            [attr.data-test]="button.dataTest" (onClick)="buttonClicked(button)"></app-button>
     </div>
 </div>

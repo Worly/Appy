@@ -2,8 +2,9 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { DayOfWeek } from "src/app/models/working-hours";
+import { HolidayListItem } from "src/app/models/holiday";
 import { TimeOff, TimeOffRecurrence } from "src/app/models/time-off";
-import { canStopRecurring, timeOffDayCountText, timeOffRecurringRangeText, timeOffScheduleText, timeOffTimeText } from "./time-off-display";
+import { canStopRecurring, holidayRowView, timeOffDayCountText, timeOffRecurringRangeText, timeOffRowView, timeOffScheduleText, timeOffTimeText } from "./time-off-display";
 
 dayjs.extend(customParseFormat);
 dayjs.extend(isSameOrBefore);
@@ -16,7 +17,7 @@ describe("time-off-display", () => {
     t.recurrence = TimeOffRecurrence.OneOff;
     t.startDate = dayjs("2026-01-02");
     t.endDate = dayjs("2026-01-05");
-    expect(timeOffScheduleText(t, tr)).toBe("02.01.2026 – 05.01.2026");
+    expect(timeOffScheduleText(t, tr)).toBe("02.01.2026, Friday – 05.01.2026, Monday");
   });
 
   it("shows a single date when a one-off starts and ends on the same day", () => {
@@ -24,7 +25,7 @@ describe("time-off-display", () => {
     t.recurrence = TimeOffRecurrence.OneOff;
     t.startDate = dayjs("2026-01-02");
     t.endDate = dayjs("2026-01-02");
-    expect(timeOffScheduleText(t, tr)).toBe("02.01.2026");
+    expect(timeOffScheduleText(t, tr)).toBe("02.01.2026, Friday");
   });
 
   it("formats a weekly schedule", () => {
@@ -75,7 +76,7 @@ describe("time-off-display", () => {
     t.dayOfWeek = DayOfWeek.Monday;
     t.startDate = dayjs("2026-06-22");
     t.endDate = dayjs("2026-12-31");
-    expect(timeOffRecurringRangeText(t, tr)).toBe("22.06.2026 – 31.12.2026");
+    expect(timeOffRecurringRangeText(t, tr)).toBe("22.06.2026, Monday – 31.12.2026, Thursday");
   });
 
   it("shows an open-ended recurring rule's effective range as From <date>", () => {
@@ -83,7 +84,7 @@ describe("time-off-display", () => {
     t.recurrence = TimeOffRecurrence.Weekly;
     t.dayOfWeek = DayOfWeek.Monday;
     t.startDate = dayjs("2026-06-22");
-    expect(timeOffRecurringRangeText(t, tr)).toBe("pages.time-off.FROM_DATE 22.06.2026");
+    expect(timeOffRecurringRangeText(t, tr)).toBe("pages.time-off.FROM_DATE 22.06.2026, Monday");
   });
 
   it("has no effective range for one-offs (their schedule already is the date range)", () => {
@@ -204,5 +205,38 @@ describe("timeOffDayCountText", () => {
 
   it("is empty for an inverted range (To before From, mid-edit)", () => {
     expect(timeOffDayCountText(oneOff("2026-01-05", "2026-01-02"), en, "en")).toBe("");
+  });
+});
+
+describe("row views", () => {
+  it("builds a time-off row with no badge", () => {
+    const t = new TimeOff();
+    t.label = "Vacation";
+    t.recurrence = TimeOffRecurrence.OneOff;
+    t.startDate = dayjs("2026-01-02");
+    t.endDate = dayjs("2026-01-05");
+
+    const v = timeOffRowView(t, tr, "en");
+    expect(v.label).toBe("Vacation");
+    expect(v.schedule).not.toBe("");
+    expect(v.badge).toBe("none");
+    expect(v.removed).toBe(false);
+  });
+
+  it("builds an edited-holiday row with the edited badge and no date range", () => {
+    const h = new HolidayListItem({ id: 1, name: "Easter Monday", date: "2026-04-13", isAllDay: false, timeFrom: "12:00:00", timeTo: "17:00:00", isEdited: true, linkedTimeOffId: 10 });
+    const v = holidayRowView(h, tr, "en");
+    expect(v.label).toBe("Easter Monday");
+    expect(v.badge).toBe("edited");
+    expect(v.removed).toBe(false);
+    expect(v.dateRange).toBe("");
+    expect(v.time).not.toBe("");
+  });
+
+  it("builds a removed-holiday row with the removed badge", () => {
+    const h = new HolidayListItem({ id: 2, name: "Labour Day", date: "2026-05-01", isAllDay: true, isEdited: false, linkedTimeOffId: undefined });
+    const v = holidayRowView(h, tr, "en");
+    expect(v.badge).toBe("removed");
+    expect(v.removed).toBe(true);
   });
 });

@@ -12,6 +12,7 @@ export class NotifyDialogComponent implements OnInit {
     text: string,
     look: "solid" | "outlined" | "normal" | "transparent",
     color: "success" | "danger" | "normal",
+    dataTest?: string,
     onClick: () => void
   }[] = []
 

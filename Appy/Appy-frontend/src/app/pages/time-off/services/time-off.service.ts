@@ -4,13 +4,15 @@ import { map, Observable } from "rxjs";
 import { appConfig } from "src/app/app.config";
 import { TimeOff, TimeOffListType, TimeOffScope } from "src/app/models/time-off";
 import { BaseModelService } from "src/app/shared/services/base-model-service";
-import { appointmentKeys, timeOffKeys } from "src/app/shared/services/data/keys";
+import { appointmentKeys, holidayKeys, timeOffKeys } from "src/app/shared/services/data/keys";
 import { PagedResult } from "src/app/shared/services/data/contracts";
 
 @Injectable({ providedIn: "root" })
 export class TimeOffService extends BaseModelService<TimeOff, TimeOff> {
   constructor(injector: Injector) {
-    super(injector, TimeOff.ENTITY_TYPE, TimeOff, TimeOff, timeOffKeys, [appointmentKeys.all]);
+    // Holidays are TimeOffs (edited/removed through this service), so a mutation also refreshes the
+    // Holidays tab; appointments embed occurrences, so they refresh too.
+    super(injector, TimeOff.ENTITY_TYPE, TimeOff, TimeOff, timeOffKeys, [appointmentKeys.all, holidayKeys.all]);
   }
 
   /**

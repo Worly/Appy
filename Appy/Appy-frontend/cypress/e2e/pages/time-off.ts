@@ -59,11 +59,6 @@ export let timeOff = {
     return this;
   },
 
-  expectHolidaysStub() {
-    getElement("time-off-holidays-stub").should("exist");
-    return this;
-  },
-
   list() {
     this.checkView();
 
@@ -93,7 +88,8 @@ export let timeOff = {
   },
 };
 
-// The create/edit form.
+// The create/edit form. Also opened in holiday mode (locked label, single date) via the same
+// `/time-off/edit/:id` route when reached from the Holidays tab's details view.
 export let timeOffEdit = {
   checkView() {
     expectURLs(/\/time-off\/edit\/\d+/, /\/time-off\/new/);
@@ -214,6 +210,37 @@ export let timeOffView = {
     getElement("time-off-edit-button").click();
     return timeOffEdit;
   },
+};
+
+// The Holidays tab of the time-off list.
+export let holidays = {
+  openTab() { timeOff.visit(); getElement("time-off-tab-holidays").click(); return this; },
+  configure() { getElement("time-off-configure-import").click(); return holidayConfigure; },
+  configureViaEmptyState() { getElement("holidays-configure-cta").click(); return holidayConfigure; },
+  expectEmpty() { getElement("holidays-empty").should("exist"); return this; },
+  expectNoConfigureCTA() { cy.get("[data-test=holidays-configure-cta]").should("not.exist"); return this; },
+  expectRowContains(text: string) { cy.get("[data-test=time-off-row]").should("contain", text); return this; },
+  openRow(text: string) { cy.get("[data-test=time-off-row]").contains(text).click(); return holidayDetails; },
+  // A removed row opens the details view, where its only action is Restore.
+  openRemovedRow(text: string) { cy.get("[data-test=time-off-row]").contains(text).click(); return holidayDetails; },
+};
+
+// The country-configure dialog for the Holidays tab's auto-import setting.
+export let holidayConfigure = {
+  expectVisible() { getElement("holiday-configure-dialog").should("exist"); return this; },
+  selectCountry(name: string) { getElement("holiday-country-dropdown").find(".my-button").click(); cy.contains(name).click(); return this; },
+  import() { getElement("holiday-configure-save").click(); return this; },
+};
+
+// The holiday details view (app-single-time-off in holiday mode), opened from the Holidays tab.
+export let holidayDetails = {
+  expectVisible() { getElement("holiday-details").should("exist"); return this; },
+  expectChanges() { getElement("holiday-changes").should("exist"); return this; },
+  expectNoChanges() { cy.get("[data-test=holiday-changes]").should("not.exist"); return this; },
+  revert() { getElement("holiday-revert").click(); getElement("holiday-revert-confirm").click(); return this; },
+  remove() { getElement("holiday-remove").click(); getElement("holiday-remove-confirm").click(); return this; },
+  restore() { getElement("holiday-restore").click(); getElement("holiday-restore-confirm").click(); return this; },
+  edit() { getElement("holiday-edit").click(); return timeOffEdit; },
 };
 
 // Time-off as it surfaces inside the appointment views (badges/bands). Pair with the imported

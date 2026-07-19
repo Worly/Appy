@@ -25,6 +25,17 @@ namespace Appy.Tests.Middleware
                 Times.Once);
         }
 
+        private static void VerifyNeverLogged(Mock<ILogger<RequestLoggingMiddleware>> logger)
+        {
+            logger.Verify(x => x.Log(
+                It.IsAny<LogLevel>(),
+                It.IsAny<EventId>(),
+                It.IsAny<It.IsAnyType>(),
+                It.IsAny<Exception?>(),
+                (Func<It.IsAnyType, Exception?, string>)It.IsAny<object>()),
+                Times.Never);
+        }
+
         [Fact]
         public async Task Invoke_LogsInformation_OnSuccess()
         {
@@ -47,6 +58,34 @@ namespace Appy.Tests.Middleware
             var context = new DefaultHttpContext();
             context.Request.Method = "POST";
             context.Request.Path = "/api/test";
+
+            await middleware.Invoke(context);
+
+            VerifyLogged(logger, LogLevel.Error);
+        }
+
+        [Fact]
+        public async Task Invoke_DoesNotLog_OnHealthyHealthCheck()
+        {
+            var logger = VerifiableLogger();
+            var middleware = new RequestLoggingMiddleware(ctx => { ctx.Response.StatusCode = 200; return Task.CompletedTask; }, logger.Object);
+            var context = new DefaultHttpContext();
+            context.Request.Method = "GET";
+            context.Request.Path = "/health";
+
+            await middleware.Invoke(context);
+
+            VerifyNeverLogged(logger);
+        }
+
+        [Fact]
+        public async Task Invoke_LogsError_OnFailedHealthCheck()
+        {
+            var logger = VerifiableLogger();
+            var middleware = new RequestLoggingMiddleware(ctx => { ctx.Response.StatusCode = 503; return Task.CompletedTask; }, logger.Object);
+            var context = new DefaultHttpContext();
+            context.Request.Method = "GET";
+            context.Request.Path = "/health";
 
             await middleware.Invoke(context);
 

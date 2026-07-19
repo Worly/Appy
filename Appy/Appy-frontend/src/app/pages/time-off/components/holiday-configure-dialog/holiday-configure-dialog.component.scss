@@ -1,0 +1,30 @@
+.configure-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 8px 0;
+
+  .configure-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .configure-sub {
+    opacity: 0.7;
+    font-size: 0.9rem;
+  }
+
+  .split-hint {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
+}
+
+.configure-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

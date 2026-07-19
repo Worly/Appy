@@ -16,6 +16,10 @@
     align-self: stretch;
     border-radius: var(--default-border-radius);
     background: rgb(var(--rgb-warning));
+
+    &.accent-removed {
+      background: rgba(var(--rgb-text), 0.45);
+    }
   }
 
   .info {
@@ -28,6 +32,9 @@
 
   .label {
     word-break: break-word;
+    display: flex;
+    align-items: center;
+    gap: 15px;
   }
 
   .meta {
@@ -63,4 +70,30 @@
     color: rgb(var(--rgb-warning));
     opacity: 0.7;
   }
+}
+
+.time-off-row.removed {
+  opacity: 0.55;
+}
+
+.struck {
+  text-decoration: line-through;
+}
+
+.badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 100px;
+}
+
+.badge-edited {
+  background: rgba(var(--rgb-warning), 0.2);
+  color: rgb(var(--rgb-warning));
+}
+
+.badge-removed {
+  background: rgb(var(--rgb-input-background));
+  color: rgba(var(--rgb-text), 0.45);
 }

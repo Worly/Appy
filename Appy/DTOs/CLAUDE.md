@@ -6,7 +6,7 @@ Plain C# records used to transfer data across the HTTP boundary. No business log
 
 - **Request DTOs**: named after the action (e.g. `LogInDTO`, `AppointmentEditDTO`)
 - **Response DTOs**: named with `View` or `Response` suffix (e.g. `AppointmentViewDTO`, `LogInResponseDTO`)
-- **Time-off DTOs**: `TimeOffDTO` represents the recurrence rule (CRUD); `TimeOffOccurrenceDTO` represents a single expanded on-date instance (views) and carries an `Id` (the source `TimeOff` rule's id), used by the frontend to dedupe occurrences that repeat across page boundaries. It also exposes `ToInterval()` — the one shared mapping from an occurrence to the blocked `(From, To)` wall-clock span (all-day → whole day) — reused by both the appointment free-time controller and `AppointmentService`
+- **Time-off DTOs**: `TimeOffDTO` represents the recurrence rule (CRUD); when the rule is a materialized imported holiday it also carries its `Holiday` (a `HolidayDTO` — the **original** provider snapshot; the TimeOff itself carries the edited values), populated only where the `ImportedHoliday` nav is loaded (e.g. `get/{id}`), so the frontend derives edited/removed state and needs no second fetch. `TimeOffOccurrenceDTO` represents a single expanded on-date instance (views) and carries an `Id` (the source `TimeOff` rule's id), used by the frontend to dedupe occurrences that repeat across page boundaries. It also exposes `ToInterval()` — the one shared mapping from an occurrence to the blocked `(From, To)` wall-clock span (all-day → whole day) — reused by both the appointment free-time controller and `AppointmentService`
 
 ## Separation from Domain Entities
 
@@ -30,3 +30,10 @@ Strings in request-body DTOs are trimmed of leading/trailing whitespace during d
 ## AppointmentListPageDTO
 
 Envelope returned by `GET /appointment/getList`. Contains `Appointments` (the page of `AppointmentViewDTO`) and `TimeOffs` (the `TimeOffOccurrenceDTO` occurrences for the dates that have appointments on that page — not every day in the min–max span). Empty page → empty `TimeOffs`.
+
+## Holiday DTOs
+
+- `HolidayImportSettingsDTO` — `{ CountryCode? }`: settings snapshot returned by get/save settings endpoints. Produced by `HolidayImportSettings.GetDTO()`.
+- `HolidayListDTO` — merged list projection for `GET /holiday/getList`: `Id`, `Name`, `Date` (effective), `IsAllDay`, `TimeFrom?`, `TimeTo?`, `IsEdited`, `LinkedTimeOffId?` (null ⇒ removed). The ImportedHoliday flattened with its linked TimeOff's current state — what a row renders plus the link. Built by `ImportedHoliday.GetListDTO()` (reads its `LinkedTimeOff` nav).
+- `HolidayDTO` — the **original** provider snapshot, 1:1 with the `ImportedHoliday` row: `Id`, `Name`, `CountryCode`, `Date`. Built by `ImportedHoliday.GetDTO()`. Embedded in `TimeOffDTO.Holiday` (the TimeOff carries the edits) and returned by `GET /holiday/get/{id}` for the removed-holiday view.
+- Editing/removing a holiday reuses `TimeOffDTO` via `TimeOffController` (a holiday is a one-off TimeOff), so there is no holiday-specific edit DTO.

@@ -24,6 +24,7 @@ All controllers carry `[Authorize]` (requires a valid JWT from the pipeline) exc
 | `AppointmentController` | `/appointment` |
 | `WorkingHourController` | `/workinghour` |
 | `TimeOffController` | `/timeoff` |
+| `HolidayController` | `/holiday` |
 | `CalendarDayController` | `/calendarday` |
 | `DashboardController` | `/dashboard` |
 | `ClientNotificationsController` | `/clientnotifications` |

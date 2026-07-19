@@ -1,10 +1,12 @@
-import { Component, OnDestroy, OnInit } from "@angular/core";
+import { Component, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { Location } from "@angular/common";
 import { ActivatedRoute, Router } from "@angular/router";
 import { Subscription } from "rxjs";
 import { setUrlParams } from "src/app/utils/dynamic-url-params";
 import { TimeOffListType, TimeOffScope } from "src/app/models/time-off";
 import { SegmentedOption } from "src/app/components/segmented-control/segmented-control.component";
+import { HolidayListComponent } from "../holiday-list/holiday-list.component";
+import { HolidayConfigureDialogComponent } from "../holiday-configure-dialog/holiday-configure-dialog.component";
 
 type TimeOffTab = "OneOff" | "Recurring" | "Holidays";
 
@@ -17,6 +19,9 @@ export class TimeOffComponent implements OnInit, OnDestroy {
   public activeTab: TimeOffTab = "OneOff";
   public scope: TimeOffScope = "Active";
   public viewingId?: number;
+
+  @ViewChild(HolidayListComponent) private holidayList?: HolidayListComponent;
+  @ViewChild(HolidayConfigureDialogComponent) private configureDialog?: HolidayConfigureDialogComponent;
 
   public readonly tabOptions: SegmentedOption[] = [
     { value: "OneOff", label: "pages.time-off.ONE_OFF", icon: "calendar-day", dataTest: "time-off-tab-oneoff" },
@@ -81,8 +86,15 @@ export class TimeOffComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Placeholder for the upcoming holiday auto-import feature. The Holidays-tab button is wired here so
-  // the UI is in place; it does nothing until the import backend exists.
-  public configureAutoImport(): void {
+  // The configure dialog needs to know whether importing would discard existing holidays; the holiday
+  // list owns that count, so hand it over at open time.
+  public openConfigure(): void {
+    if (this.configureDialog == null) return;
+    this.configureDialog.hasImportedHolidays = this.holidayList?.hasRows ?? false;
+    this.configureDialog.open();
+  }
+
+  public onSettingsSaved(): void {
+    this.holidayList?.refresh();
   }
 }

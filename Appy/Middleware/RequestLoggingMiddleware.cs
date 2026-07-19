@@ -31,13 +31,21 @@ namespace Appy.Middleware
                     stopwatch.Stop();
 
                     var statusCode = context.Response.StatusCode;
-                    var level = statusCode >= 500 ? LogLevel.Error : LogLevel.Information;
 
-                    _logger.Log(level, "HTTP {Method} {Path} responded {StatusCode} in {ElapsedMs}ms",
-                        context.Request.Method,
-                        context.Request.Path.Value,
-                        statusCode,
-                        stopwatch.ElapsedMilliseconds);
+                    // Health checks poll every few seconds; logging every success drowns the log.
+                    // Keep failures, which signal the container going unhealthy.
+                    var isHealthyHealthCheck = statusCode < 500 && context.Request.Path.StartsWithSegments("/health");
+
+                    if (!isHealthyHealthCheck)
+                    {
+                        var level = statusCode >= 500 ? LogLevel.Error : LogLevel.Information;
+
+                        _logger.Log(level, "HTTP {Method} {Path} responded {StatusCode} in {ElapsedMs}ms",
+                            context.Request.Method,
+                            context.Request.Path.Value,
+                            statusCode,
+                            stopwatch.ElapsedMilliseconds);
+                    }
                 }
             }
         }
