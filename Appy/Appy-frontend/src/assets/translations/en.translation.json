@@ -293,7 +293,10 @@
                 "DATES_NOT_IN_ORDER": "Start date must be on or before end date",
                 "MISSING_DAY_OF_WEEK": "Day of week is required",
                 "INVALID_DAY_OF_MONTH": "Day of month must be between 1 and 31",
-                "CANNOT_STOP_ONE_OFF": "A one-off time off can't be stopped — delete it instead"
+                "CANNOT_STOP_ONE_OFF": "A one-off time off can't be stopped — delete it instead",
+                "HOLIDAY_RECURRENCE": "A holiday can't be made recurring",
+                "HOLIDAY_SINGLE_DAY": "A holiday must stay a single day",
+                "HOLIDAY_LABEL": "A holiday's label can't be changed"
             }
         },
 

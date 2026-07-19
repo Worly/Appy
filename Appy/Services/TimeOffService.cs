@@ -112,6 +112,9 @@ namespace Appy.Services
 
             Validate(dto);
 
+            if (t.ImportedHolidayId != null)
+                ValidateHolidayEdit(t, dto);
+
             if (split)
             {
                 // The new segment's effective start is applyFrom — it overrides any form "From",
@@ -202,6 +205,19 @@ namespace Appy.Services
                         throw new ValidationException(nameof(TimeOffDTO.DayOfMonth), "pages.time-off.errors.INVALID_DAY_OF_MONTH");
                     break;
             }
+        }
+
+        // A materialized holiday is a single-day one-off whose label mirrors the provider's holiday name.
+        // The editor only exposes its date / time / notes; enforce the rest here so a request that bypasses
+        // the form can't turn a holiday into a multi-day or recurring block, or relabel it.
+        private static void ValidateHolidayEdit(TimeOff holiday, TimeOffDTO dto)
+        {
+            if (dto.Recurrence != TimeOffRecurrence.OneOff)
+                throw new ValidationException(nameof(TimeOffDTO.Recurrence), "pages.time-off.errors.HOLIDAY_RECURRENCE");
+            if (dto.EndDate != dto.StartDate)
+                throw new ValidationException(nameof(TimeOffDTO.EndDate), "pages.time-off.errors.HOLIDAY_SINGLE_DAY");
+            if (dto.Label != holiday.Label)
+                throw new ValidationException(nameof(TimeOffDTO.Label), "pages.time-off.errors.HOLIDAY_LABEL");
         }
 
         // Normalizes the entity: fields irrelevant to the chosen recurrence / all-day are nulled.
