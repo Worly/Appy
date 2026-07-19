@@ -88,11 +88,11 @@ export let timeOff = {
   },
 };
 
-// The create/edit form. Also opened in holiday mode (locked label, single date) via the
-// `/time-off/holiday/edit/:id` route when reached from the Holidays tab's details view.
+// The create/edit form. Also opened in holiday mode (locked label, single date) via the same
+// `/time-off/edit/:id` route when reached from the Holidays tab's details view.
 export let timeOffEdit = {
   checkView() {
-    expectURLs(/\/time-off\/edit\/\d+/, /\/time-off\/new/, /\/time-off\/holiday\/edit\/\d+/);
+    expectURLs(/\/time-off\/edit\/\d+/, /\/time-off\/new/);
   },
 
   setLabel(label: string) {
