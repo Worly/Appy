@@ -15,7 +15,7 @@
       data-test="time-off-add" [attr.title]="'pages.time-off.ADD' | translate"
       [attr.aria-label]="'pages.time-off.ADD' | translate"></app-button>
 
-    <app-button *ngIf="isHolidays" icon="gear" alignContent="center" (onClick)="configureAutoImport()"
+    <app-button *ngIf="isHolidays" icon="gear" alignContent="center" (onClick)="openConfigure()"
       data-test="time-off-configure-import" [attr.title]="'pages.time-off.CONFIGURE_AUTO_IMPORT' | translate"
       [attr.aria-label]="'pages.time-off.CONFIGURE_AUTO_IMPORT' | translate"></app-button>
   </div>
@@ -24,76 +24,13 @@
     (openDetails)="viewingId = $event; detailsDialog.open()">
   </app-time-off-list>
 
-  <!-- Holidays tab -->
-  <ng-container *ngIf="isHolidays">
-    <app-loading *ngIf="holidaysLoading"></app-loading>
-
-    <div *ngIf="!holidaysLoading && holidayRows.length === 0" class="holidays-empty" data-test="holidays-empty">
-      <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
-
-      <!-- History has no configure CTA: importing only ever fills upcoming dates, never the past. -->
-      <ng-container *ngIf="scope === 'History'">
-        <div>{{ "pages.time-off.HOLIDAYS_EMPTY_HISTORY" | translate }}</div>
-      </ng-container>
-
-      <ng-container *ngIf="scope !== 'History'">
-        <div>{{ "pages.time-off.HOLIDAYS_EMPTY" | translate }}</div>
-        <app-button color="success" look="solid" [text]="'pages.time-off.HOLIDAYS_CONFIGURE_CTA' | translate"
-          (onClick)="configureAutoImport()" data-test="holidays-configure-cta"></app-button>
-      </ng-container>
-    </div>
-
-    <app-single-time-off-list-item *ngFor="let row of holidayRows" [view]="row.view"
-      (onOpenView)="onHolidayRowClick(row.holiday)">
-    </app-single-time-off-list-item>
-
-    <div class="loading-more" *ngIf="holidaysLoadingMore"><app-loading [hasShadow]="false"></app-loading></div>
-  </ng-container>
+  <app-holiday-list *ngIf="isHolidays" [scope]="scope" (configure)="openConfigure()"></app-holiday-list>
 </div>
 
-<!-- One-off/Recurring rows and active (linked) holidays alike open the time-off by id. -->
+<!-- The One-off/Recurring list rows open the time-off details dialog by id. -->
 <app-dialog #detailsDialog>
   <app-single-time-off *ngIf="detailsDialog.isOpen" [id]="viewingId"
-    (onChanged)="loadHolidaysIfNeeded()" (onDone)="detailsDialog.close()"></app-single-time-off>
+    (onDone)="detailsDialog.close()"></app-single-time-off>
 </app-dialog>
 
-<!-- A removed holiday has no TimeOff to load by id, so it has its own view keyed on the ImportedHoliday. -->
-<app-dialog #removedHolidayDialog>
-  <app-removed-holiday *ngIf="removedHolidayDialog.isOpen" [importedHolidayId]="viewingRemovedHolidayId"
-    (onChanged)="loadHolidaysIfNeeded()" (onDone)="removedHolidayDialog.close()"></app-removed-holiday>
-</app-dialog>
-
-<app-dialog #configureDialog>
-  <div class="configure-dialog" *ngIf="configureDialog.isOpen" data-test="holiday-configure-dialog">
-    <div class="configure-title">{{ "pages.time-off.CONFIGURE_AUTO_IMPORT" | translate }}</div>
-    <div class="configure-sub">{{ "pages.time-off.CONFIGURE_SUB" | translate }}</div>
-
-    <div class="w-input-container">
-      <label class="w-label">{{ "pages.time-off.COUNTRY" | translate }}</label>
-      <app-dropdown [items]="countries" [displayFunction]="countryDisplay" [fullWidth]="true" [matchTriggerWidth]="true"
-        [value]="selectedCountry" (valueChange)="selectedCountryCode = $event?.countryCode"
-        data-test="holiday-country-dropdown"></app-dropdown>
-    </div>
-
-    <div class="configure-actions">
-      <app-button [text]="'CANCEL' | translate" color="danger" look="normal" (onClick)="configureDialog.close()"></app-button>
-      <app-button [text]="'pages.time-off.IMPORT' | translate" color="success" look="solid"
-        [disabled]="savingSettings" [isLoading]="savingSettings" (onClick)="confirmConfigure()"
-        data-test="holiday-configure-save"></app-button>
-    </div>
-  </div>
-</app-dialog>
-
-<app-dialog #confirmChangeDialog>
-  <div class="configure-dialog" *ngIf="confirmChangeDialog.isOpen" data-test="holiday-change-confirm-dialog">
-    <div class="split-hint">
-      <fa-icon [icon]="['fas', 'circle-info']" aria-hidden="true"></fa-icon>
-      <span>{{ "pages.time-off.CHANGE_COUNTRY_WARNING" | translate }}</span>
-    </div>
-    <div class="configure-actions">
-      <app-button [text]="'CANCEL' | translate" color="danger" look="normal" (onClick)="confirmChangeDialog.close()"></app-button>
-      <app-button [text]="'CONFIRM' | translate" color="danger" look="solid" [disabled]="savingSettings"
-        (onClick)="saveSettings()" data-test="holiday-change-confirm"></app-button>
-    </div>
-  </div>
-</app-dialog>
+<app-holiday-configure-dialog (saved)="onSettingsSaved()"></app-holiday-configure-dialog>

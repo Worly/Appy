@@ -1,0 +1,23 @@
+:host {
+  display: block;
+}
+
+.holidays-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 2.5rem 1rem;
+  opacity: 0.6;
+  text-align: center;
+
+  fa-icon {
+    font-size: 1.8rem;
+  }
+}
+
+// Sized, positioned container so the app-loading spinner has a box to fill.
+.loading-more {
+  position: relative;
+  height: 150px;
+}

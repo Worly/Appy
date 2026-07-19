@@ -14,6 +14,8 @@ import { SingleTimeOffComponent } from "./components/single-time-off/single-time
 import { RemovedHolidayComponent } from "./components/removed-holiday/removed-holiday.component";
 import { TimeOffDetailsCardComponent } from "./components/time-off-details-card/time-off-details-card.component";
 import { AllDayTimeOffPickerComponent } from "./components/all-day-time-off-picker/all-day-time-off-picker.component";
+import { HolidayListComponent } from "./components/holiday-list/holiday-list.component";
+import { HolidayConfigureDialogComponent } from "./components/holiday-configure-dialog/holiday-configure-dialog.component";
 
 @NgModule({
   declarations: [
@@ -25,6 +27,8 @@ import { AllDayTimeOffPickerComponent } from "./components/all-day-time-off-pick
     RemovedHolidayComponent,
     TimeOffDetailsCardComponent,
     AllDayTimeOffPickerComponent,
+    HolidayListComponent,
+    HolidayConfigureDialogComponent,
   ],
   imports: [
     TimeOffRoutingModule,
