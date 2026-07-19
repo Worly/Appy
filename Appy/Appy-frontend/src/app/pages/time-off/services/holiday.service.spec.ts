@@ -25,15 +25,18 @@ describe("HolidayService — cache invalidation", () => {
     });
   });
 
-  it("saveSettings() invalidates holiday, time-off and appointment keys", (done) => {
+  it("saveSettings() invalidates holiday, time-off and appointment keys and seeds the settings cache", (done) => {
     const http = { put: jasmine.createSpy("put").and.returnValue(of({ countryCode: "HR" })) };
     const cache = { invalidate: jasmine.createSpy("invalidate") };
+    const queryClient = { setQueryData: jasmine.createSpy("setQueryData") };
     const svc = Object.create(HolidayService.prototype) as any;
     svc.httpClient = http;
     svc.cache = cache;
+    svc.queryClient = queryClient;
 
-    svc.saveSettings(new HolidayImportSettings({ countryCode: "SI" })).subscribe(() => {
+    svc.saveSettings(new HolidayImportSettings({ countryCode: "SI" })).subscribe((saved: HolidayImportSettings) => {
       expect(cache.invalidate).toHaveBeenCalledWith(holidayKeys.all, timeOffKeys.all, appointmentKeys.all);
+      expect(queryClient.setQueryData).toHaveBeenCalledWith([...holidayKeys.settings], saved);
       done();
     });
   });

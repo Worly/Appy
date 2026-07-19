@@ -38,21 +38,29 @@ export class HolidayService {
     });
   }
 
-  public getById(id: number): Observable<Holiday> {
-    return this.httpClient.get<HolidayDTO>(`${appConfig.apiUrl}${this.controllerName}/get/${id}`)
-      .pipe(map(d => new Holiday(d)));
+  // The original provider snapshot never changes, so this caches cleanly by id.
+  public getById(id: number): QueryResult<Holiday> {
+    return query(this.queryClient, [...holidayKeys.detail(id)], () =>
+      this.httpClient.get<HolidayDTO>(`${appConfig.apiUrl}${this.controllerName}/get/${id}`)
+        .pipe(map(d => new Holiday(d))));
   }
 
-  public getSettings(): Observable<HolidayImportSettings> {
-    return this.httpClient.get<HolidayImportSettingsDTO>(`${appConfig.apiUrl}${this.controllerName}/settings`)
-      .pipe(map(dto => new HolidayImportSettings(dto)));
+  public getSettings(): QueryResult<HolidayImportSettings> {
+    return query(this.queryClient, [...holidayKeys.settings], () =>
+      this.httpClient.get<HolidayImportSettingsDTO>(`${appConfig.apiUrl}${this.controllerName}/settings`)
+        .pipe(map(dto => new HolidayImportSettings(dto))));
   }
 
   public saveSettings(settings: HolidayImportSettings): Observable<HolidayImportSettings> {
     return this.httpClient.put<HolidayImportSettingsDTO>(`${appConfig.apiUrl}${this.controllerName}/settings`, settings.getDTO())
       .pipe(map(dto => {
+        const saved = new HolidayImportSettings(dto);
         this.cache.invalidate(holidayKeys.all, timeOffKeys.all, appointmentKeys.all);
-        return new HolidayImportSettings(dto);
+        // Write the saved settings straight into the cache: the invalidation above marks the settings
+        // query stale but keeps its now-outdated data, which the configure dialog would otherwise read
+        // (first emission) the next time it opens.
+        this.queryClient.setQueryData([...holidayKeys.settings], saved);
+        return saved;
       }));
   }
 

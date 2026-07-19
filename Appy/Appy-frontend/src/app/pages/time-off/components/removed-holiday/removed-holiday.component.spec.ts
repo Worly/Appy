@@ -21,7 +21,7 @@ function removedHoliday(id: number): Holiday {
 
 describe("RemovedHolidayComponent", () => {
   it("fetches the holiday by ImportedHoliday id and renders it", () => {
-    const getById = jasmine.createSpy("getById").and.returnValue(of(removedHoliday(3)));
+    const getById = jasmine.createSpy("getById").and.returnValue({ data$: of(removedHoliday(3)) });
     const c = make({ getById });
     c.importedHolidayId = 3;
 
@@ -34,7 +34,7 @@ describe("RemovedHolidayComponent", () => {
 
   it("restores and emits onChanged", (done) => {
     const restore = jasmine.createSpy("restore").and.returnValue(of(undefined));
-    const c = make({ getById: () => of(removedHoliday(7)), restore }, { yesNoDialog: () => of(true) });
+    const c = make({ getById: () => ({ data$: of(removedHoliday(7)) }), restore }, { yesNoDialog: () => of(true) });
     c.importedHolidayId = 7;
     c.onChanged.subscribe(() => { expect(restore).toHaveBeenCalledWith(7); done(); });
 

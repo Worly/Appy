@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnDestroy, Output } from "@angular/core";
-import { Subscription } from "rxjs";
+import { Subscription, filter, take } from "rxjs";
 import { Holiday } from "src/app/models/holiday";
 import { TimeOff } from "src/app/models/time-off";
 import { TranslateService } from "src/app/components/translate/translate.service";
@@ -52,11 +52,13 @@ export class RemovedHolidayComponent implements OnDestroy {
     if (id == null) return;
 
     this.isLoading = true;
-    this.sub = this.holidayService.getById(id).subscribe(h => {
-      this.holiday = h;
-      this.timeOff = holidayAsTimeOff({ date: h.date, isAllDay: true });
-      this.isLoading = false;
-    });
+    this.sub = this.holidayService.getById(id).data$
+      .pipe(filter((h): h is Holiday => h != null), take(1))
+      .subscribe(h => {
+        this.holiday = h;
+        this.timeOff = holidayAsTimeOff({ date: h.date, isAllDay: true });
+        this.isLoading = false;
+      });
   }
 
   public openRestoreDialog(): void {

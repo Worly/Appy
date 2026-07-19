@@ -26,14 +26,16 @@ export class HolidayConfigureDialogComponent {
   constructor(private holidayService: HolidayService) { }
 
   public open(): void {
-    this.holidayService.getSettings().subscribe(s => {
-      this.settings = s;
-      this.selectedCountryCode = s.countryCode;
-      this.holidayService.getSupportedCountries().data$
-        .pipe(filter(cs => cs != null), take(1))
-        .subscribe(cs => this.countries = cs ?? []);
-      this.configureDialog?.open();
-    });
+    this.holidayService.getSettings().data$
+      .pipe(filter((s): s is HolidayImportSettings => s != null), take(1))
+      .subscribe(s => {
+        this.settings = s;
+        this.selectedCountryCode = s.countryCode;
+        this.holidayService.getSupportedCountries().data$
+          .pipe(filter(cs => cs != null), take(1))
+          .subscribe(cs => this.countries = cs ?? []);
+        this.configureDialog?.open();
+      });
   }
 
   public countryDisplay = (c: SupportedCountry): string => c.countryCode + " - " + c.name;
