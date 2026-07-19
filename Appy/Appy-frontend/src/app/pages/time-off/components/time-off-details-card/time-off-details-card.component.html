@@ -2,8 +2,8 @@
   <div class="header">
     <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
     <div class="title" [class.struck]="struck">{{ label }}</div>
-    <span *ngIf="badge === 'edited'" class="badge-edited">{{ "pages.time-off.EDITED" | translate }}</span>
-    <span *ngIf="badge === 'removed'" class="badge-removed" data-test="holiday-badge-removed">{{ "pages.time-off.REMOVED" | translate }}</span>
+    <span *ngIf="badge === 'edited'" class="badge badge-edited">{{ "pages.time-off.EDITED" | translate }}</span>
+    <span *ngIf="badge === 'removed'" class="badge badge-removed" data-test="holiday-badge-removed">{{ "pages.time-off.REMOVED" | translate }}</span>
   </div>
 
   <div class="provenance" *ngIf="countryCode">

@@ -5,7 +5,7 @@ import { TimeOff } from "src/app/models/time-off";
 import { TranslateService } from "src/app/components/translate/translate.service";
 import { TimeOffService } from "../../services/time-off.service";
 import { HolidayService } from "../../services/holiday.service";
-import { timeOffDayCountText, timeOffRecurringRangeText, timeOffScheduleText, timeOffTimeText } from "../../time-off-display";
+import { timeOffTimeText } from "../../time-off-display";
 import { NotifyDialogService } from "src/app/components/notify-dialog/notify-dialog.service";
 
 @Component({
@@ -29,10 +29,7 @@ export class SingleTimeOffComponent implements OnDestroy {
 
   public timeOff?: TimeOff;
   public isLoading: boolean = false;
-  public schedule: string = "";
-  public dateRange: string = "";
-  public dayCount: string = "";
-  public time: string = "";
+  public time: string = "";   // the edited time, shown in the holiday changes block
 
   public isHolidayEdited = false;
   public changedDate = false;
@@ -64,12 +61,7 @@ export class SingleTimeOffComponent implements OnDestroy {
       this.timeOff = t;
       this.isLoading = false;
 
-      const tr = (k: string) => this.translateService.translate(k);
-      const lang = this.translateService.getSelectedLanguageCode();
-      this.schedule = timeOffScheduleText(t, tr, lang);
-      this.dateRange = timeOffRecurringRangeText(t, tr);
-      this.time = timeOffTimeText(t, tr);
-      this.dayCount = timeOffDayCountText(t, tr, lang);
+      this.time = timeOffTimeText(t, (k: string) => this.translateService.translate(k));
 
       if (t.holiday != null) {
         this.changedDate = t.startDate != null && !t.startDate.isSame(t.holiday.date, "date");

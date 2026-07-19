@@ -27,8 +27,9 @@ describe("RemovedHolidayComponent", () => {
 
     expect(getById).toHaveBeenCalledWith(3);
     expect(c.holiday?.name).toBe("New Year");
-    expect(c.schedule).not.toBe("");
-    expect(c.time).not.toBe("");
+    // Projected onto an all-day one-off on the original date for the details card.
+    expect(c.timeOff?.startDate?.format("YYYY-MM-DD")).toBe("2026-01-01");
+    expect(c.timeOff?.isAllDay).toBe(true);
   });
 
   it("restores and emits onChanged", (done) => {

@@ -4,7 +4,7 @@
   [label]="timeOff.label!"
   [badge]="isHolidayEdited ? 'edited' : undefined"
   [countryCode]="timeOff.holiday?.countryCode ?? undefined"
-  [schedule]="schedule" [dateRange]="dateRange" [dayCount]="dayCount" [time]="time"
+  [timeOff]="timeOff"
   [dataTest]="timeOff.holiday != null ? 'holiday-details' : undefined">
 
   <div class="notes" *ngIf="timeOff.notes">

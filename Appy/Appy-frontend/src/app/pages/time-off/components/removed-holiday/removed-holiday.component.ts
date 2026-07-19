@@ -1,10 +1,11 @@
 import { Component, EventEmitter, Input, OnDestroy, Output } from "@angular/core";
 import { Subscription } from "rxjs";
 import { Holiday } from "src/app/models/holiday";
+import { TimeOff } from "src/app/models/time-off";
 import { TranslateService } from "src/app/components/translate/translate.service";
 import { NotifyDialogService } from "src/app/components/notify-dialog/notify-dialog.service";
 import { HolidayService } from "../../services/holiday.service";
-import { holidayAsTimeOff, timeOffScheduleText, timeOffTimeText } from "../../time-off-display";
+import { holidayAsTimeOff } from "../../time-off-display";
 
 // Details view for a removed holiday — the one holiday that has no linked TimeOff, so it can't be
 // loaded by id like every other time-off. Fetches the full holiday by its ImportedHoliday id and
@@ -30,8 +31,8 @@ export class RemovedHolidayComponent implements OnDestroy {
 
   public holiday?: Holiday;
   public isLoading: boolean = false;
-  public schedule: string = "";
-  public time: string = "";
+  // A removed holiday reverts to its original all-day date — projected onto a one-off for the card.
+  public timeOff?: TimeOff;
 
   private sub?: Subscription;
 
@@ -53,11 +54,7 @@ export class RemovedHolidayComponent implements OnDestroy {
     this.isLoading = true;
     this.sub = this.holidayService.getById(id).subscribe(h => {
       this.holiday = h;
-      // A removed holiday reverts to its original all-day date.
-      const proj = holidayAsTimeOff({ date: h.date, isAllDay: true });
-      const tr = (k: string) => this.translateService.translate(k);
-      this.schedule = timeOffScheduleText(proj, tr, this.translateService.getSelectedLanguageCode());
-      this.time = timeOffTimeText(proj, tr);
+      this.timeOff = holidayAsTimeOff({ date: h.date, isAllDay: true });
       this.isLoading = false;
     });
   }

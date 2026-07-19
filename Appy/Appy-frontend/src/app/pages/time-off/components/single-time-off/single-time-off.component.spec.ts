@@ -78,6 +78,6 @@ describe("SingleTimeOffComponent — holiday mode", () => {
     c.id = 3;
 
     expect(c.timeOff?.holiday).toBeUndefined();
-    expect(c.schedule).not.toBe("");
+    expect(c.timeOff?.label).toBe("Vacation");
   });
 });

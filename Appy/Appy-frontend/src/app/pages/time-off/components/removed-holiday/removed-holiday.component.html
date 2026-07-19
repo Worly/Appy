@@ -1,9 +1,9 @@
 <app-loading *ngIf="isLoading"></app-loading>
 
-<app-time-off-details-card *ngIf="!isLoading && holiday != null"
+<app-time-off-details-card *ngIf="!isLoading && holiday != null && timeOff != null"
   [label]="holiday.name" [struck]="true" badge="removed"
   [countryCode]="holiday.countryCode"
-  [schedule]="schedule" [time]="time" dataTest="holiday-details">
+  [timeOff]="timeOff" dataTest="holiday-details">
   <div class="action-bar">
     <app-button [text]="'pages.time-off.RESTORE' | translate" icon="rotate-left" color="success"
       (onClick)="openRestoreDialog()" data-test="holiday-restore" style="margin-left: auto"></app-button>
