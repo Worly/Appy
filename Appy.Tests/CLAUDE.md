@@ -4,7 +4,11 @@ xUnit unit tests for backend service logic. Targets **.NET 8.0**, same as the ma
 
 ## What Is Tested
 
-Tests live in `Services/` and `Utils/`. The `Services/` tests cover four services:
+Tests live in `Services/`, `Utils/`, `Middleware/`, `Exceptions/`, and `Controllers/`.
+
+- **DashboardControllerTests** (`Controllers/`): verifies `UpcomingUnconfirmed` unwraps the `AppointmentListPageDTO` envelope from `IAppointmentService.GetList` and returns the bare `List<AppointmentViewDTO>` the frontend expects (not the whole page with its `TimeOffs`).
+
+The `Services/` tests cover four services:
 
 - **TrimmingStringConverterTests** (`Utils/`): verifies the global request-body string-trimming converter — leading/trailing whitespace is trimmed across top-level, nested, and collection string properties; `null` is preserved; whitespace-only becomes empty; and serialization (Write) is a passthrough that does not trim.
 
