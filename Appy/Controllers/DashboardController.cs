@@ -49,7 +49,7 @@ namespace Appy.Controllers
 
         [HttpGet("upcomingUnconfirmed")]
         [Authorize]
-        public async Task<ActionResult<List<AppointmentEditDTO>>> UpcomingUnconfirmed([FromQuery] int numberOfDays)
+        public async Task<ActionResult<List<AppointmentViewDTO>>> UpcomingUnconfirmed([FromQuery] int numberOfDays)
         {
             var endingDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(numberOfDays)).ToString("yyyy-MM-dd");
 
@@ -58,9 +58,9 @@ namespace Appy.Controllers
                 SmartFilter.FromFieldFilter(nameof(Appointment.Date), Comparator.LessThanOrEqual, endingDate)
             );
 
-            var appointments = await appointmentService.GetList(DateOnly.FromDateTime(DateTime.UtcNow), Direction.Forwards, 0, 100, filter, HttpContext.SelectedFacility());
+            var page = await appointmentService.GetList(DateOnly.FromDateTime(DateTime.UtcNow), Direction.Forwards, 0, 100, filter, HttpContext.SelectedFacility());
 
-            return Ok(appointments);
+            return Ok(page.Appointments);
         }
     }
 }
