@@ -596,6 +596,15 @@ namespace Appy.Tests.Services
             Assert.Equal(new[] { new DateOnly(2030, 1, 11), new DateOnly(2030, 1, 10) }, days);
         }
 
+        [Fact]
+        public void OccurrenceDatesBefore_Monthly_SkipsMonthsWithoutThatDay()
+        {
+            var t = new TimeOff { Recurrence = TimeOffRecurrence.Monthly, DayOfMonth = 31, StartDate = new DateOnly(2030, 1, 1) };
+            var days = TimeOffService.OccurrenceDatesBefore(t, new DateOnly(2030, 5, 1), 3).ToList();
+            // Day-31 exists only in Jan and Mar before May 1 (Feb, Apr have no 31st). Descending (nearest first).
+            Assert.Equal(new[] { new DateOnly(2030, 3, 31), new DateOnly(2030, 1, 31) }, days);
+        }
+
         // ---- GetOccurrenceDatesForward / GetOccurrenceDatesBackward ----
 
         [Fact]
