@@ -11,7 +11,7 @@ Business logic layer. Each service corresponds to one domain concept and is cons
 | `FacilityService` | Facility CRUD, selected-facility management per user |
 | `ServiceService` | Service CRUD, archive toggle, name uniqueness enforcement |
 | `ClientService` | Client CRUD, archive toggle, contact management with AppSpecificID preservation |
-| `AppointmentService` | Appointment CRUD, free-time slot generation, status changes, client notification dispatch |
+| `AppointmentService` | Appointment CRUD, free-time slot generation, status changes, client notification dispatch. `GetList(cursor, direction, take, filter, facilityId)` pages by **content-day** — any day with an appointment OR a time-off occurrence, unioning appointment days (from the DB) with time-off occurrence days (`ITimeOffService.GetOccurrenceDatesForward/Backward`) to pick the nearest `take` days from the cursor, then returns every appointment and time-off occurrence within that day window. Time-offs (and the occurrence-date lookups) are skipped entirely when a `filter` is active. Forward paging is unbounded (no upper date limit); backward paging stops once no content-day remains before the cursor. `NextCursor`/`PrevCursor` are computed by probing for any appointment or time-off content on/after or before the window's edge. |
 | `WorkingHourService` | Working-hour CRUD with overlap validation; replaces all hours for a facility atomically |
 | `DashboardService` | Dashboard settings upsert (unique per user + facility) |
 | `ClientNotificationsService` | Notification settings and outbound message dispatch; logs per-contact Debug detail, Information on success, Warning before throwing `MESSAGE_FAILED_TO_SEND` |

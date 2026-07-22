@@ -11,7 +11,7 @@ namespace Appy.Services
     public interface IAppointmentService
     {
         Task<List<AppointmentViewDTO>> GetAll(DateOnly date, int facilityId, bool findPrevious, SmartFilter? filter);
-        Task<AppointmentListPageDTO> GetList(DateOnly date, Direction direction, int skip, int take, SmartFilter? filter, int facilityId);
+        Task<AppointmentListPageDTO> GetList(DateOnly cursor, Direction direction, int take, SmartFilter? filter, int facilityId);
         Task<AppointmentViewDTO> GetById(int id, int facilityId);
         Task<AppointmentViewDTO> AddNew(AppointmentEditDTO dto, int facilityId, bool ignoreTimeNotAvailable);
         Task<AppointmentViewDTO> Edit(int id, AppointmentEditDTO dto, int facilityId, bool ignoreTimeNotAvailable);
@@ -72,46 +72,101 @@ namespace Appy.Services
                     .ToListAsync();
         }
 
-        public async Task<AppointmentListPageDTO> GetList(DateOnly date, Direction direction, int skip, int take, SmartFilter? filter, int facilityId)
+        public async Task<AppointmentListPageDTO> GetList(DateOnly cursor, Direction direction, int take, SmartFilter? filter, int facilityId)
         {
-            var appointments = context.Appointments
+            var forwards = direction == Direction.Forwards;
+
+            var appointmentQuery = context.Appointments
                 .Include(a => a.Service)
                 .Include(a => a.Client)
-                .Where(s => s.FacilityId == facilityId)
+                .Where(a => a.FacilityId == facilityId)
                 .ApplySmartFilter(filter);
 
-            if (direction == Direction.Forwards)
-                appointments = appointments.Where(s => s.Date >= date).OrderBy(s => s.Date).ThenBy(s => s.Time).ThenBy(s => s.Duration);
-            else
-                appointments = appointments.Where(s => s.Date < date).OrderByDescending(s => s.Date).ThenByDescending(s => s.Time).ThenByDescending(s => s.Duration);
+            // Candidate appointment content-days in the requested direction.
+            var appointmentDays = forwards
+                ? await appointmentQuery.Where(a => a.Date >= cursor).Select(a => a.Date).Distinct().OrderBy(d => d).Take(take).ToListAsync()
+                : await appointmentQuery.Where(a => a.Date < cursor).Select(a => a.Date).Distinct().OrderByDescending(d => d).Take(take).ToListAsync();
 
-            var page = await appointments
-                .Skip(skip)
+            // Candidate time-off content-days — never fetched when a filter is active.
+            var timeOffDays = filter != null
+                ? new List<DateOnly>()
+                : forwards
+                    ? await timeOffService.GetOccurrenceDatesForward(cursor, take, facilityId)
+                    : await timeOffService.GetOccurrenceDatesBackward(cursor, take, facilityId);
+
+            // The nearest `take` content-days overall (the first K of A ∪ B are within the first K of each),
+            // then presented ascending — the wire order in both directions.
+            var candidates = appointmentDays.Concat(timeOffDays).Distinct();
+            var windowDays = (forwards ? candidates.OrderBy(d => d) : candidates.OrderByDescending(d => d))
                 .Take(take)
-                .Select(a => new
-                {
-                    app = a,
-                    previous = context.Appointments
-                        .Include(a => a.Service)
-                        .Include(a => a.Client)
-                        .Where(s => s.FacilityId == a.FacilityId && s.ClientId == a.ClientId && (s.Date < a.Date || (s.Date == a.Date && s.Time < a.Time)))
-                        .OrderByDescending(s => s.Date)
-                        .ThenByDescending(s => s.Time)
-                        .ThenByDescending(s => s.Duration)
-                        .Select(a => a.ToViewDTO(null))
-                        .FirstOrDefault()
-                })
-                .Select(a => a.app.ToViewDTO(a.previous))
-                .ToListAsync();
+                .OrderBy(d => d)
+                .ToList();
 
-            // Only the dates that actually have appointments on this page are rendered, so expand
-            // occurrences for exactly those dates — not every day in the min..max span (which can be
-            // months/years for a sparse page, and whose appointment-less days the client discards anyway).
-            var timeOffs = page.Count == 0
-                ? new List<TimeOffOccurrenceDTO>()
-                : await timeOffService.GetOccurrencesForDates(page.Select(a => a.Date), facilityId);
+            var appointments = new List<AppointmentViewDTO>();
+            var timeOffs = new List<TimeOffOccurrenceDTO>();
+            if (windowDays.Count > 0)
+            {
+                var min = windowDays[0];
+                var max = windowDays[^1];
+                appointments = await appointmentQuery
+                    .Where(a => a.Date >= min && a.Date <= max)
+                    .OrderBy(a => a.Date).ThenBy(a => a.Time).ThenBy(a => a.Duration)
+                    .Select(a => new
+                    {
+                        app = a,
+                        previous = context.Appointments
+                            .Include(a => a.Service)
+                            .Include(a => a.Client)
+                            .Where(s => s.FacilityId == a.FacilityId && s.ClientId == a.ClientId && (s.Date < a.Date || (s.Date == a.Date && s.Time < a.Time)))
+                            .OrderByDescending(s => s.Date)
+                            .ThenByDescending(s => s.Time)
+                            .ThenByDescending(s => s.Duration)
+                            .Select(a => a.ToViewDTO(null))
+                            .FirstOrDefault()
+                    })
+                    .Select(a => a.app.ToViewDTO(a.previous))
+                    .ToListAsync();
 
-            return new AppointmentListPageDTO { Appointments = page, TimeOffs = timeOffs };
+                if (filter == null)
+                    timeOffs = await timeOffService.GetOccurrencesForDates(windowDays, facilityId);
+            }
+
+            var prevBase = windowDays.Count > 0 ? windowDays[0] : cursor;
+            DateOnly? prevCursor = await HasContentBefore(prevBase, facilityId, filter) ? prevBase : (DateOnly?)null;
+
+            DateOnly? nextCursor = null;
+            if (windowDays.Count > 0)
+            {
+                var afterWindow = windowDays[^1].AddDays(1);
+                if (await HasContentOnOrAfter(afterWindow, facilityId, filter))
+                    nextCursor = afterWindow;
+            }
+
+            return new AppointmentListPageDTO
+            {
+                Appointments = appointments,
+                TimeOffs = timeOffs,
+                NextCursor = nextCursor,
+                PrevCursor = prevCursor,
+            };
+        }
+
+        private async Task<bool> HasContentOnOrAfter(DateOnly date, int facilityId, SmartFilter? filter)
+        {
+            if (await context.Appointments.Where(a => a.FacilityId == facilityId).ApplySmartFilter(filter).AnyAsync(a => a.Date >= date))
+                return true;
+            if (filter == null && (await timeOffService.GetOccurrenceDatesForward(date, 1, facilityId)).Count > 0)
+                return true;
+            return false;
+        }
+
+        private async Task<bool> HasContentBefore(DateOnly date, int facilityId, SmartFilter? filter)
+        {
+            if (await context.Appointments.Where(a => a.FacilityId == facilityId).ApplySmartFilter(filter).AnyAsync(a => a.Date < date))
+                return true;
+            if (filter == null && (await timeOffService.GetOccurrenceDatesBackward(date, 1, facilityId)).Count > 0)
+                return true;
+            return false;
         }
 
         public async Task<AppointmentViewDTO> GetById(int id, int facilityId)

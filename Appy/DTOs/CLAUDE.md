@@ -29,7 +29,7 @@ Strings in request-body DTOs are trimmed of leading/trailing whitespace during d
 
 ## AppointmentListPageDTO
 
-Envelope returned by `GET /appointment/getList`. Contains `Appointments` (the page of `AppointmentViewDTO`) and `TimeOffs` (the `TimeOffOccurrenceDTO` occurrences for the dates that have appointments on that page — not every day in the min–max span). Empty page → empty `TimeOffs`.
+Envelope returned by `GET /appointment/getList`. Contains `Appointments` (the page of `AppointmentViewDTO`) and `TimeOffs` (the `TimeOffOccurrenceDTO` occurrences for every content-day in the window — not just the days that have appointments; empty when a filter is active or the page is empty). `NextCursor` / `PrevCursor` are nullable dates that continue the list forwards/backwards from this page; null at the respective end of the list (forward is unbounded, so `NextCursor` is null once no content remains ahead; `PrevCursor` is null once no content remains behind).
 
 ## Holiday DTOs
 
