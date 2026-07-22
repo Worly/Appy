@@ -134,13 +134,8 @@ namespace Appy.Services
             var prevBase = windowDays.Count > 0 ? windowDays[0] : cursor;
             DateOnly? prevCursor = await HasContentBefore(prevBase, facilityId, filter) ? prevBase : (DateOnly?)null;
 
-            DateOnly? nextCursor = null;
-            if (windowDays.Count > 0)
-            {
-                var afterWindow = windowDays[^1].AddDays(1);
-                if (await HasContentOnOrAfter(afterWindow, facilityId, filter))
-                    nextCursor = afterWindow;
-            }
+            var nextBase = windowDays.Count > 0 ? windowDays[^1].AddDays(1) : cursor;
+            DateOnly? nextCursor = await HasContentOnOrAfter(nextBase, facilityId, filter) ? nextBase : (DateOnly?)null;
 
             return new AppointmentListPageDTO
             {

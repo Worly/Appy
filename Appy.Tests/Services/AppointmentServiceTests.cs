@@ -380,6 +380,18 @@ namespace Appy.Tests.Services
         }
 
         [Fact]
+        public async Task GetList_Backwards_EmptyWindow_StillSetsNextCursor_WhenContentAhead()
+        {
+            AddAppointmentOn(1, new DateOnly(2030, 1, 10)); // only content is ON the cursor, nothing before it
+
+            var result = await service.GetList(new DateOnly(2030, 1, 10), Direction.Backwards, 14, null, FacilityId);
+
+            Assert.Empty(result.Appointments);                          // nothing strictly before Jan 10
+            Assert.Null(result.PrevCursor);                             // no content behind
+            Assert.Equal(new DateOnly(2030, 1, 10), result.NextCursor); // content on/after cursor ⇒ forward continuation
+        }
+
+        [Fact]
         public async Task GetList_ReturnsEmptyTimeOffs_WhenNoAppointmentsOnPage()
         {
             var result = await service.GetList(new DateOnly(2030, 1, 1), Direction.Forwards, 14, null, FacilityId);
