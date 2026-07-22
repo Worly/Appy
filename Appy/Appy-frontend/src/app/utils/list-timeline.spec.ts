@@ -3,7 +3,7 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import duration from "dayjs/plugin/duration";
 import { AppointmentView } from "../models/appointment";
 import { TimeOffOccurrence } from "../models/time-off-occurrence";
-import { buildDayTimeline } from "./list-timeline";
+import { buildDayTimeline, groupByContentDay } from "./list-timeline";
 
 dayjs.extend(customParseFormat);
 dayjs.extend(duration);
@@ -48,4 +48,34 @@ describe("buildDayTimeline", () => {
     expect(timeline[1].start.format("HH:mm")).toBe("11:00");
     expect(timeline[1].duration.asMinutes()).toBe(60);
   });
+});
+
+function appointmentOn(dateISO: string): AppointmentView {
+    const a = new AppointmentView();
+    a.date = dayjs(dateISO);
+    return a;
+}
+function occurrenceOn(dateISO: string): TimeOffOccurrence {
+    return new TimeOffOccurrence({ id: 1, date: dateISO, isAllDay: true });
+}
+
+describe("groupByContentDay()", () => {
+    it("groups appointments by day, ascending", () => {
+        const days = groupByContentDay([appointmentOn("2030-01-15"), appointmentOn("2030-01-10"), appointmentOn("2030-01-15")], []);
+        expect(days.map(d => d.date.format("YYYY-MM-DD"))).toEqual(["2030-01-10", "2030-01-15"]);
+        expect(days[1].appointments.length).toBe(2);
+    });
+
+    it("adds an appointment-less day for a date that only has a time-off", () => {
+        const days = groupByContentDay([appointmentOn("2030-01-15")], [occurrenceOn("2030-01-20")]);
+        expect(days.map(d => d.date.format("YYYY-MM-DD"))).toEqual(["2030-01-15", "2030-01-20"]);
+        const timeOffOnly = days.find(d => d.date.format("YYYY-MM-DD") === "2030-01-20")!;
+        expect(timeOffOnly.appointments.length).toBe(0);
+    });
+
+    it("does not duplicate a day that has both an appointment and a time-off", () => {
+        const days = groupByContentDay([appointmentOn("2030-01-20")], [occurrenceOn("2030-01-20")]);
+        expect(days.length).toBe(1);
+        expect(days[0].appointments.length).toBe(1);
+    });
 });
