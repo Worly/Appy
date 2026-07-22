@@ -63,6 +63,8 @@ export class AppointmentViewDTO {
 export interface AppointmentListPageDTO {
     appointments: AppointmentViewDTO[];
     timeOffs: TimeOffOccurrenceDTO[];
+    nextCursor?: string;
+    prevCursor?: string;
 }
 
 export class AppointmentView extends BaseModel {
