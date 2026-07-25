@@ -40,9 +40,29 @@ npx cypress run      # Headless E2E
 
 ## CLAUDE.md Map — Read Before Editing
 
-**Every logical unit has its own CLAUDE.md. You MUST read it before editing any file in that unit. Every change to any file must be accompanied by an update to that unit's CLAUDE.md if the change affects what the CLAUDE.md describes.**
+**Every logical unit has its own CLAUDE.md. You MUST read it before editing any file in that unit.**
 
-**Keep CLAUDE.md entries concise.** Document *what* a unit does and *where* things live — enough to navigate and understand the code at a high level. Do NOT document low-level implementation or layout minutiae (exact pixel math, CSS height/spacing tricks, internal state-flag mechanics, "X is compacted so Y is unchanged"). That detail belongs in code comments next to the code, not here — it bloats the map and goes stale fast.
+### A CLAUDE.md is a map, not a manual
+
+Its only job is to let you tell **what lives in a folder and what each thing is for** — without guessing from filenames and without opening the files. Once the map points you at the right file, you open that file and read the implementation there. The map exists so you know *which* file to open; it never tries to save you from opening it.
+
+**Write:** one line per unit (service, component, pipe, entity, page, utility) — its name and what it is responsible for. Plus the wiring you cannot see from inside a single file: who consumes what, which module exports what, cross-file ordering that matters.
+
+**Never write:**
+- Implementation details — algorithms, control flow, state flags, guard conditions, CSS/pixel math, caching mechanics, query construction.
+- API surface transcriptions — method signatures, parameter lists, field-by-field DTO/model contents, enum members.
+- Edge cases, validation rules, or the reasoning behind a behavior. Those live in the code, or in a comment next to the code.
+- Anything answering *how it works*. The map answers *what it is* and *where it lives*.
+
+**The test:** if a line would need changing when someone refactors the *inside* of a file, it does not belong here. If it repeats something the file itself already states, delete it.
+
+### Size
+
+A unit's CLAUDE.md should be readable in under 30 seconds: a one-or-two-sentence intro plus a table or bullet list. One sentence per entry — two only when a genuine cross-unit dependency needs explaining. Past ~60 short lines it has stopped being a map and needs cutting.
+
+### When to update
+
+Update a CLAUDE.md when a unit is **added, removed, renamed, or its responsibility changes** — that is what the map tracks. Changing how something works inside a file is not a map change: leave the CLAUDE.md alone.
 
 | Unit | CLAUDE.md |
 |------|-----------|

@@ -1,44 +1,34 @@
 # CLAUDE.md — Frontend Models (src/app/models/)
 
-TypeScript classes representing domain data on the frontend. Split into two tiers: view models (read-only display) and edit models (mutable forms with validation).
+TypeScript classes wrapping backend DTOs. Two tiers: view models for read-only display, edit models for mutable forms with validation.
 
-## Base Class System (base-model.ts)
+## Base Classes (base-model.ts)
 
-**`BaseModel`**: Read-only data container wrapping a raw DTO with typed accessors.
+- **`BaseModel`** — read-only container wrapping a raw DTO with typed accessors.
+- **`EditModel<T>`** — mutable form model on top of `BaseModel`, adding per-property validators, `applyServerErrors()` for backend error codes, and the `@Children` decorator so nested `EditModel` arrays roll their validity up into the parent.
 
-**`EditModel<T>`** (extends `BaseModel`): Mutable form model with:
-- **Validation**: properties declare validators in the constructor; `isValid()` checks all
-- **Server error application**: `applyServerErrors(errors)` maps backend error code objects to the corresponding property
-- **`@Children` decorator**: marks array properties whose items are themselves `EditModel` instances; nested validation rolls up into the parent's `isValid()`
+## Model Classes
 
-## Domain Model Classes
-
-| Class | Counterpart DTO | Purpose |
-|-------|----------------|---------|
-| `AppointmentView` | `AppointmentViewDTO` | Read-only appointment for display |
-| `Appointment` | `AppointmentDTO` | Editable appointment for create/edit forms |
-| `Client` | `ClientDTO` | Client with nested `ClientContact` array |
-| `ClientContact` | `ClientContactDTO` | Single notification channel |
-| `Service` | `ServiceDTO` | Service offering |
-| `Facility` | (inline) | Simple id/name pair |
-| `WorkingHour` | `WorkingHourDTO` | Operating range for one day of the week |
-| `TimeOff` | `TimeOffDTO` | Blocked availability rule with recurrence and optional bounds |
-| `TimeOffOccurrence` | `TimeOffOccurrenceDTO` | Single expanded on-date time-off instance |
-| `FreeTime` | `FreeTimeDTO` | Available booking slot (from/to/toIncludingDuration) |
-| `CalendarDay` | `CalendarDayDTO` | A date bundled with its appointments and working hours |
-| `Holiday` | `HolidayDTO` | Original provider snapshot (1:1 with the table): id, name, country, date. Embedded in a `TimeOff` (which holds the edits) and returned by holiday get-by-id |
-| `HolidayListItem` | `HolidayListDTO` | Merged holiday-list row: name, effective date, time, `isEdited`, `linkedTimeOffId` (+ `isRemoved` getter) |
-| `HolidayImportSettings` | `HolidayImportSettingsDTO` | Holiday import config snapshot (country code) |
-| `SupportedCountry` | (inline) | Country code + name pair for the supported-countries list |
-| `ClientNotificationsSettings` | (settings DTO) | Instagram config and message templates |
+| Class | Purpose |
+|-------|---------|
+| `AppointmentView` / `Appointment` | Read-only and editable appointment |
+| `Client` / `ClientContact` | Client with its notification channels |
+| `Service` | Service offering |
+| `Facility` | Workspace id/name pair |
+| `WorkingHour` | Operating range for one day of the week |
+| `TimeOff` | Blocked-availability rule (carries its original `Holiday` snapshot when it is a materialized holiday) |
+| `TimeOffOccurrence` | A single expanded on-date time-off instance |
+| `FreeTime` | An available booking slot |
+| `CalendarDay` | A date bundled with its appointments and working hours |
+| `Holiday` | The immutable original snapshot of an imported public holiday |
+| `HolidayListItem` | A holiday-list row, merging the snapshot with its current linked time-off state |
+| `HolidayImportSettings` / `SupportedCountry` | Holiday import config and the country options for it |
+| `ClientNotificationsSettings` | Instagram config and message templates |
 
 ## Enums
 
-- `AppointmentStatus`: `Confirmed`, `Unconfirmed`, `NoShow`
-- `AppointmentStatusMap`: maps each status to its display icon and CSS color class
-- `ClientContactType`: `Instagram`, `WhatsApp`
-- `DayOfWeek`: Sunday–Saturday with `weekdayOrder()` for Monday-first display ordering
+`AppointmentStatus` (+ `AppointmentStatusMap` for its icon and color class), `ClientContactType`, and `DayOfWeek`.
 
-## Adding a New Model
+## Adding a Model
 
-Extend `BaseModel` for display-only. Extend `EditModel<T>` for forms. Declare validators in the constructor. Apply `@Children` to any nested `EditModel` arrays so their validity rolls up.
+Extend `BaseModel` for display-only, `EditModel<T>` for forms. Declare validators in the constructor and apply `@Children` to nested `EditModel` arrays.

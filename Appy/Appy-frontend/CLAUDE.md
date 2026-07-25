@@ -1,6 +1,6 @@
 # CLAUDE.md — Frontend (Appy-frontend/)
 
-Angular 16 SPA. All API calls include `Authorization: Bearer <token>` and `facility-id: <id>` headers added by HTTP interceptors. The backend URL is `/` in production and `https://localhost:5001/` in development (set in `src/app/app.config.ts`).
+Angular 16 SPA. HTTP interceptors add `Authorization: Bearer <token>` and `facility-id: <id>` to every API call. The backend URL is set in `src/app/app.config.ts` (`/` in production, `https://localhost:5001/` in development).
 
 ## Commands (run from this directory)
 
@@ -8,7 +8,7 @@ Angular 16 SPA. All API calls include `Authorization: Bearer <token>` and `facil
 npm install          # Install dependencies
 npx ng serve         # Dev server → http://localhost:4200
 npx ng build         # Production build into dist/
-npx ng test          # Unit tests (Karma/Jasmine, watch mode)
+npx ng test          # Unit tests (Karma/Jasmine)
 npx cypress open     # Interactive E2E runner
 npx cypress run      # Headless E2E (used in CI)
 ```
@@ -28,41 +28,17 @@ npx cypress run      # Headless E2E (used in CI)
 | `src/styles/` | `src/styles/CLAUDE.md` |
 | `cypress/` | `cypress/CLAUDE.md` |
 
-## Module Structure
+## Modules & Routing
 
-- **AppModule** (eager): login, register, dashboard, facilities, and all global providers
-- **Lazy modules**: appointments, clients, services, working-hours, client-notifications
-- **PreloadAllModules**: lazy modules preload in the background after initial render
+`AppModule` is eager and holds login, register, dashboard, facilities, and all global providers. Everything else is a lazy feature module, preloaded in the background via `PreloadAllModules`. Routes and their guards are listed in `src/app/pages/CLAUDE.md`; unmatched paths redirect to `appConfig.homePage`.
 
-## Routing & Guards
+## State
 
-```
-/login, /register         → NotLoggedInGuard
-/error                    → (no guard)
-/facilities               → LoggedInGuard
-/dashboard                → LoggedInGuard + SelectedFacilityGuard
-/appointments             → LoggedInGuard + SelectedFacilityGuard (lazy)
-/clients                  → LoggedInGuard + SelectedFacilityGuard (lazy)
-/services                 → LoggedInGuard + SelectedFacilityGuard (lazy)
-/working-hours            → LoggedInGuard + SelectedFacilityGuard (lazy)
-/time-off                 → LoggedInGuard + SelectedFacilityGuard (lazy)
-/client-notifications     → LoggedInGuard + SelectedFacilityGuard (lazy)
-**                        → redirects to /appointments (via appConfig.homePage)
-```
+Three places, no store:
+1. Server state through the **data seam** — `QueryResult` / `PagedResult` over a TanStack Query cache, with `CacheCoordinator` invalidation (see `src/app/shared/CLAUDE.md`).
+2. URL query params for shareable view state (date, filter, tab).
+3. LocalStorage for UI preferences (theme, language, view type).
 
-`SelectedFacilityGuard` redirects to `/facilities` when no facility is selected.
+## i18n & Dates
 
-## State Management
-
-State flows via:
-1. RxJS Observables from services, surfaced through a thin **data seam** backed by a real **TanStack Query cache** — `QueryResult` / `PagedResult` contracts built by `query()` / `pagedQuery()` (see `src/app/shared/CLAUDE.md`). Mutations call `CacheCoordinator.invalidate(...mutationKeys)` and matching active queries refetch automatically — no manual refetch, no live-sync bus needed. On facility switch / logout, `CacheCoordinator.clear()` + `CustomReuseStrategy.clear()` run as a hard tenant boundary.
-2. URL query params for shareable view state (date, filter)
-3. LocalStorage for UI preferences (theme, language, view type)
-
-## Internationalization
-
-Two languages: English (`en`) and Croatian (`hr`). JSON files in `src/assets/translations/`. The `TranslatePipe` resolves keys. Language persisted in LocalStorage. Both locales configure Monday as the first day of the week.
-
-## Date/Time
-
-**dayjs** with `duration`, `customParseFormat`, `isBetween`, `isSameOrBefore`, `isSameOrAfter` plugins. `MaterialDayjsDateAdapter` makes Angular Material date pickers use dayjs objects. Initialized in `AppInitializerService` before any component renders.
+English (`en`) and Croatian (`hr`), with JSON files in `src/assets/translations/` resolved by `TranslatePipe`. Dates use **dayjs** throughout, including inside Angular Material pickers via `MaterialDayjsDateAdapter`. Both are bootstrapped in `AppInitializerService` before any component renders.

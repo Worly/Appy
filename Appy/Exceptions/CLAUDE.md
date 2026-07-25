@@ -1,32 +1,18 @@
 # CLAUDE.md — Exception System (Exceptions/)
 
-Custom exception hierarchy that maps to HTTP status codes. `ExceptionMiddleware` (registered in `Program.cs`) catches every `HttpException` and serializes it to a JSON response — controllers and services never catch these themselves. The middleware also logs `HttpException` by severity (4xx/client errors at Information, 5xx at Error), and additionally catches any unhandled non-`HttpException` exception, logs it at Error with the full stack trace, and returns a generic `500` response with body `"An unexpected error occurred"` that does not leak exception details.
+A custom exception hierarchy mapping to HTTP status codes, plus `ExceptionMiddleware`, which serializes every `HttpException` to JSON and turns any unhandled exception into a generic 500 that leaks nothing.
 
 ## Hierarchy
 
 ```
-HttpException  (base — StatusCode + Message string)
+HttpException  (base — status code + message)
 ├── BadRequestException  (400)
 ├── NotFoundException    (404)
-└── ValidationException  (400 — carries structured field errors via ErrorBuilder)
+└── ValidationException  (400 — structured per-field errors via ErrorBuilder)
 ```
 
-## ValidationException & ErrorBuilder
-
-`ValidationException` wraps an `ErrorBuilder` that maps property names to error code strings:
-
-```csharp
-throw new ValidationException(
-    new ErrorBuilder()
-        .Add("email", "EMAIL_TAKEN")
-        .Add("password", "TOO_SHORT")
-);
-```
-
-The response body is a flat JSON object: `{ "email": "EMAIL_TAKEN", "password": "TOO_SHORT" }`.
-
-The frontend `ErrorTranslateService` (see `Appy-frontend/src/app/shared/CLAUDE.md`) maps these error codes to localized user-facing strings.
+`ValidationException` carries an `ErrorBuilder` mapping property names to error-code strings, serialized as a flat JSON object. The frontend's `ErrorTranslateService` (see `Appy-frontend/src/app/shared/CLAUDE.md`) turns those codes into localized text.
 
 ## Usage Rule
 
-Throw from **services** for business rule violations, and from **controllers** for request-level validation failures. Never catch these in a controller action — let `ExceptionMiddleware` handle all of them uniformly.
+Throw from **services** for business-rule violations and from **controllers** for request-level validation. Never catch them — `ExceptionMiddleware` handles all of them uniformly.

@@ -1,38 +1,15 @@
 # CLAUDE.md — Smart Filter DSL (Services/SmartFilter/)
 
-A JSON-array-based query DSL that is compiled into a LINQ `Expression<Func<T, bool>>` for use in EF Core `Where()` calls. Both the backend (expression trees) and the frontend (TypeScript types) share this format — see `Appy-frontend/src/app/shared/CLAUDE.md` for the frontend side.
+A JSON-array query DSL compiled into a LINQ `Expression<Func<T, bool>>` for EF Core `Where()` calls. The frontend builds the same structure in TypeScript and passes it through as a single URL query parameter — see `Appy-frontend/src/app/shared/CLAUDE.md` for that side.
 
-## Syntax
+A filter is a nested array of three forms — a field comparison, a logical combination, and a negation:
 
-Three forms:
-
-**Field comparison** (leaf node):
 ```json
-["propertyName", "operator", value]
+[["client.name", "contains", "ana"], "and", ["status", "==", "Confirmed"]]
 ```
 
-**Logical combination**:
-```json
-[leftFilter, "and"|"or", rightFilter]
-```
+Read the compiler for the supported operators, value coercion, and nested-property resolution.
 
-**Negation**:
-```json
-["not", filter]
-```
+## Why Custom
 
-## Supported Operators
-
-`==`, `!=`, `<`, `>`, `<=`, `>=`, `contains` (case-insensitive substring match on strings)
-
-## Value Types
-
-Values are automatically coerced to match the target property's runtime type: `string`, numeric types, enum (matched by name), `DateOnly`.
-
-## Nested Property Access
-
-Dot notation resolves nested properties: `"client.name"` becomes the expression `x.Client.Name`.
-
-## Why a Custom DSL?
-
-Lightweight and fully owned — no dependency on OData, GraphQL, or other query frameworks. The same JSON structure passes from the frontend URL query parameter through the controller directly into the service layer.
+Fully owned and dependency-free — no OData or GraphQL. The same JSON travels from the frontend URL through the controller into the service layer untouched.

@@ -2,16 +2,12 @@
 
 Configures the facility's operating hours per day of the week. Requires `LoggedInGuard` + `SelectedFacilityGuard`. Lazy-loaded.
 
-## Components
+## Component
 
-- **`WorkingHoursComponent`**: A form displaying all seven days (Monday–Sunday). Each day shows its time range(s) with hour and minute dropdowns (hours 0–24, minutes 0/15/30/45). Days with no hours show as "CLOSED". The user can add or remove ranges per day. Saves all days atomically on submit.
+`WorkingHoursComponent` — a single form covering all seven days, where each day holds zero or more time ranges. Days with none read as closed.
 
 ## Service
 
-**`WorkingHoursService`**: Two endpoints:
-- `getAll()` — fetches current working hours for the selected facility
-- `set(workingHours[])` — replaces all working hours for the facility in one POST (atomic batch replacement)
+`WorkingHoursService` — reads the facility's hours and replaces all of them in one atomic write. There is no per-day endpoint.
 
-## Validation
-
-`timeFrom` must be strictly before `timeTo`, and ranges within the same day must not overlap. Both rules are enforced by the backend (returns a validation error on violation). The client-side should prevent submitting invalid state.
+Range ordering and overlap rules are enforced by the backend; the form should not let the user submit state that violates them.

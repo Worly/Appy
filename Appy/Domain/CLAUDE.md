@@ -1,48 +1,37 @@
 # CLAUDE.md — Domain Entities (Domain/)
 
-EF Core entity classes that map directly to PostgreSQL tables. These are the canonical data models for the backend — all business logic in `Services/` operates on these objects.
+EF Core entities mapped to PostgreSQL tables, plus `MainDbContext`. These are the canonical backend data models — everything in `Services/` operates on them.
 
-## Entity Overview
+## Entities
 
 | Entity | Purpose |
 |--------|---------|
-| `User` | Account owner with email/password credentials and a pointer to their selected facility |
-| `LoginSession` | One active refresh token per device/browser; enables multi-device login |
-| `Facility` | The core tenant unit — a named workspace owned by a User |
-| `Service` | A service offering at a Facility (e.g. "Haircut"), with name, duration, color, and archive flag |
-| `Client` | A customer of a Facility, with optional contacts and archive flag |
-| `ClientContact` | A single notification channel for a Client (Instagram username or WhatsApp number) |
-| `Appointment` | A booking linking one Client + one Service at a specific date/time, with status |
-| `WorkingHour` | Operating hours for a Facility on a specific day of the week (one time range per day) |
-| `TimeOff` | Blocked availability (recurrence: OneOff/Weekly/Monthly; all-day or time range; optional bounds) |
-| `DashboardSettings` | Per-user per-facility UI preferences stored as a JSON blob |
+| `User` | Account owner (credentials + selected facility) |
+| `LoginSession` | One refresh token per device; enables multi-device login |
+| `Facility` | The tenant unit — a workspace owned by a User |
+| `Service` | A service offering at a Facility (e.g. "Haircut") |
+| `Client` | A customer of a Facility |
+| `ClientContact` | One notification channel for a Client (Instagram / WhatsApp) |
+| `Appointment` | A booking linking one Client + one Service at a date/time |
+| `WorkingHour` | Operating hours for a Facility on one day of the week |
+| `TimeOff` | Blocked availability, one-off or recurring |
+| `DashboardSettings` | Per-user per-facility UI preferences |
 | `ClientNotificationsSettings` | Instagram API config and message templates for a Facility |
-| `HolidayImportSettings` | Per-facility holiday import config: ISO country code (null = off); PK = FacilityId. `GetDTO()` maps to `HolidayImportSettingsDTO` |
-| `ImportedHoliday` | One row per materialized public holiday occurrence; persists independently of its linked TimeOff (its 1:1 `LinkedTimeOff` nav). `GetDTO()` returns the original snapshot as a `HolidayDTO` (1:1 with this row); `GetListDTO()` merges it with `LinkedTimeOff`'s current state into a `HolidayListDTO` (`LinkedTimeOffId == null` ⇒ removed); `ToTimeOff()` builds a fresh all-day one-off TimeOff linked back to this row (used when materializing and restoring). Relationship configured in its `OnModelCreating` |
+| `HolidayImportSettings` | Per-facility public-holiday import config |
+| `ImportedHoliday` | One materialized public-holiday occurrence — the immutable original snapshot |
 
-## Multi-Tenancy Pattern
+## Multi-Tenancy
 
-Every data entity except `User` and `LoginSession` carries a `FacilityId` foreign key. All queries in the service layer filter by `FacilityId` to enforce tenant isolation.
+Every entity except `User` and `LoginSession` carries a `FacilityId`. The service layer filters by it on every query to enforce tenant isolation.
 
-## Key Relationships
+## Relationships
 
-- `User` → many `Facility` (via `OwnerId`)
-- `User` → many `LoginSession`
-- `Facility` → many `Service`, `Client`, `Appointment`, `WorkingHour`
-- `Facility` → one `ClientNotificationsSettings`
-- `Facility` → one `HolidayImportSettings`; owns `ImportedHoliday` rows via their `FacilityId` (no collection nav on `Facility`, matching the other entities)
-- `TimeOff` ↔ `ImportedHoliday` — optional 1:1 (`TimeOff.ImportedHolidayId` FK / `ImportedHoliday.LinkedTimeOff` inverse; unique index; NoAction delete — removing a TimeOff does not delete the ImportedHoliday)
-- `Client` → many `ClientContact` (auto-included in all EF queries via `modelBuilder`)
-- `Appointment` → one `Service`, one `Client` — delete behavior is **NoAction**: appointments must be deleted before their referenced service/client can be deleted
+- `User` → many `Facility`, many `LoginSession`
+- `Facility` → many `Service`, `Client`, `Appointment`, `WorkingHour`, `TimeOff`, `ImportedHoliday`; one `ClientNotificationsSettings`; one `HolidayImportSettings`
+- `Client` → many `ClientContact`
+- `Appointment` → one `Service`, one `Client` (NoAction delete — see Soft Deletes)
+- `TimeOff` ↔ `ImportedHoliday` — optional 1:1. A materialized holiday *is* a one-off `TimeOff`; the `ImportedHoliday` keeps the original snapshot and outlives its TimeOff.
 
 ## Soft Deletes
 
-`Service` and `Client` have `IsArchived: bool`. Hard deletion is blocked at the service layer if any appointment references them. Archiving is the intended path for removing active records.
-
-## Special Fields
-
-- `Appointment.WasReminded` — set `true` after a reminder is sent; prevents the scheduler from sending duplicate reminders
-- `Appointment.Status` — enum: `Unconfirmed`, `Confirmed`, `NoShow`
-- `ClientContact.AppSpecificID` — cached Instagram IGSID, stored after first lookup to avoid repeated API pagination
-- `LoginSession.Family` — unique token family UUID; the entire family is invalidated when a refresh token reuse is detected
-- `DashboardSettings.SettingsJSON` — untyped JSON blob for flexible per-facility UI preferences
+`Service` and `Client` have `IsArchived`. Hard deletion is blocked in the service layer while an `Appointment` references them — archiving is the intended path.

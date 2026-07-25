@@ -1,48 +1,27 @@
 # CLAUDE.md — API Controllers (Controllers/)
 
-REST API surface. Each controller maps to one domain concept and delegates all work to its injected service. Controllers contain no business logic.
+The REST surface. Each controller maps to one domain concept and delegates everything to its injected service — no business logic, no exception catching (`ExceptionMiddleware` handles all of it).
 
-## Authentication Pattern
+## Controllers
 
-All controllers carry `[Authorize]` (requires a valid JWT from the pipeline) except `UserController` (login/register are public). Most also carry `[SelectedFacility]` (requires a valid, user-owned facility in the `facility-id` header).
+| Controller | Route Prefix | Serves |
+|-----------|--------------|--------|
+| `UserController` | `/user` | Register, login, refresh, logout (the only public controller) |
+| `FacilityController` | `/facility` | Facility CRUD and selection |
+| `ServiceController` | `/service` | Service CRUD and archiving |
+| `ClientController` | `/client` | Client CRUD and archiving |
+| `AppointmentController` | `/appointment` | Appointment CRUD, list paging, free times, status, client notification |
+| `WorkingHourController` | `/workinghour` | Working-hour read and atomic replace |
+| `TimeOffController` | `/timeoff` | Time-off CRUD and list paging (imported holidays edit through here too) |
+| `HolidayController` | `/holiday` | Holiday import settings, list, revert/restore |
+| `CalendarDayController` | `/calendarday` | A date bundled with its appointments and working hours (scroller view) |
+| `DashboardController` | `/dashboard` | Dashboard settings and stat endpoints |
+| `ClientNotificationsController` | `/clientnotifications` | Notification settings |
+| `TestingController` | `/testing` | Dev-only test-data seeding — no auth |
 
-`TestingController` has no auth and is only used in development to seed test data.
+## Conventions
 
-## Special HTTP Protocol
-
-**Request header**: `facility-id: <int>` — required on all `[SelectedFacility]` endpoints  
-**Response header**: `X-Can-Notify-Client: true` — added by `AppointmentController` when the returned appointment's client has at least one notifiable contact and the facility has a valid notification configuration
-
-## Controller → Route Prefix
-
-| Controller | Prefix |
-|-----------|--------|
-| `UserController` | `/user` |
-| `FacilityController` | `/facility` |
-| `ServiceController` | `/service` |
-| `ClientController` | `/client` |
-| `AppointmentController` | `/appointment` |
-| `WorkingHourController` | `/workinghour` |
-| `TimeOffController` | `/timeoff` |
-| `HolidayController` | `/holiday` |
-| `CalendarDayController` | `/calendarday` |
-| `DashboardController` | `/dashboard` |
-| `ClientNotificationsController` | `/clientnotifications` |
-| `TestingController` | `/testing` |
-
-## Error Handling
-
-Controllers throw `HttpException` subclasses (from `Exceptions/`) for validation and business rule violations. They never catch exceptions — `ExceptionMiddleware` converts them to JSON responses uniformly.
-
-## Appointment-Specific Notes
-
-- `GET /appointment/getAll` and `GET /appointment/getList` accept a `filter` query parameter in Smart Filter DSL format (see `Services/SmartFilter/CLAUDE.md`)
-- `getList` pages by **content-day** from a date cursor: `date` (the cursor), `direction` (Forwards/Backwards), `take` (content-days per page) — no `skip`. Returns an `AppointmentListPageDTO` envelope (the window's appointments + time-offs, plus `NextCursor`/`PrevCursor` to continue paging)
-- `addNew` and `edit` accept `ignoreTimeNotAvailable=true` to bypass time validation
-- `notifyClient/{id}` accepts a `languageCode` query parameter to select the message language
-
-## Time Off-Specific Notes
-
-- `GET /timeoff/getList?type=&scope=&skip=&take=` — returns a paginated page of `TimeOffDTO` rules for one tab (`type` = `OneOff`|`Recurring`) and scope (`scope` = `Active`|`History`); ordered server-side, forward-paginated
-- `PUT /timeoff/edit/{id}?applyFrom=YYYY-MM-DD` — for recurring rules, `applyFrom` forks the rule: the original row becomes history (ends the day before) and a new row carries the edit from that date onward. Absent (or for one-offs / a date on-or-before the rule's start) → plain in-place edit.
-- `PUT /timeoff/stop/{id}` — clamps a recurring rule's `EndDate` to yesterday (stop-going-forward, keeps past occurrences). Rejects one-offs; no-op if the rule already ended earlier.
+- `[Authorize]` on every controller except `UserController` and `TestingController`; `[SelectedFacility]` on everything facility-scoped.
+- **Request header** `facility-id: <int>` — required by every `[SelectedFacility]` endpoint.
+- **Response header** `X-Can-Notify-Client: true` — set by `AppointmentController` when the appointment's client is notifiable.
+- Appointment and time-off list endpoints accept a `filter` query parameter in Smart Filter DSL format (see `Services/SmartFilter/CLAUDE.md`).

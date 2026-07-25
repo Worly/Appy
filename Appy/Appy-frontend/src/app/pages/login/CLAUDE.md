@@ -1,15 +1,5 @@
 # CLAUDE.md — Login Page (pages/login/)
 
-Email/password authentication page. Accessible only when not logged in (`NotLoggedInGuard`).
+Email/password sign-in. Reachable only when logged out (`NotLoggedInGuard`). No sub-routes; linked from the register page.
 
-## Behavior
-
-On successful login, redirects to `/facilities` if the user has no selected facility, otherwise to the home page (`/appointments`). Server validation errors (e.g. wrong password) are applied to the form model and displayed inline.
-
-## Components
-
-- **`LoginComponent`**: Single form with email and password fields. Calls `AuthService.logIn()`. Shows a loading state on the button during the request.
-
-## Notes
-
-No sub-routes. Linked from the register page.
+`LoginComponent` — one form calling `AuthService.logIn()`. Server validation errors are applied to the form model and shown inline. On success it routes to `/facilities` or the home page depending on whether the user already has a facility selected.

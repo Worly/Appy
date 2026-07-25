@@ -1,15 +1,5 @@
 # CLAUDE.md — Register Page (pages/register/)
 
-New user account creation. Accessible only when not logged in (`NotLoggedInGuard`).
+New account creation. Reachable only when logged out (`NotLoggedInGuard`). No sub-routes; linked from the login page.
 
-## Behavior
-
-Form with name, surname, email, and password fields. Calls `AuthService.register()`. Server validation errors (e.g. email already taken) are applied to the form model and displayed inline. On success, the user is logged in and redirected to `/facilities`.
-
-## Components
-
-- **`RegisterComponent`**: Single registration form. Shows a loading state on the button during the request.
-
-## Notes
-
-No sub-routes. Linked from the login page.
+`RegisterComponent` — one form calling `AuthService.register()`. Server validation errors are applied to the form model and shown inline. On success the user is logged in and sent to `/facilities`.

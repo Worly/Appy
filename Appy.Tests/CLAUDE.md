@@ -1,35 +1,32 @@
 # CLAUDE.md — Unit Tests (Appy.Tests/)
 
-xUnit unit tests for backend service logic. Targets **.NET 8.0**, same as the main project.
+xUnit tests for backend logic. Targets .NET 8.0, same as the main project. Folders mirror the backend: `Services/`, `Controllers/`, `Utils/`, `Middleware/`, `Exceptions/`.
 
-## What Is Tested
+## Covered
 
-Tests live in `Services/`, `Utils/`, `Middleware/`, `Exceptions/`, and `Controllers/`.
+| Test class | Covers |
+|-----------|--------|
+| `AppointmentServiceTests` | Appointment create/edit rules and list paging |
+| `AppointmentReminderServiceTests` | Which appointments get reminded, and deduplication |
+| `ClientNotificationServiceTests` | Contact resolution, template substitution, multi-contact routing |
+| `UserServiceTests` | Registration validation |
+| `HolidayServiceTests` | Holiday import, listing, revert and restore |
+| `TimeOffServiceTests` | Time-off CRUD, recurrence handling, occurrence expansion |
+| `NagerDateHolidayProviderTests` | The external holiday provider client |
+| `DashboardControllerTests` | Dashboard endpoint response shapes |
+| `TrimmingStringConverterTests` | Request-body string trimming |
+| `RequestLoggingMiddlewareTests` | Request summary logging and its suppression rules |
+| `ExceptionMiddlewareTests` | Exception-to-HTTP-response mapping and log severity |
 
-- **DashboardControllerTests** (`Controllers/`): verifies `UpcomingUnconfirmed` unwraps the `AppointmentListPageDTO` envelope from `IAppointmentService.GetList` and returns the bare `List<AppointmentViewDTO>` the frontend expects (not the whole page with its `TimeOffs`).
+`SmartFilterParserTests` lives in the main project, under `Appy/Services/SmartFilter/`.
 
-The `Services/` tests cover four services:
-
-- **TrimmingStringConverterTests** (`Utils/`): verifies the global request-body string-trimming converter — leading/trailing whitespace is trimmed across top-level, nested, and collection string properties; `null` is preserved; whitespace-only becomes empty; and serialization (Write) is a passthrough that does not trim.
-
-- **AppointmentReminderServiceTests**: verifies time-based reminder logic — which appointments get reminded based on date and time, that only `Confirmed` appointments trigger reminders, that the `WasReminded` flag prevents duplicate sends, and that an exception on one appointment does not stop reminders for others.
-
-- **AppointmentServiceTests**: verifies the status-revert rule on `Edit` — a `Confirmed` appointment whose date, time, service, or client changes is reset to `Unconfirmed`; other statuses are preserved; duration- and notes-only edits leave the status alone. Also asserts that `AddNew` creates appointments in the `Unconfirmed` state. Also verifies that `GetList` returns an `AppointmentListPageDTO` envelope with the page's time-off occurrences, requests occurrences only for the dates of the returned appointments, and returns empty `TimeOffs` when the page is empty.
-
-- **ClientNotificationServiceTests**: verifies contact validation (at least one contact required), Instagram IGSID lookup and `AppSpecificID` caching behavior, message template variable substitution (`{clientName}`, `{service}`, etc.), multi-contact routing (stops at the first successful send), and that a `LogLevel.Warning` is emitted when all contacts fail.
-
-- **UserServiceTests**: verifies `Register` rejects malformed email addresses with a `ValidationException` (before the uniqueness check) and accepts well-formed ones.
-
-- **HolidayServiceTests**: verifies `SaveSettings` and `Materialize` — new country materializes holidays in window and adds linked TimeOffs; past holidays (before today) are skipped; already-present dates are not re-added; changing country deletes only future ImportedHolidays + their TimeOffs (past rows survive as history); provider outage (HolidayProviderException) aborts before any SaveChangesAsync call. Also verifies `GetList` — returns merged list items, active scope upcoming ascending (excluding past), history excluded; `IsEdited` set when TimeOff has non-all-day time or date differs from original; `LinkedTimeOffId` null when no linked TimeOff (removed); effective date uses TimeOff.StartDate over ImportedHoliday.Date. Verifies `GetById` — returns the original provider snapshot (ignoring any linked-TimeOff edits), returns null for unknown id. Verifies `Revert` — resets date and time fields to original snapshot while preserving notes. Verifies `Restore` — calls TimeOffs.Add with a snapshot-derived TimeOff (IsAllDay, no notes, correct dates/label, linked back to the ImportedHoliday) when the holiday has no linked TimeOff. Editing/removing a holiday is not tested here — it goes through `TimeOffService` (a holiday is a one-off TimeOff), covered by `TimeOffServiceTests`. Verifies `MaterializeForAllFacilities` — calls `Materialize` for each facility with a non-null CountryCode, skips null-country rows, and continues past a per-facility provider failure without throwing.
-
-## How to Run
-
-```bash
-dotnet test                                                          # All tests
-dotnet test --filter "FullyQualifiedName~AppointmentReminder"        # Single class
-dotnet test --filter "FullyQualifiedName~SpecificMethodName"         # Single test
-```
+Editing or removing a holiday is covered by `TimeOffServiceTests`, not `HolidayServiceTests` — a holiday is a one-off `TimeOff`.
 
 ## Pattern
 
-Each test creates a fresh service instance with Moq mocks for all dependencies. No database, no HTTP — all I/O is mocked. No integration tests exist yet.
+Every test builds a fresh service with Moq mocks for all dependencies. No database, no HTTP, no integration tests.
+
+```bash
+dotnet test                                                    # all
+dotnet test --filter "FullyQualifiedName~AppointmentReminder"  # one class or test
+```

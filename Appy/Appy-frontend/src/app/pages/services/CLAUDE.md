@@ -5,34 +5,24 @@ Manages the facility's service offerings. Requires `LoggedInGuard` + `SelectedFa
 ## Routes
 
 ```
-/services          → ServicesComponent (active services)
-/services/archive  → ServicesComponent (archived, same component different mode)
+/services          → ServicesComponent (active)
+/services/archive  → ServicesComponent (archived, same component)
 /services/new      → ServiceEditComponent
 /services/edit/:id → ServiceEditComponent
 ```
 
 ## Components
 
-- **`ServicesComponent`**: List of services with archive toggle and new-service button. Each card shows the service name, duration, and a color bar matching the service's color.
-
-- **`ServiceEditComponent`**: Create/edit form with:
-  - Name and display name fields (display name is shown to clients; name is internal)
-  - Color picker — selects from a predefined palette via `ServiceColorPickerComponent`
-  - Duration picker (15-minute increments)
-  - Archive/unarchive and delete buttons
-
-- **`ServiceColorPickerComponent`**: Grid of preset color swatches. Selecting one sets the service's `colorId`.
-
-- **`ServiceLookupComponent`**: Reusable dropdown/search for selecting a service by name. Exported from `ServicesModule` and used by the appointments edit form.
+| Component | Purpose |
+|-----------|---------|
+| `ServicesComponent` | Service list with an archive toggle |
+| `ServiceEditComponent` | Create/edit form — internal name, client-facing display name, color, duration, archiving, deletion |
+| `ServiceColorPickerComponent` | Grid of preset color swatches |
+| `ServiceLookupComponent` | Reusable service picker — **exported** and used by `AppointmentsModule`'s edit form |
 
 ## Services
 
-**`ServiceService`** (extends `BaseModelService`):
-- `getAll(archived?)` — list services filtered by archive status
-- `setArchived(service, isArchived)` — toggle archive flag
+- `ServiceService` — extends `BaseModelService`; adds archive-aware listing and the archive toggle.
+- `ServiceColorsService` — resolves a service's `colorId` to its CSS color, used by the list cards and the picker.
 
-**`ServiceColorsService`**: Maps a `colorId` integer to its CSS hex color string. Used by the list cards and the color picker.
-
-## Notes
-
-`ServiceLookupComponent` is exported from this module and consumed by `AppointmentsModule`. If you move or rename it, update the appointments edit form.
+Deletion is only possible while no appointment references the service; archiving is the fallback (enforced by the backend).

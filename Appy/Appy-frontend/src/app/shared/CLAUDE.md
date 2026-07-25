@@ -1,67 +1,51 @@
 # CLAUDE.md — Shared Infrastructure (src/app/shared/)
 
-Cross-cutting code consumed by all feature modules. Organized into services, pipes, and directives.
+Cross-cutting code consumed by every feature module: services, pipes, and directives.
 
-## Shared Services (services/)
+## services/
 
-### BaseModelService\<TEdit, TView\>
+| Item | Purpose |
+|------|---------|
+| `BaseModelService<TEdit, TView>` | The generic CRUD foundation every feature service extends. Exposes get-by-id / get-all / paged-list reads returning data-seam contracts, plus add/save/delete mutations that invalidate the cache. Subclasses pass their own key factory and any cross-entity invalidation keys |
+| `smart-filter.ts` | TypeScript mirror of the backend Smart Filter DSL (see `Appy/Services/SmartFilter/CLAUDE.md`), serialized into URL query params |
 
-The generic CRUD foundation that all feature services extend. Returns the library-agnostic data contracts from the Data Seam (below):
-- `getAllAdvanced(queryKey, params)` → `QueryResult<vT[]>` (one-shot list fetch)
-- `getById(id)` → `QueryResult<vT | undefined>` (single entity; builds the cache key from the service's own `keys.detail(id)`, so callers pass only the id; `data$` emits `undefined` on 404)
-- `getListAdvanced(queryKey, params, filter?, mapPage?)` → `PagedResult<vT, E>` (paginated list, 20/page, bidirectional from an anchor; `filter` forwarded to backend; optional `mapPage` maps raw response to `{ items: vT[]; extra: E[] }` — enables the `extras$` sidecar stream; without `mapPage`, `extras$` is always empty)
-- `get(id)` → `Observable<TEdit>` (the editable model for forms)
-- `addNew` / `save` / `delete` → mutate, return the fresh entity, and call `CacheCoordinator.invalidate(...mutationKeys)` (now with real effect — matching active queries refetch automatically)
+### services/data/ — the data seam
 
-Feature services (`AppointmentService`, `ClientService`, …) extend this base, add domain-specific methods, and pass their own `EntityKeyFactory` (e.g. `clientKeys` — used to build `getById`/`getAll` keys) plus any cross-entity invalidation keys to `super()`. `mutationKeys` is then `[keys.all, ...crossEntityKeys]`.
+A library-agnostic seam over a TanStack Query cache. Components only ever see the contracts, so the cache underneath could be swapped without touching them.
 
-### Data Seam (services/data/)
+| File | Purpose |
+|------|---------|
+| `contracts.ts` | `QueryResult<T>` for single fetches and `PagedResult<T, E>` for bidirectional infinite lists — the only shapes components consume |
+| `query.ts` | `query()` — builds a `QueryResult` from a fetch function |
+| `paged-query.ts` | `pagedQuery()` — offset-paged `PagedResult` |
+| `paged-query-by-cursor.ts` | `pagedQueryByCursor()` — cursor-paged `PagedResult`, used by the appointments list |
+| `keys.ts` | The per-entity query-key factories that identify cached queries |
+| `cache-coordinator.ts` | `invalidate()` to refetch matching queries after a mutation, `clear()` for a hard tenant reset on facility switch or logout |
+| `query-client.ts` | The `QueryClient` singleton factory, mounted in `AppModule` |
 
-A thin, **library-agnostic** seam that replaced the old self-written `Datasource` / `EntityChangeNotifyService` sync layer, now **backed by TanStack Query (`@tanstack/query-core`)** as a real client-side cache. The `QueryResult` / `PagedResult` contracts are unchanged; the library sits behind them (a different cache could still be swapped in without touching component code).
+### services/auth/
 
-The `QueryClient` singleton is provided and mounted in `AppModule` via a factory in `services/data/query-client.ts` with defaults: `staleTime: 0`, `retry: false`, `refetchOnWindowFocus: false`.
+`AuthService` (token storage, login/register/logout, auto-refresh), `LoggedInGuard` / `NotLoggedInGuard`, and `AuthHttpInterceptor` (attaches the bearer token).
 
-- **Contracts (`contracts.ts`)**: `QueryResult<T>` (`data$` / `loading$` / `error$` / `refetch()`) for single fetches; `PagedResult<T, E = never>` (`items$` / `extras$` / `page$` / `loading$` / `loadingForwards$` / `loadingBackwards$` / `error$` / `loadMore(dir)` / `hasMore(dir)` / `refetch()`) for the bidirectional infinite list — `extras$` accumulates the per-page sidecar arrays in display order; `page$` pairs `items` + `extras` from one emission (subscribe to it instead of combining `items$`/`extras$`, which would flash a new-items / stale-extras pair); directional loading flags let the list view show top vs bottom spinners. Observable-flavoured for Angular 16; wrap with `toSignal` at this surface when moving to signals.
-- **`query(client, queryKey, fetchFn)`** (`query.ts`): wraps a `QueryObserver` — lazily created on first subscription, ref-counted, torn down on last unsubscribe. The Observable `fetchFn` is adapted to the queryFn Promise via `firstValueFrom`.
-- **`pagedQuery(client, opts)`** (`paged-query.ts`): wraps an `InfiniteQueryObserver`; `loadPage` now returns `Page<T, E>` (`{ items, extra }`); backwards pages are reversed and concatenated into `items$`; `extra` arrays are accumulated in the same order into `extras$`. `loadMore(dir)` is a no-op while a page in that direction is already loading (scroll-burst guard) and also while a full refetch is in flight (stale-snapshot guard). `refetch()` refreshes all loaded pages.
-- **`pagedQueryByCursor(client, opts)`** (`paged-query-by-cursor.ts`): a cursor-paginated sibling of `pagedQuery` used by the appointments list. `loadPage(dir, cursor)` returns `CursorPage<T,E>` (`{ items, extra, nextCursor, prevCursor }`); pages are always ascending (no reversal), chained via `nextCursor`/`prevCursor`. Same `PagedResult` contract. Stable against inserts/removes because the page boundary is a date, not an offset. The other paged lists (time-off, holidays) remain on `pagedQuery`.
-- **Key factories (`keys.ts`)**: `appointmentKeys` / `clientKeys` / `serviceKeys` / `workingHourKeys` / `timeOffKeys` / `holidayKeys` — the **live query keys** used by the cache: `getById` → `detail(id)`, `getAll` → `list(...)`, paged list → `list(date)` + serialized filter (for time-off and holidays, `list(type, scope)` or `list(scope)` respectively); `holidayKeys` also exposes `settings` and `countries` for the import config and supported-countries list.
-- **`CacheCoordinator`** (`cache-coordinator.ts`): `invalidate(...keys)` calls `queryClient.invalidateQueries({ queryKey })` for each key (prefix match — matching active queries refetch in the background automatically). `clear()` calls `queryClient.clear()` for a hard tenant reset on facility switch / logout.
+### services/errors/
 
-### Smart Filter (smart-filter.ts)
+`ErrorInterceptor` (extracts the error body from failed responses) and `ErrorTranslateService` (maps backend error codes to i18n keys — see `Appy/Exceptions/CLAUDE.md`).
 
-TypeScript types that mirror the backend Smart Filter DSL (see `Appy/Services/SmartFilter/CLAUDE.md`). Used to build filter objects in components, which are then serialized to URL query parameters.
-
-### Auth Services (services/auth/)
-
-- `AuthService`: JWT and refresh token management in LocalStorage; login/register/logout; auto-refresh on expiry
-- `LoggedInGuard` / `NotLoggedInGuard`: route guards
-- `AuthHttpInterceptor`: attaches `Authorization: Bearer <token>` to every outgoing request
-
-### Error Services (services/errors/)
-
-- `ErrorInterceptor`: catches HTTP error responses and extracts the error body
-- `ErrorTranslateService`: maps backend error code strings (e.g. `EMAIL_TAKEN`) to i18n translation keys for display
-
-### FacilityInterceptor
-
-Adds the `facility-id: <id>` header to all API requests, reading the selected facility ID from `AuthService`.
-
-## Shared Pipes (pipes/)
+## pipes/
 
 | Pipe | Purpose |
 |------|---------|
-| `TranslatePipe` | Resolves a translation key to the current language string |
-| `FormatDurationPipe` | dayjs Duration → `"1h 30m"` |
+| `TranslatePipe` | Translation key → current-language string |
+| `FormatDurationPipe` | dayjs Duration → readable text |
 | `ToDurationPipe` | String → dayjs Duration |
 | `FilterPipe` | Filters an array by a property value |
-| `RelativeDatePipe` | dayjs date → localized relative label ("Today", "Tomorrow", "in 3 days", "2 days ago"); impure |
-| `DateRelationPipe` | dayjs date → `'today' \| 'future' \| 'past'` token for `[ngClass]`; impure |
+| `RelativeDatePipe` | Date → localized relative label ("Today", "in 3 days") |
+| `DateRelationPipe` | Date → `'today' \| 'future' \| 'past'` token for `[ngClass]` |
 
-## Shared Directives (directives/)
+## directives/
 
 | Directive | Purpose |
 |-----------|---------|
-| `InvokeDirective` | Calls a function expression in a template binding without a wrapper method |
+| `InvokeDirective` | Calls a function expression in a template without a wrapper method |
 | `FlexSplitterDirective` | Splits a flex container responsively at a breakpoint |
 | `ElementRefDirective` | Exposes an element's `ElementRef` as a template variable |

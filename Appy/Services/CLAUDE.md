@@ -1,39 +1,35 @@
 # CLAUDE.md — Backend Services (Services/)
 
-Business logic layer. Each service corresponds to one domain concept and is constructor-injected into controllers. Services have no knowledge of HTTP — they work only with domain entities, DTOs, and `AppDbContext`.
+The business-logic layer. One service per domain concept, constructor-injected into controllers. Services know nothing about HTTP — they work with domain entities, DTOs, and `MainDbContext`, and throw `HttpException` subclasses for rule violations.
 
-## Services at a Glance
+## Services
 
 | Service | Responsibility |
 |---------|---------------|
-| `UserService` | Registration, authentication, token refresh, logout. Logs: Warning on failed login (no-user, wrong-password) and refresh-token reuse detection; Information on login, register, logout; Debug on token rotation |
-| `JwtService` | JWT generation and validation (see `Auth/CLAUDE.md`) |
-| `FacilityService` | Facility CRUD, selected-facility management per user |
-| `ServiceService` | Service CRUD, archive toggle, name uniqueness enforcement |
-| `ClientService` | Client CRUD, archive toggle, contact management with AppSpecificID preservation |
-| `AppointmentService` | Appointment CRUD, free-time slot generation, status changes, client notification dispatch. `GetList(cursor, direction, take, filter, facilityId)` pages by **content-day** — any day with an appointment OR a time-off occurrence, unioning appointment days (from the DB) with time-off occurrence days (`ITimeOffService.GetOccurrenceDatesForward/Backward`) to pick the nearest `take` days from the cursor, then returns every appointment and time-off occurrence within that day window. Time-offs (and the occurrence-date lookups) are skipped entirely when a `filter` is active. Forward paging is unbounded (no upper date limit); backward paging stops once no content-day remains before the cursor. `NextCursor`/`PrevCursor` are computed by probing for any appointment or time-off content on/after or before the window's edge. |
-| `WorkingHourService` | Working-hour CRUD with overlap validation; replaces all hours for a facility atomically |
-| `DashboardService` | Dashboard settings upsert (unique per user + facility) |
-| `ClientNotificationsService` | Notification settings and outbound message dispatch; logs per-contact Debug detail, Information on success, Warning before throwing `MESSAGE_FAILED_TO_SEND` |
-| `AppointmentReminderService` | Cron job (every 5 minutes) — sends reminders for the next day's confirmed appointments |
-| `TimeOffService` | Time-off CRUD, validation, and occurrence expansion (recurrence → concrete date intervals). `GetList(type, scope)` filters/orders/pages on the DB (excluding imported holidays — `ImportedHolidayId != null` — which belong to the dedicated Holidays tab); the two SQL-orderable quadrants (One-off/Active, any/History) page entirely in SQL, while Recurring/Active fetches the scoped set and orders it in memory via the pure `OrderRecurringByNextOccurrence` (built on `NextOccurrenceOnOrAfter`). `GetOccurrencesForDate` is a single SQL query; `GetOccurrencesForDates` pre-filters candidate rules in SQL (span overlap + requested weekday/month-day) then expands per date in memory. Effective-from (`StartDate`) is mandatory for every recurrence. Edit(id, dto, facilityId, applyFrom?) forks a recurring rule's timeline at applyFrom (original clamped to applyFrom-1, new segment inserted from applyFrom onward); a holiday-linked edit (`ImportedHolidayId` set) is additionally constrained to a single-day one-off with an unchanged label (`ValidateHolidayEdit`), mirroring the read-only editor; StopRecurring(id, facilityId) clamps a recurring rule's EndDate to yesterday (keep-history "stop"), rejecting one-offs and never extending an already-ended rule. Logs Information on each successful mutation (create / update / fork / delete / stop). `GetOccurrenceDatesForward(from, count)` / `GetOccurrenceDatesBackward(before, count)` return the nearest `count` occurrence-dates in each direction (built on the pure `OccurrenceDatesFrom` / `PreviousOccurrenceBefore` / `OccurrenceDatesBefore` generators, which reuse `NextOccurrenceOnOrAfter`), used by the appointment list to page by content-day. |
-| `HolidayService` | Holiday import: `GetSettings` / `SaveSettings` (future-only reset + immediate materialization, provider-down aborts before any DB mutation) / `Materialize` (idempotent window fill) / `MaterializeForAllFacilities(today)` (fan-out over all facilities with a non-null CountryCode, each wrapped in try/catch so one failure doesn't abort the batch) / `GetSupportedCountries` / `GetList(scope, skip, take, today, facilityId)` / `GetById(importedHolidayId, facilityId)` / `Revert` / `Restore`. Import window is today → today+1yr; past rows are never deleted. `SaveSettings` and `Materialize` share the private `StageWindow` (fetch provider window + dedupe against existing dates for the facility+country + stage new `ImportedHoliday`+`TimeOff`, no SaveChanges); `SaveSettings` deletes future rows then stages the new country — the provider fetch inside `StageWindow` runs before the single `SaveChangesAsync`, so an outage persists nothing. `GetList` loads `ImportedHolidays` with `Include(LinkedTimeOff)` (one query) and returns merged `HolidayListDTO`s (`ImportedHoliday.GetListDTO()`), filtered/sorted in memory: Active = effective date >= today ascending; History = < today descending. Effective date = `LinkedTimeOff.StartDate` if present, else `ImportedHoliday.Date`. Removed ⇔ `LinkedTimeOffId == null`; `IsEdited` = linked TimeOff exists AND (date differs OR not all-day). `GetById` returns the **original** `HolidayDTO` snapshot (`ImportedHoliday.GetDTO()`, no TimeOff lookup) for the removed-holiday view; that same snapshot is embedded by `TimeOff.GetDTO()` so the frontend derives edited state from TimeOff-vs-snapshot. **Editing and removing a holiday is not here — a holiday is a plain one-off `TimeOff`, so it edits/deletes through `TimeOffService` (the caller already has the TimeOff id).** `Revert` resets the linked TimeOff to the original snapshot date/time while preserving notes; `Restore` recreates a one-off TimeOff from the snapshot via `ImportedHoliday.ToTimeOff()` (no-op if already active). Both throw `NotFoundException` when the holiday or required linked TimeOff is missing. Private helpers: `StageWindow`, `FetchWindow`, `FindHoliday`, `FindLinkedTimeOff`. |
-| `HolidayImportScheduledJob` | `IScheduledJob` (CronScheduler) — fires daily at 03:00 UTC, creates a DI scope, resolves `IHolidayService`, and calls `MaterializeForAllFacilities`. |
-| `TestingService` | Dev-only data seeder, reachable via `TestingController` |
+| `UserService` | Registration, authentication, token refresh, logout |
+| `ServiceService` | Service CRUD and archiving |
+| `ClientService` | Client CRUD, archiving, and contact management |
+| `AppointmentService` | Appointment CRUD, list paging, free-time slot generation, status changes, notification dispatch |
+| `WorkingHourService` | Working-hour CRUD; replaces a facility's hours atomically |
+| `DashboardService` | Dashboard settings and stat queries |
+| `ClientNotificationsService` | Notification settings and outbound message dispatch |
+| `AppointmentReminderService` | Scheduled job — reminders for the next day's confirmed appointments |
+| `TimeOffService` | Time-off CRUD, list paging, and occurrence expansion (recurrence → concrete dates) |
+| `HolidayService` | Public-holiday import: settings, materialization, list, revert/restore |
+| `HolidayImportScheduledJob` | Scheduled job — daily holiday materialization across all facilities |
+| `TestingService` | Dev-only data seeder |
+
+A materialized holiday is a plain one-off `TimeOff`, so **editing and deleting one goes through `TimeOffService`**, not `HolidayService`.
 
 ## Sub-Folders
 
-- `MessagingServices/` — Instagram API integration (see `MessagingServices/CLAUDE.md`)
-- `SmartFilter/` — Dynamic LINQ filter DSL (see `SmartFilter/CLAUDE.md`)
-- `Facilities/` — Facility middleware and ownership attribute (see `Facilities/CLAUDE.md`)
+- `MessagingServices/` — Instagram/WhatsApp integration (see its CLAUDE.md)
+- `SmartFilter/` — the filter DSL compiler (see its CLAUDE.md)
+- `Facilities/` — facility service, middleware, and ownership attribute (see its CLAUDE.md)
+- `Holidays/` — `IHolidayProvider` and its `NagerDateHolidayProvider` implementation, the external source `HolidayService` imports from
 
-## Key Business Rules (enforced here, not in controllers)
+`JwtService` lives in `Auth/`, not here.
 
-- **Registration email format**: `UserService.Register` rejects malformed emails (`MailAddress` parsing) before the uniqueness check, throwing a `ValidationException` (`EMAIL_INVALID`)
-- **Service/Client deletion blocked** if any `Appointment` references them — caller must archive instead
-- **Appointment time validation**: the slot must fall within a `WorkingHour` range for that day-of-week, must not overlap an existing appointment, and must not overlap a time-off interval. Pass `ignoreTimeNotAvailable=true` to bypass
-- **Free-time generation**: 5-minute-interval slots within working hours, minus slots that would overlap existing appointments (and optionally ignoring one appointment ID for edit scenarios)
-- **Reminder deduplication**: `AppointmentReminderService` only reminds once per appointment (`WasReminded` flag prevents repeats across scheduler ticks)
-- **Contact name uniqueness**: `ClientService` enforces case-insensitive name + surname uniqueness per facility
-- **AppSpecificID preservation**: when a client's contacts are updated, existing `AppSpecificID` values are re-attached by matching contact type + value, so cached IGSIDs survive edits
-- **Logging**: services log significant mutations at Information and handled failures / security signals at Warning/Error, using `ILogger<T>` with message templates. Correlation ids (`RequestId`/`UserId`/`FacilityId`) come from middleware scopes — don't repeat them in messages. See `Appy/CLAUDE.md` → Logging.
+## Business Rules Live Here, Not in Controllers
+
+Appointment time validation, free-time generation, service/client deletion blocking, contact uniqueness, reminder deduplication, and holiday import windows are all enforced in this layer. Read the service for the specifics.

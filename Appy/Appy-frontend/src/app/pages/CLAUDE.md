@@ -2,28 +2,25 @@
 
 Each subdirectory is a feature page with its own CLAUDE.md. **Read that page's CLAUDE.md before editing anything in it.**
 
-## Page Index
+| Page | Purpose | Guards | Loading |
+|------|---------|--------|---------|
+| `login/` | Email/password sign-in | NotLoggedIn | Eager |
+| `register/` | New account creation | NotLoggedIn | Eager |
+| `error/` | Friendly HTTP error display | None | Eager |
+| `dashboard/` | Post-login stats overview | LoggedIn + SelectedFacility | Eager |
+| `facilities/` | Workspace list and active-facility selection | LoggedIn | Eager |
+| `appointments/` | The primary page — booking calendar and list | LoggedIn + SelectedFacility | Lazy |
+| `clients/` | Client list and editor | LoggedIn + SelectedFacility | Lazy |
+| `services/` | Service-offering list and editor | LoggedIn + SelectedFacility | Lazy |
+| `working-hours/` | Weekly operating hours | LoggedIn + SelectedFacility | Lazy |
+| `time-off/` | Blocked availability and holiday import | LoggedIn + SelectedFacility | Lazy |
+| `client-notifications/` | Instagram notification settings | LoggedIn + SelectedFacility | Lazy |
 
-| Page | Guards | Loading | CLAUDE.md |
-|------|--------|---------|-----------|
-| `login/` | NotLoggedInGuard | Eager | `login/CLAUDE.md` |
-| `register/` | NotLoggedInGuard | Eager | `register/CLAUDE.md` |
-| `error/` | None | Eager | `error/CLAUDE.md` |
-| `dashboard/` | LoggedIn + SelectedFacility | Eager | `dashboard/CLAUDE.md` |
-| `facilities/` | LoggedIn | Eager | `facilities/CLAUDE.md` |
-| `appointments/` | LoggedIn + SelectedFacility | Lazy | `appointments/CLAUDE.md` |
-| `clients/` | LoggedIn + SelectedFacility | Lazy | `clients/CLAUDE.md` |
-| `services/` | LoggedIn + SelectedFacility | Lazy | `services/CLAUDE.md` |
-| `working-hours/` | LoggedIn + SelectedFacility | Lazy | `working-hours/CLAUDE.md` |
-| `time-off/` | LoggedIn + SelectedFacility | Lazy | `time-off/CLAUDE.md` |
-| `client-notifications/` | LoggedIn + SelectedFacility | Lazy | `client-notifications/CLAUDE.md` |
-
-`SelectedFacilityGuard` lives in `facilities/services/facility.guard.ts` and redirects to `/facilities` when no facility is selected. `PreloadAllModules` preloads lazy modules after the initial render.
+`facilities/` deliberately requires no selected facility — it's where you pick one. Its `SelectedFacilityGuard` (`facilities/services/facility.guard.ts`) redirects there when none is selected. Lazy modules preload after the initial render via `PreloadAllModules`.
 
 ## Cross-Module Exports
 
-Some page modules export components consumed by other pages:
-- `ClientsModule` exports `ClientLookupComponent` → used by `AppointmentsModule`
-- `ServicesModule` exports `ServiceLookupComponent` → used by `AppointmentsModule`
-- `AppointmentsModule` exports `SingleAppointmentComponent` → used by `DashboardModule`
-- `TimeOffModule` exports `SingleTimeOffComponent` → used by `AppointmentsModule` (time-off details dialog in the appointment list)
+- `ClientsModule` → `ClientLookupComponent` → used by `AppointmentsModule`
+- `ServicesModule` → `ServiceLookupComponent` → used by `AppointmentsModule`
+- `TimeOffModule` → `SingleTimeOffComponent`, `AllDayTimeOffPickerComponent` → used by `AppointmentsModule`
+- `AppointmentsModule` → `SingleAppointmentComponent` → used by `DashboardModule`

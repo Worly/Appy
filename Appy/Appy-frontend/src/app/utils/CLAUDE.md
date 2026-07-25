@@ -1,23 +1,21 @@
 # CLAUDE.md — Frontend Utilities (src/app/utils/)
 
-Pure helper functions with no Angular DI dependencies. Safe to import anywhere and unit-testable without the Angular testing infrastructure.
+Pure helper functions with no Angular DI. Importable anywhere and unit-testable without the Angular testing infrastructure.
 
-## Key Utilities
-
-| File | Contents |
-|------|----------|
-| `time-utils.ts` | `parseDuration()` — string to dayjs Duration; `timeOnly()` — strip date from a datetime; `overlap()` — test whether two time ranges intersect; `timeBetweenMs()` — signed ms between end of one appointment and start of the next (positive = gap, zero = back-to-back, negative = overlap) |
-| `list-timeline.ts` | `buildDayTimeline()` — merge appointments + partial time-offs into a sorted list for gap/overlap detection in the list view; `groupByContentDay()` — group appointments by day plus a day for each time-off-only date (used by the list view to render days that have only a time-off) |
-| `group-by.ts` | `groupBy(array, keyFn)` — bucket array items by a derived key |
-| `smart-subscriber.ts` | `onUnsubscribed()` — Observable that emits when its observer unsubscribes (useful for teardown logic) |
-| `material-dayjs-adapter.ts` | Custom Angular Material `DateAdapter` that uses dayjs instead of the default Moment.js adapter |
-| `dynamic-url-params.ts` | Read and write URL query parameters reactively |
+| File | Purpose |
+|------|---------|
+| `time-utils.ts` | Duration parsing, time-only extraction, range overlap, and gap measurement between two intervals |
+| `list-timeline.ts` | Builds the appointments-list day timeline and groups items into content-days |
+| `group-by.ts` | Buckets an array by a derived key |
+| `smart-subscriber.ts` | An Observable that emits when its observer unsubscribes, for teardown logic |
+| `material-dayjs-adapter.ts` | Angular Material `DateAdapter` backed by dayjs |
+| `dynamic-url-params.ts` | Reads and writes URL query parameters reactively |
 | `search.ts` | Full-text search helpers for client-side list filtering |
 | `smart-caching.ts` | Cache-aside wrapper for expensive computations |
-| `invert-times.ts` | Given a set of occupied intervals in a day, compute the remaining free intervals |
-| `rendered-interval.ts` | Translate time ranges to pixel positions for the appointments scroller view |
-| `tween.ts` | Simple linear tweening for smooth animated scroll |
+| `invert-times.ts` | Turns occupied intervals in a day into the remaining free ones |
+| `rendered-interval.ts` | Maps time ranges to pixel positions for the appointments scroller |
+| `tween.ts` | Linear tweening for animated scroll |
 
 ## Rule
 
-Import as plain functions — do not wrap in Angular services unless HTTP or DI is genuinely needed. Keep all functions side-effect-free.
+Import as plain functions — don't wrap them in Angular services unless HTTP or DI is genuinely needed. Keep them side-effect-free.
