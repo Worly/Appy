@@ -65,5 +65,7 @@ jobs:
           push: true
 
       - name: Notify Watchtower
+        env:
+          WATCHTOWER_TOKEN: ${{ secrets.WATCHTOWER_TOKEN }}
         run: |
-          curl --fail -H "Authorization: Bearer ${{ secrets.WATCHTOWER_TOKEN }}" http://worly.ddnsfree.com:9898/v1/update
+          curl --fail -H "Authorization: Bearer $WATCHTOWER_TOKEN" http://worly.ddnsfree.com:9898/v1/update
