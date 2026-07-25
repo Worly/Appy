@@ -289,6 +289,7 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
       dateISO: this.startDate.format("YYYY-MM-DD"),
       isEmptyDate: true,
       allDayOccurrences: [],
+      isTimeOffOnly: false,
     };
 
     // Content-day grouping: a divider is emitted for every day that has an appointment OR a
@@ -319,6 +320,7 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
         dateISO: day.date.format("YYYY-MM-DD"),
         isEmptyDate: false,
         allDayOccurrences,
+        isTimeOffOnly: day.appointments.length === 0,
       });
 
       // Merge appointments + partial offs, then walk emitting gaps and items.
@@ -532,6 +534,8 @@ type RenderedDate = {
   dateISO: string;
   isEmptyDate: boolean;
   allDayOccurrences: TimeOffOccurrence[];   // whole-day time-off occurrences for this date
+  // No appointment falls on this day, so an all-day off here is informational, not a conflict.
+  isTimeOffOnly: boolean;
 }
 
 type RenderedGap = {

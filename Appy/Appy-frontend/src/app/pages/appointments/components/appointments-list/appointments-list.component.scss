@@ -148,6 +148,12 @@
     gap: 10px;
     align-items: center;
 
+    // No appointment on this day, so the off is just informational — yellow, not a red conflict.
+    &.time-off-only {
+        background: rgba(var(--rgb-warning), 0.15);
+        color: rgb(var(--rgb-warning));
+    }
+
     .whole-day-off-text {
         display: flex;
         gap: 4px;
