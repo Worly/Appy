@@ -38,3 +38,30 @@ export function buildDayTimeline(appointments: AppointmentView[], occurrences: T
 
   return entries;
 }
+
+export interface ContentDay {
+  date: Dayjs;
+  appointments: AppointmentView[];
+}
+
+// Group appointments by day, then add an appointment-less day for any date that has a time-off
+// occurrence but no appointment — so the list renders time-off-only days too. Ascending by date.
+export function groupByContentDay(appointments: AppointmentView[], timeOffs: TimeOffOccurrence[]): ContentDay[] {
+  const byKey = new Map<string, ContentDay>();
+  const keyOf = (d: Dayjs) => d.format("YYYY-MM-DD");
+
+  for (const a of appointments) {
+    if (a.date == null) continue;
+    const k = keyOf(a.date);
+    if (!byKey.has(k)) byKey.set(k, { date: a.date, appointments: [] });
+    byKey.get(k)!.appointments.push(a);
+  }
+
+  for (const o of timeOffs) {
+    if (o.date == null) continue;
+    const k = keyOf(o.date);
+    if (!byKey.has(k)) byKey.set(k, { date: o.date, appointments: [] });
+  }
+
+  return [...byKey.values()].sort((x, y) => x.date.valueOf() - y.date.valueOf());
+}

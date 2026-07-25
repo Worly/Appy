@@ -58,7 +58,7 @@ namespace Appy.Controllers
                 SmartFilter.FromFieldFilter(nameof(Appointment.Date), Comparator.LessThanOrEqual, endingDate)
             );
 
-            var page = await appointmentService.GetList(DateOnly.FromDateTime(DateTime.UtcNow), Direction.Forwards, 0, 100, filter, HttpContext.SelectedFacility());
+            var page = await appointmentService.GetList(DateOnly.FromDateTime(DateTime.UtcNow), Direction.Forwards, 100, filter, HttpContext.SelectedFacility());
 
             return Ok(page.Appointments);
         }

@@ -2,6 +2,7 @@ using Appy.Domain;
 using Appy.DTOs;
 using Appy.Exceptions;
 using Appy.Services;
+using Appy.Services.SmartFiltering;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Moq.EntityFrameworkCore;
@@ -36,6 +37,12 @@ namespace Appy.Tests.Services
             timeOffServiceMock
                 .Setup(x => x.GetOccurrencesForDates(It.IsAny<IEnumerable<DateOnly>>(), FacilityId))
                 .ReturnsAsync(new List<TimeOffOccurrenceDTO>());
+            timeOffServiceMock
+                .Setup(x => x.GetOccurrenceDatesForward(It.IsAny<DateOnly>(), It.IsAny<int>(), FacilityId))
+                .ReturnsAsync(new List<DateOnly>());
+            timeOffServiceMock
+                .Setup(x => x.GetOccurrenceDatesBackward(It.IsAny<DateOnly>(), It.IsAny<int>(), FacilityId))
+                .ReturnsAsync(new List<DateOnly>());
 
             dbContextMock.Setup(x => x.Appointments).ReturnsDbSet(appointments);
             dbContextMock.Setup(x => x.Services).ReturnsDbSet(new List<Service> { service1, service2 });
@@ -281,14 +288,13 @@ namespace Appy.Tests.Services
         [Fact]
         public async Task GetList_IncludesTimeOffsForReturnedAppointments()
         {
-            var appointment = AddAppointment(AppointmentStatus.Unconfirmed);
-
+            var appointment = AddAppointmentOn(1, new DateOnly(2030, 1, 15));
             var occurrence = new TimeOffOccurrenceDTO { Id = 7, Date = appointment.Date, Label = "Closed" };
             timeOffServiceMock
                 .Setup(x => x.GetOccurrencesForDates(It.Is<IEnumerable<DateOnly>>(d => d.Contains(appointment.Date)), FacilityId))
                 .ReturnsAsync(new List<TimeOffOccurrenceDTO> { occurrence });
 
-            var result = await service.GetList(new DateOnly(2030, 1, 1), Direction.Forwards, 0, 20, null, FacilityId);
+            var result = await service.GetList(new DateOnly(2030, 1, 1), Direction.Forwards, 14, null, FacilityId);
 
             Assert.Single(result.Appointments);
             Assert.Single(result.TimeOffs);
@@ -296,29 +302,99 @@ namespace Appy.Tests.Services
         }
 
         [Fact]
-        public async Task GetList_RequestsTimeOffsOnlyForReturnedAppointmentDates()
+        public async Task GetList_RendersDayWithOnlyTimeOff_AndNoAppointment()
         {
-            var first = AddAppointmentOn(1, new DateOnly(2030, 1, 15));
-            var second = AddAppointmentOn(2, new DateOnly(2030, 1, 20));
-            AddAppointmentOn(3, new DateOnly(2029, 12, 31)); // before the anchor — excluded from the page
-
-            List<DateOnly>? requestedDates = null;
+            // No appointments at all; a time-off falls on 2030-01-20.
             timeOffServiceMock
-                .Setup(x => x.GetOccurrencesForDates(It.IsAny<IEnumerable<DateOnly>>(), FacilityId))
-                .Callback<IEnumerable<DateOnly>, int>((dates, _) => requestedDates = dates.ToList())
-                .ReturnsAsync(new List<TimeOffOccurrenceDTO>());
+                .Setup(x => x.GetOccurrenceDatesForward(It.IsAny<DateOnly>(), It.IsAny<int>(), FacilityId))
+                .ReturnsAsync(new List<DateOnly> { new DateOnly(2030, 1, 20) });
+            timeOffServiceMock
+                .Setup(x => x.GetOccurrencesForDates(It.Is<IEnumerable<DateOnly>>(d => d.Contains(new DateOnly(2030, 1, 20))), FacilityId))
+                .ReturnsAsync(new List<TimeOffOccurrenceDTO> { new() { Id = 5, Date = new DateOnly(2030, 1, 20), Label = "Closed", IsAllDay = true } });
 
-            await service.GetList(new DateOnly(2030, 1, 1), Direction.Forwards, 0, 20, null, FacilityId);
+            var result = await service.GetList(new DateOnly(2030, 1, 1), Direction.Forwards, 14, null, FacilityId);
 
-            Assert.NotNull(requestedDates);
-            Assert.Equal(new[] { first.Date, second.Date }, requestedDates!.OrderBy(d => d).ToArray());
-            Assert.DoesNotContain(new DateOnly(2029, 12, 31), requestedDates!);
+            Assert.Empty(result.Appointments);
+            Assert.Single(result.TimeOffs);
+            Assert.Equal(new DateOnly(2030, 1, 20), result.TimeOffs[0].Date);
+        }
+
+        [Fact]
+        public async Task GetList_SuppressesTimeOffs_WhenFilterActive()
+        {
+            AddAppointmentOn(1, new DateOnly(2030, 1, 15));
+            // A filter is present → time-off collaborators must never be consulted.
+            var filter = SmartFilter.FromFieldFilter(nameof(Appointment.Status), Comparator.Equal, nameof(AppointmentStatus.Unconfirmed));
+
+            var result = await service.GetList(new DateOnly(2030, 1, 1), Direction.Forwards, 14, filter, FacilityId);
+
+            Assert.Empty(result.TimeOffs);
+            timeOffServiceMock.Verify(x => x.GetOccurrenceDatesForward(It.IsAny<DateOnly>(), It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+            timeOffServiceMock.Verify(x => x.GetOccurrencesForDates(It.IsAny<IEnumerable<DateOnly>>(), It.IsAny<int>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task GetList_SparseCalendar_ReturnsFarAppointment_InOnePage()
+        {
+            AddAppointmentOn(1, new DateOnly(2030, 1, 15));
+            AddAppointmentOn(2, new DateOnly(2040, 6, 1)); // ten years later
+
+            var result = await service.GetList(new DateOnly(2030, 1, 1), Direction.Forwards, 14, null, FacilityId);
+
+            Assert.Equal(2, result.Appointments.Count);
+            Assert.Contains(result.Appointments, a => a.Date == new DateOnly(2040, 6, 1));
+        }
+
+        [Fact]
+        public async Task GetList_SetsNextCursor_WhenMoreContentAhead()
+        {
+            for (var i = 0; i < 20; i++)
+                AddAppointmentOn(i + 1, new DateOnly(2030, 1, 1).AddDays(i)); // 20 distinct content-days
+
+            var result = await service.GetList(new DateOnly(2030, 1, 1), Direction.Forwards, 14, null, FacilityId);
+
+            Assert.NotNull(result.NextCursor);                       // 20 days > take 14 ⇒ more ahead
+            Assert.Equal(new DateOnly(2030, 1, 15), result.NextCursor); // day after the 14th content-day (Jan 14)
+        }
+
+        [Fact]
+        public async Task GetList_NextCursorNull_WhenNoMoreForward()
+        {
+            AddAppointmentOn(1, new DateOnly(2030, 1, 15));
+
+            var result = await service.GetList(new DateOnly(2030, 1, 1), Direction.Forwards, 14, null, FacilityId);
+
+            Assert.Null(result.NextCursor);
+        }
+
+        [Fact]
+        public async Task GetList_Backwards_ReturnsDaysBeforeCursor_Ascending()
+        {
+            AddAppointmentOn(1, new DateOnly(2030, 1, 10));
+            AddAppointmentOn(2, new DateOnly(2030, 1, 5));
+
+            var result = await service.GetList(new DateOnly(2030, 1, 15), Direction.Backwards, 14, null, FacilityId);
+
+            Assert.Equal(new[] { new DateOnly(2030, 1, 5), new DateOnly(2030, 1, 10) }, result.Appointments.Select(a => a.Date).ToArray());
+            Assert.Null(result.PrevCursor); // nothing before Jan 5
+        }
+
+        [Fact]
+        public async Task GetList_Backwards_EmptyWindow_StillSetsNextCursor_WhenContentAhead()
+        {
+            AddAppointmentOn(1, new DateOnly(2030, 1, 10)); // only content is ON the cursor, nothing before it
+
+            var result = await service.GetList(new DateOnly(2030, 1, 10), Direction.Backwards, 14, null, FacilityId);
+
+            Assert.Empty(result.Appointments);                          // nothing strictly before Jan 10
+            Assert.Null(result.PrevCursor);                             // no content behind
+            Assert.Equal(new DateOnly(2030, 1, 10), result.NextCursor); // content on/after cursor ⇒ forward continuation
         }
 
         [Fact]
         public async Task GetList_ReturnsEmptyTimeOffs_WhenNoAppointmentsOnPage()
         {
-            var result = await service.GetList(new DateOnly(2030, 1, 1), Direction.Forwards, 0, 20, null, FacilityId);
+            var result = await service.GetList(new DateOnly(2030, 1, 1), Direction.Forwards, 14, null, FacilityId);
 
             Assert.Empty(result.Appointments);
             Assert.Empty(result.TimeOffs);

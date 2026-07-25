@@ -23,7 +23,8 @@
                     ("pages.appointments.NO_APPOINTMENTS" | translate) : ""}}</div>
                 <div class="date-relative" [ngClass]="i.date | dateRelation">{{i.date | relativeDate}}</div>
             </div>
-            <div *ngIf="i.allDayOccurrences.length > 0" class="whole-day-off" data-test="list-all-day-timeoff"
+            <div *ngIf="i.allDayOccurrences.length > 0" class="whole-day-off" [class.time-off-only]="i.isTimeOffOnly"
+                data-test="list-all-day-timeoff"
                 (click)="openAllDayTimeOff(i.allDayOccurrences, timeOffDialog, allDayListDialog)">
                 <fa-icon [icon]="['fas', 'umbrella-beach']" aria-hidden="true"></fa-icon>
                 <div class="whole-day-off-text">

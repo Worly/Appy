@@ -10,7 +10,8 @@ import { Appointment, AppointmentListPageDTO, AppointmentStatus, AppointmentView
 import { FreeTime, FreeTimeDTO } from "src/app/models/free-time";
 import { TimeOffOccurrence } from "src/app/models/time-off-occurrence";
 import { BaseModelService } from "src/app/shared/services/base-model-service";
-import { PagedResult, QueryResult } from "src/app/shared/services/data/contracts";
+import { PageDirection, PagedResult, QueryResult } from "src/app/shared/services/data/contracts";
+import { CursorPage, pagedQueryByCursor } from "src/app/shared/services/data/paged-query-by-cursor";
 import { appointmentKeys } from "src/app/shared/services/data/keys";
 import { SmartFilter } from "src/app/shared/services/smart-filter";
 
@@ -34,16 +35,25 @@ export class AppointmentService extends BaseModelService<Appointment, Appointmen
     }
 
     public getList(date: Dayjs, filter: SmartFilter | undefined): PagedResult<AppointmentView, TimeOffOccurrence> {
-        // Filter is part of the cache key so different filters cache as separate lists; the
-        // serialized form must match what getListAdvanced sends as the `filter` HTTP param.
-        return this.getListAdvanced<TimeOffOccurrence>(
-            [...appointmentKeys.list(date.format("YYYY-MM-DD")), filter ? JSON.stringify(filter) : "all"],
-            { date: date.format("YYYY-MM-DD") },
-            filter,
-            (raw: AppointmentListPageDTO) => ({
-                items: raw.appointments.map(a => new AppointmentView(a)),
-                extra: raw.timeOffs.map(o => new TimeOffOccurrence(o)),
-            }));
+        const anchor = date.format("YYYY-MM-DD");
+        // Filter is part of the cache key so different filters cache as separate lists.
+        const queryKey = [...appointmentKeys.list(anchor), filter ? JSON.stringify(filter) : "all"];
+
+        const loadPage = (dir: PageDirection, cursor: string): Observable<CursorPage<AppointmentView, TimeOffOccurrence>> => {
+            const params: any = { date: cursor, direction: dir, take: 14 };
+            if (filter != null)
+                params.filter = JSON.stringify(filter);
+
+            return this.httpClient.get<AppointmentListPageDTO>(`${appConfig.apiUrl}${this.controllerName}/getList`, { params }).pipe(
+                map(raw => ({
+                    items: raw.appointments.map(a => new AppointmentView(a)),
+                    extra: raw.timeOffs.map(o => new TimeOffOccurrence(o)),
+                    nextCursor: raw.nextCursor ?? null,
+                    prevCursor: raw.prevCursor ?? null,
+                })));
+        };
+
+        return pagedQueryByCursor<AppointmentView, TimeOffOccurrence>(this.queryClient, { queryKey, anchor, loadPage });
     }
 
     public getFreeTimes(date: Dayjs, serviceId: number, duration: Duration, ignoreAppointmentId?: number): Observable<FreeTime[]> {

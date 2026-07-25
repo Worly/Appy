@@ -10,7 +10,7 @@ import { AppointmentService } from '../../services/appointment.service';
 import { appFilterToSmartFilter, AppointmentsFilter } from '../appointments/appointments.component';
 import { PagedResult } from 'src/app/shared/services/data/contracts';
 import { TimeOffOccurrence } from 'src/app/models/time-off-occurrence';
-import { buildDayTimeline, TimelineEntry } from 'src/app/utils/list-timeline';
+import { buildDayTimeline, groupByContentDay, TimelineEntry } from 'src/app/utils/list-timeline';
 import { DialogComponent } from 'src/app/components/dialog/dialog.component';
 
 @Component({
@@ -289,29 +289,18 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
       dateISO: this.startDate.format("YYYY-MM-DD"),
       isEmptyDate: true,
       allDayOccurrences: [],
+      isTimeOffOnly: false,
     };
 
-    let sorted = this.appointments.sort(appointmentSort);
-
-    // Group appointments by date (preserving sorted order of dates). The list is
-    // appointment-driven: a date divider is emitted ONLY for days that have at least one
-    // appointment. Days with only time-off never appear.
-    let dayKeys: string[] = [];
-    let byDate = new Map<string, { date: Dayjs, appointments: AppointmentView[] }>();
-    for (let ap of sorted) {
-      let key = ap.date?.format("YYYY-MM-DD") ?? "";
-      if (!byDate.has(key)) {
-        byDate.set(key, { date: ap.date as Dayjs, appointments: [] });
-        dayKeys.push(key);
-      }
-      byDate.get(key)!.appointments.push(ap);
-    }
+    // Content-day grouping: a divider is emitted for every day that has an appointment OR a
+    // time-off occurrence, so days with only a time-off render too (#146).
+    let days = groupByContentDay(this.appointments, this.timeOffs);
 
     let startInserted = false;
     let prevDate: Dayjs | null = null;
 
-    for (let k = 0; k < dayKeys.length; k++) {
-      let day = byDate.get(dayKeys[k])!;
+    for (let k = 0; k < days.length; k++) {
+      let day = days[k];
 
       // Insert the empty start-date divider when crossing over startDate between two days.
       if (!startInserted && prevDate?.isBefore(this.startDate, "date") && day.date.isAfter(this.startDate, "date")) {
@@ -331,6 +320,7 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
         dateISO: day.date.format("YYYY-MM-DD"),
         isEmptyDate: false,
         allDayOccurrences,
+        isTimeOffOnly: day.appointments.length === 0,
       });
 
       // Merge appointments + partial offs, then walk emitting gaps and items.
@@ -360,7 +350,7 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
             id: entry.appointment.id,
             appointment: entry.appointment,
             dateISO: day.date.format("YYYY-MM-DD"),
-            isLast: k === dayKeys.length - 1 && i === timeline.length - 1,
+            isLast: k === days.length - 1 && i === timeline.length - 1,
             // A full-day off draws the same red border as a neighbour overlap, so reuse isOverlapping.
             isOverlapping: isOverlappingWithPrev || isOnDayOff,
           };
@@ -383,11 +373,11 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
       prevDate = day.date;
     }
 
-    // Empty / boundary start-date divider (same rules as before, day-grouped).
+    // Empty / boundary start-date divider.
     if (!startInserted) {
-      if (dayKeys.length === 0 || byDate.get(dayKeys[0])!.date.isAfter(this.startDate, "date"))
+      if (days.length === 0 || days[0].date.isAfter(this.startDate, "date"))
         this.renderedItems.splice(0, 0, startDateItem);
-      else if (byDate.get(dayKeys[dayKeys.length - 1])!.date.isBefore(this.startDate, "date"))
+      else if (days[days.length - 1].date.isBefore(this.startDate, "date"))
         this.renderedItems.splice(this.renderedItems.length, 0, startDateItem);
     }
 
@@ -521,19 +511,6 @@ export class AppointmentsListComponent implements OnInit, OnDestroy {
   }
 }
 
-function appointmentSort(a: AppointmentView, b: AppointmentView): number {
-  let dateDiff = a.date?.diff(b.date, "date") as number;
-  if (dateDiff != 0)
-    return dateDiff;
-
-  let timeDiff = (a.time?.unix() as number) - (b.time?.unix() as number);
-  if (timeDiff != 0)
-    return timeDiff;
-
-  let durationDiff = (a.duration?.asMilliseconds() as number) - (b.duration?.asMilliseconds() as number);
-  return durationDiff;
-}
-
 type RenderedType = {
   type: "appointment" | "date" | "gap" | "timeoff"
 }
@@ -557,6 +534,8 @@ type RenderedDate = {
   dateISO: string;
   isEmptyDate: boolean;
   allDayOccurrences: TimeOffOccurrence[];   // whole-day time-off occurrences for this date
+  // No appointment falls on this day, so an all-day off here is informational, not a conflict.
+  isTimeOffOnly: boolean;
 }
 
 type RenderedGap = {

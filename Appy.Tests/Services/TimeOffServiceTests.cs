@@ -553,6 +553,90 @@ namespace Appy.Tests.Services
             Assert.Null(TimeOffService.NextOccurrenceOnOrAfter(t, new DateOnly(2030, 6, 21)));
         }
 
+        // ---- OccurrenceDatesFrom / PreviousOccurrenceBefore / OccurrenceDatesBefore ----
+
+        [Fact]
+        public void OccurrenceDatesFrom_OneOff_ReturnsEachDayInRange()
+        {
+            var t = new TimeOff { Recurrence = TimeOffRecurrence.OneOff, StartDate = new DateOnly(2030, 1, 10), EndDate = new DateOnly(2030, 1, 12) };
+            var days = TimeOffService.OccurrenceDatesFrom(t, new DateOnly(2030, 1, 1), 10).ToList();
+            Assert.Equal(new[] { new DateOnly(2030, 1, 10), new DateOnly(2030, 1, 11), new DateOnly(2030, 1, 12) }, days);
+        }
+
+        [Fact]
+        public void OccurrenceDatesFrom_Weekly_StepsBySevenDays_AndHonoursCount()
+        {
+            var t = new TimeOff { Recurrence = TimeOffRecurrence.Weekly, DayOfWeek = DayOfWeek.Monday, StartDate = new DateOnly(2030, 1, 1) };
+            var days = TimeOffService.OccurrenceDatesFrom(t, new DateOnly(2030, 1, 1), 3).ToList();
+            // 2030-01-07 is the first Monday on/after 2030-01-01
+            Assert.Equal(new[] { new DateOnly(2030, 1, 7), new DateOnly(2030, 1, 14), new DateOnly(2030, 1, 21) }, days);
+        }
+
+        [Fact]
+        public void OccurrenceDatesFrom_Weekly_StopsAtEndDate()
+        {
+            var t = new TimeOff { Recurrence = TimeOffRecurrence.Weekly, DayOfWeek = DayOfWeek.Monday, StartDate = new DateOnly(2030, 1, 1), EndDate = new DateOnly(2030, 1, 15) };
+            var days = TimeOffService.OccurrenceDatesFrom(t, new DateOnly(2030, 1, 1), 10).ToList();
+            Assert.Equal(new[] { new DateOnly(2030, 1, 7), new DateOnly(2030, 1, 14) }, days);
+        }
+
+        [Fact]
+        public void OccurrenceDatesBefore_Weekly_ReturnsDescending()
+        {
+            var t = new TimeOff { Recurrence = TimeOffRecurrence.Weekly, DayOfWeek = DayOfWeek.Monday, StartDate = new DateOnly(2030, 1, 1) };
+            var days = TimeOffService.OccurrenceDatesBefore(t, new DateOnly(2030, 1, 22), 2).ToList();
+            Assert.Equal(new[] { new DateOnly(2030, 1, 21), new DateOnly(2030, 1, 14) }, days);
+        }
+
+        [Fact]
+        public void OccurrenceDatesBefore_OneOff_ExcludesTheBeforeDateItself()
+        {
+            var t = new TimeOff { Recurrence = TimeOffRecurrence.OneOff, StartDate = new DateOnly(2030, 1, 10), EndDate = new DateOnly(2030, 1, 12) };
+            var days = TimeOffService.OccurrenceDatesBefore(t, new DateOnly(2030, 1, 12), 10).ToList();
+            Assert.Equal(new[] { new DateOnly(2030, 1, 11), new DateOnly(2030, 1, 10) }, days);
+        }
+
+        [Fact]
+        public void OccurrenceDatesBefore_Monthly_SkipsMonthsWithoutThatDay()
+        {
+            var t = new TimeOff { Recurrence = TimeOffRecurrence.Monthly, DayOfMonth = 31, StartDate = new DateOnly(2030, 1, 1) };
+            var days = TimeOffService.OccurrenceDatesBefore(t, new DateOnly(2030, 5, 1), 3).ToList();
+            // Day-31 exists only in Jan and Mar before May 1 (Feb, Apr have no 31st). Descending (nearest first).
+            Assert.Equal(new[] { new DateOnly(2030, 3, 31), new DateOnly(2030, 1, 31) }, days);
+        }
+
+        // ---- GetOccurrenceDatesForward / GetOccurrenceDatesBackward ----
+
+        [Fact]
+        public async Task GetOccurrenceDatesForward_MergesRules_AndReturnsNearestCount()
+        {
+            var facilityId = 1;
+            var weekly = new TimeOff { Id = 1, FacilityId = facilityId, Recurrence = TimeOffRecurrence.Weekly, DayOfWeek = DayOfWeek.Monday, StartDate = new DateOnly(2030, 1, 1) };
+            var oneOff = new TimeOff { Id = 2, FacilityId = facilityId, Recurrence = TimeOffRecurrence.OneOff, StartDate = new DateOnly(2030, 1, 9), EndDate = new DateOnly(2030, 1, 9) };
+            var ctx = new Mock<MainDbContext>();
+            ctx.Setup(x => x.TimeOffs).ReturnsDbSet(new List<TimeOff> { weekly, oneOff });
+            var svc = new TimeOffService(ctx.Object, NullLogger<TimeOffService>.Instance);
+
+            var days = await svc.GetOccurrenceDatesForward(new DateOnly(2030, 1, 1), 3, facilityId);
+
+            // Mondays 7, 14, 21 merged with one-off 9 → nearest 3 = 7, 9, 14
+            Assert.Equal(new[] { new DateOnly(2030, 1, 7), new DateOnly(2030, 1, 9), new DateOnly(2030, 1, 14) }, days);
+        }
+
+        [Fact]
+        public async Task GetOccurrenceDatesBackward_ReturnsNearestCountBelowCursor_Ascending()
+        {
+            var facilityId = 1;
+            var weekly = new TimeOff { Id = 1, FacilityId = facilityId, Recurrence = TimeOffRecurrence.Weekly, DayOfWeek = DayOfWeek.Monday, StartDate = new DateOnly(2030, 1, 1) };
+            var ctx = new Mock<MainDbContext>();
+            ctx.Setup(x => x.TimeOffs).ReturnsDbSet(new List<TimeOff> { weekly });
+            var svc = new TimeOffService(ctx.Object, NullLogger<TimeOffService>.Instance);
+
+            var days = await svc.GetOccurrenceDatesBackward(new DateOnly(2030, 1, 22), 2, facilityId);
+
+            Assert.Equal(new[] { new DateOnly(2030, 1, 14), new DateOnly(2030, 1, 21) }, days);
+        }
+
         // ---- OrderRecurringByNextOccurrence ----
 
         private static readonly DateOnly Today = new DateOnly(2030, 6, 10); // a Monday

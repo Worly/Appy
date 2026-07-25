@@ -31,7 +31,7 @@ namespace Appy.Tests.Controllers
             var appointments = new List<AppointmentViewDTO> { new() { Id = 1 }, new() { Id = 2 } };
 
             appointmentServiceMock
-                .Setup(x => x.GetList(It.IsAny<DateOnly>(), It.IsAny<Direction>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<SmartFilter?>(), FacilityId))
+                .Setup(x => x.GetList(It.IsAny<DateOnly>(), It.IsAny<Direction>(), It.IsAny<int>(), It.IsAny<SmartFilter?>(), FacilityId))
                 .ReturnsAsync(new AppointmentListPageDTO
                 {
                     Appointments = appointments,

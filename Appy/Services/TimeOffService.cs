@@ -18,6 +18,8 @@ namespace Appy.Services
         Task<List<TimeOffOccurrenceDTO>> GetOccurrencesForDate(DateOnly date, int facilityId);
         Task<List<TimeOffOccurrenceDTO>> GetOccurrencesForDates(IEnumerable<DateOnly> dates, int facilityId);
         Task<List<TimeOffDTO>> GetList(TimeOffListType type, TimeOffScope scope, int skip, int take, int facilityId);
+        Task<List<DateOnly>> GetOccurrenceDatesForward(DateOnly from, int count, int facilityId);
+        Task<List<DateOnly>> GetOccurrenceDatesBackward(DateOnly before, int count, int facilityId);
     }
 
     public class TimeOffService : ITimeOffService
@@ -268,6 +270,67 @@ namespace Appy.Services
             }
         }
 
+        // Up to `count` occurrence dates on/after `from`, ascending. Reuses NextOccurrenceOnOrAfter,
+        // advancing one day past each hit — so it works uniformly for one-off ranges, weekly and monthly.
+        public static IEnumerable<DateOnly> OccurrenceDatesFrom(TimeOff t, DateOnly from, int count)
+        {
+            var cursor = from;
+            for (var i = 0; i < count; i++)
+            {
+                var next = NextOccurrenceOnOrAfter(t, cursor);
+                if (next == null)
+                    yield break;
+                yield return next.Value;
+                cursor = next.Value.AddDays(1);
+            }
+        }
+
+        // The latest date strictly before `before` that this rule applies on, honouring its bounds.
+        public static DateOnly? PreviousOccurrenceBefore(TimeOff t, DateOnly before)
+        {
+            var upper = before.AddDays(-1);
+            if (t.EndDate.HasValue && t.EndDate.Value < upper)
+                upper = t.EndDate.Value;
+            if (upper < t.StartDate)
+                return null;
+
+            switch (t.Recurrence)
+            {
+                case TimeOffRecurrence.OneOff:
+                    if (t.EndDate == null) return null;
+                    return upper;   // one-off fires every day in [StartDate, EndDate]; `upper` is clamped into it
+
+                case TimeOffRecurrence.Weekly:
+                    if (t.DayOfWeek == null) return null;
+                    var delta = ((int)upper.DayOfWeek - (int)t.DayOfWeek.Value + 7) % 7;
+                    var wd = upper.AddDays(-delta);
+                    return wd >= t.StartDate ? wd : (DateOnly?)null;
+
+                case TimeOffRecurrence.Monthly:
+                    if (t.DayOfMonth == null) return null;
+                    for (var d = upper; d >= t.StartDate && d >= upper.AddDays(-366); d = d.AddDays(-1))
+                        if (d.Day == t.DayOfMonth.Value) return d;
+                    return null;
+
+                default:
+                    return null;
+            }
+        }
+
+        // Up to `count` occurrence dates strictly before `before`, descending.
+        public static IEnumerable<DateOnly> OccurrenceDatesBefore(TimeOff t, DateOnly before, int count)
+        {
+            var cursor = before;
+            for (var i = 0; i < count; i++)
+            {
+                var prev = PreviousOccurrenceBefore(t, cursor);
+                if (prev == null)
+                    yield break;
+                yield return prev.Value;
+                cursor = prev.Value;
+            }
+        }
+
         // Recurring/Active sort key: the next occurrence on/after today; rules with none (key null)
         // go last. Pure and in-memory — the recurrence math has no SQL translation. `today` is injected.
         public static List<TimeOff> OrderRecurringByNextOccurrence(IEnumerable<TimeOff> rules, DateOnly today)
@@ -347,6 +410,38 @@ namespace Appy.Services
             foreach (var d in distinct)
                 result.AddRange(candidates.Where(t => AppliesOn(t, d)).Select(t => ToOccurrence(t, d)));
             return result;
+        }
+
+        // The `count` nearest time-off occurrence-dates on/after `from`, ascending. Pre-filters to rules
+        // whose effective span can still reach `from`, then merges per-rule generation.
+        public async Task<List<DateOnly>> GetOccurrenceDatesForward(DateOnly from, int count, int facilityId)
+        {
+            var rules = await context.TimeOffs
+                .Where(t => t.FacilityId == facilityId && (t.EndDate == null || t.EndDate >= from))
+                .ToListAsync();
+
+            var days = new SortedSet<DateOnly>();
+            foreach (var r in rules)
+                foreach (var d in OccurrenceDatesFrom(r, from, count))
+                    days.Add(d);
+
+            return days.Take(count).ToList();
+        }
+
+        // The `count` nearest time-off occurrence-dates strictly before `before`, ascending.
+        public async Task<List<DateOnly>> GetOccurrenceDatesBackward(DateOnly before, int count, int facilityId)
+        {
+            var rules = await context.TimeOffs
+                .Where(t => t.FacilityId == facilityId && t.StartDate < before)
+                .ToListAsync();
+
+            var days = new SortedSet<DateOnly>();
+            foreach (var r in rules)
+                foreach (var d in OccurrenceDatesBefore(r, before, count))
+                    days.Add(d);
+
+            var all = days.ToList();                                    // ascending
+            return all.Skip(Math.Max(0, all.Count - count)).ToList();    // the `count` largest, still ascending
         }
 
         private static TimeOffOccurrenceDTO ToOccurrence(TimeOff t, DateOnly date) => new()
