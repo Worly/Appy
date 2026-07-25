@@ -260,6 +260,24 @@ export let appointmentEdit = {
     return durationLookup("appointment-edit-duration-picker");
   },
 
+  getNotes() {
+    this.checkView();
+
+    return {
+      type(notes: string) {
+        getElement("appointment-edit-notes-input").clear().type(notes);
+
+        return this;
+      },
+
+      expectText(notes: string) {
+        getElement("appointment-edit-notes-input").should("have.value", notes);
+
+        return this;
+      }
+    };
+  },
+
   getDateTimeLookup() {
     this.checkView();
 

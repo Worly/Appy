@@ -31,5 +31,17 @@ export function clientLookup(elementSelector: string) {
 
       return this;
     },
+
+    // Creates the client from the popup's search text, the way a user adds someone mid-booking.
+    // The new client is selected on success and the popup closes on its own.
+    addNew(nameSurname: string) {
+      getElement(elementSelector).click();
+      getElement("client-lookup-search").find("input").type(nameSurname);
+      getElement("client-lookup-new-button").click();
+
+      this.expectSelected(nameSurname.split(" ")[0]);
+
+      return this;
+    },
   };
 }
