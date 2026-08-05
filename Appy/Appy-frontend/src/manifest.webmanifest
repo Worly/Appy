@@ -1,8 +1,8 @@
 {
   "name": "Appy",
   "short_name": "Appy",
-  "theme_color": "#4f759b",
-  "background_color": "#e8f1f2",
+  "theme_color": "#6d3958",
+  "background_color": "#fdeff3",
   "display": "standalone",
   "scope": "./",
   "start_url": "./",
