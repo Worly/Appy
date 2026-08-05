@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="68 86 340 340" width="340" height="340" role="img" aria-label="Appy">
+  <title>Appy</title>
+  <g fill="#4F759B">
+    <circle cx="238" cy="256" r="170"/>
+    <rect x="352" y="86" width="56" height="340" rx="28"/>
+  </g>
+  <!-- Overlaps the stem, which tucks behind it and leaves the clock face a full circle. -->
+  <circle cx="238" cy="256" r="120" fill="#E8F1F2"/>
+  <g stroke="#4F759B" stroke-width="26" stroke-linecap="round">
+    <line x1="238" y1="266" x2="306" y2="191"/>
+    <line x1="238" y1="266" x2="198" y2="230"/>
+  </g>
+  <circle cx="162" cy="200" r="12" fill="#5DC073"/>
+</svg>
