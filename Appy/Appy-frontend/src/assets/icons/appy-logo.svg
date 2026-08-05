@@ -1,14 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="68 86 340 340" width="340" height="340" role="img" aria-label="Appy">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Appy">
   <title>Appy</title>
-  <g fill="#4F759B">
-    <circle cx="238" cy="256" r="170"/>
-    <rect x="352" y="86" width="56" height="340" rx="28"/>
-  </g>
-  <!-- Overlaps the stem, which tucks behind it and leaves the clock face a full circle. -->
-  <circle cx="238" cy="256" r="120" fill="#E8F1F2"/>
-  <g stroke="#4F759B" stroke-width="26" stroke-linecap="round">
-    <line x1="238" y1="266" x2="306" y2="191"/>
-    <line x1="238" y1="266" x2="198" y2="230"/>
-  </g>
-  <circle cx="162" cy="200" r="12" fill="#5DC073"/>
+  <mask id="notch">
+    <rect width="512" height="512" fill="#fff"/>
+    <path d="M203.3 332 L220.3 351.5 L275.8 290.4 A24.7 24.7 0 0 1 310.6 288.7 L318.4 295.8 A24.7 24.7 0 0 1 320.1 330.6 L239.9 418.9 A27.2 27.2 0 0 1 199.3 418.5 L158.2 371.3 A24.7 24.7 0 0 1 160.6 336.5 L168.5 329.6 A24.7 24.7 0 0 1 203.3 332 Z" fill="#000"/>
+  </mask>
+  <path fill="#6D3958" mask="url(#notch)" d="M249.5 82.2 A23.15 23.15 0 0 1 269.7 95.2 L415.2 394.4 C420.9 406.2 429.8 418 445.6 429.7 L377.5 429.7 C367.1 429.7 362.1 422.1 357 411.6 L236.6 162.8 L116.8 397 C111.2 407.9 106.9 418.8 103.7 429.7 L67 429.7 C82.5 417.5 89.6 405.2 95.7 392.9 Z"/>
+  <path fill="#DD7D96" d="M194.1 340 L220.1 369.8 L284.8 298.6 A12.5 12.5 0 0 1 302.4 297.7 L310.2 304.8 A12.5 12.5 0 0 1 311.1 322.4 L230.9 410.7 A15 15 0 0 1 208.4 410.5 L167.4 363.3 A12.5 12.5 0 0 1 168.6 345.7 L176.5 338.8 A12.5 12.5 0 0 1 194.1 340 Z"/>
 </svg>

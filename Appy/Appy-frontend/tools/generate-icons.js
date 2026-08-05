@@ -10,7 +10,7 @@ const SRC = path.resolve(__dirname, '..', 'src');
 const ICONS = path.join(SRC, 'assets', 'icons');
 const LOGO = path.join(ICONS, 'appy-logo.svg');
 
-const MINT = '#E8F1F2';
+const TILE = '#FCE5EB';
 const TRANSPARENT = { r: 0, g: 0, b: 0, alpha: 0 };
 
 const ANY_SIZES = [72, 96, 128, 144, 152, 192, 384, 512];
@@ -19,25 +19,28 @@ const ICO_SIZES = [16, 32, 48];
 
 const ANY_FILL = 0.92;
 const FAVICON_FILL = 0.88;
+
+// Android may crop a maskable icon to anything inside a circle of this diameter, so
+// the whole mark has to sit within it — and short of it, or the mark crowds the edge
+// of the crop.
 const SAFE_CIRCLE = 0.8;
-// Scaling the mark to touch the safe circle exactly leaves its outermost pixels
-// a rounding error outside it, so it is fitted just inside instead.
-const SAFE_INSET = 0.98;
+const SAFE_INSET = 0.9;
 
-// How far to pull the maskable icons' centre from the bounding box towards the
-// ink centroid. The stem's mass sits on one side, so 0 looks right-heavy inside
-// a circular crop; a full correction overshoots and the silhouette hangs left.
-const MASKABLE_BALANCE = 0.5;
+// The flared feet carry the mark's weight, so a circular crop centred on the
+// bounding box reads as sitting too low. The maskable icons are centred on the ink
+// instead, which lifts the mark until its weight balances on the middle of the crop.
 
+// Rasterises the 512pt artwork at 2048px, which every icon downsamples from.
+const DENSITY = 288;
 const PROBE_WIDTH = 800;
-const DENSITY = 2400;
 
 const logo = fs.readFileSync(LOGO);
 
 /**
- * Measures the mark by rasterising it once: where its ink sits, and how far the
- * ink reaches from both the bounding-box centre and the ink centroid.
- * The counter is excluded from the centroid — it reads as a hole, not as mass.
+ * Measures the mark by rasterising it once: where its ink sits, where that ink
+ * balances, and how far it reaches from the point the circular crop is centred on.
+ * The artwork carries the tile's padding around the mark, which every icon drops
+ * and then re-pads to taste.
  */
 async function measure() {
   const { data, info } = await sharp(logo, { density: DENSITY })
@@ -47,70 +50,76 @@ async function measure() {
   const { width, height, channels } = info;
 
   const opaque = [];
-  let inkCount = 0;
-  let inkSumX = 0;
-
+  let inkSumY = 0;
+  let minX = width;
+  let maxX = -1;
+  let minY = height;
+  let maxY = -1;
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      const i = (y * width + x) * channels;
-      if (data[i + 3] < 128) continue;
+      if (data[(y * width + x) * channels + 3] < 128) continue;
       opaque.push(x, y);
-      const isCounter = data[i] > 200 && data[i + 1] > 220 && data[i + 2] > 220;
-      if (isCounter) continue;
-      inkCount++;
-      inkSumX += x;
+      inkSumY += y;
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
     }
   }
 
-  const extentsAbout = (cx, cy) => {
-    let halfX = 0;
-    let halfY = 0;
-    let radius = 0;
-    for (let i = 0; i < opaque.length; i += 2) {
-      const dx = opaque[i] - cx;
-      const dy = opaque[i + 1] - cy;
-      halfX = Math.max(halfX, Math.abs(dx));
-      halfY = Math.max(halfY, Math.abs(dy));
-      radius = Math.max(radius, Math.hypot(dx, dy));
-    }
-    return { cx, cy, halfX, halfY, radius };
-  };
+  const cx = (minX + maxX) / 2;
+  const cy = (minY + maxY) / 2;
+  // Vertical only: the silhouette's horizontal weight is close enough to its
+  // bounding box that correcting sideways just makes the mark look off-centre.
+  const inkCy = inkSumY / (opaque.length / 2);
 
-  const inkX = inkSumX / inkCount;
+  let radius = 0;
+  for (let i = 0; i < opaque.length; i += 2) {
+    radius = Math.max(radius, Math.hypot(opaque[i] - cx, opaque[i + 1] - inkCy));
+  }
 
-  return {
-    width,
-    boxCentred: extentsAbout(width / 2, height / 2),
-    // Horizontal only: the silhouette is symmetric top to bottom, so the ink's
-    // slight upward bias is interior detail and must not shift the letter down.
-    balanced: (towardsInk) => extentsAbout(width / 2 + towardsInk * (inkX - width / 2), height / 2),
-  };
+  return { probe: width, minX, minY, markW: maxX - minX + 1, markH: maxY - minY + 1, cx, cy, inkCy, radius };
 }
 
-async function render({ size, anchor, background, constraint }) {
-  const target =
-    constraint === 'safe-circle'
-      ? ((SAFE_CIRCLE / 2) * SAFE_INSET * size) / anchor.radius
-      : (constraint * size) / (2 * Math.max(anchor.halfX, anchor.halfY));
+/** Rasterises the mark at `target` scale, with `anchor` landing at the centre of `background`. */
+async function place(size, target, anchor, background) {
+  const { probe, minX, minY, markW, markH } = mark;
 
-  // Placement is derived from the width actually rasterised, not the target, so
-  // the two can't disagree by a rounded pixel.
-  const markWidth = Math.max(1, Math.floor(target * probe.width));
-  const scale = markWidth / probe.width;
+  // Placement is derived from the pixels actually rasterised, not the target, so
+  // the two can't disagree by a rounded pixel. The artwork is square.
+  const raster = Math.max(1, Math.round(target * probe));
+  const scale = raster / probe;
+  const left = Math.round(minX * scale);
+  const top = Math.round(minY * scale);
+  const width = Math.min(Math.round(markW * scale), raster - left);
+  const height = Math.min(Math.round(markH * scale), raster - top);
 
-  const mark = await sharp(logo, { density: DENSITY }).resize({ width: markWidth }).png().toBuffer();
+  const cropped = await sharp(logo, { density: DENSITY })
+    .resize({ width: raster })
+    .extract({ left, top, width, height })
+    .png()
+    .toBuffer();
 
   return sharp({ create: { width: size, height: size, channels: 4, background } })
     .composite([
       {
-        input: mark,
-        left: Math.round(size / 2 - anchor.cx * scale),
-        top: Math.round(size / 2 - anchor.cy * scale),
+        input: cropped,
+        left: Math.round(size / 2 - (anchor[0] * scale - left)),
+        top: Math.round(size / 2 - (anchor[1] * scale - top)),
       },
     ])
     .png({ compressionLevel: 9 })
     .toBuffer();
 }
+
+/** Scales the mark to `fill` of the canvas and centres it on transparency. */
+const renderMark = (size, fill) =>
+  place(size, (fill * size) / Math.max(mark.markW, mark.markH), [mark.cx, mark.cy], TRANSPARENT);
+
+/** Android crops these to a shape of its own choosing, so they keep the tile and
+ * hold the mark inside the safe circle, balanced on its ink rather than its box. */
+const renderTile = (size) =>
+  place(size, ((SAFE_CIRCLE / 2) * SAFE_INSET * size) / mark.radius, [mark.cx, mark.inkCy], TILE);
 
 /** ICO container holding one PNG per size — supported everywhere since Vista. */
 function buildIco(images) {
@@ -134,41 +143,24 @@ function buildIco(images) {
   return Buffer.concat([header, ...entries, ...images.map((i) => i.buf)]);
 }
 
-let probe;
+let mark;
 
 (async () => {
-  probe = await measure();
+  mark = await measure();
 
   for (const size of ANY_SIZES) {
-    const buf = await render({
-      size,
-      anchor: probe.boxCentred,
-      background: TRANSPARENT,
-      constraint: ANY_FILL,
-    });
-    fs.writeFileSync(path.join(ICONS, `icon-${size}x${size}.png`), buf);
+    fs.writeFileSync(path.join(ICONS, `icon-${size}x${size}.png`), await renderMark(size, ANY_FILL));
     console.log(`icon-${size}x${size}.png`.padEnd(30), 'transparent');
   }
 
-  // Android crops these to a circle, so they are the one set where the mark is
-  // balanced on its ink centroid rather than on its bounding box.
   for (const size of MASKABLE_SIZES) {
-    const buf = await render({
-      size,
-      anchor: probe.balanced(MASKABLE_BALANCE),
-      background: MINT,
-      constraint: 'safe-circle',
-    });
-    fs.writeFileSync(path.join(ICONS, `icon-maskable-${size}x${size}.png`), buf);
-    console.log(`icon-maskable-${size}x${size}.png`.padEnd(30), MINT);
+    fs.writeFileSync(path.join(ICONS, `icon-maskable-${size}x${size}.png`), await renderTile(size));
+    console.log(`icon-maskable-${size}x${size}.png`.padEnd(30), TILE);
   }
 
   const ico = [];
   for (const size of ICO_SIZES) {
-    ico.push({
-      size,
-      buf: await render({ size, anchor: probe.boxCentred, background: TRANSPARENT, constraint: FAVICON_FILL }),
-    });
+    ico.push({ size, buf: await renderMark(size, FAVICON_FILL) });
   }
   fs.writeFileSync(path.join(SRC, 'favicon.ico'), buildIco(ico));
   console.log(`favicon.ico (${ICO_SIZES.join(', ')})`.padEnd(30), 'transparent');
