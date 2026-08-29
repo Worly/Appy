@@ -1,4 +1,4 @@
-import { login } from "cypress/support/commands"
+import { expectURL, login } from "cypress/support/commands"
 import dayjs, { Dayjs } from 'dayjs';
 import { parseDuration } from "src/app/utils/time-utils";
 import duration from "dayjs/plugin/duration";
@@ -278,6 +278,52 @@ describe('Appointments', () => {
     { name: "client changes", revertsStatus: true, edit: () => appointmentEdit.getClientLookup().select("Client2") },
     { name: "only duration changes", revertsStatus: false, edit: () => appointmentEdit.getDurationLookup().select("00:45") },
   ];
+
+  // --- Unsaved edits survive leaving the form and coming back ---
+  // Adding a client mid-booking and then opening that client's page takes the user off the edit
+  // form; the browser Back button must bring every in-progress edit back with them.
+  it("Should keep unsaved edits when leaving the edit form to a client's page and coming back", () => {
+    let appointment = {
+      client: "Client1",
+      service: getTestService("Service1"),
+      date: dayjs("2025-11-10"),
+      time: "09:00",
+      duration: "00:30"
+    };
+
+    let newDate = dayjs("2025-11-17");
+    let newTime = "13:00";
+    let newDuration = "00:45";
+    let newClient = "Newcomer Person";
+    let newNotes = "brings her own shampoo";
+
+    appointments.openScrollerView();
+    appointments.getCurrentDate().then(currentDate => {
+      appointments.plusButton();
+      editAndSaveAppointment(appointment, undefined, currentDate);
+    });
+
+    expectAppointment(appointment).then(item => {
+      appointments.list().viewAppointment(item.id);
+      appointmentView.edit();
+
+      appointmentEdit.getDateTimeLookup().open().select(newDate, newTime);
+      appointmentEdit.getDurationLookup().select(newDuration);
+      appointmentEdit.getNotes().type(newNotes);
+      appointmentEdit.getClientLookup().addNew(newClient);
+
+      toast.expectVisible().expectAction("pen").clickAction("pen");
+      expectURL(/\/clients\/edit\/\d+/);
+
+      cy.go("back");
+
+      appointmentEdit.getDateTimeLookup().expectSelected(newDate, newTime);
+      appointmentEdit.getDurationLookup().expectSelected(newDuration);
+      appointmentEdit.getClientLookup().expectSelected(newClient.split(" ")[0]);
+      appointmentEdit.getServiceLookup().expectSelected(appointment.service.displayName);
+      appointmentEdit.getNotes().expectText(newNotes);
+    });
+  });
 
   for (let option of statusRevertOptions) {
     it(`Should ${option.revertsStatus ? "revert Confirmed to Unconfirmed" : "keep Confirmed status"} when ${option.name}`, () => {

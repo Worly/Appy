@@ -12,6 +12,10 @@ import { overlap, timeOnly } from 'src/app/utils/time-utils';
 import dayjs from "dayjs";
 import { Dayjs } from "dayjs";
 import { Duration } from "dayjs/plugin/duration";
+// Type-only: augments the Dayjs interface with isBetween(). The plugin is registered at runtime in
+// app.module.ts; this import is needed only so this file type-checks when compiled in isolation
+// (e.g. under `ng test`, where app.module isn't in the graph). It is NOT redundant.
+import "dayjs/plugin/isBetween";
 import { ContextMenuComponent } from 'src/app/components/context-menu/context-menu.component';
 import { TimeData } from './time-button/time-button.component';
 import { AppointmentService } from '../../../services/appointment.service';

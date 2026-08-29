@@ -14,6 +14,7 @@ import { TranslateService } from 'src/app/components/translate/translate.service
 import { ClientDTO } from 'src/app/models/client';
 import { ToastService } from 'src/app/components/toast/toast.service';
 import { IconName } from '@fortawesome/fontawesome-svg-core';
+import dayjs from 'dayjs';
 
 @Component({
   selector: 'app-appointment-edit',
@@ -46,42 +47,21 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
-    let queryParamMap = this.activatedRoute.snapshot.queryParamMap;
-
     this.subs.push(combineLatest([this.activatedRoute.data, this.activatedRoute.paramMap, this.activatedRoute.queryParamMap])
       .pipe(debounceTime(0)).subscribe(([data, paramMap, queryParamMap]: [Data, ParamMap, ParamMap]) => {
         this.isNew = data["isNew"] ?? false;
 
         if (this.isNew) {
-          let date = queryParamMap.get("date") ?? undefined;
-          let time = queryParamMap.get("time") ?? undefined;
-          let duration = queryParamMap.get("duration") ?? undefined;
+          let appointment = new Appointment();
+          this.applyUrlParams(appointment, queryParamMap);
 
-          let serviceJSON = queryParamMap.get("service");
-          let service: ServiceDTO | undefined;
-          if (serviceJSON != null)
-            service = JSON.parse(serviceJSON);
-
-          let clientJSON = queryParamMap.get("client");
-          let client: ClientDTO | undefined;
-          if (clientJSON != null)
-            client = JSON.parse(clientJSON);
-
-          this.appointment = new Appointment({
-            id: 0,
-            date: date,
-            time: time,
-            service: service,
-            client: client,
-            duration: duration ?? service?.duration
-          });
-
+          this.appointment = appointment;
           this.registerPropertyChanged();
         }
         else {
           var idParam = paramMap.get("id");
           if (idParam)
-            this.load(Number.parseInt(idParam));
+            this.load(Number.parseInt(idParam), queryParamMap);
         }
       }));
   }
@@ -90,11 +70,43 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
     this.subs.forEach(s => s.unsubscribe());
   }
 
-  private load(id: number) {
+  private load(id: number, queryParamMap: ParamMap) {
     this.subs.push(this.appointmentService.get(id).subscribe((a: Appointment) => {
+      this.applyUrlParams(a, queryParamMap);
+
       this.appointment = a;
       this.registerPropertyChanged();
     }));
+  }
+
+  // The URL holds the edits made before navigating away, so they take precedence over the
+  // saved appointment. Applied before registerPropertyChanged so restoring doesn't rewrite the URL.
+  private applyUrlParams(appointment: Appointment, queryParamMap: ParamMap) {
+    let date = queryParamMap.get("date");
+    if (date != null)
+      appointment.date = dayjs(date);
+
+    let time = queryParamMap.get("time");
+    if (time != null)
+      appointment.time = dayjs(time, "HH:mm:ss");
+
+    let serviceJSON = queryParamMap.get("service");
+    if (serviceJSON != null)
+      appointment.service = JSON.parse(serviceJSON) as ServiceDTO;
+
+    let clientJSON = queryParamMap.get("client");
+    if (clientJSON != null)
+      appointment.client = JSON.parse(clientJSON) as ClientDTO;
+
+    let notes = queryParamMap.get("notes");
+    if (notes != null)
+      appointment.notes = notes;
+
+    let duration = queryParamMap.get("duration");
+    if (duration != null)
+      appointment.duration = parseDuration(duration);
+    else if (appointment.duration == null && appointment.service?.duration != null)
+      appointment.duration = parseDuration(appointment.service.duration);
   }
 
   public cancel() {
@@ -187,9 +199,10 @@ export class AppointmentEditComponent implements OnInit, OnDestroy {
       let duration = this.appointment?.duration ? this.appointment.duration.format("HH:mm:ss") : null;
       let service = this.appointment?.service ? JSON.stringify(this.appointment.service) : null;
       let client = this.appointment?.client ? JSON.stringify(this.appointment.client) : null;
+      let notes = this.appointment?.notes ?? null;
 
       setUrlParams(this.router, this.activatedRoute, this.location, {
-        date, time, duration, service, client
+        date, time, duration, service, client, notes
       });
     }));
   }
